@@ -1,0 +1,32 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Build the firmware
+    cmds:
+      - pio run
+
+  upload:
+    desc: Upload the firmware to the ESP32 CYD board
+    cmds:
+      - pio run --target upload
+
+  monitor:
+    desc: Start the serial monitor
+    cmds:
+      - pio device monitor
+
+  test:
+    desc: Run unit tests
+    cmds:
+      - pio test
+
+  check:
+    desc: Run static code analysis / linting
+    cmds:
+      - pio check
+
+  clean:
+    desc: Clean build files
+    cmds:
+      - pio run --target clean
