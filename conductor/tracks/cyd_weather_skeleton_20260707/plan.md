@@ -32,10 +32,10 @@ This plan details the tasks to set up the CYD hardware configuration, integrate 
 
 ## Phase 4: LVGL Skeleton UI and Interaction
 
-- [ ] Task: Design and Build Layout Skeleton
-    - [ ] Create simple header bar widget with mock time and Wi-Fi icon
-    - [ ] Create main layout container with placeholder widgets for current weather
-- [ ] Task: Implement Touch Input Handling
-    - [ ] Add simple interactive button with click callback handler
-    - [ ] Verify click callback triggers a debug output on screen or Serial
+- [x] Task: Design and Build Layout Skeleton (ac4514d)
+    - [x] Create simple header bar widget with mock time and Wi-Fi icon
+    - [x] Create main layout container with placeholder widgets for current weather
+- [x] Task: Implement Touch Input Handling (ac4514d)
+    - [x] Add simple interactive button with click callback handler
+    - [x] Verify click callback triggers a debug output on screen or Serial
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: LVGL Skeleton UI and Interaction' (Protocol in workflow.md)
