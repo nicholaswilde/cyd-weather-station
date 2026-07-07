@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Implement basic weather station UI skeleton and Wi-Fi connection**
+- [x] **Track: Implement basic weather station UI skeleton and Wi-Fi connection**
   *Link: [./tracks/cyd_weather_skeleton_20260707/](./tracks/cyd_weather_skeleton_20260707/)*
