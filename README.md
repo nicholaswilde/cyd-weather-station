@@ -1,1 +1,1 @@
-# cyd-weather-station
+# CYD Weather Station
