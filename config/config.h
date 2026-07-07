@@ -1,0 +1,13 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// Wi-Fi Credentials
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+
+// Open-Meteo API Settings
+#define WEATHER_API_LATITUDE "37.7749"
+#define WEATHER_API_LONGITUDE "-122.4194"
+#define WEATHER_UPDATE_INTERVAL_MINS 15
+
+#endif // CONFIG_H
