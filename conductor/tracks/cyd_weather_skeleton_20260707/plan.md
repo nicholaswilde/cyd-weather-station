@@ -20,7 +20,7 @@ This plan details the tasks to set up the CYD hardware configuration, integrate 
     - [x] Integrate LVGL library v8 dependency in platformio.ini
     - [x] Write LVGL display buffer allocation and tick handler
     - [x] Register display and touch input drivers with LVGL
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Hardware Drivers and LVGL Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Hardware Drivers and LVGL Integration' (Protocol in workflow.md) (69b3391)
 
 ## Phase 3: Wi-Fi Connectivity and State Management
 
@@ -28,7 +28,7 @@ This plan details the tasks to set up the CYD hardware configuration, integrate 
     - [x] Write unit tests for Wi-Fi manager state logic (offline, connecting, connected)
     - [x] Implement Wi-Fi connection and reconnect logic
     - [x] Add Serial logger for Wi-Fi status transitions
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Wi-Fi Connectivity and State Management' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Wi-Fi Connectivity and State Management' (Protocol in workflow.md) (69b3391)
 
 ## Phase 4: LVGL Skeleton UI and Interaction
 
@@ -38,4 +38,4 @@ This plan details the tasks to set up the CYD hardware configuration, integrate 
 - [x] Task: Implement Touch Input Handling (ac4514d)
     - [x] Add simple interactive button with click callback handler
     - [x] Verify click callback triggers a debug output on screen or Serial
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: LVGL Skeleton UI and Interaction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: LVGL Skeleton UI and Interaction' (Protocol in workflow.md) (69b3391)
