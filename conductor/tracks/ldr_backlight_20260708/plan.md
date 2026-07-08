@@ -9,7 +9,7 @@
     - [x] Verify unit tests pass successfully
 - [x] Task: Conductor - User Manual Verification 'Phase 1: PWM Backlight Control & Calibration' (Protocol in workflow.md)
 
-## Phase 2: LDR Sensor Integration & Smoothing
+## Phase 2: LDR Sensor Integration & Smoothing [checkpoint: 5cc4a1e]
 - [x] Task: Add sensor reading and filtering logic (e26b1fa)
     - [x] Add `USE_LDR_AUTO_BACKLIGHT` configuration flag to [config/config.h](file:///home/nicholas/git/nicholaswilde/config/config.h)
     - [x] Extend `BacklightManager` to accept raw LDR analog readings
