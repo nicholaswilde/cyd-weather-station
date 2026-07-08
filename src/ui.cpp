@@ -47,7 +47,7 @@ void initUI() {
     time_label = lv_label_create(header);
     lv_label_set_text(time_label, "--:--");
     lv_obj_set_style_text_color(time_label, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
-    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -15, 0);
 
     // 2. Main Content Card
     lv_obj_t * card = lv_obj_create(scr);
