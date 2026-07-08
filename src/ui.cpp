@@ -40,13 +40,13 @@ void initUI() {
     wifi_label = lv_label_create(header);
     lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
     lv_obj_set_style_text_color(wifi_label, lv_color_hex(0xFFC107), LV_PART_MAIN); // Amber text
-    lv_obj_align(wifi_label, LV_ALIGN_RIGHT_MID, -10, 0);
+    lv_obj_align(wifi_label, LV_ALIGN_RIGHT_MID, -5, 0);
 
     // Time Label in Header
     time_label = lv_label_create(header);
     lv_label_set_text(time_label, "--:--");
     lv_obj_set_style_text_color(time_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -15, 0);
+    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -10, 0);
 
     // 2. Main Content Card
     lv_obj_t * card = lv_obj_create(scr);
