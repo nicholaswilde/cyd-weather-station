@@ -62,7 +62,7 @@ void initUI() {
 
     // Weather Placeholders inside card
     temp_label = lv_label_create(card);
-    lv_label_set_text(temp_label, "--.- *C");
+    lv_label_set_text(temp_label, "--.- °C");
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
     lv_obj_align(temp_label, LV_ALIGN_TOP_LEFT, 15, 15);
@@ -108,7 +108,7 @@ void updateWifiStatus(bool connected) {
 
 void updateWeatherUI(float temperature, int humidity, const char* status) {
     char temp_str[32];
-    snprintf(temp_str, sizeof(temp_str), "%.1f *C", temperature);
+    snprintf(temp_str, sizeof(temp_str), "%.1f °C", temperature);
     lv_label_set_text(temp_label, temp_str);
 
     char hum_str[32];
