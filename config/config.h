@@ -64,4 +64,11 @@
   #define COLOR_HEADER_TEXT  0xeff1f5
 #endif
 
+// Unit System Settings
+#define UNIT_METRIC   1
+#define UNIT_IMPERIAL 2
+
+// Choose Unit System (UNIT_METRIC or UNIT_IMPERIAL)
+#define UNIT_SYSTEM UNIT_METRIC
+
 #endif // CONFIG_H

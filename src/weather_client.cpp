@@ -1,5 +1,6 @@
 #include "weather_client.h"
 #include <ArduinoJson.h>
+#include "config/config.h"
 
 #ifndef NATIVE_TEST
 #include <WiFi.h>
@@ -34,6 +35,9 @@ WeatherData WeatherClient::fetchWeather() {
     url += "&longitude=";
     url += _longitude;
     url += "&current=temperature_2m,relative_humidity_2m,weather_code";
+#if UNIT_SYSTEM == UNIT_IMPERIAL
+    url += "&temperature_unit=fahrenheit";
+#endif
 
     Serial.print("[Weather] Fetching URL: ");
     Serial.println(url);
