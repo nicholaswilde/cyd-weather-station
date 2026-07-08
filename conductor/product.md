@@ -17,6 +17,7 @@ The **ESP32 CYD LVGL Weather Station** is an interactive, touch-screen-enabled w
 3. **LVGL Touch UI:** A polished, touch-interactive interface with widgets, smooth animations, and visual clarity suited for a small display.
 4. **Wi-Fi Connectivity:** Automated Wi-Fi connection with status indicators and reconnect logic.
 5. **Open-Meteo Integration:** Automated periodic JSON API requests to fetch weather data without requiring an API key.
+6. **Auto-Brightness Control:** Automatically dims the screen backlight in low-light environments and brightens it in well-lit rooms using the onboard LDR light sensor.
 
 ## References
 - [Random Nerd Tutorials - ESP32 CYD LVGL Weather Station](https://randomnerdtutorials.com/esp32-cyd-lvgl-weather-station/)

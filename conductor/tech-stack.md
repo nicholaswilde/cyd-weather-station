@@ -6,6 +6,8 @@
   - Display: 2.8" TFT resistive touch screen (320x240)
   - Graphics Controller: ILI9341
   - Touch Controller: XPT2046
+  - Ambient Light Sensor: Onboard LDR photoresistor (GPIO 34)
+  - Backlight Control: PWM via LEDC (GPIO 21)
 
 ## 2. Core Software Stack
 * **Language:** C/C++
