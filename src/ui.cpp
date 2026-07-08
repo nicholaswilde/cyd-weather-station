@@ -3,6 +3,10 @@
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *test_label;
+static lv_obj_t *temp_label;
+static lv_obj_t *hum_label;
+static lv_obj_t *status_lbl;
+static lv_obj_t *time_label;
 
 static void btn_event_cb(lv_event_t * e) {
     lv_event_code_t code = lv_event_get_code(e);
@@ -32,6 +36,12 @@ void initUI() {
     lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
     lv_obj_align(title, LV_ALIGN_LEFT_MID, 10, 0);
 
+    // Time Label in Header
+    time_label = lv_label_create(header);
+    lv_label_set_text(time_label, "--:--");
+    lv_obj_set_style_text_color(time_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+    lv_obj_align(time_label, LV_ALIGN_CENTER, 0, 0);
+
     // Wi-Fi Label in Header
     wifi_label = lv_label_create(header);
     lv_label_set_text(wifi_label, "WiFi: Offline");
@@ -49,16 +59,16 @@ void initUI() {
     lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
 
     // Weather Placeholders inside card
-    lv_obj_t * temp_label = lv_label_create(card);
+    temp_label = lv_label_create(card);
     lv_label_set_text(temp_label, "--.- *C");
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_align(temp_label, LV_ALIGN_TOP_LEFT, 15, 15);
 
-    lv_obj_t * hum_label = lv_label_create(card);
+    hum_label = lv_label_create(card);
     lv_label_set_text(hum_label, "Humidity: --%");
     lv_obj_align_to(hum_label, temp_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
 
-    lv_obj_t * status_lbl = lv_label_create(card);
+    status_lbl = lv_label_create(card);
     lv_label_set_text(status_lbl, "Waiting for API update...");
     lv_obj_align_to(status_lbl, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
 
@@ -86,4 +96,20 @@ void updateWifiStatus(bool connected) {
         lv_label_set_text(wifi_label, "WiFi: Lost");
         lv_obj_set_style_text_color(wifi_label, lv_color_hex(0xF44336), LV_PART_MAIN); // Red
     }
+}
+
+void updateWeatherUI(float temperature, int humidity, const char* status) {
+    char temp_str[32];
+    snprintf(temp_str, sizeof(temp_str), "%.1f *C", temperature);
+    lv_label_set_text(temp_label, temp_str);
+
+    char hum_str[32];
+    snprintf(hum_str, sizeof(hum_str), "Humidity: %d%%", humidity);
+    lv_label_set_text(hum_label, hum_str);
+
+    lv_label_set_text(status_lbl, status);
+}
+
+void updateTimeUI(const char* time_str) {
+    lv_label_set_text(time_label, time_str);
 }

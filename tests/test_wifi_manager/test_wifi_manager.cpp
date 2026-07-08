@@ -1,8 +1,8 @@
 #include <unity.h>
 #include "WiFi.h"
 #include "Arduino.h"
-#include "mocks/mocks.cpp"
-#include "../src/wifi_manager.cpp"
+#include "../mocks/mocks.cpp"
+#include "../../src/wifi_manager.cpp"
 
 void setUp(void) {
     WiFi._status = 0;

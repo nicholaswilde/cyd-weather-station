@@ -2,11 +2,19 @@
 #include "display.h"
 #include "wifi_manager.h"
 #include "ui.h"
+#include "weather_client.h"
 #include "config/config.h"
 
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
+WeatherClient weather(WEATHER_API_LATITUDE, WEATHER_API_LONGITUDE);
+
 unsigned long lastWifiUpdate = 0;
 const unsigned long wifiUpdateInterval = 1000; // 1 second
+
+unsigned long lastWeatherUpdate = 0;
+const unsigned long weatherUpdateInterval = WEATHER_UPDATE_INTERVAL_MINS * 60 * 1000UL;
+bool hasInitialFetch = false;
+bool ntpInitialized = false;
 
 void setup() {
     Serial.begin(115200);
@@ -33,7 +41,7 @@ void loop() {
     delay(5);
     lv_tick_inc(5);
 
-    // Periodically update Wi-Fi Connection Manager
+    // Periodically update Wi-Fi Connection Manager and fetch weather/time
     unsigned long currentMillis = millis();
     if (currentMillis - lastWifiUpdate >= wifiUpdateInterval) {
         lastWifiUpdate = currentMillis;
@@ -42,5 +50,35 @@ void loop() {
         // Reflect WiFi status in UI
         bool isConnected = (wifi.getState() == WIFI_STATE_CONNECTED);
         updateWifiStatus(isConnected);
+
+        if (isConnected) {
+            // Initialize NTP once connection is established
+#ifndef NATIVE_TEST
+            if (!ntpInitialized) {
+                Serial.println("[System] Initializing NTP client...");
+                configTime(GMT_OFFSET_SEC, DST_OFFSET_SEC, NTP_SERVER);
+                ntpInitialized = true;
+            }
+            struct tm timeinfo;
+            if (getLocalTime(&timeinfo)) {
+                char timeStr[16];
+                strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                updateTimeUI(timeStr);
+            }
+#else
+            updateTimeUI("12:00");
+#endif
+
+            // Check for weather updates
+            if (!hasInitialFetch || (currentMillis - lastWeatherUpdate >= weatherUpdateInterval)) {
+                Serial.println("[System] Fetching weather update...");
+                WeatherData data = weather.fetchWeather();
+                if (data.valid) {
+                    updateWeatherUI(data.temperature, data.humidity, data.status.c_str());
+                    lastWeatherUpdate = currentMillis;
+                    hasInitialFetch = true;
+                }
+            }
+        }
     }
 }

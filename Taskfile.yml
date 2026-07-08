@@ -1,32 +1,38 @@
+---
 version: '3'
 
 tasks:
   build:
     desc: Build the firmware
     cmds:
-      - ./.venv/bin/pio run
+      - pio run
 
   upload:
     desc: Upload the firmware to the ESP32 CYD board
     cmds:
-      - ./.venv/bin/pio run --target upload
+      - pio run --target upload
 
   monitor:
     desc: Start the serial monitor
     cmds:
-      - ./.venv/bin/pio device monitor
+      - pio device monitor
 
   test:
     desc: Run unit tests
     cmds:
-      - ./.venv/bin/pio test
+      - pio test -e native
 
   check:
     desc: Run static code analysis / linting
     cmds:
-      - ./.venv/bin/pio check
+      - pio check
 
   clean:
     desc: Clean build files
     cmds:
-      - ./.venv/bin/pio run --target clean
+      - pio run --target clean
+
+  default:
+    cmds:
+      - task -l
+    silent: true
