@@ -10,6 +10,9 @@ BacklightManager::BacklightManager(uint8_t pin, uint8_t channel, float minBright
 
 void BacklightManager::begin() {
 #ifndef NATIVE_TEST
+    // Configure LDR pin as analog input
+    pinMode(LDR_PIN, INPUT);
+
     // Configure TFT_BL pin for LEDC PWM
     #if defined(ESP_ARDUINO_VERSION) && ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
         ledcAttach(_pin, 5000, 8); // 5000 Hz, 8-bit resolution
