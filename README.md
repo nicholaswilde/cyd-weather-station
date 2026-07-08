@@ -71,3 +71,11 @@ This repository is optimized using PlatformIO Core and includes support for both
 | **Monitor** | `task monitor` | `pio device monitor` | Opens the Serial Monitor at 115200 baud. |
 | **Native Tests**| `task test` | `pio test -e native` | Runs local mock tests on the host environment. |
 | **Lint Check** | `task check` | `pio check` | Executes fast static code analysis (`cppcheck`). |
+
+## :balance_scale: License
+
+[Apache License 2.0](LICENSE)
+
+## :writing_hand: Author
+
+This project was started in 2026 by [Nicholas Wilde](https://github.com/nicholaswilde/).

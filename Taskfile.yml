@@ -2,6 +2,13 @@
 version: '3'
 
 tasks:
+  init:
+    desc: Initialize the project
+    preconditions:
+      - test -f config/secrets.h.example
+    cmds:
+      - cp config/secrets.h.example config/secrets.h
+
   build:
     desc: Build the firmware
     cmds:
