@@ -3,9 +3,15 @@
 
 #include "secrets.h"
 
-// Open-Meteo API Settings
+// Location Settings
+#define USE_ZIP_CODE true
+#define WEATHER_ZIP_CODE "90210"
+
+// Coordinates (Fallback if USE_ZIP_CODE is false)
 #define WEATHER_API_LATITUDE "37.7749"
 #define WEATHER_API_LONGITUDE "-122.4194"
+
+// Open-Meteo API Settings
 #define WEATHER_UPDATE_INTERVAL_MINS 15
 
 // NTP and Timezone Settings
@@ -69,6 +75,7 @@
 #define UNIT_IMPERIAL 2
 
 // Choose Unit System (UNIT_METRIC or UNIT_IMPERIAL)
-#define UNIT_SYSTEM UNIT_METRIC
+// #define UNIT_SYSTEM UNIT_METRIC
+#define UNIT_SYSTEM UNIT_IMPERIAL
 
 #endif // CONFIG_H

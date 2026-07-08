@@ -1,5 +1,6 @@
 #include <unity.h>
 #include "weather_client.h"
+#include "../mocks/mocks.cpp"
 #include "../../src/weather_client.cpp"
 
 void setUp(void) {
@@ -35,10 +36,21 @@ void test_weather_client_fetch_weather_native_mock(void) {
     TEST_ASSERT_EQUAL_STRING("Clear sky", data.status.c_str());
 }
 
+void test_weather_client_zip_code_initialization(void) {
+    WeatherClient client("90210");
+    WeatherData data = client.fetchWeather();
+    
+    TEST_ASSERT_TRUE(data.valid);
+    TEST_ASSERT_EQUAL_FLOAT(21.5f, data.temperature);
+    TEST_ASSERT_EQUAL(60, data.humidity);
+    TEST_ASSERT_EQUAL_STRING("Clear sky", data.status.c_str());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
     RUN_TEST(test_weather_client_get_weather_desc);
     RUN_TEST(test_weather_client_fetch_weather_native_mock);
+    RUN_TEST(test_weather_client_zip_code_initialization);
     return UNITY_END();
 }

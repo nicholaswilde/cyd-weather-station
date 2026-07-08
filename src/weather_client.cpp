@@ -9,10 +9,79 @@
 #endif
 
 WeatherClient::WeatherClient(const char* latitude, const char* longitude)
-    : _latitude(latitude), _longitude(longitude) {}
+    : _latitude(latitude), _longitude(longitude), _zipCode(nullptr), _useZip(false), _zipResolved(false) {}
+
+WeatherClient::WeatherClient(const char* zipCode)
+    : _latitude(nullptr), _longitude(nullptr), _zipCode(zipCode), _useZip(true), _zipResolved(false) {}
+
+bool WeatherClient::geocodeZip() {
+#ifdef NATIVE_TEST
+    _resolvedLat = "34.0736";
+    _resolvedLng = "-118.4004";
+    _zipResolved = true;
+    return true;
+#else
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("[Weather] WiFi not connected. Cannot geocode zip code.");
+        return false;
+    }
+
+    WiFiClient client;
+    HTTPClient http;
+
+    String url = "http://geocoding-api.open-meteo.com/v1/search?name=";
+    url += _zipCode;
+    url += "&count=1&language=en&format=json";
+
+    Serial.print("[Weather] Geocoding Zip Code: ");
+    Serial.println(_zipCode);
+
+    if (http.begin(client, url)) {
+        int httpCode = http.GET();
+        if (httpCode == HTTP_CODE_OK) {
+            String payload = http.getString();
+            StaticJsonDocument<1024> doc;
+            DeserializationError error = deserializeJson(doc, payload);
+
+            if (!error && doc["results"].is<JsonArray>() && doc["results"].size() > 0) {
+                float lat = doc["results"][0]["latitude"] | 0.0f;
+                float lng = doc["results"][0]["longitude"] | 0.0f;
+                const char* name = doc["results"][0]["name"] | "Unknown";
+
+                _resolvedLat = String(lat, 5);
+                _resolvedLng = String(lng, 5);
+                _zipResolved = true;
+
+                Serial.printf("[Weather] Zip %s resolved to %s (%s, %s)\n",
+                    _zipCode, name, _resolvedLat.c_str(), _resolvedLng.c_str());
+                http.end();
+                return true;
+            } else {
+                Serial.print("[Weather] Geocoding JSON parsing failed or empty: ");
+                Serial.println(error.c_str());
+            }
+        } else {
+            Serial.printf("[Weather] Geocoding HTTP GET failed: %d\n", httpCode);
+        }
+        http.end();
+    }
+    return false;
+#endif
+}
 
 WeatherData WeatherClient::fetchWeather() {
     WeatherData data = { 0.0f, 0, "Unknown", false };
+
+    // Resolve zip code if using zip code and not yet resolved
+    if (_useZip && !_zipResolved) {
+        if (!geocodeZip()) {
+            Serial.println("[Weather] Failed to resolve zip code. Cannot fetch weather.");
+            return data;
+        }
+    }
+
+    const char* lat = _useZip ? _resolvedLat.c_str() : _latitude;
+    const char* lng = _useZip ? _resolvedLng.c_str() : _longitude;
 
 #ifdef NATIVE_TEST
     // Mock response for native unit tests
@@ -31,9 +100,9 @@ WeatherData WeatherClient::fetchWeather() {
     HTTPClient http;
 
     String url = "http://api.open-meteo.com/v1/forecast?latitude=";
-    url += _latitude;
+    url += lat;
     url += "&longitude=";
-    url += _longitude;
+    url += lng;
     url += "&current=temperature_2m,relative_humidity_2m,weather_code";
 #if UNIT_SYSTEM == UNIT_IMPERIAL
     url += "&temperature_unit=fahrenheit";

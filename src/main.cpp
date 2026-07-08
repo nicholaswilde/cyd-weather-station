@@ -6,7 +6,11 @@
 #include "config/config.h"
 
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
+#if USE_ZIP_CODE
+WeatherClient weather(WEATHER_ZIP_CODE);
+#else
 WeatherClient weather(WEATHER_API_LATITUDE, WEATHER_API_LONGITUDE);
+#endif
 
 unsigned long lastWifiUpdate = 0;
 const unsigned long wifiUpdateInterval = 1000; // 1 second
