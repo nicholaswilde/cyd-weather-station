@@ -38,7 +38,7 @@ void initUI() {
 
     // Wi-Fi Label in Header
     wifi_label = lv_label_create(header);
-    lv_label_set_text(wifi_label, "WiFi: Offline");
+    lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
     lv_obj_set_style_text_color(wifi_label, lv_color_hex(0xFFC107), LV_PART_MAIN); // Amber text
     lv_obj_align(wifi_label, LV_ALIGN_RIGHT_MID, -10, 0);
 
@@ -90,10 +90,10 @@ void initUI() {
 
 void updateWifiStatus(bool connected) {
     if (connected) {
-        lv_label_set_text(wifi_label, "WiFi: OK");
+        lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
         lv_obj_set_style_text_color(wifi_label, lv_color_hex(0x4CAF50), LV_PART_MAIN); // Green
     } else {
-        lv_label_set_text(wifi_label, "WiFi: Lost");
+        lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
         lv_obj_set_style_text_color(wifi_label, lv_color_hex(0xF44336), LV_PART_MAIN); // Red
     }
 }
