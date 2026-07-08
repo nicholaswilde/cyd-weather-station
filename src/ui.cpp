@@ -3,19 +3,10 @@
 #include "config/config.h"
 
 static lv_obj_t *wifi_label;
-static lv_obj_t *test_label;
 static lv_obj_t *temp_label;
 static lv_obj_t *hum_label;
 static lv_obj_t *status_lbl;
 static lv_obj_t *time_label;
-
-static void btn_event_cb(lv_event_t * e) {
-    lv_event_code_t code = lv_event_get_code(e);
-    if(code == LV_EVENT_CLICKED) {
-        Serial.println("[UI] Button Clicked!");
-        lv_label_set_text(test_label, "Touch OK!");
-    }
-}
 
 void initUI() {
     // Main screen setup (light grey background -> Catppuccin Base)
@@ -80,24 +71,6 @@ void initUI() {
     lv_label_set_text(status_lbl, "Waiting for API update...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
     lv_obj_align_to(status_lbl, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
-
-    // 3. Touch Test Button
-    lv_obj_t * btn = lv_btn_create(card);
-    lv_obj_set_size(btn, 100, 40);
-    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -15, -15);
-    lv_obj_set_style_bg_color(btn, lv_color_hex(COLOR_BLUE), LV_PART_MAIN); // Blue button background
-    lv_obj_add_event_cb(btn, btn_event_cb, LV_EVENT_ALL, NULL);
-
-    lv_obj_t * btn_label = lv_label_create(btn);
-    lv_label_set_text(btn_label, "Test Touch");
-    lv_obj_set_style_text_color(btn_label, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN); // Contrast text
-    lv_obj_center(btn_label);
-
-    // Test result feedback label
-    test_label = lv_label_create(card);
-    lv_label_set_text(test_label, "Touch to test");
-    lv_obj_set_style_text_color(test_label, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_align_to(test_label, btn, LV_ALIGN_OUT_LEFT_MID, -15, 0);
 }
 
 void updateWifiStatus(bool connected) {
