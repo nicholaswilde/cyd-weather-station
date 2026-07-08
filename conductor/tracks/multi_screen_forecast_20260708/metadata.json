@@ -1,0 +1,8 @@
+{
+  "track_id": "multi_screen_forecast_20260708",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-08T12:22:00-07:00",
+  "updated_at": "2026-07-08T12:22:00-07:00",
+  "description": "Refactor UI to use an LVGL Tabview and add a multi-day forecast view fetching forecast data from Open-Meteo"
+}

@@ -1,0 +1,19 @@
+# Implementation Plan - Multi-Screen Tabview & Weather Forecast (`multi_screen_forecast_20260708`)
+
+## Phase 1: Weather Client Forecast Parsing
+- [ ] Task: Extend API client and write parser tests
+    - [ ] Update `WeatherData` struct in `include/weather_client.h` to store forecast entries (3 days)
+    - [ ] Write unit tests in `tests/test_weather_client` verifying daily forecast parsing from JSON payload
+    - [ ] Update `WeatherClient::fetchWeather()` in `src/weather_client.cpp` to fetch and parse daily forecast parameters from Open-Meteo
+    - [ ] Verify all tests pass on native target
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Weather Client Forecast Parsing' (Protocol in workflow.md)
+
+## Phase 2: LVGL Tabview Integration & Forecast Layout
+- [ ] Task: Implement Tabview and forecast screen in UI
+    - [ ] Refactor `initUI()` in `src/ui.cpp` to create an `lv_tabview` object with two tabs: Current and Forecast
+    - [ ] Re-add the existing current weather widgets to the first tab
+    - [ ] Design and add forecast widgets (labels, grids/rows) in the second tab
+    - [ ] Implement `updateForecastUI(...)` to populate min/max temperatures and status codes
+    - [ ] Hook the forecast update to the main fetch routine in [main.cpp](file:///home/nicholas/git/nicholaswilde/cyd-weather-station/src/main.cpp)
+    - [ ] Verify compilation and test suite correctness
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: LVGL Tabview Integration & Forecast Layout' (Protocol in workflow.md)
