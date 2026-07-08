@@ -5,6 +5,13 @@
 #include "weather_client.h"
 #include "config/config.h"
 
+#if USE_LDR_AUTO_BACKLIGHT
+#include "backlight_manager.h"
+BacklightManager backlight(TFT_BL, 0, 10.0f);
+unsigned long lastBacklightUpdate = 0;
+const unsigned long backlightUpdateInterval = 1000; // 1 second
+#endif
+
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
 #if USE_ZIP_CODE
 WeatherClient weather(WEATHER_ZIP_CODE);
@@ -27,6 +34,10 @@ void setup() {
     // Initialize hardware display and touch drivers
     initDisplayAndTouch();
 
+#if USE_LDR_AUTO_BACKLIGHT
+    backlight.begin();
+#endif
+
     // Initialize LVGL UI framework
     initLVGL();
 
@@ -45,8 +56,19 @@ void loop() {
     delay(5);
     lv_tick_inc(5);
 
-    // Periodically update Wi-Fi Connection Manager and fetch weather/time
     unsigned long currentMillis = millis();
+
+#if USE_LDR_AUTO_BACKLIGHT
+    #ifndef NATIVE_TEST
+    if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {
+        lastBacklightUpdate = currentMillis;
+        uint16_t ldrRaw = analogRead(LDR_PIN);
+        backlight.update(ldrRaw);
+    }
+    #endif
+#endif
+
+    // Periodically update Wi-Fi Connection Manager and fetch weather/time
     if (currentMillis - lastWifiUpdate >= wifiUpdateInterval) {
         lastWifiUpdate = currentMillis;
         wifi.update();

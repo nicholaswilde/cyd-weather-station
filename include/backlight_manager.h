@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define LDR_PIN 34
+
 class BacklightManager {
 public:
     // Parameters:

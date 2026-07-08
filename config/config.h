@@ -86,4 +86,7 @@
 // #define UNIT_SYSTEM UNIT_METRIC
 #define UNIT_SYSTEM UNIT_IMPERIAL
 
+// Auto Backlight Settings
+#define USE_LDR_AUTO_BACKLIGHT true
+
 #endif // CONFIG_H
