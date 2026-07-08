@@ -68,17 +68,17 @@ void initUI() {
     lv_label_set_text(temp_label, "--.- °C");
 #endif
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
-    lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
     lv_obj_align(temp_label, LV_ALIGN_TOP_LEFT, 15, 15);
 
     hum_label = lv_label_create(card);
     lv_label_set_text(hum_label, "Humidity: --%");
-    lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
     lv_obj_align_to(hum_label, temp_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
 
     status_lbl = lv_label_create(card);
     lv_label_set_text(status_lbl, "Waiting for API update...");
-    lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
     lv_obj_align_to(status_lbl, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
 
     // 3. Touch Test Button
@@ -96,7 +96,7 @@ void initUI() {
     // Test result feedback label
     test_label = lv_label_create(card);
     lv_label_set_text(test_label, "Touch to test");
-    lv_obj_set_style_text_color(test_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(test_label, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
     lv_obj_align_to(test_label, btn, LV_ALIGN_OUT_LEFT_MID, -15, 0);
 }
 

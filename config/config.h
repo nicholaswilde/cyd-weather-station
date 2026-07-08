@@ -37,6 +37,8 @@
   #define COLOR_GREEN        0xa6e3a1
   #define COLOR_RED          0xf38ba8
   #define COLOR_YELLOW       0xf9e2af
+  #define COLOR_PEACH        0xfab387
+  #define COLOR_MAUVE        0xcba6f7
   #define COLOR_HEADER_TEXT  0x1e1e2e
 #elif CATPPUCCIN_FLAVOR == CATPPUCCIN_MACCHIATO
   #define COLOR_BASE         0x24273a
@@ -47,6 +49,8 @@
   #define COLOR_GREEN        0xa6da95
   #define COLOR_RED          0xed8796
   #define COLOR_YELLOW       0xeed49f
+  #define COLOR_PEACH        0xf5a97f
+  #define COLOR_MAUVE        0xc6a0f6
   #define COLOR_HEADER_TEXT  0x24273a
 #elif CATPPUCCIN_FLAVOR == CATPPUCCIN_FRAPPE
   #define COLOR_BASE         0x303446
@@ -57,6 +61,8 @@
   #define COLOR_GREEN        0xa6d189
   #define COLOR_RED          0xe78284
   #define COLOR_YELLOW       0xe5c890
+  #define COLOR_PEACH        0xef9f76
+  #define COLOR_MAUVE        0xca9ee6
   #define COLOR_HEADER_TEXT  0x303446
 #elif CATPPUCCIN_FLAVOR == CATPPUCCIN_LATTE
   #define COLOR_BASE         0xeff1f5
@@ -67,6 +73,8 @@
   #define COLOR_GREEN        0x40a02b
   #define COLOR_RED          0xd20f39
   #define COLOR_YELLOW       0xdf8e1d
+  #define COLOR_PEACH        0xfe640b
+  #define COLOR_MAUVE        0x8839ef
   #define COLOR_HEADER_TEXT  0xeff1f5
 #endif
 
