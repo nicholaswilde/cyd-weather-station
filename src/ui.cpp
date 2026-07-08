@@ -15,9 +15,9 @@ void initUI() {
 
     // 1. Header Bar Container
     lv_obj_t * header = lv_obj_create(scr);
-    lv_obj_set_size(header, 320, 40);
+    lv_obj_set_size(header, 320, 45);
     lv_obj_align(header, LV_ALIGN_TOP_MID, 0, 0);
-    lv_obj_set_style_bg_color(header, lv_color_hex(COLOR_BLUE), LV_PART_MAIN); // Catppuccin Blue header
+    lv_obj_set_style_bg_color(header, lv_color_hex(COLOR_CRUST), LV_PART_MAIN); // Crust header background
     lv_obj_set_style_border_width(header, 0, LV_PART_MAIN);
     lv_obj_set_style_radius(header, 0, LV_PART_MAIN);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);

@@ -31,6 +31,7 @@
 #if CATPPUCCIN_FLAVOR == CATPPUCCIN_MOCHA
   #define COLOR_BASE         0x1e1e2e
   #define COLOR_MANTLE       0x181825
+  #define COLOR_CRUST        0x11111b
   #define COLOR_TEXT         0xcdd6f4
   #define COLOR_OVERLAY      0x6c7086
   #define COLOR_BLUE         0x89b4fa
@@ -39,10 +40,12 @@
   #define COLOR_YELLOW       0xf9e2af
   #define COLOR_PEACH        0xfab387
   #define COLOR_MAUVE        0xcba6f7
-  #define COLOR_HEADER_TEXT  0x1e1e2e
+  #define COLOR_LAVENDER     0xb4befe
+  #define COLOR_HEADER_TEXT  0xcdd6f4
 #elif CATPPUCCIN_FLAVOR == CATPPUCCIN_MACCHIATO
   #define COLOR_BASE         0x24273a
   #define COLOR_MANTLE       0x1e2030
+  #define COLOR_CRUST        0x181926
   #define COLOR_TEXT         0xcad3f5
   #define COLOR_OVERLAY      0x6e738d
   #define COLOR_BLUE         0x8aadf4
@@ -51,10 +54,12 @@
   #define COLOR_YELLOW       0xeed49f
   #define COLOR_PEACH        0xf5a97f
   #define COLOR_MAUVE        0xc6a0f6
-  #define COLOR_HEADER_TEXT  0x24273a
+  #define COLOR_LAVENDER     0xb7bdf8
+  #define COLOR_HEADER_TEXT  0xcad3f5
 #elif CATPPUCCIN_FLAVOR == CATPPUCCIN_FRAPPE
   #define COLOR_BASE         0x303446
   #define COLOR_MANTLE       0x292c3c
+  #define COLOR_CRUST        0x232634
   #define COLOR_TEXT         0xc6d0f5
   #define COLOR_OVERLAY      0x737994
   #define COLOR_BLUE         0x8caaee
@@ -63,19 +68,22 @@
   #define COLOR_YELLOW       0xe5c890
   #define COLOR_PEACH        0xef9f76
   #define COLOR_MAUVE        0xca9ee6
-  #define COLOR_HEADER_TEXT  0x303446
+  #define COLOR_LAVENDER     0xbabbf1
+  #define COLOR_HEADER_TEXT  0xc6d0f5
 #elif CATPPUCCIN_FLAVOR == CATPPUCCIN_LATTE
   #define COLOR_BASE         0xeff1f5
   #define COLOR_MANTLE       0xe6e9ef
+  #define COLOR_CRUST        0xdce0e8
   #define COLOR_TEXT         0x4c4f69
-  #define COLOR_OVERLAY      0x8c8fa1
+  #define COLOR_OVERLAY      0x9ca0b0
   #define COLOR_BLUE         0x1e66f5
   #define COLOR_GREEN        0x40a02b
   #define COLOR_RED          0xd20f39
   #define COLOR_YELLOW       0xdf8e1d
   #define COLOR_PEACH        0xfe640b
   #define COLOR_MAUVE        0x8839ef
-  #define COLOR_HEADER_TEXT  0xeff1f5
+  #define COLOR_LAVENDER     0x7287fd
+  #define COLOR_HEADER_TEXT  0x4c4f69
 #endif
 
 // Unit System Settings
