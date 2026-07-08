@@ -63,8 +63,7 @@ void loop() {
     if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {
         lastBacklightUpdate = currentMillis;
         uint16_t ldrRaw = analogRead(LDR_PIN);
-        uint8_t duty = backlight.update(ldrRaw);
-        Serial.printf("[Backlight] LDR Raw: %d, PWM Duty: %d\n", ldrRaw, duty);
+        backlight.update(ldrRaw);
     }
     #endif
 #endif
