@@ -1,6 +1,6 @@
 # Implementation Plan - LDR Auto-Backlight Dimming (`ldr_backlight_20260708`)
 
-## Phase 1: PWM Backlight Control & Calibration
+## Phase 1: PWM Backlight Control & Calibration [checkpoint: 2673f29]
 - [x] Task: Design and test Backlight Control interface (5ad4e0e)
     - [x] Create backlight controller header and implementation files `include/backlight_manager.h` and `src/backlight_manager.cpp`
     - [x] Define `BacklightManager` class handling LEDC configuration and duty cycle adjustments
