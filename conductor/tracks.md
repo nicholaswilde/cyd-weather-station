@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Implement auto-brightness/backlight control using the LDR sensor (GPIO 34) and PWM (GPIO 21)**
+- [x] **Track: Implement auto-brightness/backlight control using the LDR sensor (GPIO 34) and PWM (GPIO 21)**
 *Link: [./tracks/ldr_backlight_20260708/](./tracks/ldr_backlight_20260708/)*
 
 ---
