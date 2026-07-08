@@ -11,9 +11,10 @@
 
 ## Phase 2: LDR Sensor Integration & Smoothing
 - [ ] Task: Add sensor reading and filtering logic
+    - [ ] Add `USE_LDR_AUTO_BACKLIGHT` configuration flag to [config/config.h](file:///home/nicholas/git/nicholaswilde/cyd-weather-station/config/config.h)
     - [ ] Extend `BacklightManager` to accept raw LDR analog readings
     - [ ] Write unit tests for exponential moving average (EMA) smoothing algorithm
     - [ ] Implement the EMA filter logic
-    - [ ] Integrate backlight manager into [main.cpp](file:///home/nicholas/git/nicholaswilde/cyd-weather-station/src/main.cpp) setup and loop (sampling every 1 second)
+    - [ ] Integrate backlight manager into [main.cpp](file:///home/nicholas/git/nicholaswilde/cyd-weather-station/src/main.cpp) setup and loop (sampling every 1 second), wrapped inside conditional checks for the configuration flag
     - [ ] Verify test coverage and run lint checks via `task check`
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: LDR Sensor Integration & Smoothing' (Protocol in workflow.md)
