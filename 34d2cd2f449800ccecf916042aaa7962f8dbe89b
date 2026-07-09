@@ -1,0 +1,4 @@
+Task: Regenerate weather icons font to include the windy glyph
+Summary of changes:
+- Added 0xf021 (wi-windy) code point to package.json.
+- Run setup:node and font:generate tasks to update src/weather_icons_48.c.
