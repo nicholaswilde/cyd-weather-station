@@ -1,0 +1,1 @@
+Task: Fix weather status icons rendering. Changes: Regenerated the weather_icons_48 font without compression to match LV_USE_FONT_COMPRESSED=0, minimized font to 7 specific weather symbols to fit flash capacity, added build flags to platformio.ini to define LVGL version, and restored ui.cpp mappings.
