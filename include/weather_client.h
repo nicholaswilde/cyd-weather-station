@@ -3,6 +3,14 @@
 
 #include <Arduino.h>
 
+struct ForecastDay {
+    float tempMax;
+    float tempMin;
+    int weatherCode;
+    String status;
+    String dayName;
+};
+
 struct WeatherData {
     float temperature;
     int humidity;
@@ -10,6 +18,7 @@ struct WeatherData {
     bool valid;
     int weatherCode;
     float windSpeed;
+    ForecastDay forecast[3];
 };
 
 class WeatherClient {
@@ -18,6 +27,7 @@ public:
     WeatherClient(const char* zipCode);
     WeatherData fetchWeather();
     static String getWeatherDesc(int code);
+    static bool parseWeatherJson(const char* json, WeatherData& data);
 
 private:
     bool geocodeZip();
