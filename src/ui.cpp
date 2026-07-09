@@ -4,6 +4,7 @@
 
 extern "C" {
 LV_FONT_DECLARE(weather_icons_48);
+LV_FONT_DECLARE(weather_icons_24);
 }
 
 static lv_obj_t *wifi_label;
@@ -62,7 +63,7 @@ void initUI() {
     lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 20, 0);
+    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 15, -12);
 
     temp_label = lv_label_create(card);
 #if UNIT_SYSTEM == UNIT_IMPERIAL
@@ -72,28 +73,28 @@ void initUI() {
 #endif
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-    lv_obj_align_to(temp_label, icon_lbl, LV_ALIGN_OUT_RIGHT_TOP, 25, -5);
+    lv_obj_align_to(temp_label, icon_lbl, LV_ALIGN_OUT_RIGHT_TOP, 25, -10);
 
     hum_label = lv_label_create(card);
     lv_label_set_text(hum_label, "Humidity: --%");
     lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
-    lv_obj_align_to(hum_label, temp_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+    lv_obj_align_to(hum_label, temp_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
 
     wind_label = lv_label_create(card);
     lv_label_set_text(wind_label, "Wind: -- km/h");
     lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
-    lv_obj_align_to(wind_label, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 22);
+    lv_obj_align_to(wind_label, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
 
     lv_obj_t * wind_icon_lbl = lv_label_create(card);
-    lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_48, LV_PART_MAIN);
+    lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_24, LV_PART_MAIN);
     lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
     lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
-    lv_obj_align_to(wind_icon_lbl, wind_label, LV_ALIGN_OUT_LEFT_MID, -18, 0);
+    lv_obj_align_to(wind_icon_lbl, wind_label, LV_ALIGN_OUT_LEFT_MID, -37, 0);
 
     status_lbl = lv_label_create(card);
     lv_label_set_text(status_lbl, "Waiting for API update...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
-    lv_obj_align_to(status_lbl, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 56);
+    lv_obj_align_to(status_lbl, wind_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
 }
 
 void updateWifiStatus(bool connected) {

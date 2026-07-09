@@ -49,6 +49,7 @@ tasks:
     deps: [setup:node]
     cmds:
       - npm run font:generate
+      - npm run font:generate:24
 
   default:
     cmds:
