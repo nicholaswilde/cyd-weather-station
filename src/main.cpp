@@ -130,6 +130,7 @@ void loop() {
                 WeatherData data = weather.fetchWeather();
                 if (data.valid) {
                     updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed);
+                    updateForecastUI(data);
 
 #if USE_RGB_LED_STATUS
                     // Trigger brief weather status feedback pulse

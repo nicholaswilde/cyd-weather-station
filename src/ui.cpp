@@ -15,6 +15,13 @@ static lv_obj_t *time_label;
 static lv_obj_t *icon_lbl;
 static lv_obj_t *wind_label;
 
+// Forecast widgets
+static lv_obj_t *fore_day_label[3];
+static lv_obj_t *fore_icon_label[3];
+static lv_obj_t *fore_temp_label[3];
+static lv_obj_t *fore_desc_label[3];
+
+
 void initUI() {
     // Main screen setup (light grey background -> Catppuccin Base)
     lv_obj_t * scr = lv_scr_act();
@@ -47,25 +54,41 @@ void initUI() {
     lv_obj_set_style_text_color(time_label, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
     lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -15, 0);
 
-    // 2. Main Content Card
-    lv_obj_t * card = lv_obj_create(scr);
-    lv_obj_set_size(card, 300, 180);
-    lv_obj_align(scr, LV_ALIGN_BOTTOM_MID, 0, -10);
-    lv_obj_align_to(card, header, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
-    lv_obj_set_style_bg_color(card, lv_color_hex(COLOR_MANTLE), LV_PART_MAIN); // Mantle background
-    lv_obj_set_style_radius(card, 10, LV_PART_MAIN);
-    lv_obj_set_style_border_width(card, 1, LV_PART_MAIN);
-    lv_obj_set_style_border_color(card, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN); // Overlay border
-    lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
+    // 2. Tabview Setup
+    lv_obj_t * tabview = lv_tabview_create(scr, LV_DIR_BOTTOM, 35);
+    lv_obj_set_size(tabview, 320, 195);
+    lv_obj_align(tabview, LV_ALIGN_BOTTOM_MID, 0, 0);
 
-    // Weather Placeholders inside card
-    icon_lbl = lv_label_create(card);
+    // Style the tabview container and buttons
+    lv_obj_t * tab_btns = lv_tabview_get_tab_btns(tabview);
+    lv_obj_set_style_bg_color(tabview, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    
+    // Style the buttons
+    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
+    lv_obj_set_style_text_color(tab_btns, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(COLOR_BASE), LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(tab_btns, lv_color_hex(COLOR_PEACH), LV_PART_ITEMS | LV_STATE_CHECKED);
+
+    // Create the tabs
+    lv_obj_t * tab_curr = lv_tabview_add_tab(tabview, "Current");
+    lv_obj_t * tab_fore = lv_tabview_add_tab(tabview, "Forecast");
+
+    // Clear scroll on tabs and set base color & padding
+    lv_obj_clear_flag(tab_curr, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(tab_fore, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_bg_color(tab_curr, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_fore, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_pad_all(tab_curr, 5, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(tab_fore, 5, LV_PART_MAIN);
+
+    // Weather Placeholders inside tab_curr
+    icon_lbl = lv_label_create(tab_curr);
     lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 15, -27);
+    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 15, -20);
  
-    temp_label = lv_label_create(card);
+    temp_label = lv_label_create(tab_curr);
 #if UNIT_SYSTEM == UNIT_IMPERIAL
     lv_label_set_text(temp_label, "--.- °F");
 #else
@@ -73,28 +96,76 @@ void initUI() {
 #endif
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-    lv_obj_align_to(temp_label, icon_lbl, LV_ALIGN_OUT_RIGHT_TOP, 25, 5);
+    lv_obj_align_to(temp_label, icon_lbl, LV_ALIGN_OUT_RIGHT_TOP, 25, 0);
 
-    hum_label = lv_label_create(card);
+    hum_label = lv_label_create(tab_curr);
     lv_label_set_text(hum_label, "Humidity: --%");
     lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
-    lv_obj_align_to(hum_label, temp_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
+    lv_obj_align_to(hum_label, temp_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 6);
 
-    wind_label = lv_label_create(card);
+    wind_label = lv_label_create(tab_curr);
     lv_label_set_text(wind_label, "Wind: -- km/h");
     lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
-    lv_obj_align_to(wind_label, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
+    lv_obj_align_to(wind_label, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 6);
 
-    lv_obj_t * wind_icon_lbl = lv_label_create(card);
+    lv_obj_t * wind_icon_lbl = lv_label_create(tab_curr);
     lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_24, LV_PART_MAIN);
     lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
     lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
     lv_obj_align_to(wind_icon_lbl, wind_label, LV_ALIGN_OUT_LEFT_MID, -29, 0);
 
-    status_lbl = lv_label_create(card);
+    status_lbl = lv_label_create(tab_curr);
     lv_label_set_text(status_lbl, "Waiting for API update...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
-    lv_obj_align_to(status_lbl, wind_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 8);
+    lv_obj_align_to(status_lbl, wind_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 6);
+
+    // 3-day Forecast Card Layout inside tab_fore
+    for (int i = 0; i < 3; i++) {
+        lv_obj_t *day_card = lv_obj_create(tab_fore);
+        lv_obj_set_size(day_card, 90, 130);
+        if (i == 0) {
+            lv_obj_align(day_card, LV_ALIGN_LEFT_MID, 10, 0);
+        } else if (i == 1) {
+            lv_obj_align(day_card, LV_ALIGN_CENTER, 0, 0);
+        } else {
+            lv_obj_align(day_card, LV_ALIGN_RIGHT_MID, -10, 0);
+        }
+        
+        // Card styling: Catppuccin Mantle background
+        lv_obj_set_style_bg_color(day_card, lv_color_hex(COLOR_MANTLE), LV_PART_MAIN);
+        lv_obj_set_style_radius(day_card, 8, LV_PART_MAIN);
+        lv_obj_set_style_border_width(day_card, 1, LV_PART_MAIN);
+        lv_obj_set_style_border_color(day_card, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+        lv_obj_clear_flag(day_card, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_set_style_pad_all(day_card, 2, LV_PART_MAIN);
+
+        // 1. Day Name Label
+        fore_day_label[i] = lv_label_create(day_card);
+        lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tomorrow" : "Day"));
+        lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+        lv_obj_align(fore_day_label[i], LV_ALIGN_TOP_MID, 0, 5);
+
+        // 2. Weather Icon Label
+        fore_icon_label[i] = lv_label_create(day_card);
+        lv_obj_set_style_text_font(fore_icon_label[i], &weather_icons_24, LV_PART_MAIN);
+        lv_label_set_text(fore_icon_label[i], "\xef\x81\xbb"); // fallback NA
+        lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+        lv_obj_align(fore_icon_label[i], LV_ALIGN_CENTER, 0, -5);
+
+        // 3. Temp Label (High / Low)
+        fore_temp_label[i] = lv_label_create(day_card);
+        lv_label_set_text(fore_temp_label[i], "--°/--°");
+        lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+        lv_obj_align(fore_temp_label[i], LV_ALIGN_BOTTOM_MID, 0, -22);
+
+        // 4. Status Description Label
+        fore_desc_label[i] = lv_label_create(day_card);
+        lv_label_set_text(fore_desc_label[i], "Loading...");
+        lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
+        lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_obj_set_width(fore_desc_label[i], 80);
+        lv_obj_align(fore_desc_label[i], LV_ALIGN_BOTTOM_MID, 0, -4);
+    }
 }
 
 void updateWifiStatus(bool connected) {
@@ -218,4 +289,23 @@ void updateWeatherUI(float temperature, int humidity, const char* status, int we
 
 void updateTimeUI(const char* time_str) {
     lv_label_set_text(time_label, time_str);
+}
+
+void updateForecastUI(const WeatherData& data) {
+    for (int i = 0; i < 3; i++) {
+        // Set Day name
+        lv_label_set_text(fore_day_label[i], data.forecast[i].dayName.c_str());
+
+        // Set Icon and its color
+        lv_label_set_text(fore_icon_label[i], getIconGlyph(data.forecast[i].weatherCode));
+        lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(getIconColor(data.forecast[i].weatherCode)), LV_PART_MAIN);
+
+        // Set Temp range
+        char temp_range[32];
+        snprintf(temp_range, sizeof(temp_range), "%.0f°/%.0f°", data.forecast[i].tempMax, data.forecast[i].tempMin);
+        lv_label_set_text(fore_temp_label[i], temp_range);
+
+        // Set Status description
+        lv_label_set_text(fore_desc_label[i], data.forecast[i].status.c_str());
+    }
 }
