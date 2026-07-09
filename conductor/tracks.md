@@ -5,7 +5,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Refactor UI to use an LVGL Tabview and add a multi-day forecast view fetching forecast data from Open-Meteo**
+- [x] **Track: Refactor UI to use an LVGL Tabview and add a multi-day forecast view fetching forecast data from Open-Meteo**
 *Link: [./tracks/multi_screen_forecast_20260708/](./tracks/multi_screen_forecast_20260708/)*
 
 ---
