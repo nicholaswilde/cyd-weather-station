@@ -20,6 +20,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Implement weather status icons using Erik Flowers' Weather Icons font**
+- [~] **Track: Implement weather status icons using Erik Flowers' Weather Icons font**
 *Link: [./tracks/weather_icons_20260708/](./tracks/weather_icons_20260708/)*
 
