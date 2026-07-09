@@ -1,0 +1,9 @@
+Phase: Phase 2 - Main Loop Integration & Weather Pulses
+Automated test command: task test
+Manual verification steps:
+1. Upload firmware with 'task upload'.
+2. Monitor output with 'task monitor'.
+3. Observe RGB LED colors during Wi-Fi setup (slow Blue, solid Green, fast Red).
+4. Observe weather pulse colors on updates (Sunny=Yellow, Overcast=White, Rain=Blue, Storm=Red alert).
+5. Toggle USE_RGB_LED_STATUS to false and confirm LED stays off.
+User confirmation: Yes
