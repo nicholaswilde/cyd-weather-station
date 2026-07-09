@@ -164,6 +164,7 @@ void initUI() {
         lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
         lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
         lv_obj_set_width(fore_desc_label[i], 80);
+        lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_align(fore_desc_label[i], LV_ALIGN_BOTTOM_MID, 0, -4);
     }
 }
