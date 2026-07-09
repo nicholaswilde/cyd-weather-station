@@ -4,12 +4,12 @@
 - [x] Task: Regenerate weather icons font to include the windy glyph (34d2cd2)
     - [x] Add `0xf021` to the font generator script in `package.json`
     - [x] Run `task setup:node` and `task font:generate` to rebuild `src/weather_icons_48.c`
-- [~] Task: Update WeatherClient data model and parsing
-    - [ ] Add `windSpeed` float to `WeatherData` struct in `include/weather_client.h`
-    - [ ] Add failing unit tests in `tests/test_weather_client` verifying parsing of wind speed
-    - [ ] Update `src/weather_client.cpp` to parse `windspeed` from the Open-Meteo JSON response
-    - [ ] Verify all unit tests pass successfully
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Font Regeneration & API Integration' (Protocol in workflow.md)
+- [x] Task: Update WeatherClient data model and parsing (a3e472a)
+    - [x] Add `windSpeed` float to `WeatherData` struct in `include/weather_client.h`
+    - [x] Add failing unit tests in `tests/test_weather_client` verifying parsing of wind speed
+    - [x] Update `src/weather_client.cpp` to parse `windspeed` from the Open-Meteo JSON response
+    - [x] Verify all unit tests pass successfully
+- [~] Task: Conductor - User Manual Verification 'Phase 1: Font Regeneration & API Integration' (Protocol in workflow.md)
 
 ## Phase 2: UI Integration & Layout
 - [ ] Task: Implement wind speed UI layout and formatting
