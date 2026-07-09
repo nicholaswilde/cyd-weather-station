@@ -12,11 +12,11 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Font Regeneration & API Integration' (Protocol in workflow.md) (e88ce27)
 
 ## Phase 2: UI Integration & Layout
-- [~] Task: Implement wind speed UI layout and formatting
-    - [ ] Create `wind_label` in `src/ui.cpp` and position it below the humidity reading inside the weather card
-    - [ ] Declare a small windy icon inline or next to the label using unicode `0xf021`
-    - [ ] Update `updateWeatherUI()` in `include/ui.h` and `src/ui.cpp` to accept `windSpeed` parameter
-    - [ ] Format wind speed dynamically based on `UNIT_SYSTEM` (mph vs km/h)
-    - [ ] Update main application loop in `src/main.cpp` to pass wind speed to `updateWeatherUI()`
-    - [ ] Verify test coverage and run lint checks via `task check`
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: UI Integration & Layout' (Protocol in workflow.md)
+- [x] Task: Implement wind speed UI layout and formatting (ed60b14)
+    - [x] Create `wind_label` in `src/ui.cpp` and position it below the humidity reading inside the weather card
+    - [x] Declare a small windy icon inline or next to the label using unicode `0xf021`
+    - [x] Update `updateWeatherUI()` in `include/ui.h` and `src/ui.cpp` to accept `windSpeed` parameter
+    - [x] Format wind speed dynamically based on `UNIT_SYSTEM` (mph vs km/h)
+    - [x] Update main application loop in `src/main.cpp` to pass wind speed to `updateWeatherUI()`
+    - [x] Verify test coverage and run lint checks via `task check`
+- [~] Task: Conductor - User Manual Verification 'Phase 2: UI Integration & Layout' (Protocol in workflow.md)
