@@ -15,7 +15,7 @@
 * **Core Framework:** Arduino Framework (PlatformIO `framework = arduino`)
 * **UI Library:** LVGL (Light and Versatile Graphics Library) - v8 (matching Random Nerd Tutorials / RuiSantos example code)
 * **TFT & Touch Drivers:** TFT_eSPI or native LVGL display/touch interface (configured for CYD pinout)
-* **Custom Fonts:** Erik Flowers' Weather Icons font (uncompressed 48px C font file containing custom weather glyphs)
+* **Custom Fonts:** Erik Flowers' Weather Icons font (uncompressed 48px and 24px C font files containing custom weather glyphs)
 * **Font Asset Tooling:** `lv_font_conv` (Node.js/npm) for generating custom LVGL font assets
 
 ## 3. Build, Execution, and Tooling
