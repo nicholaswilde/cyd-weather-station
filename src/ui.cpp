@@ -89,7 +89,7 @@ void initUI() {
     lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_24, LV_PART_MAIN);
     lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
     lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
-    lv_obj_align_to(wind_icon_lbl, wind_label, LV_ALIGN_OUT_LEFT_MID, -32, 0);
+    lv_obj_align_to(wind_icon_lbl, wind_label, LV_ALIGN_OUT_LEFT_MID, -29, 0);
 
     status_lbl = lv_label_create(card);
     lv_label_set_text(status_lbl, "Waiting for API update...");
