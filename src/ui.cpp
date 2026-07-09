@@ -63,8 +63,8 @@ void initUI() {
     lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 15, -12);
-
+    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 15, -22);
+ 
     temp_label = lv_label_create(card);
 #if UNIT_SYSTEM == UNIT_IMPERIAL
     lv_label_set_text(temp_label, "--.- °F");
@@ -73,7 +73,7 @@ void initUI() {
 #endif
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-    lv_obj_align_to(temp_label, icon_lbl, LV_ALIGN_OUT_RIGHT_TOP, 25, -10);
+    lv_obj_align_to(temp_label, icon_lbl, LV_ALIGN_OUT_RIGHT_TOP, 25, 0);
 
     hum_label = lv_label_create(card);
     lv_label_set_text(hum_label, "Humidity: --%");
