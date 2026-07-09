@@ -2,7 +2,9 @@
 #include <Arduino.h>
 #include "config/config.h"
 
+extern "C" {
 LV_FONT_DECLARE(weather_icons_48);
+}
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *temp_label;
