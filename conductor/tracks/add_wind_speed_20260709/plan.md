@@ -12,7 +12,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Font Regeneration & API Integration' (Protocol in workflow.md) (e88ce27)
 
 ## Phase 2: UI Integration & Layout
-- [ ] Task: Implement wind speed UI layout and formatting
+- [~] Task: Implement wind speed UI layout and formatting
     - [ ] Create `wind_label` in `src/ui.cpp` and position it below the humidity reading inside the weather card
     - [ ] Declare a small windy icon inline or next to the label using unicode `0xf021`
     - [ ] Update `updateWeatherUI()` in `include/ui.h` and `src/ui.cpp` to accept `windSpeed` parameter
