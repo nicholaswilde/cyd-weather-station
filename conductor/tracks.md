@@ -17,9 +17,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Add a settings screen allowing runtime configuration of units (Celsius/Fahrenheit), manual brightness, and timezone offset via touch**
 *Link: [./tracks/interactive_settings_20260708/](./tracks/interactive_settings_20260708/)*
-
----
-
-- [x] **Track: Implement weather status icons using Erik Flowers' Weather Icons font**
-*Link: [./tracks/weather_icons_20260708/](./tracks/weather_icons_20260708/)*
-
