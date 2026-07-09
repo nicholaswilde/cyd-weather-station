@@ -1,0 +1,1 @@
+Task: Download Erik Flowers' Weather Icons TTF file and convert to LVGL C file. Changes: Downloaded weather icons TTF and converted to 48px C font file using lv_font_conv.
