@@ -13,10 +13,25 @@
 
 typedef int wl_status_t;
 
+#define OUTPUT 0x03
+#define INPUT 0x01
+#define HIGH 0x01
+#define LOW 0x00
+
+extern uint8_t mock_pin_modes[100];
+extern uint8_t mock_pin_states[100];
+extern unsigned long mock_millis_val;
+
 inline unsigned long millis() {
-    static unsigned long t = 0;
-    t += 1000; // Mock time advancement
-    return t;
+    return mock_millis_val;
+}
+
+inline void pinMode(uint8_t pin, uint8_t mode) {
+    if (pin < 100) mock_pin_modes[pin] = mode;
+}
+
+inline void digitalWrite(uint8_t pin, uint8_t val) {
+    if (pin < 100) mock_pin_states[pin] = val;
 }
 
 class String : public std::string {
