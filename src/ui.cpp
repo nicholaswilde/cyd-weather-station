@@ -12,6 +12,7 @@ static lv_obj_t *hum_label;
 static lv_obj_t *status_lbl;
 static lv_obj_t *time_label;
 static lv_obj_t *icon_lbl;
+static lv_obj_t *wind_label;
 
 void initUI() {
     // Main screen setup (light grey background -> Catppuccin Base)
@@ -78,10 +79,21 @@ void initUI() {
     lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
     lv_obj_align_to(hum_label, temp_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
 
+    wind_label = lv_label_create(card);
+    lv_label_set_text(wind_label, "Wind: -- km/h");
+    lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
+    lv_obj_align_to(wind_label, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 20, 22);
+
+    lv_obj_t * wind_icon_lbl = lv_label_create(card);
+    lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_48, LV_PART_MAIN);
+    lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
+    lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
+    lv_obj_align_to(wind_icon_lbl, wind_label, LV_ALIGN_OUT_LEFT_MID, -10, 0);
+
     status_lbl = lv_label_create(card);
     lv_label_set_text(status_lbl, "Waiting for API update...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
-    lv_obj_align_to(status_lbl, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 10);
+    lv_obj_align_to(status_lbl, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 56);
 }
 
 void updateWifiStatus(bool connected) {
@@ -175,7 +187,7 @@ static uint32_t getIconColor(int code) {
     }
 }
 
-void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode) {
+void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed) {
     char temp_str[32];
 #if UNIT_SYSTEM == UNIT_IMPERIAL
     snprintf(temp_str, sizeof(temp_str), "%.1f °F", temperature);
@@ -187,6 +199,14 @@ void updateWeatherUI(float temperature, int humidity, const char* status, int we
     char hum_str[32];
     snprintf(hum_str, sizeof(hum_str), "Humidity: %d%%", humidity);
     lv_label_set_text(hum_label, hum_str);
+
+    char wind_str[32];
+#if UNIT_SYSTEM == UNIT_IMPERIAL
+    snprintf(wind_str, sizeof(wind_str), "Wind: %.1f mph", windSpeed);
+#else
+    snprintf(wind_str, sizeof(wind_str), "Wind: %.1f km/h", windSpeed);
+#endif
+    lv_label_set_text(wind_label, wind_str);
 
     lv_label_set_text(status_lbl, status);
 

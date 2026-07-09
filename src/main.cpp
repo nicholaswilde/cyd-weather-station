@@ -129,7 +129,7 @@ void loop() {
                 Serial.println("[System] Fetching weather update...");
                 WeatherData data = weather.fetchWeather();
                 if (data.valid) {
-                    updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode);
+                    updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed);
 
 #if USE_RGB_LED_STATUS
                     // Trigger brief weather status feedback pulse
