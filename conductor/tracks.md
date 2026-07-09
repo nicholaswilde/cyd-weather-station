@@ -15,5 +15,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Add wind speed to the display**
+- [x] **Track: Add wind speed to the display**
 *Link: [./tracks/add_wind_speed_20260709/](./tracks/add_wind_speed_20260709/)*
