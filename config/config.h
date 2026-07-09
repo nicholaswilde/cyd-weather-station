@@ -97,4 +97,7 @@
 // Auto Backlight Settings
 #define USE_LDR_AUTO_BACKLIGHT true
 
+// RGB LED Status Settings
+#define USE_RGB_LED_STATUS true
+
 #endif // CONFIG_H

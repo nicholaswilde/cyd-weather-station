@@ -4,6 +4,7 @@
 #include "ui.h"
 #include "weather_client.h"
 #include "config/config.h"
+#include "led_manager.h"
 
 #if USE_LDR_AUTO_BACKLIGHT
 #include "backlight_manager.h"
@@ -17,6 +18,11 @@ WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
 WeatherClient weather(WEATHER_ZIP_CODE);
 #else
 WeatherClient weather(WEATHER_API_LATITUDE, WEATHER_API_LONGITUDE);
+#endif
+
+#if USE_RGB_LED_STATUS
+LedManager led(4, 16, 17);
+WifiState lastWifiState = WIFI_STATE_DISCONNECTED;
 #endif
 
 unsigned long lastWifiUpdate = 0;
@@ -46,6 +52,11 @@ void setup() {
 
     // Initialize WiFi Connection
     wifi.begin();
+
+#if USE_RGB_LED_STATUS
+    led.begin();
+    led.setEnabled(true);
+#endif
 }
 
 void loop() {
@@ -57,6 +68,10 @@ void loop() {
     lv_tick_inc(5);
 
     unsigned long currentMillis = millis();
+
+#if USE_RGB_LED_STATUS
+    led.update(currentMillis);
+#endif
 
 #if USE_LDR_AUTO_BACKLIGHT
     #ifndef NATIVE_TEST
@@ -76,6 +91,20 @@ void loop() {
         // Reflect WiFi status in UI
         bool isConnected = (wifi.getState() == WIFI_STATE_CONNECTED);
         updateWifiStatus(isConnected);
+
+#if USE_RGB_LED_STATUS
+        WifiState currentWifiState = wifi.getState();
+        if (currentWifiState != lastWifiState) {
+            if (currentWifiState == WIFI_STATE_CONNECTED) {
+                led.setState(LedManager::STATE_CONNECTED);
+            } else if (currentWifiState == WIFI_STATE_CONNECTING) {
+                led.setState(LedManager::STATE_CONNECTING);
+            } else {
+                led.setState(LedManager::STATE_DISCONNECTED);
+            }
+            lastWifiState = currentWifiState;
+        }
+#endif
 
         if (isConnected) {
             // Initialize NTP once connection is established
@@ -101,6 +130,51 @@ void loop() {
                 WeatherData data = weather.fetchWeather();
                 if (data.valid) {
                     updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode);
+
+#if USE_RGB_LED_STATUS
+                    // Trigger brief weather status feedback pulse
+                    switch (data.weatherCode) {
+                        case 0:
+                        case 1:
+                            led.setState(LedManager::STATE_PULSE_YELLOW);
+                            break;
+                        case 2:
+                        case 3:
+                        case 45:
+                        case 48:
+                            led.setState(LedManager::STATE_PULSE_WHITE);
+                            break;
+                        case 51:
+                        case 53:
+                        case 55:
+                        case 61:
+                        case 63:
+                        case 65:
+                        case 80:
+                        case 81:
+                        case 82:
+                        case 56:
+                        case 57:
+                        case 66:
+                        case 67:
+                        case 71:
+                        case 73:
+                        case 75:
+                        case 77:
+                        case 85:
+                        case 86:
+                            led.setState(LedManager::STATE_PULSE_BLUE);
+                            break;
+                        case 95:
+                        case 96:
+                        case 99:
+                            led.setState(LedManager::STATE_ALERT_RED);
+                            break;
+                        default:
+                            break;
+                    }
+#endif
+
                     lastWeatherUpdate = currentMillis;
                     hasInitialFetch = true;
                 }
