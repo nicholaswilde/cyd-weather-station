@@ -8,6 +8,7 @@
   - Touch Controller: XPT2046
   - Ambient Light Sensor: Onboard LDR photoresistor (GPIO 34)
   - Backlight Control: PWM via LEDC (GPIO 21)
+  - Status Indicator: Onboard active-low RGB LED (Red: GPIO 4, Green: GPIO 16, Blue: GPIO 17)
 
 ## 2. Core Software Stack
 * **Language:** C/C++
