@@ -9,6 +9,7 @@ struct WeatherData {
     String status;
     bool valid;
     int weatherCode;
+    float windSpeed;
 };
 
 class WeatherClient {

@@ -35,6 +35,7 @@ void test_weather_client_fetch_weather_native_mock(void) {
     TEST_ASSERT_EQUAL(60, data.humidity);
     TEST_ASSERT_EQUAL_STRING("Clear sky", data.status.c_str());
     TEST_ASSERT_EQUAL(0, data.weatherCode);
+    TEST_ASSERT_EQUAL_FLOAT(8.8f, data.windSpeed);
 }
 
 void test_weather_client_zip_code_initialization(void) {
@@ -46,6 +47,7 @@ void test_weather_client_zip_code_initialization(void) {
     TEST_ASSERT_EQUAL(60, data.humidity);
     TEST_ASSERT_EQUAL_STRING("Clear sky", data.status.c_str());
     TEST_ASSERT_EQUAL(0, data.weatherCode);
+    TEST_ASSERT_EQUAL_FLOAT(8.8f, data.windSpeed);
 }
 
 int main(int argc, char **argv) {

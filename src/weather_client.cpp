@@ -90,6 +90,7 @@ WeatherData WeatherClient::fetchWeather() {
     data.status = "Clear sky";
     data.valid = true;
     data.weatherCode = 0;
+    data.windSpeed = 8.8f;
     return data;
 #else
     if (WiFi.status() != WL_CONNECTED) {
@@ -104,9 +105,10 @@ WeatherData WeatherClient::fetchWeather() {
     url += lat;
     url += "&longitude=";
     url += lng;
-    url += "&current=temperature_2m,relative_humidity_2m,weather_code";
+    url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
 #if UNIT_SYSTEM == UNIT_IMPERIAL
     url += "&temperature_unit=fahrenheit";
+    url += "&windspeed_unit=mph";
 #endif
 
     Serial.print("[Weather] Fetching URL: ");
@@ -124,10 +126,11 @@ WeatherData WeatherClient::fetchWeather() {
                 data.humidity = doc["current"]["relative_humidity_2m"].as<int>();
                 int code = doc["current"]["weather_code"].is<int>() ? doc["current"]["weather_code"].as<int>() : -1;
                 data.status = getWeatherDesc(code);
+                data.windSpeed = doc["current"]["wind_speed_10m"].as<float>();
                 data.valid = true;
                 data.weatherCode = code;
-                Serial.printf("[Weather] Success! Temp: %.1f C, Hum: %d %%, Status: %s\n",
-                    data.temperature, data.humidity, data.status.c_str());
+                Serial.printf("[Weather] Success! Temp: %.1f, Hum: %d %%, Status: %s, Wind: %.1f\n",
+                    data.temperature, data.humidity, data.status.c_str(), data.windSpeed);
             } else {
                 Serial.print("[Weather] JSON Deserialization failed: ");
                 Serial.println(error.c_str());
