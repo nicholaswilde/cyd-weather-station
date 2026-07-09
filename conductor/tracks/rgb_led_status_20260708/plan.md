@@ -10,7 +10,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: LedManager Class and Wifi States' (Protocol in workflow.md) (bf42304)
 
 ## Phase 2: Main Loop Integration & Weather Pulses
-- [ ] Task: Integrate with main application logic
+- [~] Task: Integrate with main application logic
     - [ ] Initialize `LedManager` in [main.cpp](file:///home/nicholas/git/nicholaswilde/cyd-weather-station/src/main.cpp)
     - [ ] Hook `LedManager` to the WiFi manager states (Connecting, Connected, Disconnected)
     - [ ] Implement brief LED feedback pulses on successful weather updates based on the current weather code
