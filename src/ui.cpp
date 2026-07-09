@@ -82,7 +82,7 @@ void initUI() {
     wind_label = lv_label_create(card);
     lv_label_set_text(wind_label, "Wind: -- km/h");
     lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
-    lv_obj_align_to(wind_label, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 20, 22);
+    lv_obj_align_to(wind_label, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 22);
 
     lv_obj_t * wind_icon_lbl = lv_label_create(card);
     lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_48, LV_PART_MAIN);
