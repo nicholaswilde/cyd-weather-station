@@ -1,0 +1,6 @@
+Phase: Phase 1 - Font Regeneration & API Integration
+Automated test command: task test
+Manual verification steps:
+1. Run task test.
+2. Verify all test_weather_client test cases pass natively including the new windSpeed mock value check.
+User confirmation: Yes
