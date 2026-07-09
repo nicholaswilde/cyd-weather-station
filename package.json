@@ -4,7 +4,7 @@
   "description": "ESP32 CYD Weather Station font generation and development environment",
   "private": true,
   "scripts": {
-    "font:generate": "lv_font_conv --font assets/fonts/weathericons-regular-webfont.ttf -r 0xf002,0xf003,0xf008,0xf00a,0xf00d,0xf010,0xf07b --size 48 --format lvgl --bpp 4 --lv-include lvgl.h --no-compress -o src/weather_icons_48.c"
+    "font:generate": "lv_font_conv --font assets/fonts/weathericons-regular-webfont.ttf -r 0xf002,0xf003,0xf008,0xf00a,0xf00d,0xf010,0xf07b,0xf021 --size 48 --format lvgl --bpp 4 --lv-include lvgl.h --no-compress -o src/weather_icons_48.c"
   },
   "devDependencies": {
     "lv_font_conv": "^1.5.3"
