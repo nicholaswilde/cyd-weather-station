@@ -100,7 +100,7 @@ void loop() {
                 Serial.println("[System] Fetching weather update...");
                 WeatherData data = weather.fetchWeather();
                 if (data.valid) {
-                    updateWeatherUI(data.temperature, data.humidity, data.status.c_str());
+                    updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode);
                     lastWeatherUpdate = currentMillis;
                     hasInitialFetch = true;
                 }

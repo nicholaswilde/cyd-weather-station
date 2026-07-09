@@ -70,7 +70,7 @@ bool WeatherClient::geocodeZip() {
 }
 
 WeatherData WeatherClient::fetchWeather() {
-    WeatherData data = { 0.0f, 0, "Unknown", false };
+    WeatherData data = { 0.0f, 0, "Unknown", false, -1 };
 
     // Resolve zip code if using zip code and not yet resolved
     if (_useZip && !_zipResolved) {
@@ -89,6 +89,7 @@ WeatherData WeatherClient::fetchWeather() {
     data.humidity = 60;
     data.status = "Clear sky";
     data.valid = true;
+    data.weatherCode = 0;
     return data;
 #else
     if (WiFi.status() != WL_CONNECTED) {
@@ -124,6 +125,7 @@ WeatherData WeatherClient::fetchWeather() {
                 int code = doc["current"]["weather_code"].is<int>() ? doc["current"]["weather_code"].as<int>() : -1;
                 data.status = getWeatherDesc(code);
                 data.valid = true;
+                data.weatherCode = code;
                 Serial.printf("[Weather] Success! Temp: %.1f C, Hum: %d %%, Status: %s\n",
                     data.temperature, data.humidity, data.status.c_str());
             } else {
