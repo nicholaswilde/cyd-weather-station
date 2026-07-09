@@ -5,11 +5,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Implement onboard RGB LED status indicator (GPIO 4/16/17) for WiFi connectivity and weather states**
-*Link: [./tracks/rgb_led_status_20260708/](./tracks/rgb_led_status_20260708/)*
-
----
-
 - [ ] **Track: Refactor UI to use an LVGL Tabview and add a multi-day forecast view fetching forecast data from Open-Meteo**
 *Link: [./tracks/multi_screen_forecast_20260708/](./tracks/multi_screen_forecast_20260708/)*
 
