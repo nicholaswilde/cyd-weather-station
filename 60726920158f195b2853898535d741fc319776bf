@@ -1,0 +1,1 @@
+Task: Update data model and integrate weather icons in UI. Changes: Updated WeatherData to hold weatherCode, updated updateWeatherUI to map weatherCode to icons and Catppuccin colors, added weather icon label to UI layout, and updated tests.
