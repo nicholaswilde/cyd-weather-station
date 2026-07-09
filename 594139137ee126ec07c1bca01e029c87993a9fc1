@@ -1,0 +1,4 @@
+Task: Align wind label to left edge
+Summary of changes:
+- Changed x offset of wind_label relative to hum_label from 20 to 0 in src/ui.cpp.
+- The wind_icon_lbl remains positioned to the left of the wind_label.
