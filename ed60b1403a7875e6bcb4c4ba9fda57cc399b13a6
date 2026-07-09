@@ -1,0 +1,7 @@
+Task: Implement wind speed UI layout and formatting
+Summary of changes:
+- Declared static wind_label and created it in src/ui.cpp, aligned below hum_label.
+- Created wind_icon_lbl using weather_icons_48 font and wi-windy (0xf021) icon, aligned left of wind_label.
+- Updated updateWeatherUI signature in include/ui.h and src/ui.cpp to accept windSpeed and format it according to UNIT_SYSTEM (mph vs km/h).
+- Modified src/main.cpp to pass data.windSpeed to updateWeatherUI.
+- Ran task check successfully.
