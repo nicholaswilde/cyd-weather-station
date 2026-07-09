@@ -5,7 +5,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Implement onboard RGB LED status indicator (GPIO 4/16/17) for WiFi connectivity and weather states**
+- [x] **Track: Implement onboard RGB LED status indicator (GPIO 4/16/17) for WiFi connectivity and weather states**
 *Link: [./tracks/rgb_led_status_20260708/](./tracks/rgb_led_status_20260708/)*
 
 ---
