@@ -1,10 +1,10 @@
 # Implementation Plan - Add Wind Speed to Display (`add_wind_speed_20260709`)
 
 ## Phase 1: Font Regeneration & API Integration
-- [ ] Task: Regenerate weather icons font to include the windy glyph
-    - [ ] Add `0xf021` to the font generator script in `package.json`
-    - [ ] Run `task setup:node` and `task font:generate` to rebuild `src/weather_icons_48.c`
-- [ ] Task: Update WeatherClient data model and parsing
+- [x] Task: Regenerate weather icons font to include the windy glyph (34d2cd2)
+    - [x] Add `0xf021` to the font generator script in `package.json`
+    - [x] Run `task setup:node` and `task font:generate` to rebuild `src/weather_icons_48.c`
+- [~] Task: Update WeatherClient data model and parsing
     - [ ] Add `windSpeed` float to `WeatherData` struct in `include/weather_client.h`
     - [ ] Add failing unit tests in `tests/test_weather_client` verifying parsing of wind speed
     - [ ] Update `src/weather_client.cpp` to parse `windspeed` from the Open-Meteo JSON response
