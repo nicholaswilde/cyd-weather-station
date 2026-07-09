@@ -9,7 +9,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Font Acquisition & CLI Conversion' (Protocol in workflow.md) bc86752
 
 ## Phase 2: UI Icon Mapping and Layout Update
-- [ ] Task: Update data model and integrate weather icons in UI
+- [x] Task: Update data model and integrate weather icons in UI (6072692)
     - [ ] Update `WeatherData` struct in `include/weather_client.h` to include `weatherCode`.
     - [ ] Update `updateWeatherUI` signature in `include/ui.h` and its definition in `src/ui.cpp`.
     - [ ] Implement mapping logic in `src/ui.cpp` to map Open-Meteo codes to glyph unicode strings and Catppuccin hex colors.
