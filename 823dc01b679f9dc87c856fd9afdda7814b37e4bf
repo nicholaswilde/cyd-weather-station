@@ -1,0 +1,3 @@
+Task: Align wind icon position to offset -18
+Summary of changes:
+- Changed x offset of wind_icon_lbl to -18 relative to wind_label to place the icon visually centered with the weather icon.
