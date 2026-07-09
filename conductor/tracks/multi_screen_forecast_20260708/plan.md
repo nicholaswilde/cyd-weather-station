@@ -1,12 +1,12 @@
 # Implementation Plan - Multi-Screen Tabview & Weather Forecast (`multi_screen_forecast_20260708`)
 
-## Phase 1: Weather Client Forecast Parsing
+## Phase 1: Weather Client Forecast Parsing [checkpoint: 016653d]
 - [x] Task: Extend API client and write parser tests (ac0a9aa)
     - [x] Update `WeatherData` struct in `include/weather_client.h` to store forecast entries (3 days)
     - [x] Write unit tests in `tests/test_weather_client` verifying daily forecast parsing from JSON payload
     - [x] Update `WeatherClient::fetchWeather()` in `src/weather_client.cpp` to fetch and parse daily forecast parameters from Open-Meteo
     - [x] Verify all tests pass on native target
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Weather Client Forecast Parsing' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Weather Client Forecast Parsing' (Protocol in workflow.md) (016653d)
 
 ## Phase 2: LVGL Tabview Integration & Forecast Layout
 - [ ] Task: Implement Tabview and forecast screen in UI
