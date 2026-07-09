@@ -1,0 +1,5 @@
+Task: Update WeatherClient data model and parsing
+Summary of changes:
+- Added windSpeed float to WeatherData struct in include/weather_client.h.
+- Wrote failing unit tests in tests/test_weather_client/test_weather_client.cpp.
+- Updated src/weather_client.cpp to parse current wind speed from Open-Meteo current response object (wind_speed_10m field) and mock it for native tests.
