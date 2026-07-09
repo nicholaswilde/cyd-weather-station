@@ -12,3 +12,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Add a settings screen allowing runtime configuration of units (Celsius/Fahrenheit), manual brightness, and timezone offset via touch**
 *Link: [./tracks/interactive_settings_20260708/](./tracks/interactive_settings_20260708/)*
+
+---
+
+- [ ] **Track: Add wind speed to the display**
+*Link: [./tracks/add_wind_speed_20260709/](./tracks/add_wind_speed_20260709/)*
