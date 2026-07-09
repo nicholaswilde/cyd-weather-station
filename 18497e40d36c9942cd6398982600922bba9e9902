@@ -1,0 +1,9 @@
+Task: Create LedManager and unit tests
+Summary of changes:
+- Created include/led_manager.h and src/led_manager.cpp declaring and implementing the LedManager class.
+- Supported active-low RGB LED pins (Red=GPIO 4, Green=GPIO 16, Blue=GPIO 17) and non-blocking timers.
+- Mapped Wi-Fi states: Connecting (slow blink Blue), Connected (solid Green for 3s then off), Disconnected (fast blink Red).
+- Mapped weather status pulses: Sunny (Yellow), Rain/Snow (Blue), Overcast/Fog (White), Thunderstorm (indefinite Red alert).
+- Added setEnabled() low-power toggle.
+- Extended mocks in tests/mocks/ to support pinMode/digitalWrite tracking and configurable millis.
+- Created tests/test_led/test_led.cpp verifying all states, timings, and toggles pass.
