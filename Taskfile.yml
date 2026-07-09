@@ -39,6 +39,17 @@ tasks:
     cmds:
       - pio run --target clean
 
+  setup:node:
+    desc: Install Node.js dependencies for font generation
+    cmds:
+      - npm install
+
+  font:generate:
+    desc: Generate custom weather icon font from TTF source
+    deps: [setup:node]
+    cmds:
+      - npm run font:generate
+
   default:
     cmds:
       - task -l

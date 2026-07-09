@@ -78,3 +78,6 @@ Testing/
 
 # Local Configuration Secrets
 config/secrets.h
+
+# Node.js
+node_modules/

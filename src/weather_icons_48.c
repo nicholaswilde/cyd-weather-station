@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Size: 48 px
  * Bpp: 4
- * Opts: --font /home/nicholas/git/nicholaswilde/cyd-weather-station/conductor/tracks/weather_icons_20260708/weathericons-regular-webfont.ttf -r 0xf002,0xf003,0xf008,0xf00a,0xf00d,0xf010,0xf07b --size 48 --format lvgl --bpp 4 --lv-include lvgl.h --no-compress -o /home/nicholas/git/nicholaswilde/cyd-weather-station/src/weather_icons_48.c
+ * Opts: --font assets/fonts/weathericons-regular-webfont.ttf -r 0xf002,0xf003,0xf008,0xf00a,0xf00d,0xf010,0xf07b --size 48 --format lvgl --bpp 4 --lv-include lvgl.h --no-compress -o src/weather_icons_48.c
  ******************************************************************************/
 
 #ifdef LV_LVGL_H_INCLUDE_SIMPLE
