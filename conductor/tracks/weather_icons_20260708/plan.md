@@ -1,7 +1,7 @@
 # Implementation Plan - Weather Status Icons Integration
 
 ## Phase 1: Font Acquisition & CLI Conversion
-- [ ] Task: Download Erik Flowers' Weather Icons TTF file and convert to LVGL C file
+- [x] Task: Download Erik Flowers' Weather Icons TTF file and convert to LVGL C file (b210df1)
     - [ ] Download TTF font from erikflowers weather-icons GitHub raw URL.
     - [ ] Run `npx lv_font_conv` to generate the 48px C font file (`src/weather_icons_48.c`).
     - [ ] Integrate the font into the PlatformIO build system.
