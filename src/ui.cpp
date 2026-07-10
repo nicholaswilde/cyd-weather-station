@@ -324,6 +324,12 @@ void initUI() {
 
     lv_obj_t * unit_sw = lv_switch_create(unit_row);
     lv_obj_set_size(unit_sw, 40, 20);
+    // Switch track — off state
+    lv_obj_set_style_bg_color(unit_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    // Switch track — on/checked state
+    lv_obj_set_style_bg_color(unit_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    // Switch knob
+    lv_obj_set_style_bg_color(unit_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
         lv_obj_add_state(unit_sw, LV_STATE_CHECKED);
     }
@@ -349,6 +355,18 @@ void initUI() {
     lv_dropdown_set_options(theme_dropdown, "Mocha\nMacchiato\nFrappe\nLatte");
     lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
     lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    // Dropdown button body
+    lv_obj_set_style_bg_color(theme_dropdown, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(theme_dropdown, lv_color_hex(COLOR_TEXT), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(theme_dropdown, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(theme_dropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // Dropdown list
+    lv_obj_t * dropdown_list = lv_dropdown_get_list(theme_dropdown);
+    lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
+    lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_border_color(dropdown_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
 
     // --- Right column items ---
 
@@ -364,6 +382,12 @@ void initUI() {
     lv_obj_set_size(brightness_slider, 136, 14);
     lv_obj_set_style_pad_top(brightness_slider, 4, LV_PART_KNOB);
     lv_obj_set_style_pad_bottom(brightness_slider, 4, LV_PART_KNOB);
+    // Slider track (unfilled)
+    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    // Slider filled indicator
+    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    // Slider knob
+    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(COLOR_TEXT), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_slider_set_range(brightness_slider, 10, 100);
     lv_slider_set_value(brightness_slider, settings.getBrightness(), LV_ANIM_OFF);
     lv_obj_add_event_cb(brightness_slider, brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, slider_label);
@@ -374,6 +398,9 @@ void initUI() {
     // Auto switch (created after slider so we can pass slider as user_data)
     lv_obj_t * auto_sw = lv_switch_create(auto_row);
     lv_obj_set_size(auto_sw, 40, 20);
+    lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getAutoBrightness()) {
         lv_obj_add_state(auto_sw, LV_STATE_CHECKED);
     }
@@ -396,8 +423,11 @@ void initUI() {
 
     lv_obj_t * tz_minus_btn = lv_btn_create(tz_row);
     lv_obj_set_size(tz_minus_btn, 30, 24);
+    lv_obj_set_style_bg_color(tz_minus_btn, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(tz_minus_btn, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_t * tz_minus_lbl = lv_label_create(tz_minus_btn);
     lv_label_set_text(tz_minus_lbl, "-");
+    lv_obj_set_style_text_color(tz_minus_lbl, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
     lv_obj_align(tz_minus_lbl, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(tz_minus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)-1);
 
@@ -414,8 +444,11 @@ void initUI() {
 
     lv_obj_t * tz_plus_btn = lv_btn_create(tz_row);
     lv_obj_set_size(tz_plus_btn, 30, 24);
+    lv_obj_set_style_bg_color(tz_plus_btn, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(tz_plus_btn, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_t * tz_plus_lbl = lv_label_create(tz_plus_btn);
     lv_label_set_text(tz_plus_lbl, "+");
+    lv_obj_set_style_text_color(tz_plus_lbl, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
     lv_obj_align(tz_plus_lbl, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(tz_plus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)1);
 }
