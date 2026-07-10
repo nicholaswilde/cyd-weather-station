@@ -45,9 +45,10 @@ static void my_touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
 }
 
 void initDisplayAndTouch() {
-    // Initialize backlight pin
-    pinMode(TFT_BL, OUTPUT);
-    digitalWrite(TFT_BL, TFT_BACKLIGHT_ON);
+    // NOTE: TFT_BL (GPIO 21) is intentionally NOT set up here via digitalWrite.
+    // BacklightManager::begin() configures it exclusively as an LEDC PWM output.
+    // Setting it as a digital GPIO output first would prevent LEDC from controlling
+    // brightness, causing the screen to be stuck at full brightness.
 
     // Initialize display
     tft.init();
