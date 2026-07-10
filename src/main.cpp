@@ -101,6 +101,35 @@ void loop() {
 #endif
     }
 
+    if (settings_theme_changed) {
+        settings_theme_changed = false;
+        Serial.println("[System] Theme changed. Reloading UI...");
+        
+        // Clean active screen and rebuild
+        lv_obj_clean(lv_scr_act());
+        initUI();
+        
+        // Force immediate updates of WiFi, time, and weather
+        bool isConnected = (wifi.getState() == WIFI_STATE_CONNECTED);
+        updateWifiStatus(isConnected);
+        
+#ifndef NATIVE_TEST
+        if (ntpInitialized) {
+            struct tm timeinfo;
+            if (getLocalTime(&timeinfo)) {
+                char timeStr[16];
+                strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                updateTimeUI(timeStr);
+            }
+        }
+#else
+        updateTimeUI("12:00");
+#endif
+        
+        // Trigger weather fetch to redraw UI with new theme colors
+        hasInitialFetch = false;
+    }
+
 #ifndef NATIVE_TEST
     if (settings.getAutoBrightness()) {
         if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {

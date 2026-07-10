@@ -13,6 +13,7 @@ extern SettingsManager settings;
 volatile bool settings_unit_changed = false;
 volatile bool settings_brightness_changed = false;
 volatile bool settings_timezone_changed = false;
+volatile bool settings_theme_changed = false;
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *temp_label;
@@ -28,6 +29,16 @@ static lv_obj_t *fore_day_label[3];
 static lv_obj_t *fore_icon_label[3];
 static lv_obj_t *fore_temp_label[3];
 static lv_obj_t *fore_desc_label[3];
+
+static void theme_dropdown_event_cb(lv_event_t * e) {
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    int selected = lv_dropdown_get_selected(dropdown);
+    int flavor = selected + 1; // 1-based (Mocha=1, Macchiato=2, Frappe=3, Latte=4)
+    if (flavor != settings.getThemeFlavor()) {
+        settings.setThemeFlavor(flavor);
+        settings_theme_changed = true;
+    }
+}
 
 static void unit_sw_event_cb(lv_event_t * e) {
     lv_obj_t * sw = lv_event_get_target(e);
@@ -349,6 +360,13 @@ void initUI() {
         lv_obj_add_state(auto_sw, LV_STATE_CHECKED);
     }
     lv_obj_add_event_cb(auto_sw, auto_sw_event_cb, LV_EVENT_VALUE_CHANGED, brightness_slider);
+
+    // Theme selector dropdown in left_col
+    lv_obj_t * theme_dropdown = lv_dropdown_create(left_col);
+    lv_obj_set_size(theme_dropdown, 145, 30);
+    lv_dropdown_set_options(theme_dropdown, "Mocha\nMacchiato\nFrappe\nLatte");
+    lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
+    lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Timezone Configurator Row in right_col
     lv_obj_t * tz_label = lv_label_create(right_col);

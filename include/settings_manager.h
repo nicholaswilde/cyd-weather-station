@@ -7,6 +7,7 @@ private:
     int _brightness;
     bool _autoBrightness;
     int _timezoneOffset;
+    int _themeFlavor;
 
 public:
     SettingsManager();
@@ -23,6 +24,9 @@ public:
     
     int getTimezoneOffset() const;
     void setTimezoneOffset(int offset);
+
+    int getThemeFlavor() const;
+    void setThemeFlavor(int flavor);
 };
 
 #endif // SETTINGS_MANAGER_H
