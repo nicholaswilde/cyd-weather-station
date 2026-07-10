@@ -86,9 +86,23 @@ void initUI() {
     lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 15, -20);
+    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 25, 0);
  
-    temp_label = lv_label_create(tab_curr);
+    // Vertical container for details on the right side
+    lv_obj_t * details_cnt = lv_obj_create(tab_curr);
+    lv_obj_set_size(details_cnt, 200, 150);
+    lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, -10, 0);
+    lv_obj_set_flex_flow(details_cnt, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(details_cnt, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+
+    // Remove styling constraints and scrollbars
+    lv_obj_set_style_bg_opa(details_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(details_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(details_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_row(details_cnt, 4, LV_PART_MAIN); // vertical space between children
+    lv_obj_clear_flag(details_cnt, LV_OBJ_FLAG_SCROLLABLE);
+
+    temp_label = lv_label_create(details_cnt);
 #if UNIT_SYSTEM == UNIT_IMPERIAL
     lv_label_set_text(temp_label, "--.- °F");
 #else
@@ -96,28 +110,35 @@ void initUI() {
 #endif
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-    lv_obj_align_to(temp_label, icon_lbl, LV_ALIGN_OUT_RIGHT_TOP, 25, 0);
 
-    hum_label = lv_label_create(tab_curr);
+    hum_label = lv_label_create(details_cnt);
     lv_label_set_text(hum_label, "Humidity: --%");
     lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
-    lv_obj_align_to(hum_label, temp_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 6);
 
-    wind_label = lv_label_create(tab_curr);
-    lv_label_set_text(wind_label, "Wind: -- km/h");
-    lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
-    lv_obj_align_to(wind_label, hum_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 6);
+    // Row container for wind icon and label
+    lv_obj_t * wind_cnt = lv_obj_create(details_cnt);
+    lv_obj_set_size(wind_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(wind_cnt, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(wind_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(wind_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(wind_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(wind_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(wind_cnt, 6, LV_PART_MAIN); // horizontal space between icon and text
+    lv_obj_clear_flag(wind_cnt, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t * wind_icon_lbl = lv_label_create(tab_curr);
+    lv_obj_t * wind_icon_lbl = lv_label_create(wind_cnt);
     lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_24, LV_PART_MAIN);
     lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
     lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
-    lv_obj_align_to(wind_icon_lbl, wind_label, LV_ALIGN_OUT_LEFT_MID, -29, 0);
 
-    status_lbl = lv_label_create(tab_curr);
+    wind_label = lv_label_create(wind_cnt);
+    lv_label_set_text(wind_label, "Wind: -- km/h");
+    lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
+
+    status_lbl = lv_label_create(details_cnt);
     lv_label_set_text(status_lbl, "Waiting for API update...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
-    lv_obj_align_to(status_lbl, wind_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 6);
+    lv_obj_set_width(status_lbl, 190);
 
     // 3-day Forecast Card Layout inside tab_fore
     for (int i = 0; i < 3; i++) {
