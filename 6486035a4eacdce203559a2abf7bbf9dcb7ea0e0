@@ -1,0 +1,14 @@
+Task: Create settings configuration manager
+
+Summary:
+- Created include/settings_manager.h and src/settings_manager.cpp to manage configuration state (units, brightness, auto brightness, and timezone offset) backed by the ESP32 Preferences library.
+- Created tests/mocks/Preferences.h to simulate persistent flash preferences on native hosts.
+- Added tests/test_settings/test_settings.cpp unit tests to verify proper initialization, defaults, range constraints, and persistence.
+
+Files:
+- include/settings_manager.h
+- src/settings_manager.cpp
+- tests/mocks/Preferences.h
+- tests/test_settings/test_settings.cpp
+
+Why: Establishes the persistent settings configuration manager to support user settings across boot cycles.
