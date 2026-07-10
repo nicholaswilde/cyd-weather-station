@@ -1,0 +1,19 @@
+Task: Implement settings controls in LVGL UI
+
+Summary:
+- Added a third 'Settings' tab to the LVGL Tabview in src/ui.cpp with a side-by-side landscape columns layout.
+- Integrated switches for temperature unit (C/F) and Auto Light (LDR auto-brightness toggle), a manual brightness slider, and timezone offset buttons.
+- Configured callbacks to update SettingsManager in real-time and trigger notification flags.
+- Updated main.cpp loop to react to settings changes immediately (forcing weather refetches, updating backlight PWM, and reconfiguring NTP timezone).
+- Replaced compile-time UNIT_SYSTEM checks with runtime checks in weather_client.cpp and ui.cpp.
+- Verified compilation and test runs successfully on all modules.
+
+Files:
+- src/ui.cpp
+- include/ui.h
+- src/weather_client.cpp
+- tests/mocks/mocks.cpp
+- tests/test_settings/test_settings.cpp
+- src/main.cpp
+
+Why: Completes the integration of UI controls and settings state, providing immediate visual updates and hardware changes on the CYD board when settings are interacted with.
