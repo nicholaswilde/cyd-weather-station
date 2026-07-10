@@ -17,6 +17,7 @@
 * **TFT & Touch Drivers:** TFT_eSPI or native LVGL display/touch interface (configured for CYD pinout)
 * **Custom Fonts:** Erik Flowers' Weather Icons font (uncompressed 48px and 24px C font files containing custom weather glyphs)
 * **Font Asset Tooling:** `lv_font_conv` (Node.js/npm) for generating custom LVGL font assets
+* **Preferences Storage:** ESP32 `Preferences` library (for saving runtime configurations in Flash memory across reboot cycles)
 
 ## 3. Build, Execution, and Tooling
 * **Build System:** PlatformIO (Core CLI)
