@@ -4,6 +4,10 @@
 #include <lvgl.h>
 #include "weather_client.h"
 
+extern volatile bool settings_unit_changed;
+extern volatile bool settings_brightness_changed;
+extern volatile bool settings_timezone_changed;
+
 void initUI();
 void updateWifiStatus(bool connected);
 void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed);

@@ -6,12 +6,12 @@
 #include "config/config.h"
 #include "led_manager.h"
 
-#if USE_LDR_AUTO_BACKLIGHT
 #include "backlight_manager.h"
+#include "settings_manager.h"
 BacklightManager backlight(TFT_BL, 0, 10.0f);
 unsigned long lastBacklightUpdate = 0;
 const unsigned long backlightUpdateInterval = 1000; // 1 second
-#endif
+SettingsManager settings;
 
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
 #if USE_ZIP_CODE
@@ -37,12 +37,16 @@ void setup() {
     Serial.begin(115200);
     Serial.println("[System] Booting ESP32 CYD Weather Station...");
 
+    // Load saved preferences
+    settings.begin();
+
     // Initialize hardware display and touch drivers
     initDisplayAndTouch();
 
-#if USE_LDR_AUTO_BACKLIGHT
     backlight.begin();
-#endif
+    if (!settings.getAutoBrightness()) {
+        backlight.setManualBrightness(settings.getBrightness());
+    }
 
     // Initialize LVGL UI framework
     initLVGL();
@@ -73,14 +77,38 @@ void loop() {
     led.update(currentMillis);
 #endif
 
-#if USE_LDR_AUTO_BACKLIGHT
-    #ifndef NATIVE_TEST
-    if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {
-        lastBacklightUpdate = currentMillis;
-        uint16_t ldrRaw = analogRead(LDR_PIN);
-        backlight.update(ldrRaw);
+    // Handle runtime settings changes from UI
+    if (settings_unit_changed) {
+        settings_unit_changed = false;
+        Serial.println("[System] Temperature unit changed. Triggering weather refetch...");
+        hasInitialFetch = false;
     }
-    #endif
+
+    if (settings_brightness_changed) {
+        settings_brightness_changed = false;
+        if (!settings.getAutoBrightness()) {
+            backlight.setManualBrightness(settings.getBrightness());
+        }
+    }
+
+    if (settings_timezone_changed) {
+        settings_timezone_changed = false;
+#ifndef NATIVE_TEST
+        if (ntpInitialized) {
+            Serial.println("[System] Timezone offset changed. Reconfiguring NTP...");
+            configTime(settings.getTimezoneOffset() * 3600, DST_OFFSET_SEC, NTP_SERVER);
+        }
+#endif
+    }
+
+#ifndef NATIVE_TEST
+    if (settings.getAutoBrightness()) {
+        if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {
+            lastBacklightUpdate = currentMillis;
+            uint16_t ldrRaw = analogRead(LDR_PIN);
+            backlight.update(ldrRaw);
+        }
+    }
 #endif
 
     // Periodically update Wi-Fi Connection Manager and fetch weather/time
@@ -111,7 +139,7 @@ void loop() {
 #ifndef NATIVE_TEST
             if (!ntpInitialized) {
                 Serial.println("[System] Initializing NTP client...");
-                configTime(GMT_OFFSET_SEC, DST_OFFSET_SEC, NTP_SERVER);
+                configTime(settings.getTimezoneOffset() * 3600, DST_OFFSET_SEC, NTP_SERVER);
                 ntpInitialized = true;
             }
             struct tm timeinfo;

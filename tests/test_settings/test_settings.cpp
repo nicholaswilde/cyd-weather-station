@@ -1,9 +1,5 @@
 #include <unity.h>
-#include "Arduino.h"
-#include "Preferences.h"
 #include "../mocks/mocks.cpp"
-#include "settings_manager.h"
-#include "../../src/settings_manager.cpp"
 
 void setUp(void) {
     // any setup

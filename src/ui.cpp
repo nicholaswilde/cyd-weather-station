@@ -1,11 +1,18 @@
 #include "ui.h"
 #include <Arduino.h>
 #include "config/config.h"
+#include "settings_manager.h"
 
 extern "C" {
 LV_FONT_DECLARE(weather_icons_48);
 LV_FONT_DECLARE(weather_icons_24);
 }
+
+extern SettingsManager settings;
+
+volatile bool settings_unit_changed = false;
+volatile bool settings_brightness_changed = false;
+volatile bool settings_timezone_changed = false;
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *temp_label;
@@ -14,12 +21,72 @@ static lv_obj_t *status_lbl;
 static lv_obj_t *time_label;
 static lv_obj_t *icon_lbl;
 static lv_obj_t *wind_label;
+static lv_obj_t *tz_val_label;
 
 // Forecast widgets
 static lv_obj_t *fore_day_label[3];
 static lv_obj_t *fore_icon_label[3];
 static lv_obj_t *fore_temp_label[3];
 static lv_obj_t *fore_desc_label[3];
+
+static void unit_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    int unit = is_checked ? UNIT_IMPERIAL : UNIT_METRIC;
+    settings.setUnitSystem(unit);
+    settings_unit_changed = true;
+}
+
+static void auto_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setAutoBrightness(is_checked);
+    settings_brightness_changed = true;
+    
+    lv_obj_t * slider = (lv_obj_t *)lv_event_get_user_data(e);
+    if (slider) {
+        if (is_checked) {
+            lv_obj_add_state(slider, LV_STATE_DISABLED);
+        } else {
+            lv_obj_clear_state(slider, LV_STATE_DISABLED);
+        }
+    }
+}
+
+static void brightness_slider_event_cb(lv_event_t * e) {
+    lv_obj_t * slider = lv_event_get_target(e);
+    int val = lv_slider_get_value(slider);
+    settings.setBrightness(val);
+    settings_brightness_changed = true;
+    
+    lv_obj_t * label = (lv_obj_t *)lv_event_get_user_data(e);
+    if (label) {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "Bright: %d%%", val);
+        lv_label_set_text(label, buf);
+    }
+}
+
+static void tz_btn_event_cb(lv_event_t * e) {
+    intptr_t dir = (intptr_t)lv_event_get_user_data(e);
+    int current_offset = settings.getTimezoneOffset();
+    int new_offset = current_offset + dir;
+    if (new_offset < -12) new_offset = -12;
+    if (new_offset > 14) new_offset = 14;
+    
+    if (new_offset != current_offset) {
+        settings.setTimezoneOffset(new_offset);
+        settings_timezone_changed = true;
+        
+        char buf[32];
+        if (new_offset >= 0) {
+            snprintf(buf, sizeof(buf), "GMT +%d", new_offset);
+        } else {
+            snprintf(buf, sizeof(buf), "GMT %d", new_offset);
+        }
+        lv_label_set_text(tz_val_label, buf);
+    }
+}
 
 
 void initUI() {
@@ -72,14 +139,18 @@ void initUI() {
     // Create the tabs
     lv_obj_t * tab_curr = lv_tabview_add_tab(tabview, "Current");
     lv_obj_t * tab_fore = lv_tabview_add_tab(tabview, "Forecast");
+    lv_obj_t * tab_settings = lv_tabview_add_tab(tabview, "Settings");
 
     // Clear scroll on tabs and set base color & padding
     lv_obj_clear_flag(tab_curr, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_clear_flag(tab_fore, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(tab_settings, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_bg_color(tab_curr, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
     lv_obj_set_style_bg_color(tab_fore, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_settings, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_curr, 5, LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_fore, 5, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(tab_settings, 5, LV_PART_MAIN);
 
     // Weather Placeholders inside tab_curr
     icon_lbl = lv_label_create(tab_curr);
@@ -103,11 +174,11 @@ void initUI() {
     lv_obj_clear_flag(details_cnt, LV_OBJ_FLAG_SCROLLABLE);
 
     temp_label = lv_label_create(details_cnt);
-#if UNIT_SYSTEM == UNIT_IMPERIAL
-    lv_label_set_text(temp_label, "--.- °F");
-#else
-    lv_label_set_text(temp_label, "--.- °C");
-#endif
+    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
+        lv_label_set_text(temp_label, "--.- °F");
+    } else {
+        lv_label_set_text(temp_label, "--.- °C");
+    }
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
 
@@ -188,6 +259,135 @@ void initUI() {
         lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_align(fore_desc_label[i], LV_ALIGN_BOTTOM_MID, 0, -4);
     }
+
+    // --- 3. Settings Tab UI Widgets ---
+    // Main container inside tab_settings
+    lv_obj_t * settings_grid = lv_obj_create(tab_settings);
+    lv_obj_set_size(settings_grid, 310, 150);
+    lv_obj_align(settings_grid, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_flex_flow(settings_grid, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(settings_grid, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(settings_grid, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(settings_grid, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(settings_grid, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(settings_grid, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Left Column
+    lv_obj_t * left_col = lv_obj_create(settings_grid);
+    lv_obj_set_size(left_col, 145, 140);
+    lv_obj_set_flex_flow(left_col, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(left_col, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_set_style_bg_opa(left_col, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(left_col, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(left_col, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(left_col, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Right Column
+    lv_obj_t * right_col = lv_obj_create(settings_grid);
+    lv_obj_set_size(right_col, 150, 140);
+    lv_obj_set_flex_flow(right_col, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(right_col, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_set_style_bg_opa(right_col, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(right_col, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(right_col, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(right_col, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Temp Unit Selector Row in left_col
+    lv_obj_t * unit_row = lv_obj_create(left_col);
+    lv_obj_set_size(unit_row, 145, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(unit_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(unit_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(unit_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(unit_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(unit_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(unit_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * unit_label = lv_label_create(unit_row);
+    lv_label_set_text(unit_label, "Unit (C/F)");
+    lv_obj_set_style_text_color(unit_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * unit_sw = lv_switch_create(unit_row);
+    lv_obj_set_size(unit_sw, 40, 20);
+    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
+        lv_obj_add_state(unit_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(unit_sw, unit_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    // Auto Brightness Row in left_col
+    lv_obj_t * auto_row = lv_obj_create(left_col);
+    lv_obj_set_size(auto_row, 145, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(auto_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(auto_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(auto_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(auto_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(auto_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(auto_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * auto_label = lv_label_create(auto_row);
+    lv_label_set_text(auto_label, "Auto Light");
+    lv_obj_set_style_text_color(auto_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    // Brightness Slider Row in right_col (created first so we can pass to auto switch)
+    lv_obj_t * slider_label = lv_label_create(right_col);
+    char slider_buf[32];
+    snprintf(slider_buf, sizeof(slider_buf), "Bright: %d%%", settings.getBrightness());
+    lv_label_set_text(slider_label, slider_buf);
+    lv_obj_set_style_text_color(slider_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * brightness_slider = lv_slider_create(right_col);
+    lv_obj_set_size(brightness_slider, 140, 10);
+    lv_slider_set_range(brightness_slider, 10, 100);
+    lv_slider_set_value(brightness_slider, settings.getBrightness(), LV_ANIM_OFF);
+    lv_obj_add_event_cb(brightness_slider, brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, slider_label);
+    if (settings.getAutoBrightness()) {
+        lv_obj_add_state(brightness_slider, LV_STATE_DISABLED);
+    }
+
+    lv_obj_t * auto_sw = lv_switch_create(auto_row);
+    lv_obj_set_size(auto_sw, 40, 20);
+    if (settings.getAutoBrightness()) {
+        lv_obj_add_state(auto_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(auto_sw, auto_sw_event_cb, LV_EVENT_VALUE_CHANGED, brightness_slider);
+
+    // Timezone Configurator Row in right_col
+    lv_obj_t * tz_label = lv_label_create(right_col);
+    lv_label_set_text(tz_label, "Timezone");
+    lv_obj_set_style_text_color(tz_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * tz_row = lv_obj_create(right_col);
+    lv_obj_set_size(tz_row, 140, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(tz_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(tz_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(tz_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(tz_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(tz_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(tz_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * tz_minus_btn = lv_btn_create(tz_row);
+    lv_obj_set_size(tz_minus_btn, 30, 24);
+    lv_obj_t * tz_minus_lbl = lv_label_create(tz_minus_btn);
+    lv_label_set_text(tz_minus_lbl, "-");
+    lv_obj_align(tz_minus_lbl, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_event_cb(tz_minus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)-1);
+
+    tz_val_label = lv_label_create(tz_row);
+    char tz_buf[16];
+    int offset = settings.getTimezoneOffset();
+    if (offset >= 0) {
+        snprintf(tz_buf, sizeof(tz_buf), "GMT +%d", offset);
+    } else {
+        snprintf(tz_buf, sizeof(tz_buf), "GMT %d", offset);
+    }
+    lv_label_set_text(tz_val_label, tz_buf);
+    lv_obj_set_style_text_color(tz_val_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+
+    lv_obj_t * tz_plus_btn = lv_btn_create(tz_row);
+    lv_obj_set_size(tz_plus_btn, 30, 24);
+    lv_obj_t * tz_plus_lbl = lv_label_create(tz_plus_btn);
+    lv_label_set_text(tz_plus_lbl, "+");
+    lv_obj_align(tz_plus_lbl, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_add_event_cb(tz_plus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)1);
 }
 
 void updateWifiStatus(bool connected) {
@@ -283,11 +483,11 @@ static uint32_t getIconColor(int code) {
 
 void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed) {
     char temp_str[32];
-#if UNIT_SYSTEM == UNIT_IMPERIAL
-    snprintf(temp_str, sizeof(temp_str), "%.1f °F", temperature);
-#else
-    snprintf(temp_str, sizeof(temp_str), "%.1f °C", temperature);
-#endif
+    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
+        snprintf(temp_str, sizeof(temp_str), "%.1f °F", temperature);
+    } else {
+        snprintf(temp_str, sizeof(temp_str), "%.1f °C", temperature);
+    }
     lv_label_set_text(temp_label, temp_str);
 
     char hum_str[32];
@@ -295,11 +495,11 @@ void updateWeatherUI(float temperature, int humidity, const char* status, int we
     lv_label_set_text(hum_label, hum_str);
 
     char wind_str[32];
-#if UNIT_SYSTEM == UNIT_IMPERIAL
-    snprintf(wind_str, sizeof(wind_str), "Wind: %.1f mph", windSpeed);
-#else
-    snprintf(wind_str, sizeof(wind_str), "Wind: %.1f km/h", windSpeed);
-#endif
+    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
+        snprintf(wind_str, sizeof(wind_str), "Wind: %.1f mph", windSpeed);
+    } else {
+        snprintf(wind_str, sizeof(wind_str), "Wind: %.1f km/h", windSpeed);
+    }
     lv_label_set_text(wind_label, wind_str);
 
     lv_label_set_text(status_lbl, status);
