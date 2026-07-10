@@ -277,35 +277,40 @@ void initUI() {
     lv_obj_set_size(settings_grid, 310, 150);
     lv_obj_align(settings_grid, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_flex_flow(settings_grid, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(settings_grid, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_flex_align(settings_grid, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(settings_grid, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(settings_grid, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(settings_grid, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_gap(settings_grid, 0, LV_PART_MAIN);
     lv_obj_clear_flag(settings_grid, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Left Column
+    // Left Column — Unit switch, Auto Light switch, Theme dropdown
     lv_obj_t * left_col = lv_obj_create(settings_grid);
-    lv_obj_set_size(left_col, 145, 140);
+    lv_obj_set_size(left_col, 148, 148);
     lv_obj_set_flex_flow(left_col, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(left_col, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_set_flex_align(left_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(left_col, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(left_col, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(left_col, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(left_col, 2, LV_PART_MAIN);
+    lv_obj_set_style_pad_gap(left_col, 8, LV_PART_MAIN);
     lv_obj_clear_flag(left_col, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Right Column
+    // Right Column — Brightness label+slider, Timezone label+buttons
     lv_obj_t * right_col = lv_obj_create(settings_grid);
-    lv_obj_set_size(right_col, 150, 140);
+    lv_obj_set_size(right_col, 155, 148);
     lv_obj_set_flex_flow(right_col, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(right_col, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_set_flex_align(right_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(right_col, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(right_col, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(right_col, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(right_col, 2, LV_PART_MAIN);
+    lv_obj_set_style_pad_gap(right_col, 8, LV_PART_MAIN);
     lv_obj_clear_flag(right_col, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Temp Unit Selector Row in left_col
+    // --- Left column items ---
+
+    // Unit (C/F) row
     lv_obj_t * unit_row = lv_obj_create(left_col);
-    lv_obj_set_size(unit_row, 145, LV_SIZE_CONTENT);
+    lv_obj_set_size(unit_row, 144, 28);
     lv_obj_set_flex_flow(unit_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(unit_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(unit_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -324,9 +329,9 @@ void initUI() {
     }
     lv_obj_add_event_cb(unit_sw, unit_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
-    // Auto Brightness Row in left_col
+    // Auto Light row
     lv_obj_t * auto_row = lv_obj_create(left_col);
-    lv_obj_set_size(auto_row, 145, LV_SIZE_CONTENT);
+    lv_obj_set_size(auto_row, 144, 28);
     lv_obj_set_flex_flow(auto_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(auto_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(auto_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -338,15 +343,27 @@ void initUI() {
     lv_label_set_text(auto_label, "Auto Light");
     lv_obj_set_style_text_color(auto_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
 
-    // Brightness Slider Row in right_col (created first so we can pass to auto switch)
+    // Theme selector dropdown
+    lv_obj_t * theme_dropdown = lv_dropdown_create(left_col);
+    lv_obj_set_size(theme_dropdown, 144, 30);
+    lv_dropdown_set_options(theme_dropdown, "Mocha\nMacchiato\nFrappe\nLatte");
+    lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
+    lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    // --- Right column items ---
+
+    // Brightness label
     lv_obj_t * slider_label = lv_label_create(right_col);
     char slider_buf[32];
     snprintf(slider_buf, sizeof(slider_buf), "Bright: %d%%", settings.getBrightness());
     lv_label_set_text(slider_label, slider_buf);
     lv_obj_set_style_text_color(slider_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
 
+    // Brightness slider — suppress thumb padding so it doesn't bloat height
     lv_obj_t * brightness_slider = lv_slider_create(right_col);
-    lv_obj_set_size(brightness_slider, 140, 10);
+    lv_obj_set_size(brightness_slider, 148, 14);
+    lv_obj_set_style_pad_top(brightness_slider, 4, LV_PART_KNOB);
+    lv_obj_set_style_pad_bottom(brightness_slider, 4, LV_PART_KNOB);
     lv_slider_set_range(brightness_slider, 10, 100);
     lv_slider_set_value(brightness_slider, settings.getBrightness(), LV_ANIM_OFF);
     lv_obj_add_event_cb(brightness_slider, brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, slider_label);
@@ -354,6 +371,7 @@ void initUI() {
         lv_obj_add_state(brightness_slider, LV_STATE_DISABLED);
     }
 
+    // Auto switch (created after slider so we can pass slider as user_data)
     lv_obj_t * auto_sw = lv_switch_create(auto_row);
     lv_obj_set_size(auto_sw, 40, 20);
     if (settings.getAutoBrightness()) {
@@ -361,20 +379,14 @@ void initUI() {
     }
     lv_obj_add_event_cb(auto_sw, auto_sw_event_cb, LV_EVENT_VALUE_CHANGED, brightness_slider);
 
-    // Theme selector dropdown in left_col
-    lv_obj_t * theme_dropdown = lv_dropdown_create(left_col);
-    lv_obj_set_size(theme_dropdown, 145, 30);
-    lv_dropdown_set_options(theme_dropdown, "Mocha\nMacchiato\nFrappe\nLatte");
-    lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
-    lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
-
-    // Timezone Configurator Row in right_col
+    // Timezone label
     lv_obj_t * tz_label = lv_label_create(right_col);
     lv_label_set_text(tz_label, "Timezone");
     lv_obj_set_style_text_color(tz_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
 
+    // Timezone +/- row
     lv_obj_t * tz_row = lv_obj_create(right_col);
-    lv_obj_set_size(tz_row, 140, LV_SIZE_CONTENT);
+    lv_obj_set_size(tz_row, 148, 30);
     lv_obj_set_flex_flow(tz_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(tz_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(tz_row, LV_OPA_TRANSP, LV_PART_MAIN);
