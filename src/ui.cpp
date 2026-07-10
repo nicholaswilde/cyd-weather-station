@@ -130,7 +130,7 @@ void initUI() {
     time_label = lv_label_create(header);
     lv_label_set_text(time_label, "--:--");
     lv_obj_set_style_text_color(time_label, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
-    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -15, 0);
+    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -18, 0);
 
     // 2. Tabview Setup
     lv_obj_t * tabview = lv_tabview_create(scr, LV_DIR_BOTTOM, 35);
