@@ -361,7 +361,7 @@ void initUI() {
 
     // Brightness slider — suppress thumb padding so it doesn't bloat height
     lv_obj_t * brightness_slider = lv_slider_create(right_col);
-    lv_obj_set_size(brightness_slider, 148, 14);
+    lv_obj_set_size(brightness_slider, 120, 14);
     lv_obj_set_style_pad_top(brightness_slider, 4, LV_PART_KNOB);
     lv_obj_set_style_pad_bottom(brightness_slider, 4, LV_PART_KNOB);
     lv_slider_set_range(brightness_slider, 10, 100);
