@@ -168,7 +168,8 @@ void initUI() {
     lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 25, 0);
+    // lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 25, 0);
+    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 12, 0);
  
     // Vertical container for details on the right side
     lv_obj_t * details_cnt = lv_obj_create(tab_curr);
