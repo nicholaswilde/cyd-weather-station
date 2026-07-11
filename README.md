@@ -1,16 +1,19 @@
-# CYD Weather Station
+# :partly_sunny: CYD Weather Station
 
-A beautiful, configurable real-time weather station and desk clock built for the **ESP32 Cheap Yellow Device (CYD)** (board model ESP32-2432S028R) utilizing the **LVGL v8** graphics library, **Open-Meteo Weather API**, and the **Catppuccin Color Theme**.
+A beautiful, configurable real-time weather station and desk clock built for the **ESP32 Cheap Yellow Device (CYD)** (board model ESP32-2432S028R) utilizing the **LVGL v8** graphics library, **Open-Meteo / OpenWeatherMap APIs**, and the **Catppuccin Color Theme**.
 
-## Features
+## :star: Features
 
-- **Real-Time Weather Details**: Fetches current temperature, humidity, and condition status from the free [Open-Meteo API](https://open-meteo.com/) — no API key required.
-- **Location Resolution**:
-  - **Zip Code Geocoding**: Enter a US Zip Code (e.g. `90210`); coordinates are resolved on boot via the Open-Meteo Geocoding API.
-  - **Coordinates**: Enter latitude and longitude directly as a fallback.
+- **Dual API Integration**: 
+  - **Open-Meteo API**: Out-of-the-box fallback — no API key required.
+  - **OpenWeatherMap API**: Automatically used if an API key is configured.
+- **Location Resolution & City Name Footer**:
+  - Displays `Last Update: <time> | <city name>` centered at the bottom of the screen.
+  - **Zip Code Geocoding**: Enter a US Zip Code (e.g. `90210`); coordinates are resolved on boot.
+  - **Reverse Geocoding**: When using coordinates + Open-Meteo, the city is resolved using Nominatim OSM. OWM resolves and returns the city name natively.
 - **3-Day Forecast View**: Swipe to a dedicated Forecast tab showing daily high/low temperature and weather condition icons.
 - **Swipe Navigation**: Swipe left/right anywhere on the screen to switch between the Current, Forecast, and Settings tabs.
-- **Dynamic Weather Icons**: A large (48px) custom weather glyph maps WMO weather codes to condition icons (clear, cloudy, rainy, snowy, stormy), dynamically colored using the active Catppuccin palette (sunny yellow, rainy blue, cloudy lavender, stormy mauve, etc.).
+- **Dynamic Weather Icons**: A large (48px) custom weather glyph maps weather codes to condition icons, dynamically colored using the active Catppuccin palette.
 - **Interactive Settings Tab**: Touch-configurable settings persisted to flash across reboots:
   - **Temperature Unit**: Toggle between Celsius (°C) and Fahrenheit (°F).
   - **Catppuccin Theme Flavor**: Choose between Mocha, Macchiato, Frappé, or Latte — the full UI redraws instantly in the selected palette.
@@ -19,20 +22,20 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Timezone Offset**: `–` / `+` buttons to set a GMT offset (–12 to +14) for the NTP clock.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured timezone offset.
-- **RGB LED Status Indicator**: The onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback: slow blue blink (connecting), solid green (connected), fast red blink (disconnected), and a brief weather-condition colour pulse on each weather update.
+- **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback and a brief weather-condition colour pulse on each weather update.
 - **Wi-Fi Status Icon**: Header bar Wi-Fi symbol changes color in real time (green = connected, red = disconnected).
 
-## Hardware Requirements
+## :hammer_and_wrench: Hardware Requirements
 
 - **ESP32 Cheap Yellow Device (CYD)**: ESP32-2432S028R — 2.8″ 320×240 ILI9341 LCD with XPT2046 resistive touch.
 - **Onboard Sensors**: LDR photoresistor (GPIO 34), Backlight PWM (GPIO 21), RGB LED (GPIO 4/16/17).
 - Micro-USB cable for power and programming.
 
-## Getting Started
+## :rocket: Getting Started
 
 ### 1. Secrets Setup
 
-Wi-Fi credentials live in a Git-ignored secrets file to prevent committing them.
+Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent committing them.
 
 1. Copy the template:
    ```bash
@@ -44,6 +47,10 @@ Wi-Fi credentials live in a Git-ignored secrets file to prevent committing them.
    ```cpp
    #define WIFI_SSID     "Your_WiFi_Network"
    #define WIFI_PASSWORD "Your_WiFi_Password"
+
+   // (Optional) Set your API key here to use OpenWeatherMap instead of Open-Meteo.
+   // If left empty (""), Open-Meteo API will be used as a fallback.
+   #define OPENWEATHERMAP_API_KEY "YOUR_OPENWEATHERMAP_API_KEY"
    ```
 
 ### 2. Configuration
@@ -92,7 +99,7 @@ task monitor  # Open serial monitor (115200 baud)
 
 ---
 
-## Settings Tab Reference
+## :gear: Settings Tab Reference
 
 All settings below are configured by touch on the device and saved to flash:
 
@@ -106,7 +113,7 @@ All settings below are configured by touch on the device and saved to flash:
 
 ---
 
-## Development
+## :computer: Development
 
 This project is built with **PlatformIO** and supports both ESP32 hardware builds and native desktop mock testing via a CMock/Unity test suite.
 
