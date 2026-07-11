@@ -49,7 +49,7 @@ jobs:
         run: cp config/secrets.h.example config/secrets.h
 
       - name: Uncomment secrets
-        run: "sed -i 's|// #|#|' include/secrets.h"
+        run: "sed -i 's|// #|#|' config/secrets.h"
 
       - name: Build PlatformIO Project
         run: pio run --environment ${{ matrix.env }}
