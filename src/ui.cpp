@@ -6,6 +6,7 @@
 extern "C" {
 LV_FONT_DECLARE(weather_icons_48);
 LV_FONT_DECLARE(weather_icons_24);
+LV_FONT_DECLARE(weather_icons_16);
 }
 
 extern SettingsManager settings;
@@ -19,6 +20,7 @@ static lv_obj_t *wifi_label;
 static lv_obj_t *temp_label;
 static lv_obj_t *hum_label;
 static lv_obj_t *status_lbl;
+static lv_obj_t *status_icon_lbl;
 static lv_obj_t *time_label;
 static lv_obj_t *icon_lbl;
 static lv_obj_t *wind_label;
@@ -184,7 +186,7 @@ void initUI() {
  
     // Vertical container for details on the right side
     lv_obj_t * details_cnt = lv_obj_create(tab_curr);
-    lv_obj_set_size(details_cnt, 200, 150);
+    lv_obj_set_size(details_cnt, 200, 115);
     lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, -10, -10);
     lv_obj_set_flex_flow(details_cnt, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(details_cnt, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -193,10 +195,29 @@ void initUI() {
     lv_obj_set_style_bg_opa(details_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(details_cnt, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(details_cnt, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_row(details_cnt, 4, LV_PART_MAIN); // vertical space between children
+    lv_obj_set_style_pad_row(details_cnt, 2, LV_PART_MAIN); // vertical space between children (reduced from 4)
     lv_obj_clear_flag(details_cnt, LV_OBJ_FLAG_SCROLLABLE);
 
-    temp_label = lv_label_create(details_cnt);
+    // Helper lambda-style macro for creating an icon+text row in details_cnt
+    // Each row: transparent flex-row container → icon label → text label
+
+    // --- Temperature row (wi-thermometer + value) ---
+    lv_obj_t * temp_cnt = lv_obj_create(details_cnt);
+    lv_obj_set_size(temp_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(temp_cnt, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(temp_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(temp_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(temp_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(temp_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(temp_cnt, 4, LV_PART_MAIN); // reduced spacing
+    lv_obj_clear_flag(temp_cnt, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * temp_icon_lbl = lv_label_create(temp_cnt);
+    lv_obj_set_style_text_font(temp_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
+    lv_label_set_text(temp_icon_lbl, "\xef\x81\x95"); // U+F055 wi-thermometer
+    lv_obj_set_style_text_color(temp_icon_lbl, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+
+    temp_label = lv_label_create(temp_cnt);
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
         lv_label_set_text(temp_label, "--.- °F");
     } else {
@@ -205,11 +226,27 @@ void initUI() {
     lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
 
-    hum_label = lv_label_create(details_cnt);
-    lv_label_set_text(hum_label, "Humidity: --%");
+    // --- Humidity row (wi-humidity + value) ---
+    lv_obj_t * hum_cnt = lv_obj_create(details_cnt);
+    lv_obj_set_size(hum_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(hum_cnt, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(hum_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(hum_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(hum_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(hum_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(hum_cnt, 4, LV_PART_MAIN);
+    lv_obj_clear_flag(hum_cnt, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * hum_icon_lbl = lv_label_create(hum_cnt);
+    lv_obj_set_style_text_font(hum_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
+    lv_label_set_text(hum_icon_lbl, "\xef\x81\xba"); // U+F07A wi-humidity
+    lv_obj_set_style_text_color(hum_icon_lbl, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
+
+    hum_label = lv_label_create(hum_cnt);
+    lv_label_set_text(hum_label, "--%");
     lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
 
-    // Row container for wind icon and label
+    // --- Wind row (wi-windy + value) ---
     lv_obj_t * wind_cnt = lv_obj_create(details_cnt);
     lv_obj_set_size(wind_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(wind_cnt, LV_FLEX_FLOW_ROW);
@@ -217,11 +254,11 @@ void initUI() {
     lv_obj_set_style_bg_opa(wind_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(wind_cnt, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(wind_cnt, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_column(wind_cnt, 6, LV_PART_MAIN); // horizontal space between icon and text
+    lv_obj_set_style_pad_column(wind_cnt, 4, LV_PART_MAIN); // horizontal space between icon and text
     lv_obj_clear_flag(wind_cnt, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * wind_icon_lbl = lv_label_create(wind_cnt);
-    lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_24, LV_PART_MAIN);
+    lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
     lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
 
@@ -229,10 +266,25 @@ void initUI() {
     lv_label_set_text(wind_label, "Wind: -- km/h");
     lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
 
-    status_lbl = lv_label_create(details_cnt);
-    lv_label_set_text(status_lbl, "Waiting for API update...");
+    // --- Status row (dynamic weather-code icon + description text) ---
+    lv_obj_t * status_cnt = lv_obj_create(details_cnt);
+    lv_obj_set_size(status_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(status_cnt, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(status_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(status_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(status_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(status_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(status_cnt, 4, LV_PART_MAIN);
+    lv_obj_clear_flag(status_cnt, LV_OBJ_FLAG_SCROLLABLE);
+
+    status_icon_lbl = lv_label_create(status_cnt);
+    lv_obj_set_style_text_font(status_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
+    lv_label_set_text(status_icon_lbl, "\xef\x81\xbb"); // U+F07B wi-na (updated on fetch)
+    lv_obj_set_style_text_color(status_icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+
+    status_lbl = lv_label_create(status_cnt);
+    lv_label_set_text(status_lbl, "Updating...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
-    lv_obj_set_width(status_lbl, 190);
 
     // Footer bar: "Last Update: HH:MM | City Name"
     footer_label = lv_label_create(tab_curr);
@@ -576,22 +628,24 @@ void updateWeatherUI(float temperature, int humidity, const char* status, int we
     lv_label_set_text(temp_label, temp_str);
 
     char hum_str[32];
-    snprintf(hum_str, sizeof(hum_str), "Humidity: %d%%", humidity);
+    snprintf(hum_str, sizeof(hum_str), "%d%%", humidity);
     lv_label_set_text(hum_label, hum_str);
 
     char wind_str[32];
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-        snprintf(wind_str, sizeof(wind_str), "Wind: %.1f mph", windSpeed);
+        snprintf(wind_str, sizeof(wind_str), "%.1f mph", windSpeed);
     } else {
-        snprintf(wind_str, sizeof(wind_str), "Wind: %.1f km/h", windSpeed);
+        snprintf(wind_str, sizeof(wind_str), "%.1f km/h", windSpeed);
     }
     lv_label_set_text(wind_label, wind_str);
 
     lv_label_set_text(status_lbl, status);
 
-    // Update weather icon and its color
+    // Update large weather icon (left side) and small status row icon (right side)
     lv_label_set_text(icon_lbl, getIconGlyph(weatherCode));
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(getIconColor(weatherCode)), LV_PART_MAIN);
+    lv_label_set_text(status_icon_lbl, getIconGlyph(weatherCode));
+    lv_obj_set_style_text_color(status_icon_lbl, lv_color_hex(getIconColor(weatherCode)), LV_PART_MAIN);
 }
 
 void updateTimeUI(const char* time_str) {
