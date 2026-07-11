@@ -72,6 +72,8 @@ void loop() {
     delay(5);
     lv_tick_inc(5);
 
+    wifi.update();
+
     unsigned long currentMillis = millis();
 
 #if USE_RGB_LED_STATUS
@@ -144,7 +146,6 @@ void loop() {
     // Periodically update Wi-Fi Connection Manager and fetch weather/time
     if (currentMillis - lastWifiUpdate >= wifiUpdateInterval) {
         lastWifiUpdate = currentMillis;
-        wifi.update();
 
         // Reflect WiFi status in UI
         bool isConnected = (wifi.getState() == WIFI_STATE_CONNECTED);

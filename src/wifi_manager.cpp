@@ -118,6 +118,7 @@ void WifiManager::startAPMode() {
     WiFi.softAP(apSSID.c_str());
 
     _dnsServer = new DNSServer();
+    _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
     _dnsServer->start(53, "*", apIP);
 
     _webServer = new WebServer(80);
