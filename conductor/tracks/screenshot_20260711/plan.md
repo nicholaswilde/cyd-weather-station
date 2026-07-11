@@ -23,14 +23,14 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Remote Screenshot Web Server Integration' (Protocol in workflow.md)
 
 ## Phase 3: Physical BOOT Button Trigger & SD Card Storage [checkpoint: ]
-- [ ] Task: Set up physical BOOT button input handler.
-    - [ ] Define `BOOT_BUTTON_PIN` as GPIO 0.
-    - [ ] Initialize the pin as `INPUT_PULLUP` during setup.
-- [ ] Task: Implement button polling and SD write sequence in loop.
-    - [ ] In `loop()`, poll the button state and debounce presses.
-    - [ ] On press, generate a timestamped filename `/screenshot_YYYYMMDD_HHMMSS.bmp` using NTP time.
-    - [ ] Temporarily mount the SD card (if not already mounted), write the BMP header and pixel data row-by-row, then restore the previous SD mount state.
-- [ ] Task: Write unit tests for file name formatting and SD storage writing mocks.
+- [x] Task: Set up physical BOOT button input handler. (966d76a)
+    - [x] Define `BOOT_BUTTON_PIN` as GPIO 0.
+    - [x] Initialize the pin as `INPUT_PULLUP` during setup.
+- [x] Task: Implement button polling and SD write sequence in loop. (966d76a)
+    - [x] In `loop()`, poll the button state and debounce presses.
+    - [x] On press, generate a timestamped filename `/screenshot_YYYYMMDD_HHMMSS.bmp` using NTP time.
+    - [x] Temporarily mount the SD card (if not already mounted), write the BMP header and pixel data row-by-row, then restore the previous SD mount state.
+- [x] Task: Write unit tests for file name formatting and SD storage writing mocks. (966d76a)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Physical BOOT Button Trigger & SD Card Storage' (Protocol in workflow.md)
 
 ## Phase 4: UI Toggle Control [checkpoint: ]
