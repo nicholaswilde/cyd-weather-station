@@ -4,6 +4,7 @@
 #include <FS.h>
 #include "config/config.h"
 
+static SPIClass sdSPI(VSPI);
 static bool sdMounted = false;
 static bool sdCardDetected = false;
 
@@ -14,8 +15,8 @@ bool SdCardManager::begin() {
     
     Serial.println("Initializing SD card...");
     
-    SPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
-    sdMounted = SD.begin(SD_CS_PIN, SPI, 4000000, "/sd", 5, true);
+    sdSPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
+    sdMounted = SD.begin(SD_CS_PIN, sdSPI, 4000000, "/sd", 5, true);
 
     if (sdMounted) {
         Serial.println("SD card initialized successfully.");
