@@ -119,6 +119,7 @@ WeatherData WeatherClient::fetchWeather() {
     url += lng;
     url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
     url += "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3";
+    url += "&timezone=auto"; // Return dates in local timezone, not UTC
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
         url += "&temperature_unit=fahrenheit";
         url += "&windspeed_unit=mph";
@@ -193,12 +194,14 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
                     int y = (dateCStr[0]-'0')*1000 + (dateCStr[1]-'0')*100 + (dateCStr[2]-'0')*10 + (dateCStr[3]-'0');
                     int m = (dateCStr[5]-'0')*10 + (dateCStr[6]-'0');
                     int d = (dateCStr[8]-'0')*10 + (dateCStr[9]-'0');
-                    
+
+                    // Tomohiko Sakamoto's algorithm (correct form):
+                    // Treat Jan/Feb as months 13/14 of the previous year so the
+                    // leap-year correction works uniformly across month boundaries.
                     static const char* days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-                    int yr = y;
-                    if (m < 3) yr -= 1;
-                    static int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
-                    int dayIdx = (yr + yr/4 - yr/100 + yr/400 + t[m-1] + d) % 7;
+                    static const int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+                    if (m < 3) y -= 1;
+                    int dayIdx = (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7;
                     if (dayIdx >= 0 && dayIdx < 7) {
                         data.forecast[i].dayName = days[dayIdx];
                     } else {
