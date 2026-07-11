@@ -22,8 +22,12 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Timezone Offset**: `–` / `+` buttons to set a GMT offset (–12 to +14) for the NTP clock.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured timezone offset.
-- **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback and a brief weather-condition colour pulse on each weather update.
-- **Wi-Fi Status Icon**: Header bar Wi-Fi symbol changes color in real time (green = connected, red = disconnected).
+- **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
+- **Wi-Fi AP Captive Portal Fallback**:
+  - Automatically hosts an open Soft AP (`cyd-weather-station-<mac_short>`) if connection fails or times out after 30 seconds on boot.
+  - Runs a captive portal configuration web server and DNS redirector on `192.168.4.1` for selecting networks and setting Wi-Fi credentials.
+  - Dynamically displays step-by-step connection instructions (SSID name and IP address) directly on the screen while AP Mode is active.
+  - Colors the header Wi-Fi icon **Mauve** when in setup configuration mode.
 
 ## :hammer_and_wrench: Hardware Requirements
 
