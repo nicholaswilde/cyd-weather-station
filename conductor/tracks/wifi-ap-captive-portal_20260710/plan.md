@@ -10,7 +10,7 @@
     - [x] Complete implementation to make the tests pass (Green Phase) [f45dcd2]
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Extend SettingsManager for Wi-Fi Persistence' (Protocol in workflow.md) [455b60c]
 
-## Phase 2: Implement AP Mode and Captive Portal Web Server
+## Phase 2: Implement AP Mode and Captive Portal Web Server [checkpoint: 7a4142d]
 - [x] Task: Update WifiManager interface and state machine [3ac1d66]
     - [x] Update `include/wifi_manager.h` to support AP mode states (e.g., `WIFI_STATE_AP_MODE`), timeout trackers, and DNS/Web Server pointers [3ac1d66]
     - [x] Implement AP setup using `<hostname>-<mac>` format (e.g. `cyd-weather-station-1A2B`) [3ac1d66]
@@ -21,7 +21,7 @@
     - [x] Add unit tests in `tests/test_wifi_manager/test_wifi_manager.cpp` for AP mode timeouts and status checks [3ac1d66]
     - [x] Run tests to verify failure (Red Phase) [3ac1d66]
     - [x] Pass the tests (Green Phase) [3ac1d66]
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Implement AP Mode and Captive Portal Web Server' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Implement AP Mode and Captive Portal Web Server' (Protocol in workflow.md) [7a4142d]
 
 ## Phase 3: Integrate Form Submission and Lifecycle Loop
 - [ ] Task: Handle Captive Portal credentials submission
