@@ -381,8 +381,20 @@ String WeatherClient::getWeatherDesc(int code) {
 }
 
 bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
-    DynamicJsonDocument doc(16384);
-    DeserializationError error = deserializeJson(doc, json);
+    StaticJsonDocument<1024> filter;
+    filter["list"][0]["dt_txt"] = true;
+    filter["list"][0]["main"]["temp"] = true;
+    filter["list"][0]["main"]["humidity"] = true;
+    filter["list"][0]["main"]["temp_min"] = true;
+    filter["list"][0]["main"]["temp_max"] = true;
+    filter["list"][0]["wind"]["speed"] = true;
+    filter["list"][0]["wind"]["deg"] = true;
+    filter["list"][0]["weather"][0]["id"] = true;
+    filter["list"][0]["weather"][0]["description"] = true;
+    filter["city"]["name"] = true;
+
+    DynamicJsonDocument doc(12288);
+    DeserializationError error = deserializeJson(doc, json, DeserializationOption::Filter(filter));
 
     if (error) {
         Serial.print("[Weather] OWM JSON Deserialization failed: ");

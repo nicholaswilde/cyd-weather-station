@@ -108,6 +108,33 @@ void test_weather_client_parse_weather_json_custom(void) {
     TEST_ASSERT_EQUAL_STRING("Thunderstorm", data.forecast[2].status.c_str());
 }
 
+void test_weather_client_parse_owm_json(void) {
+    WeatherClient client("33.60002", "-117.67200");
+    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {} };
+
+    const char* owmJson = "{"
+        "\"list\":["
+            "{"
+                "\"dt_txt\":\"2026-07-11 12:00:00\","
+                "\"main\":{\"temp\":72.5,\"humidity\":50,\"temp_min\":68.0,\"temp_max\":75.0},"
+                "\"wind\":{\"speed\":5.5,\"deg\":180},"
+                "\"weather\":[{\"id\":800,\"description\":\"clear sky\"}]"
+            "}"
+        "],"
+        "\"city\":{\"name\":\"Orange County\"}"
+    "}";
+
+    bool parsed = client.parseOwmJson(owmJson, data);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_TRUE(data.valid);
+    TEST_ASSERT_EQUAL_FLOAT(72.5f, data.temperature);
+    TEST_ASSERT_EQUAL(50, data.humidity);
+    TEST_ASSERT_EQUAL_FLOAT(5.5f, data.windSpeed);
+    TEST_ASSERT_EQUAL(180, data.windDirection);
+    TEST_ASSERT_EQUAL_STRING("Orange County", data.cityName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Clear sky", data.status.c_str());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -115,5 +142,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_fetch_weather_native_mock);
     RUN_TEST(test_weather_client_zip_code_initialization);
     RUN_TEST(test_weather_client_parse_weather_json_custom);
+    RUN_TEST(test_weather_client_parse_owm_json);
     return UNITY_END();
 }
