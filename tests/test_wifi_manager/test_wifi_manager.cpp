@@ -45,11 +45,25 @@ void test_wifi_manager_loses_connection(void) {
     TEST_ASSERT_EQUAL(WIFI_STATE_DISCONNECTED, wifi.getState());
 }
 
+void test_wifi_manager_transitions_to_ap_mode(void) {
+    mock_millis_val = 0;
+    WifiManager wifi("SSID", "PASS");
+    wifi.begin();
+    TEST_ASSERT_EQUAL(WIFI_STATE_CONNECTING, wifi.getState());
+
+    // Simulate 31 seconds passing
+    mock_millis_val = 31000;
+    WiFi._status = 0; // not connected
+    wifi.update();
+    TEST_ASSERT_EQUAL(WIFI_STATE_AP_MODE, wifi.getState());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_wifi_manager_initial_state);
     RUN_TEST(test_wifi_manager_transitions_to_connecting);
     RUN_TEST(test_wifi_manager_transitions_to_connected);
     RUN_TEST(test_wifi_manager_loses_connection);
+    RUN_TEST(test_wifi_manager_transitions_to_ap_mode);
     return UNITY_END();
 }
