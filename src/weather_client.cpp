@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include "config/config.h"
 #include "settings_manager.h"
+#include <time.h>
 
 extern SettingsManager settings;
 
@@ -176,6 +177,31 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
         JsonArray daily_min = doc["daily"]["temperature_2m_min"];
         JsonArray daily_code = doc["daily"]["weather_code"];
 
+        // Compute today's and tomorrow's date in the user's configured timezone
+        // so that "Today" / "Tomorrow" labels are correct regardless of UTC rollover.
+        // Falls back to index-based labelling if NTP hasn't synced yet.
+        char today_str[11]    = "";
+        char tomorrow_str[11] = "";
+#ifndef NATIVE_TEST
+        time_t now = time(nullptr);
+        const bool time_valid = (now > 946684800L); // after year 2000 = NTP synced
+        if (time_valid) {
+            // Apply the configured offset so we compare against local midnight,
+            // not UTC midnight.
+            long tz_sec = (long)settings.getTimezoneOffset() * 3600L;
+            time_t local_now = now + tz_sec;
+            struct tm tm_today, tm_tomorrow;
+            gmtime_r(&local_now,          &tm_today);
+            gmtime_r(&(local_now += 86400), &tm_tomorrow);
+            snprintf(today_str,    sizeof(today_str),    "%04d-%02d-%02d",
+                tm_today.tm_year + 1900,    tm_today.tm_mon + 1,    tm_today.tm_mday);
+            snprintf(tomorrow_str, sizeof(tomorrow_str), "%04d-%02d-%02d",
+                tm_tomorrow.tm_year + 1900, tm_tomorrow.tm_mon + 1, tm_tomorrow.tm_mday);
+        }
+#else
+        const bool time_valid = false; // native test: fall back to index-based
+#endif
+
         for (int i = 0; i < 3; i++) {
             if (i < (int)daily_time.size()) {
                 data.forecast[i].tempMax = daily_max[i].as<float>();
@@ -183,30 +209,35 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
                 int code = daily_code[i].as<int>();
                 data.forecast[i].weatherCode = code;
                 data.forecast[i].status = getWeatherDesc(code);
-                
+
                 String dateStr = daily_time[i].as<String>();
-                if (i == 0) {
+
+                // Determine the human-readable label for this date.
+                // Priority: timezone-aware match > index-based fallback > day name.
+                if (time_valid && dateStr == today_str) {
                     data.forecast[i].dayName = "Today";
-                } else if (i == 1) {
+                } else if (time_valid && dateStr == tomorrow_str) {
+                    data.forecast[i].dayName = "Tomorrow";
+                } else if (!time_valid && i == 0) {
+                    // NTP not yet synced: assume API day 0 is today
+                    data.forecast[i].dayName = "Today";
+                } else if (!time_valid && i == 1) {
                     data.forecast[i].dayName = "Tomorrow";
                 } else if (dateStr.length() >= 10) {
+                    // Compute short day name from the date string
                     const char* dateCStr = dateStr.c_str();
-                    int y = (dateCStr[0]-'0')*1000 + (dateCStr[1]-'0')*100 + (dateCStr[2]-'0')*10 + (dateCStr[3]-'0');
+                    int y = (dateCStr[0]-'0')*1000 + (dateCStr[1]-'0')*100
+                          + (dateCStr[2]-'0')*10  + (dateCStr[3]-'0');
                     int m = (dateCStr[5]-'0')*10 + (dateCStr[6]-'0');
                     int d = (dateCStr[8]-'0')*10 + (dateCStr[9]-'0');
 
-                    // Tomohiko Sakamoto's algorithm (correct form):
-                    // Treat Jan/Feb as months 13/14 of the previous year so the
-                    // leap-year correction works uniformly across month boundaries.
-                    static const char* days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+                    // Tomohiko Sakamoto's algorithm (0=Sun … 6=Sat)
+                    static const char* days[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
                     static const int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
                     if (m < 3) y -= 1;
                     int dayIdx = (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7;
-                    if (dayIdx >= 0 && dayIdx < 7) {
-                        data.forecast[i].dayName = days[dayIdx];
-                    } else {
-                        data.forecast[i].dayName = dateStr;
-                    }
+                    data.forecast[i].dayName = (dayIdx >= 0 && dayIdx < 7)
+                                               ? days[dayIdx] : dateStr.c_str();
                 } else {
                     data.forecast[i].dayName = dateStr;
                 }
