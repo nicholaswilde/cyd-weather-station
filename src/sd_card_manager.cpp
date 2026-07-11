@@ -38,6 +38,7 @@ void SdCardManager::end() {
         sdMounted = false;
         Serial.println("SD card unmounted.");
     }
+    sdSPI.end();
 }
 
 bool SdCardManager::isCardPresent() {
