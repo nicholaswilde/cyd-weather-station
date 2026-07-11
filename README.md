@@ -23,6 +23,8 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Auto Brightness**: Toggle automatic backlight dimming/brightening driven by the onboard LDR light sensor (GPIO 34).
   - **Manual Brightness**: Slider to set a fixed screen brightness level (when Auto is off).
   - **Timezone Offset**: `–` / `+` buttons to set a GMT offset (–12 to +14) for the NTP clock.
+  - **SD Log**: Enable/disable weather logging to a microSD card.
+  - **Screenshot Server**: Enable/disable the remote screenshot HTTP server.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured timezone offset.
 - **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
@@ -34,11 +36,16 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **SD Card Weather Logging**:
   - Automatically mounts a microSD card on boot and appends weather records (timestamp, temperature, humidity, wind speed, wind direction, weather code) to `/weather_history.csv` on the root of the card.
   - Automatic formatting fallback to FAT32 on mount failure.
+- **Screenshot Capture**:
+  - **Remote via HTTP**: `GET /screenshot` streams a pixel-perfect 24-bit BMP of the current screen directly over Wi-Fi.
+  - **Physical button**: Press the BOOT button (GPIO 0) to save a timestamped BMP to the SD card as `/screenshot_YYYYMMDD_HHMMSS.bmp`.
+  - Zero large-allocation design — screen tiles are intercepted from the LVGL flush callback and written directly to file.
+  - Toggle the screenshot server on/off from the **Settings tab** (`Scr Srv`).
 
 ## :hammer_and_wrench: Hardware Requirements
 
 - **ESP32 Cheap Yellow Device (CYD)**: ESP32-2432S028R — 2.8″ 320×240 ILI9341 LCD with XPT2046 resistive touch.
-- **Onboard Sensors**: LDR photoresistor (GPIO 34), Backlight PWM (GPIO 21), RGB LED (GPIO 4/16/17).
+- **Onboard Sensors**: LDR photoresistor (GPIO 34), Backlight PWM (GPIO 21), RGB LED (GPIO 4/16/17), BOOT button (GPIO 0).
 - **Storage**: MicroSD card slot (compatible with standard FAT32 formatted cards).
 - Micro-USB cable for power and programming.
 
@@ -50,6 +57,36 @@ The weather station periodically logs weather reports to a microSD card in CSV f
 > **Auto-Formatting Warning:** If the inserted microSD card fails to mount (e.g., if it is formatted as exFAT or uses a GPT partition scheme), the firmware will **automatically format the card to FAT32** on boot. This will **permanently delete all existing data** on the card.
 > 
 > To prevent data loss, ensure that any card you insert is either empty, or pre-formatted as **FAT32** with a **Master Boot Record (MBR)** partition scheme (GUID/GPT partition tables are not supported).
+
+## :camera: Screenshots
+
+The device supports capturing the current screen as a standard 24-bit BMP image via two methods:
+
+### Remote HTTP capture
+
+> [!NOTE]
+> The screenshot server must be enabled in the **Settings tab** (`Scr Srv` toggle) and Wi-Fi must be connected. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
+
+```bash
+# Save to file
+curl http://<DEVICE_IP>/screenshot -o screenshot.bmp
+
+# View inline (if ImageMagick is installed)
+curl -s http://<DEVICE_IP>/screenshot | display -
+```
+
+### Physical BOOT button capture
+
+Press the **BOOT button** (GPIO 0) on the CYD board. The screenshot is saved to the SD card root as `/screenshot_YYYYMMDD_HHMMSS.bmp` (NTP-synced timestamp).
+
+Serial output confirms the save:
+```
+[System] BOOT button pressed. Taking screenshot...
+[Screenshot] Capture started: /screenshot_20260711_135852.bmp
+[Screenshot] Capture complete.
+```
+
+---
 
 ## :rocket: Getting Started
 
@@ -135,6 +172,8 @@ All settings below are configured by touch on the device and saved to flash:
 | **Theme** | Catppuccin flavor selector — Mocha / Macchiato / Frappé / Latte. Full UI redraws on change. |
 | **Timezone** | GMT offset (– / + buttons, range –12 to +14). |
 | **DST** | Toggle Daylight Saving Time on/off (adds 1 hour to NTP offset when enabled). |
+| **SD Log** | Toggle SD card weather logging. Disabled automatically if no card is inserted. |
+| **Scr Srv** | Toggle the remote screenshot HTTP server on/off. |
 
 ---
 
