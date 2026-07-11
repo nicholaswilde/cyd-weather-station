@@ -28,12 +28,25 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - Runs a captive portal configuration web server and DNS redirector on `192.168.4.1` for selecting networks and setting Wi-Fi credentials.
   - Dynamically displays step-by-step connection instructions (SSID name and IP address) directly on the screen while AP Mode is active.
   - Colors the header Wi-Fi icon **Mauve** when in setup configuration mode.
+- **SD Card Weather Logging**:
+  - Automatically mounts a microSD card on boot and appends weather records (timestamp, temperature, humidity, wind speed, wind direction, weather code) to `/weather_history.csv` on the root of the card.
+  - Automatic formatting fallback to FAT32 on mount failure.
 
 ## :hammer_and_wrench: Hardware Requirements
 
 - **ESP32 Cheap Yellow Device (CYD)**: ESP32-2432S028R — 2.8″ 320×240 ILI9341 LCD with XPT2046 resistive touch.
 - **Onboard Sensors**: LDR photoresistor (GPIO 34), Backlight PWM (GPIO 21), RGB LED (GPIO 4/16/17).
+- **Storage**: MicroSD card slot (compatible with standard FAT32 formatted cards).
 - Micro-USB cable for power and programming.
+
+## :sd: MicroSD Card Logging & Auto-Formatting
+
+The weather station periodically logs weather reports to a microSD card in CSV format.
+
+> [!WARNING]
+> **Auto-Formatting Warning:** If the inserted microSD card fails to mount (e.g., if it is formatted as exFAT or uses a GPT partition scheme), the firmware will **automatically format the card to FAT32** on boot. This will **permanently delete all existing data** on the card.
+> 
+> To prevent data loss, ensure that any card you insert is either empty, or pre-formatted as **FAT32** with a **Master Boot Record (MBR)** partition scheme (GUID/GPT partition tables are not supported).
 
 ## :rocket: Getting Started
 
