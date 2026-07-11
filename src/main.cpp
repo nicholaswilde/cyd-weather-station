@@ -226,8 +226,8 @@ void loop() {
                         strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
                         updateFooterUI(timeStr, data.cityName.c_str());
 
-                        // Log weather data to SD card if enabled
-                        if (settings.getSdLoggingEnabled()) {
+                        // Log weather data to SD card if enabled and card is present
+                        if (settings.getSdLoggingEnabled() && SdCardManager::isCardPresent()) {
                             WeatherLogger::logWeather(timeinfo, data);
                         }
                     }

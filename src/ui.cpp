@@ -497,7 +497,6 @@ void initUI() {
         lv_obj_add_event_cb(sd_sw, sd_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     } else {
         lv_obj_add_state(sd_sw, LV_STATE_DISABLED);
-        settings.setSdLoggingEnabled(false);
     }
 
     // --- Right column items ---
