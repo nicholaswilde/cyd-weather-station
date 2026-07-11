@@ -5,6 +5,8 @@
 #include "weather_client.h"
 #include "config/config.h"
 #include "led_manager.h"
+#include "sd_card_manager.h"
+#include "weather_logger.h"
 
 #include "backlight_manager.h"
 #include "settings_manager.h"
@@ -62,6 +64,9 @@ void setup() {
     led.begin();
     led.setEnabled(true);
 #endif
+
+    // Initialize SD card
+    SdCardManager::begin();
 }
 
 void loop() {
@@ -206,6 +211,9 @@ void loop() {
                         char timeStr[16];
                         strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
                         updateFooterUI(timeStr, data.cityName.c_str());
+
+                        // Log weather data to SD card
+                        WeatherLogger::logWeather(timeinfo, data);
                     }
 #else
                     updateFooterUI("12:00", data.cityName.c_str());
