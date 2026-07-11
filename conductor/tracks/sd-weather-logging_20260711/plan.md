@@ -6,6 +6,6 @@
 - [x] Task: Implement mock-based unit tests for CSV parsing and formatting (c978320)
 
 ## Phase 2: Weather Logging
-- [ ] Task: Write appender function to write CSV records to `weather_history.csv`
+- [x] Task: Write appender function to write CSV records to `weather_history.csv` (c978320)
 - [ ] Task: Hook the appender execution to trigger on successful weather client fetches in `main.cpp`
 - [ ] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md)
