@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include <cstring>
+#include "Arduino.h"
 
 class Preferences {
 private:
@@ -68,6 +70,24 @@ public:
         int val;
         ss >> val;
         return val;
+    }
+
+    size_t putString(const char* key, const char* value) {
+        if (_readOnly || !_opened) return 0;
+        getStorage()[key] = value;
+        return strlen(value);
+    }
+
+    size_t putString(const char* key, String value) {
+        return putString(key, value.c_str());
+    }
+
+    String getString(const char* key, String defaultValue = "") {
+        if (!_opened) return defaultValue;
+        auto& storage = getStorage();
+        auto it = storage.find(key);
+        if (it == storage.end()) return defaultValue;
+        return String(it->second.c_str());
     }
 };
 

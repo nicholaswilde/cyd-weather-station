@@ -8,6 +8,8 @@ private:
     bool _autoBrightness;
     int _timezoneOffset;
     int _themeFlavor;
+    String _wifiSSID;
+    String _wifiPassword;
 
 public:
     SettingsManager();
@@ -27,6 +29,12 @@ public:
 
     int getThemeFlavor() const;
     void setThemeFlavor(int flavor);
+
+    String getWifiSSID() const;
+    void setWifiSSID(const String& ssid);
+
+    String getWifiPassword() const;
+    void setWifiPassword(const String& password);
 };
 
 #endif // SETTINGS_MANAGER_H

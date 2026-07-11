@@ -8,6 +8,8 @@ SettingsManager::SettingsManager() {
     _autoBrightness = USE_LDR_AUTO_BACKLIGHT;
     _timezoneOffset = GMT_OFFSET_SEC / 3600;
     _themeFlavor = CATPPUCCIN_MOCHA;
+    _wifiSSID = WIFI_SSID;
+    _wifiPassword = WIFI_PASSWORD;
 }
 
 void SettingsManager::begin() {
@@ -19,6 +21,8 @@ void SettingsManager::begin() {
     _autoBrightness = prefs.getBool("auto_bright", USE_LDR_AUTO_BACKLIGHT);
     _timezoneOffset = prefs.getInt("tz_offset", GMT_OFFSET_SEC / 3600);
     _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
+    _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
+    _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     
     prefs.end();
 }
@@ -98,6 +102,34 @@ void SettingsManager::setThemeFlavor(int flavor) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putInt("theme", _themeFlavor);
+        prefs.end();
+    }
+}
+
+String SettingsManager::getWifiSSID() const {
+    return _wifiSSID;
+}
+
+void SettingsManager::setWifiSSID(const String& ssid) {
+    if (_wifiSSID != ssid) {
+        _wifiSSID = ssid;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("wifi_ssid", _wifiSSID);
+        prefs.end();
+    }
+}
+
+String SettingsManager::getWifiPassword() const {
+    return _wifiPassword;
+}
+
+void SettingsManager::setWifiPassword(const String& password) {
+    if (_wifiPassword != password) {
+        _wifiPassword = password;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("wifi_pass", _wifiPassword);
         prefs.end();
     }
 }

@@ -44,9 +44,30 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL(5, settings_new.getTimezoneOffset());
 }
 
+void test_settings_wifi_credentials(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    // Verify default values fallback to secrets.h macros
+    TEST_ASSERT_EQUAL_STRING(WIFI_SSID, settings.getWifiSSID().c_str());
+    TEST_ASSERT_EQUAL_STRING(WIFI_PASSWORD, settings.getWifiPassword().c_str());
+
+    // Modify WiFi credentials
+    settings.setWifiSSID("New_SSID");
+    settings.setWifiPassword("New_Password");
+
+    // Re-instantiate to simulate reboot
+    SettingsManager settings_new;
+    settings_new.begin();
+
+    TEST_ASSERT_EQUAL_STRING("New_SSID", settings_new.getWifiSSID().c_str());
+    TEST_ASSERT_EQUAL_STRING("New_Password", settings_new.getWifiPassword().c_str());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_settings_default_values);
     RUN_TEST(test_settings_save_and_load);
+    RUN_TEST(test_settings_wifi_credentials);
     return UNITY_END();
 }
