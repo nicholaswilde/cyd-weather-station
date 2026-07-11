@@ -1,0 +1,8 @@
+{
+  "track_id": "wifi-ap-captive-portal_20260710",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-11T06:39:00Z",
+  "updated_at": "2026-07-11T06:39:00Z",
+  "description": "Implement wifi manager that launches if the cyd can't connect to wifi so that the cyd acts as an AP where a user can connect to it and set the SSID and password. The SSID of the cyd should be the hostname and dash and a shortened version of the mac address (e.g. <hostname>-<mac>)"
+}
