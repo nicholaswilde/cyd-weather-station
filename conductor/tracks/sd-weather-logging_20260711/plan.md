@@ -7,5 +7,5 @@
 
 ## Phase 2: Weather Logging
 - [x] Task: Write appender function to write CSV records to `weather_history.csv` (c978320)
-- [ ] Task: Hook the appender execution to trigger on successful weather client fetches in `main.cpp`
+- [x] Task: Hook the appender execution to trigger on successful weather client fetches in `main.cpp` (1e253db)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md)
