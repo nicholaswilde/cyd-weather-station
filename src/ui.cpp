@@ -147,21 +147,31 @@ void initUI() {
     lv_obj_set_style_bg_color(tab_btns, lv_color_hex(COLOR_BASE), LV_PART_ITEMS | LV_STATE_CHECKED);
     lv_obj_set_style_text_color(tab_btns, lv_color_hex(COLOR_PEACH), LV_PART_ITEMS | LV_STATE_CHECKED);
 
+    // Tune swipe animation: speed it up and disable momentum throw for crisp
+    // tab transitions on the embedded display.
+    lv_obj_t * tab_content = lv_tabview_get_content(tabview);
+    lv_obj_set_style_anim_time(tab_content, DISPLAY_SWIPE_ANIM_MS, 0); // set in config/config.h
+    lv_obj_clear_flag(tab_content, LV_OBJ_FLAG_SCROLL_MOMENTUM);
+
     // Create the tabs
     lv_obj_t * tab_curr = lv_tabview_add_tab(tabview, "Current");
     lv_obj_t * tab_fore = lv_tabview_add_tab(tabview, "Forecast");
     lv_obj_t * tab_settings = lv_tabview_add_tab(tabview, "Settings");
 
-    // Clear scroll on tabs and set base color & padding
-    lv_obj_clear_flag(tab_curr, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_clear_flag(tab_fore, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_clear_flag(tab_settings, LV_OBJ_FLAG_SCROLLABLE);
+    // Set base color & padding on tabs
+    // NOTE: Do NOT clear LV_OBJ_FLAG_SCROLLABLE on the tab panels —
+    // the tabview's internal content object uses horizontal scrolling to
+    // animate between tabs when the user swipes left/right.
     lv_obj_set_style_bg_color(tab_curr, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
     lv_obj_set_style_bg_color(tab_fore, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
     lv_obj_set_style_bg_color(tab_settings, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_curr, 5, LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_fore, 5, LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_settings, 5, LV_PART_MAIN);
+    // Hide scrollbars so they don't appear visually
+    lv_obj_set_scrollbar_mode(tab_curr, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scrollbar_mode(tab_fore, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scrollbar_mode(tab_settings, LV_SCROLLBAR_MODE_OFF);
 
     // Weather Placeholders inside tab_curr
     icon_lbl = lv_label_create(tab_curr);

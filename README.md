@@ -9,6 +9,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Zip Code Geocoding**: Enter a US Zip Code (e.g. `90210`); coordinates are resolved on boot via the Open-Meteo Geocoding API.
   - **Coordinates**: Enter latitude and longitude directly as a fallback.
 - **3-Day Forecast View**: Swipe to a dedicated Forecast tab showing daily high/low temperature and weather condition icons.
+- **Swipe Navigation**: Swipe left/right anywhere on the screen to switch between the Current, Forecast, and Settings tabs.
 - **Dynamic Weather Icons**: A large (48px) custom weather glyph maps WMO weather codes to condition icons (clear, cloudy, rainy, snowy, stormy), dynamically colored using the active Catppuccin palette (sunny yellow, rainy blue, cloudy lavender, stormy mauve, etc.).
 - **Interactive Settings Tab**: Touch-configurable settings persisted to flash across reboots:
   - **Temperature Unit**: Toggle between Celsius (°C) and Fahrenheit (°F).
@@ -62,6 +63,23 @@ Static settings (location, update interval) live in [`config/config.h`](config/c
 **Weather update interval:**
 ```cpp
 #define WEATHER_UPDATE_INTERVAL_MINS 15
+```
+
+**Display performance** — tune animation smoothness vs. touch responsiveness:
+```cpp
+// Height of the LVGL draw buffer (pixel rows).
+// Larger = smoother animation; too large = unresponsive touch.
+// Sweet spot on CYD hardware: 25–35.
+#define DISPLAY_DRAW_BUF_ROWS 30
+
+// How often LVGL redraws changed areas (ms). Range: 10–30.
+#define DISPLAY_REFR_PERIOD_MS 20
+
+// How often LVGL polls the touchscreen (ms). Keep <= DISPLAY_REFR_PERIOD_MS.
+#define DISPLAY_INDEV_READ_PERIOD_MS 10
+
+// Duration of the tab-switch swipe animation (ms). LVGL default: 300.
+#define DISPLAY_SWIPE_ANIM_MS 150
 ```
 
 ### 3. Build & Upload

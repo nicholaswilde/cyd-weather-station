@@ -51,4 +51,27 @@ extern int getCurrentThemeFlavor();
 // RGB LED Status Settings
 #define USE_RGB_LED_STATUS true
 
+// Display Performance Settings
+// DISPLAY_DRAW_BUF_ROWS: Height of the LVGL draw buffer in pixel rows.
+//   Larger = fewer SPI flush calls per frame (smoother animation) but longer
+//   CPU blocks per flush (less touch responsiveness). Tune for your hardware:
+//     10 rows → ~24 flushes/frame, ~0.9 ms blocked each (choppy)
+//     20 rows → ~12 flushes/frame, ~1.85 ms blocked each
+//     30 rows → ~8 flushes/frame,  ~2.8 ms blocked each (default, sweet spot)
+//     40 rows → ~6 flushes/frame,  ~7 ms blocked each (unresponsive)
+#define DISPLAY_DRAW_BUF_ROWS 30
+
+// DISPLAY_REFR_PERIOD_MS: How often LVGL redraws changed areas (milliseconds).
+//   Lower = higher frame rate ceiling but more CPU time spent flushing.
+//   Recommended range: 10–30 ms. Must be >= loop tick interval (5 ms).
+#define DISPLAY_REFR_PERIOD_MS 20
+
+// DISPLAY_INDEV_READ_PERIOD_MS: How often LVGL polls the touchscreen (milliseconds).
+//   Lower = more responsive touch input. Keep at or below DISPLAY_REFR_PERIOD_MS.
+#define DISPLAY_INDEV_READ_PERIOD_MS 10
+
+// DISPLAY_SWIPE_ANIM_MS: Duration of the tab-switch swipe animation (milliseconds).
+//   Lower = snappier transitions. LVGL default is 300 ms.
+#define DISPLAY_SWIPE_ANIM_MS 150
+
 #endif // CONFIG_H

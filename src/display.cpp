@@ -1,14 +1,15 @@
 #include "display.h"
 #include <Arduino.h>
 #include <SPI.h>
+#include "config/config.h"
 
 TFT_eSPI tft = TFT_eSPI();
 SPIClass touchscreenSPI(HSPI); // HSPI is used for the touch SPI bus on CYD
 XPT2046_Touchscreen ts(XPT2046_CS, XPT2046_IRQ);
 
-// LVGL buffers
+// LVGL buffers — size controlled by DISPLAY_DRAW_BUF_ROWS in config/config.h
 static lv_disp_draw_buf_t draw_buf;
-static lv_color_t buf[320 * 10];
+static lv_color_t buf[320 * DISPLAY_DRAW_BUF_ROWS];
 
 // Flush callback for LVGL display
 static void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p) {
