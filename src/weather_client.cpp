@@ -13,10 +13,10 @@ extern SettingsManager settings;
 #endif
 
 WeatherClient::WeatherClient(const char* latitude, const char* longitude)
-    : _latitude(latitude), _longitude(longitude), _zipCode(nullptr), _useZip(false), _zipResolved(false) {}
+    : _latitude(latitude), _longitude(longitude), _zipCode(nullptr), _useZip(false), _zipResolved(false), _cityName("") {}
 
 WeatherClient::WeatherClient(const char* zipCode)
-    : _latitude(nullptr), _longitude(nullptr), _zipCode(zipCode), _useZip(true), _zipResolved(false) {}
+    : _latitude(nullptr), _longitude(nullptr), _zipCode(zipCode), _useZip(true), _zipResolved(false), _cityName("") {}
 
 bool WeatherClient::geocodeZip() {
 #ifdef NATIVE_TEST
@@ -54,6 +54,7 @@ bool WeatherClient::geocodeZip() {
 
                 _resolvedLat = String(lat, 5);
                 _resolvedLng = String(lng, 5);
+                _cityName    = String(name);
                 _zipResolved = true;
 
                 Serial.printf("[Weather] Zip %s resolved to %s (%s, %s)\n",
@@ -73,8 +74,66 @@ bool WeatherClient::geocodeZip() {
 #endif
 }
 
+bool WeatherClient::reverseGeocode() {
+#ifdef NATIVE_TEST
+    _cityName = "Mock City";
+    return true;
+#else
+    if (WiFi.status() != WL_CONNECTED) return false;
+
+    WiFiClient client;
+    HTTPClient http;
+
+    // Nominatim reverse geocoding — free, no API key required.
+    // Policy: include a descriptive User-Agent (required by Nominatim ToS).
+    String url = "http://nominatim.openstreetmap.org/reverse?format=json&lat=";
+    url += _latitude;
+    url += "&lon=";
+    url += _longitude;
+    url += "&zoom=10&addressdetails=1";
+
+    Serial.print("[Weather] Reverse geocoding coordinates: ");
+    Serial.print(_latitude); Serial.print(", "); Serial.println(_longitude);
+
+    if (http.begin(client, url)) {
+        http.addHeader("User-Agent", "CYD-Weather-Station/1.0");
+        int httpCode = http.GET();
+        if (httpCode == HTTP_CODE_OK) {
+            String payload = http.getString();
+            StaticJsonDocument<2048> doc;
+            DeserializationError error = deserializeJson(doc, payload);
+            if (!error) {
+                // Prefer city > town > village > county in that order
+                const char* city = nullptr;
+                if (!city && doc["address"]["city"].is<const char*>())
+                    city = doc["address"]["city"];
+                if (!city && doc["address"]["town"].is<const char*>())
+                    city = doc["address"]["town"];
+                if (!city && doc["address"]["village"].is<const char*>())
+                    city = doc["address"]["village"];
+                if (!city && doc["address"]["county"].is<const char*>())
+                    city = doc["address"]["county"];
+                if (city) {
+                    _cityName = String(city);
+                    Serial.printf("[Weather] Reverse geocode: %s\n", _cityName.c_str());
+                    http.end();
+                    return true;
+                }
+            } else {
+                Serial.print("[Weather] Reverse geocode JSON error: ");
+                Serial.println(error.c_str());
+            }
+        } else {
+            Serial.printf("[Weather] Reverse geocode HTTP failed: %d\n", httpCode);
+        }
+        http.end();
+    }
+    return false;
+#endif
+}
+
 WeatherData WeatherClient::fetchWeather() {
-    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, {} };
+    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, "", {} };
 
     // Resolve zip code if using zip code and not yet resolved
     if (_useZip && !_zipResolved) {
@@ -82,6 +141,11 @@ WeatherData WeatherClient::fetchWeather() {
             Serial.println("[Weather] Failed to resolve zip code. Cannot fetch weather.");
             return data;
         }
+    }
+
+    // Resolve city name from coordinates (once) if not using zip
+    if (!_useZip && _cityName.isEmpty()) {
+        reverseGeocode();
     }
 
     const char* lat = _useZip ? _resolvedLat.c_str() : _latitude;
@@ -103,7 +167,9 @@ WeatherData WeatherClient::fetchWeather() {
             "\"temperature_2m_min\":[15.0,14.8,15.2]"
         "}"
     "}";
+    _cityName = "Mock City";
     parseWeatherJson(mockJson, data);
+    data.cityName = _cityName;
     return data;
 #else
     if (WiFi.status() != WL_CONNECTED) {
@@ -134,8 +200,9 @@ WeatherData WeatherClient::fetchWeather() {
         if (httpCode == HTTP_CODE_OK) {
             String payload = http.getString();
             if (parseWeatherJson(payload.c_str(), data)) {
-                Serial.printf("[Weather] Success! Temp: %.1f, Hum: %d %%, Status: %s, Wind: %.1f\n",
-                    data.temperature, data.humidity, data.status.c_str(), data.windSpeed);
+                data.cityName = _cityName;
+                Serial.printf("[Weather] Success! Temp: %.1f, Hum: %d %%, Status: %s, Wind: %.1f, City: %s\n",
+                    data.temperature, data.humidity, data.status.c_str(), data.windSpeed, data.cityName.c_str());
             }
         } else {
             Serial.printf("[Weather] HTTP GET failed, error code: %d\n", httpCode);

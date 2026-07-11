@@ -14,5 +14,6 @@ void updateWifiStatus(bool connected);
 void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed);
 void updateTimeUI(const char* time_str);
 void updateForecastUI(const WeatherData& data);
+void updateFooterUI(const char* update_time, const char* city);
 
 #endif // UI_H

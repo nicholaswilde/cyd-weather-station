@@ -23,6 +23,7 @@ static lv_obj_t *time_label;
 static lv_obj_t *icon_lbl;
 static lv_obj_t *wind_label;
 static lv_obj_t *tz_val_label;
+static lv_obj_t *footer_label;
 
 // Forecast widgets
 static lv_obj_t *fore_day_label[3];
@@ -232,6 +233,15 @@ void initUI() {
     lv_label_set_text(status_lbl, "Waiting for API update...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
     lv_obj_set_width(status_lbl, 190);
+
+    // Footer bar: "Last Update: HH:MM | City Name"
+    footer_label = lv_label_create(tab_curr);
+    lv_label_set_text(footer_label, "Last Update: -- | --");
+    lv_obj_set_style_text_color(footer_label, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_text_font(footer_label, &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_label_set_long_mode(footer_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(footer_label, 290);
+    lv_obj_align(footer_label, LV_ALIGN_BOTTOM_MID, 0, -2);
 
     // 3-day Forecast Card Layout inside tab_fore
     for (int i = 0; i < 3; i++) {
@@ -604,4 +614,14 @@ void updateForecastUI(const WeatherData& data) {
         // Set Status description
         lv_label_set_text(fore_desc_label[i], data.forecast[i].status.c_str());
     }
+}
+
+void updateFooterUI(const char* update_time, const char* city) {
+    char buf[64];
+    if (city && city[0] != '\0') {
+        snprintf(buf, sizeof(buf), "Last Update: %s | %s", update_time, city);
+    } else {
+        snprintf(buf, sizeof(buf), "Last Update: %s", update_time);
+    }
+    lv_label_set_text(footer_label, buf);
 }

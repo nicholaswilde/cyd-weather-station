@@ -18,6 +18,7 @@ struct WeatherData {
     bool valid;
     int weatherCode;
     float windSpeed;
+    String cityName;
     ForecastDay forecast[3];
 };
 
@@ -26,11 +27,13 @@ public:
     WeatherClient(const char* latitude, const char* longitude);
     WeatherClient(const char* zipCode);
     WeatherData fetchWeather();
+    const String& getCityName() const { return _cityName; }
     static String getWeatherDesc(int code);
     static bool parseWeatherJson(const char* json, WeatherData& data);
 
 private:
     bool geocodeZip();
+    bool reverseGeocode();
 
     const char* _latitude;
     const char* _longitude;
@@ -39,6 +42,7 @@ private:
     bool _zipResolved;
     String _resolvedLat;
     String _resolvedLng;
+    String _cityName;
 };
 
 #endif // WEATHER_CLIENT_H

@@ -189,6 +189,18 @@ void loop() {
                     updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed);
                     updateForecastUI(data);
 
+#ifndef NATIVE_TEST
+                    // Update footer: "Last Update: HH:MM | City"
+                    struct tm timeinfo;
+                    if (getLocalTime(&timeinfo)) {
+                        char timeStr[16];
+                        strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                        updateFooterUI(timeStr, data.cityName.c_str());
+                    }
+#else
+                    updateFooterUI("12:00", data.cityName.c_str());
+#endif
+
 #if USE_RGB_LED_STATUS
                     // Trigger brief weather status feedback pulse
                     switch (data.weatherCode) {
