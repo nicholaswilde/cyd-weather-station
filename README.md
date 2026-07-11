@@ -1,4 +1,4 @@
-# :partly_sunny: CYD Weather Station
+# :partly_sunny: CYD Weather Station :pager:
 
 A beautiful, configurable real-time weather station and desk clock built for the **ESP32 Cheap Yellow Device (CYD)** (board model ESP32-2432S028R) utilizing the **LVGL v8** graphics library, **Open-Meteo / OpenWeatherMap APIs**, and the **Catppuccin Color Theme**.
 
