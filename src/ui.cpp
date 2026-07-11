@@ -180,12 +180,12 @@ void initUI() {
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
     // lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 25, 0);
-    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 12, 0);
+    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 12, -10);
  
     // Vertical container for details on the right side
     lv_obj_t * details_cnt = lv_obj_create(tab_curr);
     lv_obj_set_size(details_cnt, 200, 150);
-    lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, -10, 0);
+    lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, -10, -10);
     lv_obj_set_flex_flow(details_cnt, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(details_cnt, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 
@@ -240,7 +240,8 @@ void initUI() {
     lv_obj_set_style_text_color(footer_label, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
     lv_obj_set_style_text_font(footer_label, &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_long_mode(footer_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_width(footer_label, 290);
+    lv_obj_set_width(footer_label, 300);
+    lv_obj_set_style_text_align(footer_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_align(footer_label, LV_ALIGN_BOTTOM_MID, 0, -2);
 
     // 3-day Forecast Card Layout inside tab_fore
