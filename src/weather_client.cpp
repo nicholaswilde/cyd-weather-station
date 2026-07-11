@@ -137,7 +137,7 @@ bool WeatherClient::reverseGeocode() {
 }
 
 WeatherData WeatherClient::fetchWeather() {
-    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, "", {} };
+    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {} };
 
     bool useOWM = (String(OPENWEATHERMAP_API_KEY).length() > 0);
 
@@ -201,7 +201,7 @@ WeatherData WeatherClient::fetchWeather() {
         url += lat;
         url += "&longitude=";
         url += lng;
-        url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
+        url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m";
         url += "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3";
         url += "&timezone=auto"; // Return dates in local timezone, not UTC
         if (settings.getUnitSystem() == UNIT_IMPERIAL) {
@@ -257,6 +257,7 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
         int code = doc["current"]["weather_code"].is<int>() ? doc["current"]["weather_code"].as<int>() : -1;
         data.status = getWeatherDesc(code);
         data.windSpeed = doc["current"]["wind_speed_10m"].as<float>();
+        data.windDirection = doc["current"]["wind_direction_10m"].is<int>() ? doc["current"]["wind_direction_10m"].as<int>() : 0;
         data.valid = true;
         data.weatherCode = code;
     }
@@ -401,6 +402,7 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
     data.temperature = current["main"]["temp"].as<float>();
     data.humidity = current["main"]["humidity"].as<int>();
     data.windSpeed = current["wind"]["speed"].as<float>();
+    data.windDirection = current["wind"]["deg"].is<int>() ? current["wind"]["deg"].as<int>() : 0;
     // Convert metric wind speed from m/s to km/h (if metric)
     if (settings.getUnitSystem() == UNIT_METRIC) {
         data.windSpeed *= 3.6f;

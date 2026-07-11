@@ -194,7 +194,7 @@ void loop() {
                 Serial.println("[System] Fetching weather update...");
                 WeatherData data = weather.fetchWeather();
                 if (data.valid) {
-                    updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed);
+                    updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed, data.windDirection);
                     updateForecastUI(data);
 
 #ifndef NATIVE_TEST

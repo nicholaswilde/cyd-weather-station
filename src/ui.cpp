@@ -636,7 +636,15 @@ static uint32_t getIconColor(int code) {
     }
 }
 
-void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed) {
+static const char* getCardinalDirection(int degrees) {
+    degrees = (degrees % 360 + 360) % 360;
+    static const char* directions[] = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                                       "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
+    int index = (int)((degrees + 11.25) / 22.5) % 16;
+    return directions[index];
+}
+
+void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed, int windDirection) {
     char temp_str[32];
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
         snprintf(temp_str, sizeof(temp_str), "%.1f °F", temperature);
@@ -649,11 +657,12 @@ void updateWeatherUI(float temperature, int humidity, const char* status, int we
     snprintf(hum_str, sizeof(hum_str), "%d%%", humidity);
     lv_label_set_text(hum_label, hum_str);
 
-    char wind_str[32];
+    char wind_str[48];
+    const char* cardinal = getCardinalDirection(windDirection);
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-        snprintf(wind_str, sizeof(wind_str), "%.1f mph", windSpeed);
+        snprintf(wind_str, sizeof(wind_str), "%.1f mph %s", windSpeed, cardinal);
     } else {
-        snprintf(wind_str, sizeof(wind_str), "%.1f km/h", windSpeed);
+        snprintf(wind_str, sizeof(wind_str), "%.1f km/h %s", windSpeed, cardinal);
     }
     lv_label_set_text(wind_label, wind_str);
 

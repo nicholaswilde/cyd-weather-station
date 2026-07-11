@@ -18,6 +18,7 @@ struct WeatherData {
     bool valid;
     int weatherCode;
     float windSpeed;
+    int windDirection;
     String cityName;
     ForecastDay forecast[3];
 };

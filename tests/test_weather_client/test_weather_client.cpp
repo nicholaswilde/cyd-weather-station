@@ -67,7 +67,7 @@ void test_weather_client_zip_code_initialization(void) {
 }
 
 void test_weather_client_parse_weather_json_custom(void) {
-    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, {} };
+    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {} };
     const char* customJson = "{"
         "\"current\":{"
             "\"temperature_2m\":15.5,"
