@@ -5,6 +5,7 @@
 #include "config/config.h"
 
 static bool sdMounted = false;
+static bool sdCardDetected = false;
 
 bool SdCardManager::begin() {
     if (sdMounted) {
@@ -22,8 +23,10 @@ bool SdCardManager::begin() {
 
     if (sdMounted) {
         Serial.println("SD card initialized successfully.");
+        sdCardDetected = true;
     } else {
         Serial.println("Failed to initialize SD card.");
+        sdCardDetected = false;
     }
     return sdMounted;
 }
@@ -38,4 +41,8 @@ void SdCardManager::end() {
         sdMounted = false;
         Serial.println("SD card unmounted.");
     }
+}
+
+bool SdCardManager::isCardPresent() {
+    return sdCardDetected;
 }

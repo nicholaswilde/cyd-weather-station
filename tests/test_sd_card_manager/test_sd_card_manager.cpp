@@ -18,6 +18,7 @@ void test_sd_card_manager_mount_success(void) {
     mock_sd_card_present = true;
     TEST_ASSERT_TRUE(SdCardManager::begin());
     TEST_ASSERT_TRUE(SdCardManager::isMounted());
+    TEST_ASSERT_TRUE(SdCardManager::isCardPresent());
 }
 
 void test_sd_card_manager_mount_no_card(void) {
@@ -25,16 +26,19 @@ void test_sd_card_manager_mount_no_card(void) {
     mock_sd_card_present = false;
     TEST_ASSERT_FALSE(SdCardManager::begin());
     TEST_ASSERT_FALSE(SdCardManager::isMounted());
+    TEST_ASSERT_FALSE(SdCardManager::isCardPresent());
 }
 
 void test_sd_card_manager_reinitialization(void) {
     // Test that if we fail to mount first (no card), then insert card, it mounts
     mock_sd_card_present = false;
     TEST_ASSERT_FALSE(SdCardManager::begin());
+    TEST_ASSERT_FALSE(SdCardManager::isCardPresent());
     
     mock_sd_card_present = true;
     TEST_ASSERT_TRUE(SdCardManager::begin());
     TEST_ASSERT_TRUE(SdCardManager::isMounted());
+    TEST_ASSERT_TRUE(SdCardManager::isCardPresent());
 }
 
 int main(int argc, char **argv) {

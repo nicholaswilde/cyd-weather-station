@@ -65,9 +65,10 @@ void setup() {
     led.setEnabled(true);
 #endif
 
-    // Initialize SD card if logging is enabled
-    if (settings.getSdLoggingEnabled()) {
-        SdCardManager::begin();
+    // Check if SD card is present by attempting a begin/mount
+    bool sdPresent = SdCardManager::begin();
+    if (sdPresent && !settings.getSdLoggingEnabled()) {
+        SdCardManager::end();
     }
 }
 

@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "config/config.h"
 #include "settings_manager.h"
+#include "sd_card_manager.h"
 
 extern "C" {
 LV_FONT_DECLARE(weather_icons_48);
@@ -489,10 +490,15 @@ void initUI() {
     lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
-    if (settings.getSdLoggingEnabled()) {
-        lv_obj_add_state(sd_sw, LV_STATE_CHECKED);
+    if (SdCardManager::isCardPresent()) {
+        if (settings.getSdLoggingEnabled()) {
+            lv_obj_add_state(sd_sw, LV_STATE_CHECKED);
+        }
+        lv_obj_add_event_cb(sd_sw, sd_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    } else {
+        lv_obj_add_state(sd_sw, LV_STATE_DISABLED);
+        settings.setSdLoggingEnabled(false);
     }
-    lv_obj_add_event_cb(sd_sw, sd_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // --- Right column items ---
 
