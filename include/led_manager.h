@@ -11,7 +11,8 @@ public:
         STATE_PULSE_YELLOW,
         STATE_PULSE_BLUE,
         STATE_PULSE_WHITE,
-        STATE_ALERT_RED
+        STATE_ALERT_RED,
+        STATE_AP_MODE
     };
 
     LedManager(int redPin, int greenPin, int bluePin);

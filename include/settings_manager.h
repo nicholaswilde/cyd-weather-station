@@ -1,6 +1,12 @@
 #ifndef SETTINGS_MANAGER_H
 #define SETTINGS_MANAGER_H
 
+#ifndef NATIVE_TEST
+#include <Arduino.h>
+#else
+#include "Arduino.h"
+#endif
+
 class SettingsManager {
 private:
     int _unitSystem;

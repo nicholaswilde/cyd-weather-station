@@ -55,6 +55,7 @@ void setup() {
     initUI();
 
     // Initialize WiFi Connection
+    wifi.setCredentials(settings.getWifiSSID(), settings.getWifiPassword());
     wifi.begin();
 
 #if USE_RGB_LED_STATUS
@@ -156,6 +157,8 @@ void loop() {
                 led.setState(LedManager::STATE_CONNECTED);
             } else if (currentWifiState == WIFI_STATE_CONNECTING) {
                 led.setState(LedManager::STATE_CONNECTING);
+            } else if (currentWifiState == WIFI_STATE_AP_MODE) {
+                led.setState(LedManager::STATE_AP_MODE);
             } else {
                 led.setState(LedManager::STATE_DISCONNECTED);
             }

@@ -113,7 +113,7 @@ void WifiManager::startAPMode() {
     WiFi.softAP(apSSID.c_str());
 
     _dnsServer = new DNSServer();
-    _dnsServer->start(53, "*", IPAddress(192.168.4.1));
+    _dnsServer->start(53, "*", IPAddress(192, 168, 4, 1));
 
     _webServer = new WebServer(80);
     _webServer->on("/", [this]() { handleRoot(); });

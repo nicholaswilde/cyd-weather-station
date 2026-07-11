@@ -153,6 +153,24 @@ void test_led_manager_disabled_mode(void) {
     TEST_ASSERT_EQUAL(HIGH, mock_pin_states[17]);
 }
 
+void test_led_manager_ap_mode(void) {
+    LedManager led(4, 16, 17);
+    led.begin();
+    led.setState(LedManager::STATE_AP_MODE);
+
+    // Purple blink at t=0 (Red + Blue ON -> LOW)
+    led.update(0);
+    TEST_ASSERT_EQUAL(LOW, mock_pin_states[4]);   // Red ON
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[16]); // Green OFF
+    TEST_ASSERT_EQUAL(LOW, mock_pin_states[17]);  // Blue ON
+
+    // Toggles at t=1000 to OFF (pins HIGH)
+    mock_millis_val = 1000;
+    led.update(1000);
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[4]);
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[17]);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_led_manager_initialization);
@@ -161,5 +179,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_led_manager_wifi_disconnected_blink);
     RUN_TEST(test_led_manager_weather_pulse_yellow);
     RUN_TEST(test_led_manager_disabled_mode);
+    RUN_TEST(test_led_manager_ap_mode);
     return UNITY_END();
 }

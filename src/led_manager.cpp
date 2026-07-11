@@ -116,6 +116,14 @@ void LedManager::update(unsigned long currentMillis) {
             }
             writePins(_blinkState, false, false);
             break;
+
+        case STATE_AP_MODE:
+            if (currentMillis - _lastToggleTime >= 1000) {
+                _blinkState = !_blinkState;
+                _lastToggleTime = currentMillis;
+            }
+            writePins(_blinkState, false, _blinkState); // purple slow blink
+            break;
     }
 }
 
