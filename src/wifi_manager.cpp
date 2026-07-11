@@ -3,6 +3,11 @@
 #include "settings_manager.h"
 #include "config/config.h"
 
+#ifndef NATIVE_TEST
+#include "screenshot_manager.h"
+#include <lvgl.h>
+#endif
+
 extern SettingsManager settings;
 
 WifiManager::WifiManager(const char* ssid, const char* password)
@@ -36,6 +41,11 @@ void WifiManager::update() {
                 _state = WIFI_STATE_CONNECTED;
                 Serial.print("[WiFi] Connected! IP address: ");
                 Serial.println(WiFi.localIP());
+#ifndef NATIVE_TEST
+                if (settings.getScreenshotServerEnabled()) {
+                    startScreenshotServer();
+                }
+#endif
             } else if (status == WL_CONNECT_FAILED || status == WL_NO_SSID_AVAIL || (millis() - _connectionStartTime > _connectionTimeout)) {
                 Serial.println("[WiFi] Connection failed or timed out. Transitioning to AP Mode...");
                 startAPMode();
@@ -47,6 +57,15 @@ void WifiManager::update() {
                 _state = WIFI_STATE_DISCONNECTED;
                 _lastReconnectAttempt = millis();
                 Serial.println("[WiFi] Connection lost.");
+#ifndef NATIVE_TEST
+                stopScreenshotServer();
+#endif
+            } else {
+#ifndef NATIVE_TEST
+                if (_webServer) {
+                    _webServer->handleClient();
+                }
+#endif
             }
             break;
 
@@ -260,3 +279,86 @@ void WifiManager::handleNotFound() {
     _webServer->send(302, "text/plain", "");
 #endif
 }
+
+#ifndef NATIVE_TEST
+void WifiManager::startScreenshotServer() {
+    if (_webServer) {
+        stopScreenshotServer();
+    }
+    _webServer = new WebServer(80);
+    _webServer->on("/screenshot", [this]() { handleScreenshot(); });
+    _webServer->begin();
+    Serial.println("[WiFi] Screenshot server started on port 80.");
+}
+
+void WifiManager::stopScreenshotServer() {
+    if (_webServer) {
+        _webServer->stop();
+        delete _webServer;
+        _webServer = nullptr;
+        Serial.println("[WiFi] Screenshot server stopped.");
+    }
+}
+
+void WifiManager::handleScreenshot() {
+    lv_obj_t* screen = lv_scr_act();
+    if (!screen) {
+        _webServer->send(500, "text/plain", "Error: No active screen");
+        return;
+    }
+    
+    uint32_t width = lv_obj_get_width(screen);
+    uint32_t height = lv_obj_get_height(screen);
+    uint32_t dataSize = width * height * sizeof(lv_color_t);
+    
+    uint8_t* imgData = (uint8_t*)malloc(dataSize);
+    if (!imgData) {
+        _webServer->send(500, "text/plain", "Error: Out of memory for snapshot");
+        return;
+    }
+    
+    lv_img_dsc_t snapshot;
+    snapshot.data = imgData;
+    
+    lv_res_t res = lv_snapshot_take_to_buf(screen, LV_IMG_CF_TRUE_COLOR, &snapshot, imgData, dataSize);
+    if (res != LV_RES_OK) {
+        free(imgData);
+        _webServer->send(500, "text/plain", "Error: LVGL snapshot failed");
+        return;
+    }
+    
+    uint32_t imageSize = width * height * 3;
+    uint32_t totalSize = 54 + imageSize;
+    
+    _webServer->setContentLength(totalSize);
+    _webServer->send(200, "image/bmp", "");
+    
+    WiFiClient client = _webServer->client();
+    
+    BmpHeader header = ScreenshotManager::createHeader(width, height);
+    client.write(header.bytes, sizeof(header.bytes));
+    
+    lv_color_t* pixels = (lv_color_t*)imgData;
+    uint8_t* rowBuffer = (uint8_t*)malloc(width * 3);
+    if (!rowBuffer) {
+        free(imgData);
+        return;
+    }
+    
+    for (int y = (int)height - 1; y >= 0; y--) {
+        for (uint32_t x = 0; x < width; x++) {
+            lv_color_t pixel = pixels[y * width + x];
+            uint8_t r, g, b;
+            ScreenshotManager::convertRGB565ToBGR24(pixel.full, r, g, b);
+            
+            rowBuffer[x * 3] = b;     // Blue
+            rowBuffer[x * 3 + 1] = g; // Green
+            rowBuffer[x * 3 + 2] = r; // Red
+        }
+        client.write(rowBuffer, width * 3);
+    }
+    
+    free(rowBuffer);
+    free(imgData);
+}
+#endif

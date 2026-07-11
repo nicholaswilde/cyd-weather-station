@@ -43,6 +43,9 @@ private:
 #ifndef NATIVE_TEST
     DNSServer* _dnsServer = nullptr;
     WebServer* _webServer = nullptr;
+    void startScreenshotServer();
+    void stopScreenshotServer();
+    void handleScreenshot();
 #endif
 };
 
