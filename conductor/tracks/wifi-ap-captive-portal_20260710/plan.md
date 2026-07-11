@@ -1,6 +1,6 @@
 # Implementation Plan: Wi-Fi Manager AP Captive Portal
 
-## Phase 1: Extend SettingsManager for Wi-Fi Persistence
+## Phase 1: Extend SettingsManager for Wi-Fi Persistence [checkpoint: 455b60c]
 - [x] Task: Add SSID and Password to SettingsManager [f45dcd2]
     - [x] Update `include/settings_manager.h` to declare getter/setter for SSID and Password [f45dcd2]
     - [x] Update `src/settings_manager.cpp` to initialize, save, and load SSID and password fields from Preferences (falling back to secrets.h if not set) [f45dcd2]
@@ -8,7 +8,7 @@
     - [x] Write unit tests in `tests/test_settings/test_settings.cpp` to verify getters, setters, and default fallbacks for SSID and password [f45dcd2]
     - [x] Run tests to verify they fail (Red Phase) [f45dcd2]
     - [x] Complete implementation to make the tests pass (Green Phase) [f45dcd2]
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Extend SettingsManager for Wi-Fi Persistence' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Extend SettingsManager for Wi-Fi Persistence' (Protocol in workflow.md) [455b60c]
 
 ## Phase 2: Implement AP Mode and Captive Portal Web Server
 - [ ] Task: Update WifiManager interface and state machine
