@@ -216,6 +216,8 @@ void initUI() {
     lv_obj_set_style_text_font(temp_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(temp_icon_lbl, "\xef\x81\x95"); // U+F055 wi-thermometer
     lv_obj_set_style_text_color(temp_icon_lbl, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+    lv_obj_set_width(temp_icon_lbl, 20);
+    lv_obj_set_style_text_align(temp_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     temp_label = lv_label_create(temp_cnt);
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
@@ -241,6 +243,8 @@ void initUI() {
     lv_obj_set_style_text_font(hum_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(hum_icon_lbl, "\xef\x81\xba"); // U+F07A wi-humidity
     lv_obj_set_style_text_color(hum_icon_lbl, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
+    lv_obj_set_width(hum_icon_lbl, 20);
+    lv_obj_set_style_text_align(hum_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     hum_label = lv_label_create(hum_cnt);
     lv_label_set_text(hum_label, "--%");
@@ -261,6 +265,8 @@ void initUI() {
     lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
     lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
+    lv_obj_set_width(wind_icon_lbl, 20);
+    lv_obj_set_style_text_align(wind_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     wind_label = lv_label_create(wind_cnt);
     lv_label_set_text(wind_label, "Wind: -- km/h");
@@ -281,6 +287,8 @@ void initUI() {
     lv_obj_set_style_text_font(status_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(status_icon_lbl, "\xef\x81\xbb"); // U+F07B wi-na (updated on fetch)
     lv_obj_set_style_text_color(status_icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_width(status_icon_lbl, 20);
+    lv_obj_set_style_text_align(status_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     status_lbl = lv_label_create(status_cnt);
     lv_label_set_text(status_lbl, "Updating...");
