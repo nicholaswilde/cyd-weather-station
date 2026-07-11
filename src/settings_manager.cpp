@@ -10,6 +10,7 @@ SettingsManager::SettingsManager() {
     _dstEnabled = (DST_OFFSET_SEC > 0);
     _themeFlavor = CATPPUCCIN_MOCHA;
     _sdLoggingEnabled = USE_SD_LOGGING;
+    _screenshotServerEnabled = true;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
 }
@@ -25,6 +26,7 @@ void SettingsManager::begin() {
     _dstEnabled = prefs.getBool("dst_enabled", DST_OFFSET_SEC > 0);
     _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
     _sdLoggingEnabled = prefs.getBool("sd_log", USE_SD_LOGGING);
+    _screenshotServerEnabled = prefs.getBool("scr_srv", true);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     
@@ -162,6 +164,20 @@ void SettingsManager::setSdLoggingEnabled(bool enabled) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putBool("sd_log", _sdLoggingEnabled);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getScreenshotServerEnabled() const {
+    return _screenshotServerEnabled;
+}
+
+void SettingsManager::setScreenshotServerEnabled(bool enabled) {
+    if (_screenshotServerEnabled != enabled) {
+        _screenshotServerEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("scr_srv", _screenshotServerEnabled);
         prefs.end();
     }
 }
