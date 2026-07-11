@@ -1,6 +1,6 @@
 # Implementation Plan - screenshot_20260711
 
-## Phase 1: Settings Preference & Screenshot Core Logic [checkpoint: ]
+## Phase 1: Settings Preference & Screenshot Core Logic [checkpoint: c05a382]
 - [x] Task: Update `SettingsManager` to support screenshot server enabled setting. (4920bf2)
     - [x] Add `_screenshotServerEnabled` member variable (default to true).
     - [x] Implement `getScreenshotServerEnabled()` and `setScreenshotServerEnabled(bool enabled)`.
@@ -10,7 +10,7 @@
     - [x] Implement `captureScreenToBMP` to allocate LVGL screenshot buffer and handle color space conversion (RGB565 to 24-bit BGR).
 - [x] Task: Write unit tests for BMP formatting. (e2971bd)
     - [x] Verify that BMP header fields (file size, offset, width, height, color depth) are constructed correctly.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Settings Preference & Screenshot Core Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Settings Preference & Screenshot Core Logic' (Protocol in workflow.md)
 
 ## Phase 2: Remote Screenshot Web Server Integration [checkpoint: ]
 - [ ] Task: Modify `WifiManager` to start WebServer in STA mode.
