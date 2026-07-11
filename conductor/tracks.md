@@ -29,10 +29,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: SD Weather History & Sensor Data Logging**
-  *Link: [./tracks/sd-weather-logging_20260711/](./tracks/sd-weather-logging_20260711/)*
-
----
-
 - [ ] **Track: SD Offline Cache Recovery**
   *Link: [./tracks/sd-offline-cache_20260711/](./tracks/sd-offline-cache_20260711/)*
