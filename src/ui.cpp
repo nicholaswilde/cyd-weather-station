@@ -545,6 +545,16 @@ void updateWifiStatus(bool connected) {
     }
 }
 
+void updateWifiAPMode(const char* apSSID) {
+    lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
+    lv_obj_set_style_text_color(wifi_label, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN); // Catppuccin Mauve for AP Mode
+
+    lv_label_set_text(status_lbl, "AP Active");
+    lv_label_set_text(temp_label, "Setup");
+    lv_label_set_text(hum_label, "192.168.4.1");
+    lv_label_set_text(wind_label, apSSID);
+}
+
 static const char* getIconGlyph(int code) {
     switch (code) {
         case 0:

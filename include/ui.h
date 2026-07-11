@@ -11,6 +11,7 @@ extern volatile bool settings_theme_changed;
 
 void initUI();
 void updateWifiStatus(bool connected);
+void updateWifiAPMode(const char* apSSID);
 void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed);
 void updateTimeUI(const char* time_str);
 void updateForecastUI(const WeatherData& data);

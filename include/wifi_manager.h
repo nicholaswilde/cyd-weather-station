@@ -24,13 +24,13 @@ public:
     String getIPAddress() const;
     int8_t getRSSI() const;
     void setCredentials(const String& ssid, const String& password);
+    String getAPSSID();
 
 private:
     void startAPMode();
     void handleRoot();
     void handleSave();
     void handleNotFound();
-    String getAPSSID();
 
     String _ssid;
     String _password;

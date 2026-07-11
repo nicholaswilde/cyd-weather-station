@@ -149,7 +149,11 @@ void loop() {
 
         // Reflect WiFi status in UI
         bool isConnected = (wifi.getState() == WIFI_STATE_CONNECTED);
-        updateWifiStatus(isConnected);
+        if (wifi.getState() == WIFI_STATE_AP_MODE) {
+            updateWifiAPMode(wifi.getAPSSID().c_str());
+        } else {
+            updateWifiStatus(isConnected);
+        }
 
 #if USE_RGB_LED_STATUS
         WifiState currentWifiState = wifi.getState();
