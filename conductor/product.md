@@ -21,6 +21,7 @@ The **ESP32 CYD LVGL Weather Station** is an interactive, touch-screen-enabled w
 7. **Dynamic Weather Status Icons:** Displays a large (48px) weather icon corresponding to the current weather condition (clear, cloudy, rainy, snowy, stormy) next to the weather reading, dynamically colored using the Catppuccin color scheme.
 8. **RGB LED Status Indicator:** Utilizes the onboard active-low RGB LED (GPIO 4/16/17) to provide secondary visual feedback about Wi-Fi connection states (slow blue blink for connecting, solid green for connected, fast red blink for disconnected, slow purple blink for AP mode) and brief weather status pulse notifications.
 9. **Interactive Settings Screen:** Adds a Settings tab to the Tabview allowing runtime configuration of temperature units (Celsius/Fahrenheit), manual screen brightness, Auto Light brightness mode, and GMT timezone offsets (-12 to +14) via touch controls, persisting settings across boots.
+10. **SD Weather History & Sensor Data Logging:** Periodically logs hourly weather and system variables (temperature, humidity, wind speed, wind direction, weather code) alongside synchronized NTP timestamps to a CSV format file (`weather_history.csv`) on the root of the microSD card, with boot-time mounting and robust error handling.
 
 ## References
 - [Random Nerd Tutorials - ESP32 CYD LVGL Weather Station](https://randomnerdtutorials.com/esp32-cyd-lvgl-weather-station/)

@@ -9,6 +9,7 @@
   - Ambient Light Sensor: Onboard LDR photoresistor (GPIO 34)
   - Backlight Control: PWM via LEDC (GPIO 21)
   - Status Indicator: Onboard active-low RGB LED (Red: GPIO 4, Green: GPIO 16, Blue: GPIO 17)
+  - Storage: Onboard microSD card slot (CS: GPIO 5, SCK: GPIO 18, MISO: GPIO 19, MOSI: GPIO 23, utilizing VSPI bus)
 
 ## 2. Core Software Stack
 * **Language:** C/C++
@@ -19,6 +20,7 @@
 * **Font Asset Tooling:** `lv_font_conv` (Node.js/npm) for generating custom LVGL font assets
 * **Preferences Storage:** ESP32 `Preferences` library (for saving runtime configurations in Flash memory across reboot cycles)
 * **Captive Portal Servers:** `DNSServer` and `WebServer` standard ESP32 libraries (for routing and serving the setup configuration page in AP mode)
+* **Storage & File System:** `SD` and `FS` standard ESP32 libraries (for card mounting and appending weather data records in CSV format)
 
 
 ## 3. Build, Execution, and Tooling
