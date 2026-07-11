@@ -42,6 +42,12 @@ void setup() {
     // Load saved preferences
     settings.begin();
 
+    // Check if SD card is present by attempting a begin/mount
+    bool sdPresent = SdCardManager::begin();
+    if (sdPresent && !settings.getSdLoggingEnabled()) {
+        SdCardManager::end();
+    }
+
     // Initialize hardware display and touch drivers
     initDisplayAndTouch();
 
@@ -64,12 +70,6 @@ void setup() {
     led.begin();
     led.setEnabled(true);
 #endif
-
-    // Check if SD card is present by attempting a begin/mount
-    bool sdPresent = SdCardManager::begin();
-    if (sdPresent && !settings.getSdLoggingEnabled()) {
-        SdCardManager::end();
-    }
 }
 
 void loop() {
