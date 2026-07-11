@@ -43,9 +43,9 @@ static void theme_dropdown_event_cb(lv_event_t * e) {
     }
 }
 
-static void dst_cb_event_cb(lv_event_t * e) {
-    lv_obj_t * cb = lv_event_get_target(e);
-    bool is_checked = lv_obj_has_state(cb, LV_STATE_CHECKED);
+static void dst_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
     settings.setDstEnabled(is_checked);
     settings_timezone_changed = true;
 }
@@ -438,7 +438,7 @@ void initUI() {
     lv_label_set_text(auto_label, "Auto Light");
     lv_obj_set_style_text_color(auto_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
 
-    // DST checkbox row
+    // DST switch row
     lv_obj_t * dst_row = lv_obj_create(left_col);
     lv_obj_set_size(dst_row, 144, 28);
     lv_obj_set_flex_flow(dst_row, LV_FLEX_FLOW_ROW);
@@ -452,17 +452,15 @@ void initUI() {
     lv_label_set_text(dst_label, "DST");
     lv_obj_set_style_text_color(dst_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
 
-    lv_obj_t * dst_cb = lv_checkbox_create(dst_row);
-    lv_checkbox_set_text(dst_cb, "");
-    lv_obj_set_style_bg_color(dst_cb, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(dst_cb, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(dst_cb, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(dst_cb, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_text_color(dst_cb, lv_color_hex(COLOR_CRUST), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_t * dst_sw = lv_switch_create(dst_row);
+    lv_obj_set_size(dst_sw, 40, 20);
+    lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getDstEnabled()) {
-        lv_obj_add_state(dst_cb, LV_STATE_CHECKED);
+        lv_obj_add_state(dst_sw, LV_STATE_CHECKED);
     }
-    lv_obj_add_event_cb(dst_cb, dst_cb_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb(dst_sw, dst_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Theme selector dropdown
     lv_obj_t * theme_dropdown = lv_dropdown_create(left_col);
