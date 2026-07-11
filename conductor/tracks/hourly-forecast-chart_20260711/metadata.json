@@ -1,0 +1,8 @@
+{
+  "track_id": "hourly-forecast-chart_20260711",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-11T00:59:00Z",
+  "updated_at": "2026-07-11T00:59:00Z",
+  "description": "Add an Hourly Forecast Tab displaying a temperature curve using LVGL's native chart widget"
+}

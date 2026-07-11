@@ -1,0 +1,8 @@
+{
+  "track_id": "multi-city-carousel_20260711",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-11T00:59:00Z",
+  "updated_at": "2026-07-11T00:59:00Z",
+  "description": "Implement a Multi-City carousel to cycle between multiple configured weather locations"
+}
