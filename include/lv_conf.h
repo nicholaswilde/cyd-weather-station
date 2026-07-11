@@ -78,10 +78,12 @@
  *====================*/
 
 /*Default display refresh period. LVG will redraw changed areas with this period time*/
-#define LV_DISP_DEF_REFR_PERIOD DISPLAY_REFR_PERIOD_MS      /*[ms] — set in config/config.h*/
+/*Keep in sync with DISPLAY_REFR_PERIOD_MS in config/config.h*/
+#define LV_DISP_DEF_REFR_PERIOD 20      /*[ms]*/
 
 /*Input device read period in milliseconds*/
-#define LV_INDEV_DEF_READ_PERIOD DISPLAY_INDEV_READ_PERIOD_MS     /*[ms] — set in config/config.h*/
+/*Keep in sync with DISPLAY_INDEV_READ_PERIOD_MS in config/config.h*/
+#define LV_INDEV_DEF_READ_PERIOD 10     /*[ms]*/
 
 /*Use a custom tick source that tells the elapsed time in milliseconds.
  *It removes the need to manually update the tick with `lv_tick_inc()`)*/

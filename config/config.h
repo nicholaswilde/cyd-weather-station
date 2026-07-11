@@ -64,10 +64,15 @@ extern int getCurrentThemeFlavor();
 // DISPLAY_REFR_PERIOD_MS: How often LVGL redraws changed areas (milliseconds).
 //   Lower = higher frame rate ceiling but more CPU time spent flushing.
 //   Recommended range: 10–30 ms. Must be >= loop tick interval (5 ms).
+//   NOTE: lv_conf.h is compiled by LVGL before this file is in scope, so
+//   LV_DISP_DEF_REFR_PERIOD in include/lv_conf.h must be updated manually
+//   to match this value.
 #define DISPLAY_REFR_PERIOD_MS 20
 
 // DISPLAY_INDEV_READ_PERIOD_MS: How often LVGL polls the touchscreen (milliseconds).
 //   Lower = more responsive touch input. Keep at or below DISPLAY_REFR_PERIOD_MS.
+//   NOTE: LV_INDEV_DEF_READ_PERIOD in include/lv_conf.h must also be updated
+//   manually to match this value.
 #define DISPLAY_INDEV_READ_PERIOD_MS 10
 
 // DISPLAY_SWIPE_ANIM_MS: Duration of the tab-switch swipe animation (milliseconds).
