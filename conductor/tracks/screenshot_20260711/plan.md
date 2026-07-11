@@ -12,7 +12,7 @@
     - [x] Verify that BMP header fields (file size, offset, width, height, color depth) are constructed correctly.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Settings Preference & Screenshot Core Logic' (Protocol in workflow.md)
 
-## Phase 2: Remote Screenshot Web Server Integration [checkpoint: ]
+## Phase 2: Remote Screenshot Web Server Integration [checkpoint: 54f6689]
 - [x] Task: Modify `WifiManager` to start WebServer in STA mode. (926635a)
     - [x] Create and start `_webServer` on port 80 when connected to Wi-Fi if `getScreenshotServerEnabled()` is true.
     - [x] Periodically call `_webServer->handleClient()` in `WifiManager::update()` during STA connected state.
@@ -20,7 +20,7 @@
     - [x] Register `/screenshot` route on `_webServer`.
     - [x] Write headers and stream the BMP image directly to the client socket row-by-row to save memory.
 - [x] Task: Write unit tests to check web server handlers and endpoint routing. (926635a)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Remote Screenshot Web Server Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Remote Screenshot Web Server Integration' (Protocol in workflow.md)
 
 ## Phase 3: Physical BOOT Button Trigger & SD Card Storage [checkpoint: ]
 - [ ] Task: Set up physical BOOT button input handler.
