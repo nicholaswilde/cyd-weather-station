@@ -1,0 +1,43 @@
+# Implementation Plan - screenshot_20260711
+
+## Phase 1: Settings Preference & Screenshot Core Logic [checkpoint: ]
+- [ ] Task: Update `SettingsManager` to support screenshot server enabled setting.
+    - [ ] Add `_screenshotServerEnabled` member variable (default to true).
+    - [ ] Implement `getScreenshotServerEnabled()` and `setScreenshotServerEnabled(bool enabled)`.
+    - [ ] Load and save `"scr_srv"` preference key.
+- [ ] Task: Create `ScreenshotManager` class.
+    - [ ] Define helper functions to construct 54-byte BMP header for width/height.
+    - [ ] Implement `captureScreenToBMP` to allocate LVGL screenshot buffer and handle color space conversion (RGB565 to 24-bit BGR).
+- [ ] Task: Write unit tests for BMP formatting.
+    - [ ] Verify that BMP header fields (file size, offset, width, height, color depth) are constructed correctly.
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Settings Preference & Screenshot Core Logic' (Protocol in workflow.md)
+
+## Phase 2: Remote Screenshot Web Server Integration [checkpoint: ]
+- [ ] Task: Modify `WifiManager` to start WebServer in STA mode.
+    - [ ] Create and start `_webServer` on port 80 when connected to Wi-Fi if `getScreenshotServerEnabled()` is true.
+    - [ ] Periodically call `_webServer->handleClient()` in `WifiManager::update()` during STA connected state.
+- [ ] Task: Implement `/screenshot` HTTP route handler.
+    - [ ] Register `/screenshot` route on `_webServer`.
+    - [ ] Write headers and stream the BMP image directly to the client socket row-by-row to save memory.
+- [ ] Task: Write unit tests to check web server handlers and endpoint routing.
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Remote Screenshot Web Server Integration' (Protocol in workflow.md)
+
+## Phase 3: Physical BOOT Button Trigger & SD Card Storage [checkpoint: ]
+- [ ] Task: Set up physical BOOT button input handler.
+    - [ ] Define `BOOT_BUTTON_PIN` as GPIO 0.
+    - [ ] Initialize the pin as `INPUT_PULLUP` during setup.
+- [ ] Task: Implement button polling and SD write sequence in loop.
+    - [ ] In `loop()`, poll the button state and debounce presses.
+    - [ ] On press, generate a timestamped filename `/screenshot_YYYYMMDD_HHMMSS.bmp` using NTP time.
+    - [ ] Temporarily mount the SD card (if not already mounted), write the BMP header and pixel data row-by-row, then restore the previous SD mount state.
+- [ ] Task: Write unit tests for file name formatting and SD storage writing mocks.
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Physical BOOT Button Trigger & SD Card Storage' (Protocol in workflow.md)
+
+## Phase 4: UI Toggle Control [checkpoint: ]
+- [ ] Task: Add "Screenshot Server" toggle switch in Settings UI screen.
+    - [ ] Add the toggle switch widget and align it in the settings toggles column.
+    - [ ] Add callback to update the preferences.
+- [ ] Task: Handle dynamic server starting/stopping.
+    - [ ] If toggled off, immediately stop the WebServer listener.
+    - [ ] If toggled on and Wi-Fi is connected, start the WebServer listener.
+- [ ] Task: Conductor - User Manual Verification 'Phase 4: UI Toggle Control' (Protocol in workflow.md)

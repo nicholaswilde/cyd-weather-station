@@ -36,3 +36,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: 4-Way Screen Orientation and UI Adaptation**
   *Link: [./tracks/screen-orientation_20260711/](./tracks/screen-orientation_20260711/)*
+
+---
+
+- [ ] **Track: Remote and Local Screen Capture (Screenshots)**
+  *Link: [./tracks/screenshot_20260711/](./tracks/screenshot_20260711/)*
