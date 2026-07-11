@@ -124,8 +124,16 @@ void WifiManager::startAPMode() {
     _webServer = new WebServer(80);
     _webServer->on("/", [this]() { handleRoot(); });
     _webServer->on("/save", [this]() { handleSave(); });
+    _webServer->on("/scan", [this]() {
+        WiFi.scanNetworks(true);
+        _webServer->sendHeader("Location", "/", true);
+        _webServer->send(302, "text/plain", "");
+    });
     _webServer->onNotFound([this]() { handleNotFound(); });
     _webServer->begin();
+
+    // Start background network scan immediately
+    WiFi.scanNetworks(true);
 
     Serial.println("[WiFi] AP Mode Web Server and DNS Server started.");
 #endif
@@ -136,9 +144,7 @@ void WifiManager::handleRoot() {
     int n = WiFi.scanComplete();
     if (n == -2) {
         WiFi.scanNetworks(true);
-    }
-    if (n <= 0) {
-        n = WiFi.scanNetworks();
+        n = -1;
     }
 
     String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
@@ -165,9 +171,16 @@ void WifiManager::handleRoot() {
     html += "<h2>Wi-Fi Configuration</h2>";
     html += "<form method='POST' action='/save'>";
     
-    html += "<label>Select Network</label>";
+    html += "<div style='display: flex; justify-content: space-between; align-items: center;'>";
+    html += "<label style='margin-bottom: 0;'>Select Network</label>";
+    html += "<a href='/scan' style='color: #cba6f7; font-size: 12px; text-decoration: none;'>🔄 Refresh List</a>";
+    html += "</div>";
+    html += "<div style='height: 8px;'></div>";
+    
     html += "<div class='net-list'>";
-    if (n <= 0) {
+    if (n == -1) {
+        html += "<div class='net-item' style='color: #a6adc8;'>Scanning in progress...</div>";
+    } else if (n == 0) {
         html += "<div class='net-item'>No networks found</div>";
     } else {
         for (int i = 0; i < n; ++i) {
