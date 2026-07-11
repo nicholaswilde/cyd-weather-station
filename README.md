@@ -118,6 +118,7 @@ All settings below are configured by touch on the device and saved to flash:
 | **Brightness** | Manual backlight level slider (disabled when Auto Light is on). |
 | **Theme** | Catppuccin flavor selector — Mocha / Macchiato / Frappé / Latte. Full UI redraws on change. |
 | **Timezone** | GMT offset (– / + buttons, range –12 to +14). |
+| **DST** | Toggle Daylight Saving Time on/off (adds 1 hour to NTP offset when enabled). |
 
 ---
 
