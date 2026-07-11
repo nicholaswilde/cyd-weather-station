@@ -15,6 +15,7 @@ private:
     int _timezoneOffset;
     bool _dstEnabled;
     int _themeFlavor;
+    bool _sdLoggingEnabled;
     String _wifiSSID;
     String _wifiPassword;
 
@@ -39,6 +40,9 @@ public:
 
     int getThemeFlavor() const;
     void setThemeFlavor(int flavor);
+
+    bool getSdLoggingEnabled() const;
+    void setSdLoggingEnabled(bool enabled);
 
     String getWifiSSID() const;
     void setWifiSSID(const String& ssid);

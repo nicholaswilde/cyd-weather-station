@@ -65,8 +65,10 @@ void setup() {
     led.setEnabled(true);
 #endif
 
-    // Initialize SD card
-    SdCardManager::begin();
+    // Initialize SD card if logging is enabled
+    if (settings.getSdLoggingEnabled()) {
+        SdCardManager::begin();
+    }
 }
 
 void loop() {
@@ -108,6 +110,17 @@ void loop() {
             configTime(settings.getTimezoneOffset() * 3600, dstOffset, NTP_SERVER);
         }
 #endif
+    }
+
+    if (settings_sd_logging_changed) {
+        settings_sd_logging_changed = false;
+        if (settings.getSdLoggingEnabled()) {
+            Serial.println("[System] SD logging enabled, initializing SD card...");
+            SdCardManager::begin();
+        } else {
+            Serial.println("[System] SD logging disabled, unmounting SD card...");
+            SdCardManager::end();
+        }
     }
 
     if (settings_theme_changed) {
@@ -212,8 +225,10 @@ void loop() {
                         strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
                         updateFooterUI(timeStr, data.cityName.c_str());
 
-                        // Log weather data to SD card
-                        WeatherLogger::logWeather(timeinfo, data);
+                        // Log weather data to SD card if enabled
+                        if (settings.getSdLoggingEnabled()) {
+                            WeatherLogger::logWeather(timeinfo, data);
+                        }
                     }
 #else
                     updateFooterUI("12:00", data.cityName.c_str());

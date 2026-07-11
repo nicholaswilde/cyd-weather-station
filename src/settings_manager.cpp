@@ -9,6 +9,7 @@ SettingsManager::SettingsManager() {
     _timezoneOffset = GMT_OFFSET_SEC / 3600;
     _dstEnabled = (DST_OFFSET_SEC > 0);
     _themeFlavor = CATPPUCCIN_MOCHA;
+    _sdLoggingEnabled = USE_SD_LOGGING;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
 }
@@ -23,6 +24,7 @@ void SettingsManager::begin() {
     _timezoneOffset = prefs.getInt("tz_offset", GMT_OFFSET_SEC / 3600);
     _dstEnabled = prefs.getBool("dst_enabled", DST_OFFSET_SEC > 0);
     _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
+    _sdLoggingEnabled = prefs.getBool("sd_log", USE_SD_LOGGING);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     
@@ -146,6 +148,20 @@ void SettingsManager::setWifiPassword(const String& password) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("wifi_pass", _wifiPassword);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getSdLoggingEnabled() const {
+    return _sdLoggingEnabled;
+}
+
+void SettingsManager::setSdLoggingEnabled(bool enabled) {
+    if (_sdLoggingEnabled != enabled) {
+        _sdLoggingEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("sd_log", _sdLoggingEnabled);
         prefs.end();
     }
 }

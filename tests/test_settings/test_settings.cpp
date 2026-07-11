@@ -23,6 +23,7 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL(false, settings.getAutoBrightness());
     TEST_ASSERT_EQUAL(-8, settings.getTimezoneOffset());
     TEST_ASSERT_EQUAL(true, settings.getDstEnabled());
+    TEST_ASSERT_EQUAL(true, settings.getSdLoggingEnabled());
 }
 
 void test_settings_save_and_load(void) {
@@ -35,6 +36,7 @@ void test_settings_save_and_load(void) {
     settings.setAutoBrightness(true);
     settings.setTimezoneOffset(5);
     settings.setDstEnabled(false);
+    settings.setSdLoggingEnabled(false);
     
     // Create new instance to simulate re-reading from preferences
     SettingsManager settings_new;
@@ -45,6 +47,7 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL(true, settings_new.getAutoBrightness());
     TEST_ASSERT_EQUAL(5, settings_new.getTimezoneOffset());
     TEST_ASSERT_EQUAL(false, settings_new.getDstEnabled());
+    TEST_ASSERT_EQUAL(false, settings_new.getSdLoggingEnabled());
 }
 
 void test_settings_wifi_credentials(void) {

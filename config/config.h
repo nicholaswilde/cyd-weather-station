@@ -12,7 +12,7 @@
 #define WEATHER_API_LONGITUDE "-122.4194"
 
 // Open-Meteo API Settings
-#define WEATHER_UPDATE_INTERVAL_MINS 15
+#define WEATHER_UPDATE_INTERVAL_MINS 1
 
 // NTP and Timezone Settings
 #define NTP_SERVER "pool.ntp.org"
@@ -50,6 +50,9 @@ extern int getCurrentThemeFlavor();
 
 // RGB LED Status Settings
 #define USE_RGB_LED_STATUS true
+
+// SD Card Weather Logging Settings
+#define USE_SD_LOGGING true
 
 // Display Performance Settings
 // DISPLAY_DRAW_BUF_ROWS: Height of the LVGL draw buffer in pixel rows.
