@@ -15,25 +15,25 @@
 #include "FS.h"
 #endif
 
-// --- Internal state ---
+// --- Internal capture state ---
 static File     _captureFile;
 static bool     _captureInProgress = false;
-static uint32_t _captureWidth = 320;
+static uint32_t _captureWidth  = 320;
 static uint32_t _captureHeight = 240;
 
-// --- Written pixels counter (tracks rows completed for bottom-up BMP) ---
-// We use the "top-down" BMP trick: negative height in header means rows are
-// stored top-to-bottom, matching LVGL's rendering order. No reordering needed.
+// --- BMP pixel data begins at byte 54 ---
+static const uint32_t BMP_HEADER_SIZE = 54;
 
 /**
  * @brief Constructs a 54-byte BMP file header for a 24-bit top-down image.
+ *        A negative height field signals top-down row order, matching LVGL.
  */
 BmpHeader ScreenshotManager::createHeader(uint32_t width, uint32_t height) {
     BmpHeader header;
     memset(header.bytes, 0, sizeof(header.bytes));
 
     uint32_t imageSize = width * height * 3;
-    uint32_t fileSize  = 54 + imageSize;
+    uint32_t fileSize  = BMP_HEADER_SIZE + imageSize;
 
     // --- BMP file header (14 bytes) ---
     header.bytes[0]  = 'B';
@@ -42,30 +42,30 @@ BmpHeader ScreenshotManager::createHeader(uint32_t width, uint32_t height) {
     header.bytes[3]  = (fileSize >> 8)  & 0xFF;
     header.bytes[4]  = (fileSize >> 16) & 0xFF;
     header.bytes[5]  = (fileSize >> 24) & 0xFF;
-    header.bytes[10] = 54; // pixel data offset
+    header.bytes[10] = BMP_HEADER_SIZE; // pixel data offset
 
     // --- DIB header (BITMAPINFOHEADER, 40 bytes) ---
     header.bytes[14] = 40; // header size
 
-    // Width (signed, positive)
+    // Width (positive)
     header.bytes[18] = width  & 0xFF;
     header.bytes[19] = (width  >> 8)  & 0xFF;
     header.bytes[20] = (width  >> 16) & 0xFF;
     header.bytes[21] = (width  >> 24) & 0xFF;
 
-    // Height: NEGATIVE = top-down row order (matches LVGL rendering)
+    // Height: NEGATIVE = top-down row order (matches LVGL flush order)
     int32_t negHeight = -(int32_t)height;
     header.bytes[22] = negHeight & 0xFF;
     header.bytes[23] = (negHeight >> 8)  & 0xFF;
     header.bytes[24] = (negHeight >> 16) & 0xFF;
     header.bytes[25] = (negHeight >> 24) & 0xFF;
 
-    // Color planes
+    // Color planes (1)
     header.bytes[26] = 1;
-    // Bits per pixel
+    // Bits per pixel (24)
     header.bytes[28] = 24;
 
-    // Image size
+    // Image data size
     header.bytes[34] = imageSize & 0xFF;
     header.bytes[35] = (imageSize >> 8)  & 0xFF;
     header.bytes[36] = (imageSize >> 16) & 0xFF;
@@ -108,7 +108,9 @@ bool ScreenshotManager::isCaptureInProgress() {
 }
 
 /**
- * @brief Opens the SD file, writes the BMP header, and sets capture-in-progress flag.
+ * @brief Opens the SD file, writes the BMP header, pre-fills pixel area with
+ *        zeros (enabling random-access seek+write per tile), and sets the
+ *        capture-in-progress flag.
  */
 bool ScreenshotManager::beginCapture(const char* filepath) {
     if (_captureInProgress) {
@@ -139,9 +141,17 @@ bool ScreenshotManager::beginCapture(const char* filepath) {
         return false;
     }
 
-    // --- Write BMP header ---
+    // --- Write BMP header (54 bytes) ---
     BmpHeader header = createHeader(_captureWidth, _captureHeight);
     _captureFile.write(header.bytes, sizeof(header.bytes));
+
+    // --- Pre-fill entire pixel area with zeros using a small stack buffer.
+    //     This reserves the space so later seek+write calls land in bounds. ---
+    uint8_t zeroBuf[_captureWidth * 3]; // 960 bytes on stack
+    memset(zeroBuf, 0, sizeof(zeroBuf));
+    for (uint32_t row = 0; row < _captureHeight; row++) {
+        _captureFile.write(zeroBuf, sizeof(zeroBuf));
+    }
 
     _captureInProgress = true;
     Serial.printf("[Screenshot] Capture started: %s\n", filepath);
@@ -149,7 +159,8 @@ bool ScreenshotManager::beginCapture(const char* filepath) {
 }
 
 /**
- * @brief Receives one LVGL flush tile and writes its BGR24 rows to the BMP file.
+ * @brief Receives one LVGL flush tile and seeks to the correct BMP file offset
+ *        to write those pixels — correctly handles any tile size or position.
  */
 void ScreenshotManager::onFlushTile(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const uint16_t* pixels) {
     if (!_captureInProgress || !_captureFile) return;
@@ -157,33 +168,28 @@ void ScreenshotManager::onFlushTile(int32_t x1, int32_t y1, int32_t x2, int32_t 
     uint32_t tileW = (uint32_t)(x2 - x1 + 1);
     uint32_t tileH = (uint32_t)(y2 - y1 + 1);
 
-    // --- Allocate a small single-row output buffer (max 320 * 3 = 960 bytes) ---
+    // --- BGR row buffer sized to the tile width (max 320*3 = 960 bytes) ---
     uint8_t rowBuf[320 * 3];
 
     for (uint32_t row = 0; row < tileH; row++) {
         const uint16_t* srcRow = pixels + row * tileW;
 
-        // --- If tile does not start at x=0, pad left with black ---
-        if (x1 > 0) {
-            memset(rowBuf, 0, (size_t)x1 * 3);
-        }
-
+        // --- Convert this tile row from RGB565 to BGR24 ---
         for (uint32_t col = 0; col < tileW; col++) {
             uint8_t r, g, b;
             convertRGB565ToBGR24(srcRow[col], r, g, b);
-            uint32_t off = ((uint32_t)x1 + col) * 3;
-            rowBuf[off]     = b; // BGR order
-            rowBuf[off + 1] = g;
-            rowBuf[off + 2] = r;
+            rowBuf[col * 3]     = b; // BGR order
+            rowBuf[col * 3 + 1] = g;
+            rowBuf[col * 3 + 2] = r;
         }
 
-        // --- If tile ends before the right edge, pad right with black ---
-        if ((uint32_t)x2 < _captureWidth - 1) {
-            memset(rowBuf + ((uint32_t)x2 + 1) * 3, 0,
-                   (_captureWidth - (uint32_t)x2 - 1) * 3);
-        }
-
-        _captureFile.write(rowBuf, _captureWidth * 3);
+        // --- Seek to the exact file offset for this row's x1 column.
+        //     top-down BMP: row (y1+row) starts at byte 54 + (y1+row)*width*3
+        //     then x1 columns in: + x1*3                                   ---
+        uint32_t absRow  = (uint32_t)y1 + row;
+        uint32_t fileOff = BMP_HEADER_SIZE + absRow * _captureWidth * 3 + (uint32_t)x1 * 3;
+        _captureFile.seek(fileOff);
+        _captureFile.write(rowBuf, tileW * 3);
     }
 }
 
@@ -204,7 +210,8 @@ void ScreenshotManager::endCapture() {
 }
 
 /**
- * @brief Convenience wrapper: begin capture, force a full LVGL redraw, end capture.
+ * @brief Convenience wrapper: opens the file, forces a full LVGL redraw so
+ *        every pixel is flushed through onFlushTile, then closes the file.
  */
 bool ScreenshotManager::captureToSD(const char* filepath) {
     if (!beginCapture(filepath)) return false;
@@ -212,12 +219,11 @@ bool ScreenshotManager::captureToSD(const char* filepath) {
 #ifndef NATIVE_TEST
     // --- Force LVGL to re-render the entire screen through the flush callback ---
     lv_obj_invalidate(lv_scr_act());
-    // Flush all pending LVGL rendering synchronously
     lv_refr_now(NULL);
 #else
-    // --- Native test: simulate two horizontal tiles covering the full screen ---
+    // --- Native test: simulate tiles covering the full 320x240 frame ---
     uint16_t tile[320 * 120] = {};
-    onFlushTile(0, 0,   319, 119, tile);
+    onFlushTile(0,   0, 319, 119, tile);
     onFlushTile(0, 120, 319, 239, tile);
 #endif
 
