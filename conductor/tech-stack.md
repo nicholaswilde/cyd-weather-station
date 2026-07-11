@@ -18,6 +18,8 @@
 * **Custom Fonts:** Erik Flowers' Weather Icons font (uncompressed 48px and 24px C font files containing custom weather glyphs)
 * **Font Asset Tooling:** `lv_font_conv` (Node.js/npm) for generating custom LVGL font assets
 * **Preferences Storage:** ESP32 `Preferences` library (for saving runtime configurations in Flash memory across reboot cycles)
+* **Captive Portal Servers:** `DNSServer` and `WebServer` standard ESP32 libraries (for routing and serving the setup configuration page in AP mode)
+
 
 ## 3. Build, Execution, and Tooling
 * **Build System:** PlatformIO (Core CLI)
