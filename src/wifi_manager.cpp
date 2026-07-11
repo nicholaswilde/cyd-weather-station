@@ -109,13 +109,19 @@ void WifiManager::startAPMode() {
     Serial.printf("[WiFi] Entering AP Mode. SSID: %s\n", apSSID.c_str());
 
 #ifndef NATIVE_TEST
+    WiFi.persistent(false);
     WiFi.disconnect();
-    delay(100);
+    delay(200);
 
     WiFi.mode(WIFI_AP_STA);
+    delay(100);
+    
     IPAddress apIP(192, 168, 4, 1);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+    delay(100);
+    
     WiFi.softAP(apSSID.c_str());
+    delay(200);
 
     _dnsServer = new DNSServer();
     _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
