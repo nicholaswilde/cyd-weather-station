@@ -29,9 +29,9 @@ void test_bmp_header_generation(void) {
     uint32_t width = header.bytes[18] | (header.bytes[19] << 8) | (header.bytes[20] << 16) | (header.bytes[21] << 24);
     TEST_ASSERT_EQUAL(320, width);
     
-    // Check Height (240)
-    uint32_t height = header.bytes[22] | (header.bytes[23] << 8) | (header.bytes[24] << 16) | (header.bytes[25] << 24);
-    TEST_ASSERT_EQUAL(240, height);
+    // Check Height: negative = top-down BMP (-240 = 0xFFFFFF10)
+    int32_t height = (int32_t)(header.bytes[22] | (header.bytes[23] << 8) | (header.bytes[24] << 16) | (header.bytes[25] << 24));
+    TEST_ASSERT_EQUAL(-240, height);
     
     // Check Planes (1)
     uint16_t planes = header.bytes[26] | (header.bytes[27] << 8);
@@ -74,9 +74,68 @@ void test_color_conversion(void) {
     TEST_ASSERT_EQUAL(0, b);
 }
 
+void test_filename_generation(void) {
+    struct tm timeinfo;
+    timeinfo.tm_year = 126; // 2026
+    timeinfo.tm_mon = 6;    // July (0-indexed)
+    timeinfo.tm_mday = 11;
+    timeinfo.tm_hour = 13;
+    timeinfo.tm_min = 45;
+    timeinfo.tm_sec = 30;
+    
+    std::string filename = ScreenshotManager::generateFilename(&timeinfo, 12345);
+    TEST_ASSERT_EQUAL_STRING("/screenshot_20260711_134530.bmp", filename.c_str());
+    
+    std::string fallback = ScreenshotManager::generateFilename(nullptr, 12345);
+    TEST_ASSERT_EQUAL_STRING("/screenshot_12345.bmp", fallback.c_str());
+}
+
+void test_capture_to_sd_success(void) {
+    mock_sd_card_present = true;
+    mock_sd_card_mounted = false;
+    mock_files.clear();
+    
+    bool result = ScreenshotManager::captureToSD("/test_screenshot.bmp");
+    TEST_ASSERT_TRUE(result);
+    TEST_ASSERT_TRUE(mock_files.find("/test_screenshot.bmp") != mock_files.end());
+    TEST_ASSERT_EQUAL(230454, mock_files["/test_screenshot.bmp"].size());
+}
+
+void test_begin_capture_flush_end(void) {
+    mock_sd_card_present = true;
+    mock_sd_card_mounted = false;
+    mock_files.clear();
+    
+    TEST_ASSERT_FALSE(ScreenshotManager::isCaptureInProgress());
+    TEST_ASSERT_TRUE(ScreenshotManager::beginCapture("/flush_test.bmp"));
+    TEST_ASSERT_TRUE(ScreenshotManager::isCaptureInProgress());
+    
+    // Simulate two horizontal tile flushes covering full 320x240 frame
+    uint16_t tile[320 * 120] = {};
+    ScreenshotManager::onFlushTile(0,   0, 319, 119, tile);
+    ScreenshotManager::onFlushTile(0, 120, 319, 239, tile);
+    
+    ScreenshotManager::endCapture();
+    TEST_ASSERT_FALSE(ScreenshotManager::isCaptureInProgress());
+    TEST_ASSERT_EQUAL(230454, mock_files["/flush_test.bmp"].size());
+}
+
+void test_capture_to_sd_no_card(void) {
+    mock_sd_card_present = false;
+    mock_sd_card_mounted = false;
+    mock_files.clear();
+    
+    bool result = ScreenshotManager::captureToSD("/test_screenshot.bmp");
+    TEST_ASSERT_FALSE(result);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_bmp_header_generation);
     RUN_TEST(test_color_conversion);
+    RUN_TEST(test_filename_generation);
+    RUN_TEST(test_capture_to_sd_success);
+    RUN_TEST(test_begin_capture_flush_end);
+    RUN_TEST(test_capture_to_sd_no_card);
     return UNITY_END();
 }
