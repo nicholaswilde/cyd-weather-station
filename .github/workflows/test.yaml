@@ -56,6 +56,9 @@ jobs:
       - name: Uncomment secrets
         run: "sed -i 's|// #|#|' config/secrets.h"
 
+      - name: Test PlatformIO Project
+        run: task check
+
       - name: Build PlatformIO Project
         run: task test
         # run: pio run --environment ${{ matrix.env }}
