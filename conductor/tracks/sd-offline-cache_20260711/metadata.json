@@ -1,0 +1,8 @@
+{
+  "track_id": "sd-offline-cache_20260711",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-07-11T01:03:00Z",
+  "updated_at": "2026-07-11T01:03:00Z",
+  "description": "Cache latest weather JSON structure to the SD card and recover offline values on boot"
+}

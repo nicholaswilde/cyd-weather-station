@@ -26,3 +26,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Multi-City Carousel**
   *Link: [./tracks/multi-city-carousel_20260711/](./tracks/multi-city-carousel_20260711/)*
+
+---
+
+- [ ] **Track: SD Weather History & Sensor Data Logging**
+  *Link: [./tracks/sd-weather-logging_20260711/](./tracks/sd-weather-logging_20260711/)*
+
+---
+
+- [ ] **Track: SD Offline Cache Recovery**
+  *Link: [./tracks/sd-offline-cache_20260711/](./tracks/sd-offline-cache_20260711/)*
