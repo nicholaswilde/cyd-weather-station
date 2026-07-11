@@ -14,11 +14,7 @@ bool SdCardManager::begin() {
     
     Serial.println("Initializing SD card...");
     
-    static bool spiInitialized = false;
-    if (!spiInitialized) {
-        SPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
-        spiInitialized = true;
-    }
+    SPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
     sdMounted = SD.begin(SD_CS_PIN, SPI, 4000000, "/sd", 5, true);
 
     if (sdMounted) {
