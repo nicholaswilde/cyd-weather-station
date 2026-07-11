@@ -7,6 +7,7 @@ SettingsManager::SettingsManager() {
     _brightness = 80;
     _autoBrightness = USE_LDR_AUTO_BACKLIGHT;
     _timezoneOffset = GMT_OFFSET_SEC / 3600;
+    _dstEnabled = (DST_OFFSET_SEC > 0);
     _themeFlavor = CATPPUCCIN_MOCHA;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
@@ -20,6 +21,7 @@ void SettingsManager::begin() {
     _brightness = prefs.getInt("bright", 80);
     _autoBrightness = prefs.getBool("auto_bright", USE_LDR_AUTO_BACKLIGHT);
     _timezoneOffset = prefs.getInt("tz_offset", GMT_OFFSET_SEC / 3600);
+    _dstEnabled = prefs.getBool("dst_enabled", DST_OFFSET_SEC > 0);
     _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
@@ -85,6 +87,20 @@ void SettingsManager::setTimezoneOffset(int offset) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putInt("tz_offset", _timezoneOffset);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getDstEnabled() const {
+    return _dstEnabled;
+}
+
+void SettingsManager::setDstEnabled(bool enabled) {
+    if (_dstEnabled != enabled) {
+        _dstEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("dst_enabled", _dstEnabled);
         prefs.end();
     }
 }

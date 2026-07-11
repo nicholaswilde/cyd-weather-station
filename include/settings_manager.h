@@ -13,6 +13,7 @@ private:
     int _brightness;
     bool _autoBrightness;
     int _timezoneOffset;
+    bool _dstEnabled;
     int _themeFlavor;
     String _wifiSSID;
     String _wifiPassword;
@@ -32,6 +33,9 @@ public:
     
     int getTimezoneOffset() const;
     void setTimezoneOffset(int offset);
+    
+    bool getDstEnabled() const;
+    void setDstEnabled(bool enabled);
 
     int getThemeFlavor() const;
     void setThemeFlavor(int flavor);

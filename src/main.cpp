@@ -98,8 +98,9 @@ void loop() {
         settings_timezone_changed = false;
 #ifndef NATIVE_TEST
         if (ntpInitialized) {
-            Serial.println("[System] Timezone offset changed. Reconfiguring NTP...");
-            configTime(settings.getTimezoneOffset() * 3600, DST_OFFSET_SEC, NTP_SERVER);
+            Serial.println("[System] Timezone/DST settings changed. Reconfiguring NTP...");
+            long dstOffset = settings.getDstEnabled() ? 3600 : 0;
+            configTime(settings.getTimezoneOffset() * 3600, dstOffset, NTP_SERVER);
         }
 #endif
     }
@@ -176,7 +177,8 @@ void loop() {
 #ifndef NATIVE_TEST
             if (!ntpInitialized) {
                 Serial.println("[System] Initializing NTP client...");
-                configTime(settings.getTimezoneOffset() * 3600, DST_OFFSET_SEC, NTP_SERVER);
+                long dstOffset = settings.getDstEnabled() ? 3600 : 0;
+                configTime(settings.getTimezoneOffset() * 3600, dstOffset, NTP_SERVER);
                 ntpInitialized = true;
             }
             struct tm timeinfo;
