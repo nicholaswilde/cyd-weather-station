@@ -52,6 +52,10 @@ Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent com
    #define WIFI_SSID     "Your_WiFi_Network"
    #define WIFI_PASSWORD "Your_WiFi_Password"
 
+   // (Optional) Secure the configuration AP with a password (at least 8 chars).
+   // Leave blank ("") or comment out to run an open Access Point.
+   #define AP_PASSWORD ""
+
    // (Optional) Set your API key here to use OpenWeatherMap instead of Open-Meteo.
    // If left empty (""), Open-Meteo API will be used as a fallback.
    #define OPENWEATHERMAP_API_KEY "YOUR_OPENWEATHERMAP_API_KEY"
