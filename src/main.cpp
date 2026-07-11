@@ -7,6 +7,7 @@
 #include "led_manager.h"
 #include "sd_card_manager.h"
 #include "weather_logger.h"
+#include "screenshot_manager.h"
 
 #include "backlight_manager.h"
 #include "settings_manager.h"
@@ -70,6 +71,9 @@ void setup() {
     led.begin();
     led.setEnabled(true);
 #endif
+
+    // Initialize physical BOOT button (GPIO 0)
+    pinMode(BOOT_BUTTON_PIN, INPUT_PULLUP);
 }
 
 void loop() {
@@ -87,6 +91,33 @@ void loop() {
 #if USE_RGB_LED_STATUS
     led.update(currentMillis);
 #endif
+
+    // Handle physical BOOT button press to save screenshot to SD
+    static unsigned long lastButtonPressTime = 0;
+    static bool lastButtonState = HIGH;
+    bool currentButtonState = digitalRead(BOOT_BUTTON_PIN);
+    
+    if (currentButtonState == LOW && lastButtonState == HIGH) {
+        lastButtonPressTime = millis();
+    } else if (currentButtonState == HIGH && lastButtonState == LOW) {
+        if (millis() - lastButtonPressTime > 50) { // Debounce threshold (50ms)
+            Serial.println("[System] BOOT button pressed. Taking screenshot...");
+            
+            struct tm timeinfo;
+            std::string filename;
+#ifndef NATIVE_TEST
+            if (getLocalTime(&timeinfo)) {
+                filename = ScreenshotManager::generateFilename(&timeinfo, 0);
+            } else {
+                filename = ScreenshotManager::generateFilename(nullptr, millis());
+            }
+#else
+            filename = ScreenshotManager::generateFilename(nullptr, millis());
+#endif
+            ScreenshotManager::captureToSD(filename.c_str());
+        }
+    }
+    lastButtonState = currentButtonState;
 
     // Handle runtime settings changes from UI
     if (settings_unit_changed) {

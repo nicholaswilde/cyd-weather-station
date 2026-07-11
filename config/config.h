@@ -88,4 +88,7 @@ extern int getCurrentThemeFlavor();
 #define SD_MISO_PIN 19
 #define SD_MOSI_PIN 23
 
+// Physical BOOT Button Settings
+#define BOOT_BUTTON_PIN 0
+
 #endif // CONFIG_H
