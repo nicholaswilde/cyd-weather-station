@@ -33,11 +33,11 @@
 - [x] Task: Write unit tests for file name formatting and SD storage writing mocks. (966d76a)
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Physical BOOT Button Trigger & SD Card Storage' (Protocol in workflow.md)
 
-## Phase 4: UI Toggle Control [checkpoint: ]
-- [~] Task: Add "Screenshot Server" toggle switch in Settings UI screen.
-    - [~] Add the toggle switch widget and align it in the settings toggles column.
-    - [~] Add callback to update the preferences.
-- [~] Task: Handle dynamic server starting/stopping.
-    - [~] If toggled off, immediately stop the WebServer listener.
-    - [~] If toggled on and Wi-Fi is connected, start the WebServer listener.
+## Phase 4: UI Toggle Control [checkpoint: 591890a]
+- [x] Task: Add "Screenshot Server" toggle switch in Settings UI screen. (591890a)
+    - [x] Add the toggle switch widget and align it in the settings toggles column.
+    - [x] Add callback to update the preferences.
+- [x] Task: Handle dynamic server starting/stopping. (591890a)
+    - [x] If toggled off, immediately stop the WebServer listener.
+    - [x] If toggled on and Wi-Fi is connected, start the WebServer listener.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: UI Toggle Control' (Protocol in workflow.md)
