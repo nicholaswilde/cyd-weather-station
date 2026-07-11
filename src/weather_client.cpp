@@ -4,6 +4,10 @@
 #include "settings_manager.h"
 #include <time.h>
 
+#ifndef OPENWEATHERMAP_API_KEY
+#define OPENWEATHERMAP_API_KEY ""
+#endif
+
 extern SettingsManager settings;
 
 #ifndef NATIVE_TEST
