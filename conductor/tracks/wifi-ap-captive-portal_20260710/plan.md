@@ -23,7 +23,7 @@
     - [x] Pass the tests (Green Phase) [3ac1d66]
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Implement AP Mode and Captive Portal Web Server' (Protocol in workflow.md) [7a4142d]
 
-## Phase 3: Integrate Form Submission and Lifecycle Loop
+## Phase 3: Integrate Form Submission and Lifecycle Loop [checkpoint: 9ae01e1]
 - [x] Task: Handle Captive Portal credentials submission [c95240a]
     - [x] Parse POST parameters on submission, save via `SettingsManager`, and schedule reboot [c95240a]
 - [x] Task: Update main loop to handle connection fallback [c95240a]
@@ -32,4 +32,4 @@
 - [x] Task: Verify End-to-End Integration [c95240a]
     - [x] Compile and build project using `task build` [c95240a]
     - [x] Verify test suite passes with `pio test -e native` [c95240a]
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Integrate Form Submission and Lifecycle Loop' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Integrate Form Submission and Lifecycle Loop' (Protocol in workflow.md) [9ae01e1]
