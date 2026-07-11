@@ -135,6 +135,8 @@ bool WeatherClient::reverseGeocode() {
 WeatherData WeatherClient::fetchWeather() {
     WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, "", {} };
 
+    bool useOWM = (String(OPENWEATHERMAP_API_KEY).length() > 0);
+
     // Resolve zip code if using zip code and not yet resolved
     if (_useZip && !_zipResolved) {
         if (!geocodeZip()) {
@@ -143,8 +145,8 @@ WeatherData WeatherClient::fetchWeather() {
         }
     }
 
-    // Resolve city name from coordinates (once) if not using zip
-    if (!_useZip && _cityName.isEmpty()) {
+    // Resolve city name from coordinates (once) if not using zip and not using OWM (OWM gets it directly)
+    if (!_useZip && _cityName.length() == 0 && !useOWM) {
         reverseGeocode();
     }
 
@@ -180,16 +182,28 @@ WeatherData WeatherClient::fetchWeather() {
     WiFiClient client;
     HTTPClient http;
 
-    String url = "http://api.open-meteo.com/v1/forecast?latitude=";
-    url += lat;
-    url += "&longitude=";
-    url += lng;
-    url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
-    url += "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3";
-    url += "&timezone=auto"; // Return dates in local timezone, not UTC
-    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-        url += "&temperature_unit=fahrenheit";
-        url += "&windspeed_unit=mph";
+    String url;
+    if (useOWM) {
+        url = "http://api.openweathermap.org/data/2.5/forecast?lat=";
+        url += lat;
+        url += "&lon=";
+        url += lng;
+        url += "&appid=";
+        url += OPENWEATHERMAP_API_KEY;
+        url += "&units=";
+        url += (settings.getUnitSystem() == UNIT_IMPERIAL ? "imperial" : "metric");
+    } else {
+        url = "http://api.open-meteo.com/v1/forecast?latitude=";
+        url += lat;
+        url += "&longitude=";
+        url += lng;
+        url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m";
+        url += "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3";
+        url += "&timezone=auto"; // Return dates in local timezone, not UTC
+        if (settings.getUnitSystem() == UNIT_IMPERIAL) {
+            url += "&temperature_unit=fahrenheit";
+            url += "&windspeed_unit=mph";
+        }
     }
 
     Serial.print("[Weather] Fetching URL: ");
@@ -199,7 +213,13 @@ WeatherData WeatherClient::fetchWeather() {
         int httpCode = http.GET();
         if (httpCode == HTTP_CODE_OK) {
             String payload = http.getString();
-            if (parseWeatherJson(payload.c_str(), data)) {
+            bool parseSuccess = false;
+            if (useOWM) {
+                parseSuccess = parseOwmJson(payload.c_str(), data);
+            } else {
+                parseSuccess = parseWeatherJson(payload.c_str(), data);
+            }
+            if (parseSuccess) {
                 data.cityName = _cityName;
                 Serial.printf("[Weather] Success! Temp: %.1f, Hum: %d %%, Status: %s, Wind: %.1f, City: %s\n",
                     data.temperature, data.humidity, data.status.c_str(), data.windSpeed, data.cityName.c_str());
@@ -209,7 +229,7 @@ WeatherData WeatherClient::fetchWeather() {
         }
         http.end();
     } else {
-        Serial.println("[Weather] Unable to connect to Open-Meteo API");
+        Serial.println("[Weather] Unable to connect to Weather API");
     }
 
     return data;
@@ -353,4 +373,189 @@ String WeatherClient::getWeatherDesc(int code) {
         case 99: return "Thunderstorm with heavy hail";
         default: return "Unknown";
     }
+}
+
+bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
+    DynamicJsonDocument doc(16384);
+    DeserializationError error = deserializeJson(doc, json);
+
+    if (error) {
+        Serial.print("[Weather] OWM JSON Deserialization failed: ");
+        Serial.println(error.c_str());
+        return false;
+    }
+
+    if (!doc.containsKey("list") || doc["list"].size() == 0) {
+        Serial.println("[Weather] Invalid OWM JSON payload");
+        return false;
+    }
+
+    JsonArray list = doc["list"];
+
+    // 1. Parse current weather from list[0]
+    JsonObject current = list[0];
+    data.temperature = current["main"]["temp"].as<float>();
+    data.humidity = current["main"]["humidity"].as<int>();
+    data.windSpeed = current["wind"]["speed"].as<float>();
+    // Convert metric wind speed from m/s to km/h (if metric)
+    if (settings.getUnitSystem() == UNIT_METRIC) {
+        data.windSpeed *= 3.6f;
+    }
+    
+    int owmCode = current["weather"][0]["id"].as<int>();
+    data.weatherCode = owmToWmoCode(owmCode);
+    data.status = current["weather"][0]["description"].as<String>();
+    // Capitalize first letter of status description for better aesthetics
+    if (data.status.length() > 0) {
+        data.status[0] = toupper(data.status[0]);
+    }
+    data.valid = true;
+
+    // Resolve city name from OWM city object
+    if (_cityName.length() == 0 && doc.containsKey("city")) {
+        const char* name = doc["city"]["name"] | "";
+        if (name && name[0] != '\0') {
+            _cityName = String(name);
+        }
+    }
+    data.cityName = _cityName;
+
+    // 2. Parse 3-day forecast (Today, Tomorrow, Day after)
+    // We group OWM's 3-hourly forecasts by local date.
+    // Each date will have max/min temps calculated, and we grab weather condition closest to midday (12:00:00).
+    
+    struct DayForecastTemp {
+        float tempMin = 999.0f;
+        float tempMax = -999.0f;
+        int weatherCode = -1;
+        String status = "";
+        bool hasMidday = false;
+    };
+
+    String uniqueDays[5];
+    DayForecastTemp dayTemps[5];
+    int dayCount = 0;
+
+    for (JsonObject entry : list) {
+        String dt_txt = entry["dt_txt"].as<String>();
+        if (dt_txt.length() < 10) continue;
+        char dateBuf[11];
+        strncpy(dateBuf, dt_txt.c_str(), 10);
+        dateBuf[10] = '\0';
+        String dateStr(dateBuf);
+        
+        // Find if this date is already tracked
+        int idx = -1;
+        for (int i = 0; i < dayCount; i++) {
+            if (uniqueDays[i] == dateStr) {
+                idx = i;
+                break;
+            }
+        }
+        
+        if (idx == -1) {
+            if (dayCount >= 5) continue; // Only track up to 5 days
+            idx = dayCount;
+            uniqueDays[idx] = dateStr;
+            dayCount++;
+        }
+
+        // Update min/max temperatures
+        float tMin = entry["main"]["temp_min"].as<float>();
+        float tMax = entry["main"]["temp_max"].as<float>();
+        if (tMin < dayTemps[idx].tempMin) dayTemps[idx].tempMin = tMin;
+        if (tMax > dayTemps[idx].tempMax) dayTemps[idx].tempMax = tMax;
+
+        // Pick weather condition. Prefer midday (12:00:00).
+        // If not midday, and we don't have midday set yet, use the first/any entry.
+        bool isMidday = strstr(dt_txt.c_str(), "12:00:00") != nullptr;
+        if (isMidday || (!dayTemps[idx].hasMidday && dayTemps[idx].weatherCode == -1)) {
+            int code = entry["weather"][0]["id"].as<int>();
+            dayTemps[idx].weatherCode = owmToWmoCode(code);
+            dayTemps[idx].status = entry["weather"][0]["description"].as<String>();
+            if (dayTemps[idx].status.length() > 0) {
+                dayTemps[idx].status[0] = toupper(dayTemps[idx].status[0]);
+            }
+            if (isMidday) {
+                dayTemps[idx].hasMidday = true;
+            }
+        }
+    }
+
+    // Now populate the 3 forecast days.
+    char today_str[11] = "";
+    char tomorrow_str[11] = "";
+    bool time_valid = false;
+#ifndef NATIVE_TEST
+    time_t now = time(nullptr);
+    time_valid = (now > 946684800L); // after year 2000
+    if (time_valid) {
+        long tz_sec = (long)settings.getTimezoneOffset() * 3600L;
+        time_t local_now = now + tz_sec;
+        struct tm tm_today, tm_tomorrow;
+        gmtime_r(&local_now, &tm_today);
+        gmtime_r(&(local_now += 86400), &tm_tomorrow);
+        snprintf(today_str, sizeof(today_str), "%04d-%02d-%02d",
+            tm_today.tm_year + 1900, tm_today.tm_mon + 1, tm_today.tm_mday);
+        snprintf(tomorrow_str, sizeof(tomorrow_str), "%04d-%02d-%02d",
+            tm_tomorrow.tm_year + 1900, tm_tomorrow.tm_mon + 1, tm_tomorrow.tm_mday);
+    }
+#endif
+
+    // Map uniqueDays to forecast slots
+    for (int i = 0; i < 3; i++) {
+        if (i < dayCount) {
+            data.forecast[i].tempMax = dayTemps[i].tempMax;
+            data.forecast[i].tempMin = dayTemps[i].tempMin;
+            data.forecast[i].weatherCode = dayTemps[i].weatherCode;
+            data.forecast[i].status = dayTemps[i].status;
+
+            String dateStr = uniqueDays[i];
+            if (time_valid && dateStr == today_str) {
+                data.forecast[i].dayName = "Today";
+            } else if (time_valid && dateStr == tomorrow_str) {
+                data.forecast[i].dayName = "Tomorrow";
+            } else if (!time_valid && i == 0) {
+                data.forecast[i].dayName = "Today";
+            } else if (!time_valid && i == 1) {
+                data.forecast[i].dayName = "Tomorrow";
+            } else {
+                // Compute short day name using Sakamoto
+                int y = (dateStr[0]-'0')*1000 + (dateStr[1]-'0')*100
+                      + (dateStr[2]-'0')*10  + (dateStr[3]-'0');
+                int m = (dateStr[5]-'0')*10 + (dateStr[6]-'0');
+                int d = (dateStr[8]-'0')*10 + (dateStr[9]-'0');
+
+                static const char* days[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+                static const int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+                if (m < 3) y -= 1;
+                int dayIdx = (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7;
+                data.forecast[i].dayName = (dayIdx >= 0 && dayIdx < 7) ? days[dayIdx] : dateStr;
+            }
+        } else {
+            data.forecast[i].tempMax = 0.0f;
+            data.forecast[i].tempMin = 0.0f;
+            data.forecast[i].weatherCode = -1;
+            data.forecast[i].status = "Unknown";
+            data.forecast[i].dayName = "N/A";
+        }
+    }
+
+    return true;
+}
+
+int WeatherClient::owmToWmoCode(int owmCode) {
+    if (owmCode >= 200 && owmCode < 300) return 95; // Thunderstorm
+    if (owmCode >= 300 && owmCode < 400) return 51; // Drizzle
+    if (owmCode >= 500 && owmCode < 600) {
+        if (owmCode == 511) return 66; // Freezing rain
+        return 61; // Rain
+    }
+    if (owmCode >= 600 && owmCode < 700) return 71; // Snow
+    if (owmCode >= 700 && owmCode < 800) return 45; // Fog
+    if (owmCode == 800) return 0; // Clear
+    if (owmCode == 801) return 1; // Mainly clear
+    if (owmCode == 802) return 2; // Partly cloudy
+    if (owmCode >= 803 && owmCode < 900) return 3; // Overcast
+    return -1;
 }

@@ -30,10 +30,12 @@ public:
     const String& getCityName() const { return _cityName; }
     static String getWeatherDesc(int code);
     static bool parseWeatherJson(const char* json, WeatherData& data);
+    bool parseOwmJson(const char* json, WeatherData& data);
 
 private:
     bool geocodeZip();
     bool reverseGeocode();
+    static int owmToWmoCode(int owmCode);
 
     const char* _latitude;
     const char* _longitude;

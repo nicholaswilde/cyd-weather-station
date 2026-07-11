@@ -14,6 +14,11 @@
 // Open-Meteo API Settings
 #define WEATHER_UPDATE_INTERVAL_MINS 15
 
+// OpenWeatherMap API Settings
+// Set your API key here to use OpenWeatherMap instead of Open-Meteo.
+// If left empty (""), Open-Meteo API will be used as a fallback.
+#define OPENWEATHERMAP_API_KEY ""
+
 // NTP and Timezone Settings
 #define NTP_SERVER "pool.ntp.org"
 #define GMT_OFFSET_SEC (-8 * 3600)  // GMT -8 (PST)
