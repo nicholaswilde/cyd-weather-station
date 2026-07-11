@@ -470,24 +470,29 @@ void initUI() {
     }
     lv_obj_add_event_cb(dst_sw, dst_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
-    // Theme selector dropdown
-    lv_obj_t * theme_dropdown = lv_dropdown_create(left_col);
-    lv_obj_set_size(theme_dropdown, 144, 30);
-    lv_dropdown_set_options(theme_dropdown, "Mocha\nMacchiato\nFrappe\nLatte");
-    lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
-    lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    // Dropdown button body
-    lv_obj_set_style_bg_color(theme_dropdown, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(theme_dropdown, lv_color_hex(COLOR_TEXT), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(theme_dropdown, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(theme_dropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // Dropdown list
-    lv_obj_t * dropdown_list = lv_dropdown_get_list(theme_dropdown);
-    lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
-    lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-    lv_obj_set_style_border_color(dropdown_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
-    lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
+    // SD Log row
+    lv_obj_t * sd_row = lv_obj_create(left_col);
+    lv_obj_set_size(sd_row, 144, 28);
+    lv_obj_set_flex_flow(sd_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(sd_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(sd_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(sd_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(sd_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(sd_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * sd_label = lv_label_create(sd_row);
+    lv_label_set_text(sd_label, "SD Log");
+    lv_obj_set_style_text_color(sd_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * sd_sw = lv_switch_create(sd_row);
+    lv_obj_set_size(sd_sw, 40, 20);
+    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.getSdLoggingEnabled()) {
+        lv_obj_add_state(sd_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(sd_sw, sd_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // --- Right column items ---
 
@@ -573,29 +578,24 @@ void initUI() {
     lv_obj_align(tz_plus_lbl, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(tz_plus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)1);
 
-    // SD Log row
-    lv_obj_t * sd_row = lv_obj_create(right_col);
-    lv_obj_set_size(sd_row, 148, 28);
-    lv_obj_set_flex_flow(sd_row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(sd_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_bg_opa(sd_row, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(sd_row, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(sd_row, 0, LV_PART_MAIN);
-    lv_obj_clear_flag(sd_row, LV_OBJ_FLAG_SCROLLABLE);
-
-    lv_obj_t * sd_label = lv_label_create(sd_row);
-    lv_label_set_text(sd_label, "SD Log");
-    lv_obj_set_style_text_color(sd_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-
-    lv_obj_t * sd_sw = lv_switch_create(sd_row);
-    lv_obj_set_size(sd_sw, 40, 20);
-    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
-    if (settings.getSdLoggingEnabled()) {
-        lv_obj_add_state(sd_sw, LV_STATE_CHECKED);
-    }
-    lv_obj_add_event_cb(sd_sw, sd_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    // Theme selector dropdown
+    lv_obj_t * theme_dropdown = lv_dropdown_create(right_col);
+    lv_obj_set_size(theme_dropdown, 148, 30);
+    lv_dropdown_set_options(theme_dropdown, "Mocha\nMacchiato\nFrappe\nLatte");
+    lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
+    lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    // Dropdown button body
+    lv_obj_set_style_bg_color(theme_dropdown, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(theme_dropdown, lv_color_hex(COLOR_TEXT), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(theme_dropdown, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(theme_dropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // Dropdown list
+    lv_obj_t * dropdown_list = lv_dropdown_get_list(theme_dropdown);
+    lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
+    lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_border_color(dropdown_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
 }
 
 void updateWifiStatus(bool connected) {
