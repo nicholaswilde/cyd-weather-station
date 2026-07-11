@@ -24,12 +24,12 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Implement AP Mode and Captive Portal Web Server' (Protocol in workflow.md) [7a4142d]
 
 ## Phase 3: Integrate Form Submission and Lifecycle Loop
-- [ ] Task: Handle Captive Portal credentials submission
-    - [ ] Parse POST parameters on submission, save via `SettingsManager`, and schedule reboot
-- [ ] Task: Update main loop to handle connection fallback
-    - [ ] Modify `src/main.cpp` to trigger AP Mode if connection to AP is not achieved within 30 seconds on boot
-    - [ ] Ensure UI/status LED reflects AP mode state
-- [ ] Task: Verify End-to-End Integration
-    - [ ] Compile and build project using `task build`
-    - [ ] Verify test suite passes with `pio test -e native`
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Integrate Form Submission and Lifecycle Loop' (Protocol in workflow.md)
+- [x] Task: Handle Captive Portal credentials submission [c95240a]
+    - [x] Parse POST parameters on submission, save via `SettingsManager`, and schedule reboot [c95240a]
+- [x] Task: Update main loop to handle connection fallback [c95240a]
+    - [x] Modify `src/main.cpp` to trigger AP Mode if connection to AP is not achieved within 30 seconds on boot [c95240a]
+    - [x] Ensure UI/status LED reflects AP mode state [c95240a]
+- [x] Task: Verify End-to-End Integration [c95240a]
+    - [x] Compile and build project using `task build` [c95240a]
+    - [x] Verify test suite passes with `pio test -e native` [c95240a]
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Integrate Form Submission and Lifecycle Loop' (Protocol in workflow.md)
