@@ -2,6 +2,10 @@
 version: '3'
 
 tasks:
+  uam:
+    desc: Upload and monitor
+    cmds:
+      - pio run -t upload -t monitor
   init:
     desc: Initialize the project
     preconditions:

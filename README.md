@@ -2,6 +2,9 @@
 
 A beautiful, configurable real-time weather station and desk clock built for the **ESP32 Cheap Yellow Device (CYD)** (board model ESP32-2432S028R) utilizing the **LVGL v8** graphics library, **Open-Meteo / OpenWeatherMap APIs**, and the **Catppuccin Color Theme**.
 
+> [!WARNING]
+> This project is currently in a `v0.X.X` development stage. Features and configurations are subject to change, and breaking changes may be introduced at any time.
+
 ## :star: Features
 
 - **Dual API Integration**: 
