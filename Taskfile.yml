@@ -39,6 +39,11 @@ tasks:
     cmds:
       - pio run --target clean
 
+  erase:
+    desc: Erase the ESP32 flash memory (clears all saved settings)
+    cmds:
+      - pio run --target erase
+
   setup:node:
     desc: Install Node.js dependencies for font generation
     cmds:
