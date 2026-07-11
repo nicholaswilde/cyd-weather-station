@@ -155,6 +155,13 @@ void loop() {
         }
     }
 
+    if (settings_screenshot_server_changed) {
+        settings_screenshot_server_changed = false;
+        bool enabled = settings.getScreenshotServerEnabled();
+        Serial.printf("[System] Screenshot server %s.\n", enabled ? "enabled" : "disabled");
+        wifi.applyScreenshotServerSetting(enabled);
+    }
+
     if (settings_theme_changed) {
         settings_theme_changed = false;
         Serial.println("[System] Theme changed. Reloading UI...");

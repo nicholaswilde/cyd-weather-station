@@ -9,6 +9,7 @@ extern volatile bool settings_brightness_changed;
 extern volatile bool settings_timezone_changed;
 extern volatile bool settings_theme_changed;
 extern volatile bool settings_sd_logging_changed;
+extern volatile bool settings_screenshot_server_changed;
 
 void initUI();
 void updateWifiStatus(bool connected);

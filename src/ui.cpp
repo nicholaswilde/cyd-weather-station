@@ -17,6 +17,7 @@ volatile bool settings_brightness_changed = false;
 volatile bool settings_timezone_changed = false;
 volatile bool settings_theme_changed = false;
 volatile bool settings_sd_logging_changed = false;
+volatile bool settings_screenshot_server_changed = false;
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *temp_label;
@@ -57,6 +58,13 @@ static void sd_sw_event_cb(lv_event_t * e) {
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
     settings.setSdLoggingEnabled(is_checked);
     settings_sd_logging_changed = true;
+}
+
+static void screenshot_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setScreenshotServerEnabled(is_checked);
+    settings_screenshot_server_changed = true;
 }
 
 static void unit_sw_event_cb(lv_event_t * e) {
@@ -498,6 +506,30 @@ void initUI() {
     } else {
         lv_obj_add_state(sd_sw, LV_STATE_DISABLED);
     }
+
+    // Screenshot Server row
+    lv_obj_t * scr_row = lv_obj_create(left_col);
+    lv_obj_set_size(scr_row, 144, 28);
+    lv_obj_set_flex_flow(scr_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(scr_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(scr_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(scr_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(scr_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(scr_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * scr_label = lv_label_create(scr_row);
+    lv_label_set_text(scr_label, "Scr Srv");
+    lv_obj_set_style_text_color(scr_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * scr_sw = lv_switch_create(scr_row);
+    lv_obj_set_size(scr_sw, 40, 20);
+    lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.getScreenshotServerEnabled()) {
+        lv_obj_add_state(scr_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(scr_sw, screenshot_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // --- Right column items ---
 

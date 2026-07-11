@@ -5,7 +5,9 @@
 
 #ifndef NATIVE_TEST
 #include "screenshot_manager.h"
+#include "sd_card_manager.h"
 #include <lvgl.h>
+#include <SD.h>
 #endif
 
 extern SettingsManager settings;
@@ -280,6 +282,19 @@ void WifiManager::handleNotFound() {
 #endif
 }
 
+/**
+ * @brief Starts or stops the screenshot server based on the given flag.
+ */
+void WifiManager::applyScreenshotServerSetting(bool enabled) {
+#ifndef NATIVE_TEST
+    if (enabled && _state == WIFI_STATE_CONNECTED) {
+        startScreenshotServer();
+    } else {
+        stopScreenshotServer();
+    }
+#endif
+}
+
 #ifndef NATIVE_TEST
 void WifiManager::startScreenshotServer() {
     if (_webServer) {
@@ -301,64 +316,38 @@ void WifiManager::stopScreenshotServer() {
 }
 
 void WifiManager::handleScreenshot() {
-    lv_obj_t* screen = lv_scr_act();
-    if (!screen) {
-        _webServer->send(500, "text/plain", "Error: No active screen");
+    const char* tmpPath = "/~scr_tmp.bmp";
+
+    // --- Capture the current screen to a temp BMP on SD first ---
+    if (!ScreenshotManager::captureToSD(tmpPath)) {
+        _webServer->send(500, "text/plain", "Error: Screenshot capture failed");
         return;
     }
-    
-    uint32_t width = lv_obj_get_width(screen);
-    uint32_t height = lv_obj_get_height(screen);
-    uint32_t dataSize = width * height * sizeof(lv_color_t);
-    
-    uint8_t* imgData = (uint8_t*)malloc(dataSize);
-    if (!imgData) {
-        _webServer->send(500, "text/plain", "Error: Out of memory for snapshot");
+
+    // --- Open the temp file and stream it over HTTP ---
+    File f = SD.open(tmpPath, FILE_READ);
+    if (!f) {
+        _webServer->send(500, "text/plain", "Error: Cannot open temp screenshot file");
+        SD.remove(tmpPath);
         return;
     }
-    
-    lv_img_dsc_t snapshot;
-    snapshot.data = imgData;
-    
-    lv_res_t res = lv_snapshot_take_to_buf(screen, LV_IMG_CF_TRUE_COLOR, &snapshot, imgData, dataSize);
-    if (res != LV_RES_OK) {
-        free(imgData);
-        _webServer->send(500, "text/plain", "Error: LVGL snapshot failed");
-        return;
-    }
-    
-    uint32_t imageSize = width * height * 3;
-    uint32_t totalSize = 54 + imageSize;
-    
+
+    const uint32_t totalSize = 54 + 320 * 240 * 3; // 230454
     _webServer->setContentLength(totalSize);
     _webServer->send(200, "image/bmp", "");
-    
+
+    // --- Stream file in 512-byte chunks to the client ---
     WiFiClient client = _webServer->client();
-    
-    BmpHeader header = ScreenshotManager::createHeader(width, height);
-    client.write(header.bytes, sizeof(header.bytes));
-    
-    lv_color_t* pixels = (lv_color_t*)imgData;
-    uint8_t* rowBuffer = (uint8_t*)malloc(width * 3);
-    if (!rowBuffer) {
-        free(imgData);
-        return;
-    }
-    
-    for (int y = (int)height - 1; y >= 0; y--) {
-        for (uint32_t x = 0; x < width; x++) {
-            lv_color_t pixel = pixels[y * width + x];
-            uint8_t r, g, b;
-            ScreenshotManager::convertRGB565ToBGR24(pixel.full, r, g, b);
-            
-            rowBuffer[x * 3] = b;     // Blue
-            rowBuffer[x * 3 + 1] = g; // Green
-            rowBuffer[x * 3 + 2] = r; // Red
+    uint8_t xferBuf[512];
+    while (f.available()) {
+        size_t n = f.read(xferBuf, sizeof(xferBuf));
+        if (n > 0) {
+            client.write(xferBuf, n);
         }
-        client.write(rowBuffer, width * 3);
     }
-    
-    free(rowBuffer);
-    free(imgData);
+
+    f.close();
+    SD.remove(tmpPath);
+    Serial.println("[WiFi] Screenshot streamed to remote client.");
 }
 #endif

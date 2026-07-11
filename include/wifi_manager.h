@@ -25,6 +25,7 @@ public:
     int8_t getRSSI() const;
     void setCredentials(const String& ssid, const String& password);
     String getAPSSID();
+    void applyScreenshotServerSetting(bool enabled);
 
 private:
     void startAPMode();
