@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: "Create filename"
         run: |
-          VAR="cy-weather-station-${{ github.ref_name }}-${{ matrix.env }}"
+          VAR="cyn-weather-station-${{ github.ref_name }}-${{ matrix.env }}"
           echo "BASENAME=${VAR,,}" >> $GITHUB_ENV
 
       - name: "Checkout repository"
@@ -64,7 +64,8 @@ jobs:
           echo "The BASENAME variable is: ${{ env.BASENAME }}"
           echo "As a shell variable: $BASENAME"
           ls -la
-        
+          unzip -l ${{ env.BASENAME }}.zip
+                  
       # - name: "Upload ${{ matrix.env }} artifacts"
       #   uses: actions/upload-artifact@v4
       #   with:
