@@ -42,14 +42,20 @@ jobs:
         with:
           python-version: '3.11'
 
+      # Install go-task
+      - name: Install Task
+        uses: go-task/setup-task@v2
+        
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
 
       - name: Copy secrets
-        run: cp config/secrets.h.example config/secrets.h
+        run: task init
+        # run: cp config/secrets.h.example config/secrets.h
 
       - name: Uncomment secrets
         run: "sed -i 's|// #|#|' config/secrets.h"
 
       - name: Build PlatformIO Project
-        run: pio run --environment ${{ matrix.env }}
+        run: task test
+        # run: pio run --environment ${{ matrix.env }}
