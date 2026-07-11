@@ -9,7 +9,7 @@ extern bool mock_sd_card_mounted;
 
 class SDFS : public FS {
 public:
-    bool begin(uint8_t ssPin = 5, SPIClass &spi = SPI, uint32_t frequency = 4000000) {
+    bool begin(uint8_t ssPin = 5, SPIClass &spi = SPI, uint32_t frequency = 4000000, const char * mountpoint = "/sd", uint8_t maxfiles = 5, bool formatOnFail = false) {
         if (mock_sd_card_present) {
             mock_sd_card_mounted = true;
             return true;
