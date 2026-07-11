@@ -5,11 +5,11 @@
     - [x] Add `_screenshotServerEnabled` member variable (default to true).
     - [x] Implement `getScreenshotServerEnabled()` and `setScreenshotServerEnabled(bool enabled)`.
     - [x] Load and save `"scr_srv"` preference key.
-- [ ] Task: Create `ScreenshotManager` class.
-    - [ ] Define helper functions to construct 54-byte BMP header for width/height.
-    - [ ] Implement `captureScreenToBMP` to allocate LVGL screenshot buffer and handle color space conversion (RGB565 to 24-bit BGR).
-- [ ] Task: Write unit tests for BMP formatting.
-    - [ ] Verify that BMP header fields (file size, offset, width, height, color depth) are constructed correctly.
+- [x] Task: Create `ScreenshotManager` class. (e2971bd)
+    - [x] Define helper functions to construct 54-byte BMP header for width/height.
+    - [x] Implement `captureScreenToBMP` to allocate LVGL screenshot buffer and handle color space conversion (RGB565 to 24-bit BGR).
+- [x] Task: Write unit tests for BMP formatting. (e2971bd)
+    - [x] Verify that BMP header fields (file size, offset, width, height, color depth) are constructed correctly.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Settings Preference & Screenshot Core Logic' (Protocol in workflow.md)
 
 ## Phase 2: Remote Screenshot Web Server Integration [checkpoint: ]
