@@ -1,6 +1,7 @@
 #include "wifi_manager.h"
 #include <Arduino.h>
 #include "settings_manager.h"
+#include "config/config.h"
 
 extern SettingsManager settings;
 
@@ -120,7 +121,13 @@ void WifiManager::startAPMode() {
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     delay(100);
     
-    WiFi.softAP(apSSID.c_str());
+    const char* apPass = nullptr;
+#ifdef AP_PASSWORD
+    if (strlen(AP_PASSWORD) >= 8) {
+        apPass = AP_PASSWORD;
+    }
+#endif
+    WiFi.softAP(apSSID.c_str(), apPass);
     delay(200);
 
     _dnsServer = new DNSServer();
