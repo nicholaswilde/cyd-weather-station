@@ -398,7 +398,7 @@ void initUI() {
     lv_obj_set_style_bg_opa(left_col, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(left_col, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(left_col, 2, LV_PART_MAIN);
-    lv_obj_set_style_pad_gap(left_col, 8, LV_PART_MAIN);
+    lv_obj_set_style_pad_gap(left_col, 4, LV_PART_MAIN);
     lv_obj_clear_flag(left_col, LV_OBJ_FLAG_SCROLLABLE);
 
     // Right Column — Brightness label+slider, Timezone label+buttons
@@ -416,7 +416,7 @@ void initUI() {
 
     // Unit (C/F) row
     lv_obj_t * unit_row = lv_obj_create(left_col);
-    lv_obj_set_size(unit_row, 144, 28);
+    lv_obj_set_size(unit_row, 144, 22);
     lv_obj_set_flex_flow(unit_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(unit_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(unit_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -443,7 +443,7 @@ void initUI() {
 
     // Auto Light row
     lv_obj_t * auto_row = lv_obj_create(left_col);
-    lv_obj_set_size(auto_row, 144, 28);
+    lv_obj_set_size(auto_row, 144, 22);
     lv_obj_set_flex_flow(auto_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(auto_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(auto_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -457,7 +457,7 @@ void initUI() {
 
     // DST switch row
     lv_obj_t * dst_row = lv_obj_create(left_col);
-    lv_obj_set_size(dst_row, 144, 28);
+    lv_obj_set_size(dst_row, 144, 22);
     lv_obj_set_flex_flow(dst_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(dst_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(dst_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -481,7 +481,7 @@ void initUI() {
 
     // SD Log row
     lv_obj_t * sd_row = lv_obj_create(left_col);
-    lv_obj_set_size(sd_row, 144, 28);
+    lv_obj_set_size(sd_row, 144, 22);
     lv_obj_set_flex_flow(sd_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(sd_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(sd_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -509,7 +509,7 @@ void initUI() {
 
     // Screenshot Server row
     lv_obj_t * scr_row = lv_obj_create(left_col);
-    lv_obj_set_size(scr_row, 144, 28);
+    lv_obj_set_size(scr_row, 144, 22);
     lv_obj_set_flex_flow(scr_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(scr_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(scr_row, LV_OPA_TRANSP, LV_PART_MAIN);
