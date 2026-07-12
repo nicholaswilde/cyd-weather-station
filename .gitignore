@@ -81,5 +81,3 @@ config/secrets.h
 
 # Node.js
 node_modules/
-screenshots/
-*.bmp

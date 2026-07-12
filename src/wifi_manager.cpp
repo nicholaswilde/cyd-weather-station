@@ -8,6 +8,7 @@
 #include "sd_card_manager.h"
 #include <lvgl.h>
 #include <SD.h>
+#include "ui.h"
 #endif
 
 extern SettingsManager settings;
@@ -302,6 +303,24 @@ void WifiManager::startScreenshotServer() {
     }
     _webServer = new WebServer(80);
     _webServer->on("/screenshot", [this]() { handleScreenshot(); });
+    _webServer->on("/api/tab", [this]() {
+        if (_webServer->hasArg("index")) {
+            int idx = _webServer->arg("index").toInt();
+            setUIActiveTab(idx);
+            _webServer->send(200, "text/plain", "Tab updated");
+        } else {
+            _webServer->send(400, "text/plain", "Missing index parameter");
+        }
+    });
+    _webServer->on("/api/orientation", [this]() {
+        if (_webServer->hasArg("val")) {
+            int val = _webServer->arg("val").toInt();
+            setUIOrientation(val);
+            _webServer->send(200, "text/plain", "Orientation updated");
+        } else {
+            _webServer->send(400, "text/plain", "Missing val parameter");
+        }
+    });
     _webServer->begin();
     Serial.println("[WiFi] Screenshot server started on port 80.");
 }
