@@ -29,12 +29,12 @@
     - [x] Rearrange multi-day forecast lists or cards to fit portrait flow.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Dynamic UI Layout Adaptation' (Protocol in workflow.md)
 
-## Phase 4: Orientation Settings Dropdown UI & Runtime Refresh [checkpoint: ]
-- [ ] Task: Add the "Orientation" dropdown in Settings panel.
-    - [ ] Add a dropdown widget with options: `Landscape`, `Portrait`, `Landscape Rev`, `Portrait Rev`.
-    - [ ] Set current value based on settings.
-- [ ] Task: Implement runtime rotation event handling.
-    - [ ] Create `orientation_dropdown_event_cb` callback.
-    - [ ] Update display rotation (`tft.setRotation`), touch controller rotation, and update preference.
-    - [ ] Trigger an LVGL screen size change event and call layout adapter to refresh UI layouts without rebooting.
+## Phase 4: Orientation Settings Dropdown UI & Runtime Refresh [checkpoint: 3fe33a9]
+- [x] Task: Add the "Orientation" dropdown in Settings panel. (3fe33a9)
+    - [x] Add a dropdown widget with options: `Landscape`, `Portrait`, `Landscape Rev`, `Portrait Rev`.
+    - [x] Set current value based on settings.
+- [x] Task: Implement runtime rotation event handling. (3fe33a9)
+    - [x] Create `orientation_dropdown_event_cb` callback.
+    - [x] Update display rotation (`tft.setRotation`), touch controller rotation, and update preference.
+    - [x] Trigger an LVGL screen size change event and call layout adapter to refresh UI layouts without rebooting.
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Orientation Settings Dropdown UI & Runtime Refresh' (Protocol in workflow.md)
