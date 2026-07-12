@@ -423,7 +423,7 @@ void initUI() {
             fore_day_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tomorrow" : "Day"));
             lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-            lv_obj_set_width(fore_day_label[i], 65);
+            lv_obj_set_width(fore_day_label[i], 75);
             lv_obj_set_style_text_align(fore_day_label[i], LV_TEXT_ALIGN_LEFT, 0);
 
             // 2. Weather Icon Label
@@ -438,7 +438,7 @@ void initUI() {
             fore_temp_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_temp_label[i], "--°/--°");
             lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-            lv_obj_set_width(fore_temp_label[i], 55);
+            lv_obj_set_width(fore_temp_label[i], 50);
             lv_obj_set_style_text_align(fore_temp_label[i], LV_TEXT_ALIGN_CENTER, 0);
 
             // 4. Status Description Label
@@ -446,7 +446,7 @@ void initUI() {
             lv_label_set_text(fore_desc_label[i], "Loading...");
             lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
             lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
-            lv_obj_set_width(fore_desc_label[i], 60);
+            lv_obj_set_width(fore_desc_label[i], 47);
             lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_RIGHT, 0);
         }
     }
