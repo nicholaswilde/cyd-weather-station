@@ -74,7 +74,7 @@ void initDisplayAndTouch() {
     // Initialize touch SPI and controller
     touchscreenSPI.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     ts.begin(touchscreenSPI);
-    ts.setRotation(rotation);
+    ts.setRotation(1);
 }
 
 void initLVGL() {

@@ -198,7 +198,6 @@ void loop() {
 
 #ifndef NATIVE_TEST
         tft.setRotation(orientation);
-        ts.setRotation(orientation);
 #endif
 
         // Update default display driver resolutions
