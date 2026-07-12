@@ -577,3 +577,60 @@ int WeatherClient::owmToWmoCode(int owmCode) {
     if (owmCode >= 803 && owmCode < 900) return 3; // Overcast
     return -1;
 }
+
+String WeatherClient::serializeWeatherData(const WeatherData& data) {
+    StaticJsonDocument<1024> doc;
+    doc["temp"] = data.temperature;
+    doc["hum"] = data.humidity;
+    doc["status"] = data.status;
+    doc["valid"] = data.valid;
+    doc["code"] = data.weatherCode;
+    doc["wind_spd"] = data.windSpeed;
+    doc["wind_dir"] = data.windDirection;
+    doc["city"] = data.cityName;
+
+    JsonArray forecast = doc.createNestedArray("forecast");
+    for (int i = 0; i < 3; i++) {
+        JsonObject fDay = forecast.createNestedObject();
+        fDay["temp_max"] = data.forecast[i].tempMax;
+        fDay["temp_min"] = data.forecast[i].tempMin;
+        fDay["code"] = data.forecast[i].weatherCode;
+        fDay["status"] = data.forecast[i].status;
+        fDay["day"] = data.forecast[i].dayName;
+    }
+
+    String output;
+    serializeJson(doc, output);
+    return output;
+}
+
+bool WeatherClient::deserializeWeatherData(const String& json, WeatherData& data) {
+    if (json.length() == 0) return false;
+    StaticJsonDocument<1024> doc;
+    DeserializationError error = deserializeJson(doc, json);
+    if (error) {
+        return false;
+    }
+
+    data.temperature = doc["temp"] | 0.0f;
+    data.humidity = doc["hum"] | 0;
+    data.status = doc["status"].as<String>();
+    data.valid = doc["valid"] | false;
+    data.weatherCode = doc["code"] | 0;
+    data.windSpeed = doc["wind_spd"] | 0.0f;
+    data.windDirection = doc["wind_dir"] | 0;
+    data.cityName = doc["city"].as<String>();
+
+    JsonArray forecast = doc["forecast"];
+    if (!forecast.isNull()) {
+        for (int i = 0; i < 3 && i < (int)forecast.size(); i++) {
+            JsonObject fDay = forecast[i];
+            data.forecast[i].tempMax = fDay["temp_max"] | 0.0f;
+            data.forecast[i].tempMin = fDay["temp_min"] | 0.0f;
+            data.forecast[i].weatherCode = fDay["code"] | 0;
+            data.forecast[i].status = fDay["status"].as<String>();
+            data.forecast[i].dayName = fDay["day"].as<String>();
+        }
+    }
+    return true;
+}

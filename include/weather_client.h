@@ -32,6 +32,8 @@ public:
     static String getWeatherDesc(int code);
     static bool parseWeatherJson(const char* json, WeatherData& data);
     bool parseOwmJson(const char* json, WeatherData& data);
+    static String serializeWeatherData(const WeatherData& data);
+    static bool deserializeWeatherData(const String& json, WeatherData& data);
 
 private:
     bool geocodeZip();
