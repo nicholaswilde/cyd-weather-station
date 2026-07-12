@@ -2,6 +2,14 @@
 version: '3'
 
 tasks:
+  screenshots:
+      desc: Capture all screenshots from the ESP32 CYD board
+      dotenv: ['.env']
+      preconditions:
+        - sh: 'test -n "$CYD_DEVICE_IP"'
+          msg: "CYD_DEVICE_IP is not set. Please add it to your .env file."
+      cmds:
+        - bash ./scripts/capture-screenshots.sh $CYD_DEVICE_IP
   uam:
     desc: Upload and monitor
     cmds:
