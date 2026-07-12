@@ -119,17 +119,17 @@ void mapTouchCoordinates(int16_t raw_x, int16_t raw_y, int16_t& out_x, int16_t& 
     
     // --- adjust based on orientation ---
     switch (orientation) {
-        case 0: // Portrait (240x320)
-            out_x = ly;
-            out_y = 320 - lx;
+        case 0: // Portrait Rev (240x320)
+            out_x = 240 - ly;
+            out_y = lx;
             break;
         case 1: // Landscape (320x240)
             out_x = lx;
             out_y = ly;
             break;
-        case 2: // Portrait Rev (240x320)
-            out_x = 240 - ly;
-            out_y = lx;
+        case 2: // Portrait (240x320)
+            out_x = ly;
+            out_y = 320 - lx;
             break;
         case 3: // Landscape Rev (320x240)
             out_x = 320 - lx;
