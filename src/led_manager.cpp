@@ -7,14 +7,20 @@
 
 LedManager::LedManager(int redPin, int greenPin, int bluePin)
     : _redPin(redPin), _greenPin(greenPin), _bluePin(bluePin),
-      _state(STATE_OFF), _enabled(true),
+      _state(STATE_OFF), _enabled(true), _brightness(255),
       _lastToggleTime(0), _blinkState(false), _stateStartTime(0),
       _stateInitialized(false) {}
 
 void LedManager::begin() {
-    pinMode(_redPin, OUTPUT);
-    pinMode(_greenPin, OUTPUT);
-    pinMode(_bluePin, OUTPUT);
+#ifndef NATIVE_TEST
+    // --- Set up three LEDC PWM channels for dimming the RGB LED ---
+    ledcSetup(5, 5000, 8); // channel 5 = red,   5 kHz, 8-bit
+    ledcSetup(6, 5000, 8); // channel 6 = green, 5 kHz, 8-bit
+    ledcSetup(7, 5000, 8); // channel 7 = blue,  5 kHz, 8-bit
+    ledcAttachPin(_redPin,   5);
+    ledcAttachPin(_greenPin, 6);
+    ledcAttachPin(_bluePin,  7);
+#endif
     turnOffAll();
     _stateInitialized = false;
 }
@@ -24,15 +30,24 @@ void LedManager::writePins(bool r, bool g, bool b) {
         turnOffAll();
         return;
     }
-    digitalWrite(_redPin, r ? LOW : HIGH);
-    digitalWrite(_greenPin, g ? LOW : HIGH);
-    digitalWrite(_bluePin, b ? LOW : HIGH);
+#ifndef NATIVE_TEST
+    // --- Pins are active-LOW; duty 255 = OFF, 0 = full-ON ---
+    // --- Scale active duty by _brightness (0-255) ---
+    int rDuty = r ? (255 - _brightness) : 255;
+    int gDuty = g ? (255 - _brightness) : 255;
+    int bDuty = b ? (255 - _brightness) : 255;
+    ledcWrite(5, rDuty);
+    ledcWrite(6, gDuty);
+    ledcWrite(7, bDuty);
+#endif
 }
 
 void LedManager::turnOffAll() {
-    digitalWrite(_redPin, HIGH);
-    digitalWrite(_greenPin, HIGH);
-    digitalWrite(_bluePin, HIGH);
+#ifndef NATIVE_TEST
+    ledcWrite(5, 255); // active-LOW: duty 255 = OFF
+    ledcWrite(6, 255);
+    ledcWrite(7, 255);
+#endif
 }
 
 void LedManager::update(unsigned long currentMillis) {
@@ -150,4 +165,20 @@ void LedManager::setEnabled(bool enabled) {
 
 bool LedManager::isEnabled() const {
     return _enabled;
+}
+
+/**
+ * @brief Sets the LED brightness (0-255) applied when a pin is active.
+ */
+void LedManager::setBrightness(int brightness) {
+    if (brightness < 0) brightness = 0;
+    if (brightness > 255) brightness = 255;
+    _brightness = brightness;
+}
+
+/**
+ * @brief Returns the current LED brightness value (0-255).
+ */
+int LedManager::getBrightness() const {
+    return _brightness;
 }

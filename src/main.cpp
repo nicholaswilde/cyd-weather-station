@@ -69,7 +69,8 @@ void setup() {
 
 #if USE_RGB_LED_STATUS
     led.begin();
-    led.setEnabled(true);
+    led.setEnabled(settings.getLedEnabled());
+    led.setBrightness(settings.getLedBrightness());
 #endif
 
     // Initialize physical BOOT button (GPIO 0)
@@ -161,6 +162,17 @@ void loop() {
         Serial.printf("[System] Screenshot server %s.\n", enabled ? "enabled" : "disabled");
         wifi.applyScreenshotServerSetting(enabled);
     }
+
+#if USE_RGB_LED_STATUS
+    if (settings_led_changed) {
+        settings_led_changed = false;
+        led.setEnabled(settings.getLedEnabled());
+        led.setBrightness(settings.getLedBrightness());
+        Serial.printf("[System] LED enabled=%s brightness=%d.\n",
+            settings.getLedEnabled() ? "true" : "false",
+            settings.getLedBrightness());
+    }
+#endif
 
     if (settings_theme_changed) {
         settings_theme_changed = false;

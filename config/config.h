@@ -51,6 +51,12 @@ extern int getCurrentThemeFlavor();
 // RGB LED Status Settings
 #define USE_RGB_LED_STATUS true
 
+// LED Enable / Brightness Defaults
+// LED_ENABLED: Set to false to disable the RGB status LED by default.
+#define LED_ENABLED true
+// LED_BRIGHTNESS: Default LED brightness (0–255). Full brightness = 255.
+#define LED_BRIGHTNESS 255
+
 // SD Card Weather Logging Settings
 #define USE_SD_LOGGING true
 

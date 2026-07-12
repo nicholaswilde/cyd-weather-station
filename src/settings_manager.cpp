@@ -12,6 +12,8 @@ SettingsManager::SettingsManager() {
     _sdLoggingEnabled = USE_SD_LOGGING;
     _screenshotServerEnabled = true;
     _screenOrientation = 1;
+    _ledEnabled = LED_ENABLED;
+    _ledBrightness = LED_BRIGHTNESS;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
 }
@@ -29,6 +31,8 @@ void SettingsManager::begin() {
     _sdLoggingEnabled = prefs.getBool("sd_log", USE_SD_LOGGING);
     _screenshotServerEnabled = prefs.getBool("scr_srv", true);
     _screenOrientation = prefs.getInt("screen_rot", 1);
+    _ledEnabled = prefs.getBool("led_en", LED_ENABLED);
+    _ledBrightness = prefs.getInt("led_bright", LED_BRIGHTNESS);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     
@@ -197,6 +201,37 @@ void SettingsManager::setScreenOrientation(int orientation) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putInt("screen_rot", _screenOrientation);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getLedEnabled() const {
+    return _ledEnabled;
+}
+
+void SettingsManager::setLedEnabled(bool enabled) {
+    if (_ledEnabled != enabled) {
+        _ledEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("led_en", _ledEnabled);
+        prefs.end();
+    }
+}
+
+int SettingsManager::getLedBrightness() const {
+    return _ledBrightness;
+}
+
+void SettingsManager::setLedBrightness(int brightness) {
+    if (brightness < 0) brightness = 0;
+    if (brightness > 255) brightness = 255;
+
+    if (_ledBrightness != brightness) {
+        _ledBrightness = brightness;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putInt("led_bright", _ledBrightness);
         prefs.end();
     }
 }

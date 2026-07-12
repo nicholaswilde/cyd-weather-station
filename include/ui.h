@@ -11,6 +11,7 @@ extern volatile bool settings_theme_changed;
 extern volatile bool settings_sd_logging_changed;
 extern volatile bool settings_screenshot_server_changed;
 extern volatile bool settings_orientation_changed;
+extern volatile bool settings_led_changed;
 
 void initUI();
 void updateWifiStatus(bool connected);

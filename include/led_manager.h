@@ -22,6 +22,8 @@ public:
     State getState() const;
     void setEnabled(bool enabled);
     bool isEnabled() const;
+    void setBrightness(int brightness);
+    int getBrightness() const;
 
 private:
     void writePins(bool r, bool g, bool b);
@@ -32,6 +34,7 @@ private:
     int _bluePin;
     State _state;
     bool _enabled;
+    int _brightness;
 
     unsigned long _lastToggleTime;
     bool _blinkState;

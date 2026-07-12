@@ -18,6 +18,8 @@ private:
     bool _sdLoggingEnabled;
     bool _screenshotServerEnabled;
     int _screenOrientation;
+    bool _ledEnabled;
+    int _ledBrightness;
     String _wifiSSID;
     String _wifiPassword;
 
@@ -51,6 +53,12 @@ public:
 
     int getScreenOrientation() const;
     void setScreenOrientation(int orientation);
+
+    bool getLedEnabled() const;
+    void setLedEnabled(bool enabled);
+
+    int getLedBrightness() const;
+    void setLedBrightness(int brightness);
 
     String getWifiSSID() const;
     void setWifiSSID(const String& ssid);

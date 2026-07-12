@@ -19,6 +19,7 @@ volatile bool settings_theme_changed = false;
 volatile bool settings_sd_logging_changed = false;
 volatile bool settings_screenshot_server_changed = false;
 volatile bool settings_orientation_changed = false;
+volatile bool settings_led_changed = false;
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *temp_label;
@@ -67,6 +68,36 @@ static void screenshot_sw_event_cb(lv_event_t * e) {
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
     settings.setScreenshotServerEnabled(is_checked);
     settings_screenshot_server_changed = true;
+}
+
+static void led_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setLedEnabled(is_checked);
+    settings_led_changed = true;
+    // --- Disable the brightness slider when LED is off ---
+    lv_obj_t * slider = (lv_obj_t *)lv_event_get_user_data(e);
+    if (slider) {
+        if (is_checked) {
+            lv_obj_clear_state(slider, LV_STATE_DISABLED);
+        } else {
+            lv_obj_add_state(slider, LV_STATE_DISABLED);
+        }
+    }
+}
+
+static void led_brightness_slider_event_cb(lv_event_t * e) {
+    lv_obj_t * slider = lv_event_get_target(e);
+    int val = lv_slider_get_value(slider);
+    settings.setLedBrightness(val);
+    settings_led_changed = true;
+    // --- Update the accompanying label ---
+    lv_obj_t * label = (lv_obj_t *)lv_event_get_user_data(e);
+    if (label) {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "LED: %d%%", (val * 100) / 255);
+        lv_label_set_text(label, buf);
+    }
 }
 
 static const int dropdown_to_rotation[] = {1, 2, 3, 0};
@@ -633,6 +664,53 @@ void initUI() {
     if (settings.getAutoBrightness()) {
         lv_obj_add_state(brightness_slider, LV_STATE_DISABLED);
     }
+
+    // LED row
+    lv_obj_t * led_row = lv_obj_create(left_col);
+    lv_obj_set_size(led_row, 144, 22);
+    lv_obj_set_flex_flow(led_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(led_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(led_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(led_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(led_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(led_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * led_label_txt = lv_label_create(led_row);
+    lv_label_set_text(led_label_txt, "LED");
+    lv_obj_set_style_text_color(led_label_txt, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    // --- right column LED Brightness label + slider (created first so we can pass as user_data) ---
+    lv_obj_t * led_slider_label = lv_label_create(right_col);
+    char led_slider_buf[32];
+    int led_bright_pct = (settings.getLedBrightness() * 100) / 255;
+    snprintf(led_slider_buf, sizeof(led_slider_buf), "LED: %d%%", led_bright_pct);
+    lv_label_set_text(led_slider_label, led_slider_buf);
+    lv_obj_set_style_text_color(led_slider_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * led_brightness_slider = lv_slider_create(right_col);
+    lv_obj_set_size(led_brightness_slider, 136, 14);
+    lv_obj_set_style_pad_top(led_brightness_slider, 4, LV_PART_KNOB);
+    lv_obj_set_style_pad_bottom(led_brightness_slider, 4, LV_PART_KNOB);
+    lv_obj_set_style_bg_color(led_brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(led_brightness_slider, lv_color_hex(COLOR_MAUVE), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(led_brightness_slider, lv_color_hex(COLOR_TEXT), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_slider_set_range(led_brightness_slider, 0, 255);
+    lv_slider_set_value(led_brightness_slider, settings.getLedBrightness(), LV_ANIM_OFF);
+    lv_obj_add_event_cb(led_brightness_slider, led_brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, led_slider_label);
+    if (!settings.getLedEnabled()) {
+        lv_obj_add_state(led_brightness_slider, LV_STATE_DISABLED);
+    }
+
+    // --- LED enable switch (created after slider so slider can be passed as user_data) ---
+    lv_obj_t * led_sw = lv_switch_create(led_row);
+    lv_obj_set_size(led_sw, 40, 20);
+    lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.getLedEnabled()) {
+        lv_obj_add_state(led_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(led_sw, led_sw_event_cb, LV_EVENT_VALUE_CHANGED, led_brightness_slider);
 
     // Auto switch (created after slider so we can pass slider as user_data)
     lv_obj_t * auto_sw = lv_switch_create(auto_row);
