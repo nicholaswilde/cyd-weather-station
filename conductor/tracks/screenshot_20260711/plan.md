@@ -22,7 +22,7 @@
 - [x] Task: Write unit tests to check web server handlers and endpoint routing. (926635a)
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Remote Screenshot Web Server Integration' (Protocol in workflow.md)
 
-## Phase 3: Physical BOOT Button Trigger & SD Card Storage [checkpoint: ]
+## Phase 3: Physical BOOT Button Trigger & SD Card Storage [checkpoint: 966d76a]
 - [x] Task: Set up physical BOOT button input handler. (966d76a)
     - [x] Define `BOOT_BUTTON_PIN` as GPIO 0.
     - [x] Initialize the pin as `INPUT_PULLUP` during setup.
@@ -31,7 +31,7 @@
     - [x] On press, generate a timestamped filename `/screenshot_YYYYMMDD_HHMMSS.bmp` using NTP time.
     - [x] Temporarily mount the SD card (if not already mounted), write the BMP header and pixel data row-by-row, then restore the previous SD mount state.
 - [x] Task: Write unit tests for file name formatting and SD storage writing mocks. (966d76a)
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Physical BOOT Button Trigger & SD Card Storage' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Physical BOOT Button Trigger & SD Card Storage' (Protocol in workflow.md)
 
 ## Phase 4: UI Toggle Control [checkpoint: 591890a]
 - [x] Task: Add "Screenshot Server" toggle switch in Settings UI screen. (591890a)
@@ -40,4 +40,4 @@
 - [x] Task: Handle dynamic server starting/stopping. (591890a)
     - [x] If toggled off, immediately stop the WebServer listener.
     - [x] If toggled on and Wi-Fi is connected, start the WebServer listener.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: UI Toggle Control' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: UI Toggle Control' (Protocol in workflow.md)
