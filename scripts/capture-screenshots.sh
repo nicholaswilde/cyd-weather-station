@@ -7,7 +7,7 @@
 #
 # @author Nicholas Wilde, 0xb299a622
 # @date 11 Jul 2026
-# @version 0.1.2
+# @version 0.1.3
 #
 ################################################################################
 
@@ -80,12 +80,14 @@ function capture_tab() {
     log "ERRO" "Failed to change tab: ${err_msg}" >&2
     exit 1
   fi
-  sleep 1.5
+  sleep 2
 
   log "INFO" "Capturing screenshot to ${out_file}..."
   mkdir -p screenshots
-  if err_msg=$(curl -sS -f -m 10 "http://${ip}/screenshot" -o "${out_file}" 2>&1); then
+  if err_msg=$(curl -sS -f -m 15 "http://${ip}/screenshot" -o "${out_file}" 2>&1); then
     log "INFO" "Successfully saved ${out_file}."
+    # Allow the ESP32 server and filesystem time to finish file operations and close the TCP socket
+    sleep 2
   else
     log "ERRO" "Screenshot capture failed: ${err_msg}" >&2
     exit 1
