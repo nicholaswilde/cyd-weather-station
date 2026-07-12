@@ -141,16 +141,29 @@ bool ScreenshotManager::beginCapture(const char* filepath) {
         return false;
     }
 
+    // --- Determine screen dimensions dynamically ---
+    uint32_t width = 320;
+    uint32_t height = 240;
+#ifndef NATIVE_TEST
+    lv_disp_t* disp = lv_disp_get_default();
+    if (disp != nullptr && disp->driver != nullptr) {
+        width = disp->driver->hor_res;
+        height = disp->driver->ver_res;
+    }
+#endif
+    _captureWidth = width;
+    _captureHeight = height;
+
     // --- Write BMP header (54 bytes) ---
     BmpHeader header = createHeader(_captureWidth, _captureHeight);
     _captureFile.write(header.bytes, sizeof(header.bytes));
 
     // --- Pre-fill entire pixel area with zeros using a small stack buffer.
     //     This reserves the space so later seek+write calls land in bounds. ---
-    uint8_t zeroBuf[_captureWidth * 3]; // 960 bytes on stack
+    uint8_t zeroBuf[320 * 3]; // Max 960 bytes on stack
     memset(zeroBuf, 0, sizeof(zeroBuf));
     for (uint32_t row = 0; row < _captureHeight; row++) {
-        _captureFile.write(zeroBuf, sizeof(zeroBuf));
+        _captureFile.write(zeroBuf, _captureWidth * 3);
     }
 
     _captureInProgress = true;
