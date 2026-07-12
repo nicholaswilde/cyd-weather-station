@@ -7,7 +7,7 @@
 #
 # @author Nicholas Wilde, 0xb299a622
 # @date 11 Jul 2026
-# @version 0.1.0
+# @version 0.1.1
 #
 ################################################################################
 
@@ -59,21 +59,29 @@ function capture_screen() {
   local tab="$4"
   local tab_name="$5"
   local out_file="screenshots/${rot_name}_${tab_name}.bmp"
+  local err_msg
 
   log "INFO" "Setting orientation to ${rot_name} (val=${rot})..."
-  curl -s -d "val=${rot}" "http://${ip}/api/orientation" > /dev/null
+  if ! err_msg=$(curl -sS -m 5 -d "val=${rot}" "http://${ip}/api/orientation" 2>&1); then
+    log "ERRO" "Connection failed: ${err_msg}" >&2
+    log "WARN" "Please ensure the Cheap Yellow Device is powered on, connected to the same network, and the Screenshot Server (Scr Srv) is turned ON in the Settings tab." >&2
+    exit 1
+  fi
   sleep 2
 
   log "INFO" "Setting tab to ${tab_name} (index=${tab})..."
-  curl -s -d "index=${tab}" "http://${ip}/api/tab" > /dev/null
+  if ! err_msg=$(curl -sS -m 5 -d "index=${tab}" "http://${ip}/api/tab" 2>&1); then
+    log "ERRO" "Failed to change tab: ${err_msg}" >&2
+    exit 1
+  fi
   sleep 1.5
 
   log "INFO" "Capturing screenshot to ${out_file}..."
   mkdir -p screenshots
-  if curl -s -f "http://${ip}/screenshot" -o "${out_file}"; then
+  if err_msg=$(curl -sS -f -m 10 "http://${ip}/screenshot" -o "${out_file}" 2>&1); then
     log "INFO" "Successfully saved ${out_file}."
   else
-    log "ERRO" "Failed to capture screenshot to ${out_file}."
+    log "ERRO" "Screenshot capture failed: ${err_msg}" >&2
     exit 1
   fi
 }
@@ -102,8 +110,8 @@ function main() {
 
   # 3. Restore to default Landscape orientation
   log "INFO" "Restoring default Landscape orientation..."
-  curl -s -d "val=1" "http://${ip}/api/orientation" > /dev/null
-  curl -s -d "index=0" "http://${ip}/api/tab" > /dev/null
+  curl -sS -m 5 -d "val=1" "http://${ip}/api/orientation" > /dev/null || true
+  curl -sS -m 5 -d "index=0" "http://${ip}/api/tab" > /dev/null || true
 
   log "INFO" "Screenshots automation process finished successfully."
 }
