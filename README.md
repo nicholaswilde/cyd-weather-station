@@ -68,9 +68,9 @@ The weather station periodically logs weather reports to a microSD card in CSV f
 
 | Screen | Landscape (320x240) | Portrait (240x320) |
 |---|---|---|
-| **Current Weather** | ![Landscape Current](screenshots/landscape_current.bmp) | ![Portrait Current](screenshots/portrait_current.bmp) |
-| **3-Day Forecast** | ![Landscape Forecast](screenshots/landscape_forecast.bmp) | ![Portrait Forecast](screenshots/portrait_forecast.bmp) |
-| **System Settings** | ![Landscape Settings](screenshots/landscape_settings.bmp) | ![Portrait Settings](screenshots/portrait_settings.bmp) |
+| **Current Weather** | ![Landscape Current](screenshots/landscape_current.png) | ![Portrait Current](screenshots/portrait_current.png) |
+| **3-Day Forecast** | ![Landscape Forecast](screenshots/landscape_forecast.png) | ![Portrait Forecast](screenshots/portrait_forecast.png) |
+| **System Settings** | ![Landscape Settings](screenshots/landscape_settings.png) | ![Portrait Settings](screenshots/portrait_settings.png) |
 
 The device supports capturing the current screen as a standard 24-bit BMP image via two methods:
 
