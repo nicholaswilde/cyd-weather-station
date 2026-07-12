@@ -12,6 +12,7 @@ This skill provides the instructions and guidelines for an agent to capture, org
 - The Cheap Yellow Device (CYD) must be powered on, running the latest firmware, and connected to the same local network as the host.
 - The web server must be running and accessible.
 - The utility script [capture-screenshots.sh](file:///home/nicholas/git/nicholaswilde/cyd-weather-station/scripts/capture-screenshots.sh) must be executable.
+- Python 3 and the `uv` tool must be installed on the host.
 
 ## How to capture screenshots
 
@@ -22,12 +23,12 @@ Run the automation script with the device's IP address:
 ```
 
 This script will automatically transition the screen across orientations and tabs to generate:
-- `screenshots/landscape_current.bmp`
-- `screenshots/landscape_forecast.bmp`
-- `screenshots/landscape_settings.bmp`
-- `screenshots/portrait_current.bmp`
-- `screenshots/portrait_forecast.bmp`
-- `screenshots/portrait_settings.bmp`
+- `screenshots/landscape_current.png`
+- `screenshots/landscape_forecast.png`
+- `screenshots/landscape_settings.png`
+- `screenshots/portrait_current.png`
+- `screenshots/portrait_forecast.png`
+- `screenshots/portrait_settings.png`
 
 ## Updating README.md
 

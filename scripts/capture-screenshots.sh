@@ -124,9 +124,9 @@ function main() {
   curl -sS -m 5 -d "index=0" "http://${ip}/api/tab" > /dev/null || true
 
   # 4. Automatically convert BMP to PNG
-  if commandExists node && [ -f "./scripts/convert-screenshots.js" ]; then
+  if commandExists uv && [ -f "./scripts/convert-screenshots.py" ]; then
     log "INFO" "Converting captured BMPs to PNG format..."
-    node ./scripts/convert-screenshots.js || log "WARN" "Automatic PNG conversion failed."
+    uv run ./scripts/convert-screenshots.py || log "WARN" "Automatic PNG conversion failed."
   fi
 
   log "INFO" "Screenshots automation process finished successfully."
