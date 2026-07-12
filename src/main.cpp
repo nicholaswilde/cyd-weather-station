@@ -1,6 +1,8 @@
 #include <Arduino.h>
+#include <WiFi.h>
 #include "display.h"
 #include "wifi_manager.h"
+#include "mqtt_manager.h"
 #include "ui.h"
 #include "weather_client.h"
 #include "config/config.h"
@@ -8,7 +10,6 @@
 #include "sd_card_manager.h"
 #include "weather_logger.h"
 #include "screenshot_manager.h"
-
 #include "backlight_manager.h"
 #include "settings_manager.h"
 BacklightManager backlight(TFT_BL, 0, 10.0f);
@@ -17,6 +18,7 @@ const unsigned long backlightUpdateInterval = 1000; // 1 second
 SettingsManager settings;
 
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
+MqttManager mqtt(MQTT_SERVER, MQTT_PORT, MQTT_USER, MQTT_PASSWORD);
 #if USE_ZIP_CODE
 WeatherClient weather(WEATHER_ZIP_CODE);
 #else
@@ -35,6 +37,17 @@ unsigned long lastWeatherUpdate = 0;
 const unsigned long weatherUpdateInterval = WEATHER_UPDATE_INTERVAL_MINS * 60 * 1000UL;
 bool hasInitialFetch = false;
 bool ntpInitialized = false;
+
+// --- Wi-Fi Event Handlers ---
+void onWiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
+    Serial.println("[System] Wi-Fi connected with IP! Signaling MQTT Manager...");
+    mqtt.onNetworkAvailable();
+}
+
+void onWiFiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info) {
+    Serial.println("[System] Wi-Fi disconnected! Signaling MQTT Manager...");
+    mqtt.onNetworkDisconnected();
+}
 
 void setup() {
     Serial.begin(115200);
@@ -62,7 +75,12 @@ void setup() {
 
     // Initialize UI layouts
     initUI();
+    mqtt.begin();
 
+    // Register the Wi-Fi events so MQTT knows when the network drops/connects
+    WiFi.onEvent(onWiFiGotIP, ARDUINO_EVENT_WIFI_STA_GOT_IP);
+    WiFi.onEvent(onWiFiDisconnect, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+        
     // Initialize WiFi Connection
     wifi.setCredentials(settings.getWifiSSID(), settings.getWifiPassword());
     wifi.begin();
@@ -72,7 +90,7 @@ void setup() {
     led.setEnabled(settings.getLedEnabled());
     led.setBrightness(settings.getLedBrightness());
 #endif
-
+    
     // Initialize physical BOOT button (GPIO 0)
     pinMode(BOOT_BUTTON_PIN, INPUT_PULLUP);
 }
@@ -322,6 +340,22 @@ void loop() {
                     updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed, data.windDirection);
                     updateForecastUI(data);
 
+                    // --- NEW: Publish to MQTT ---
+                    if (mqtt.isConnected()) {
+                        String tempPayload = String(data.temperature, 1);
+                        String humPayload = String(data.humidity);
+                        String windSpeedPayload = String(data.windSpeed, 1);
+                        // Get the Cardinal direction using the newly exposed UI function
+                        const char* cardinalDirection = getCardinalDirection(data.windDirection);
+                                                
+                        mqtt.publish("cyd/weather/temperature", tempPayload.c_str());
+                        mqtt.publish("cyd/weather/status", data.status.c_str());
+                        mqtt.publish("cyd/weather/humidity", humPayload.c_str());
+                        mqtt.publish("cyd/weather/wind_speed", windSpeedPayload.c_str());
+                        mqtt.publish("cyd/weather/wind_direction", cardinalDirection);
+                        mqtt.publish("cyd/weather/city", data.cityName.c_str());
+                    }
+                    // ----------------------------
 #ifndef NATIVE_TEST
                     // Update footer: "Last Update: HH:MM | City"
                     struct tm timeinfo;

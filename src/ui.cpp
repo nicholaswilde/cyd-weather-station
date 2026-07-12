@@ -912,7 +912,7 @@ static uint32_t getIconColor(int code) {
     }
 }
 
-static const char* getCardinalDirection(int degrees) {
+const char* getCardinalDirection(int degrees) {
     degrees = (degrees % 360 + 360) % 360;
     static const char* directions[] = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
                                        "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};

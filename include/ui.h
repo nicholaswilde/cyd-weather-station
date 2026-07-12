@@ -22,5 +22,6 @@ void updateForecastUI(const WeatherData& data);
 void updateFooterUI(const char* update_time, const char* city);
 void setUIActiveTab(int index);
 void setUIOrientation(int rotation);
+const char* getCardinalDirection(int degrees);
 
 #endif // UI_H
