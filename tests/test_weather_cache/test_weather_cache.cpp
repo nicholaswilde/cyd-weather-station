@@ -1,10 +1,15 @@
 #include <unity.h>
 #include "weather_client.h"
+#include "weather_cache.h"
 #include "../mocks/mocks.cpp"
 #include "../../src/weather_client.cpp"
+#include "../../src/sd_card_manager.cpp"
+#include "../../src/weather_cache.cpp"
 
 void setUp(void) {
-    // set up
+    mock_sd_card_present = true;
+    mock_sd_card_mounted = false;
+    mock_files.clear();
 }
 
 void tearDown(void) {
@@ -28,13 +33,11 @@ void test_weather_cache_serialization_deserialization(void) {
 
     String json = WeatherClient::serializeWeatherData(original);
     
-    // This will fail initially
     TEST_ASSERT_TRUE(json.length() > 0);
 
     WeatherData recovered;
     bool success = WeatherClient::deserializeWeatherData(json, recovered);
     
-    // This will fail initially
     TEST_ASSERT_TRUE(success);
     
     TEST_ASSERT_EQUAL_FLOAT(original.temperature, recovered.temperature);
@@ -55,8 +58,40 @@ void test_weather_cache_serialization_deserialization(void) {
     }
 }
 
+void test_weather_cache_sd_save_and_load(void) {
+    WeatherData original;
+    original.temperature = 18.0f;
+    original.humidity = 80;
+    original.status = "Rain";
+    original.valid = true;
+    original.weatherCode = 61;
+    original.windSpeed = 5.0f;
+    original.windDirection = 90;
+    original.cityName = "Seattle";
+    
+    original.forecast[0] = {20.0f, 12.0f, 61, "Rain", "Today"};
+    original.forecast[1] = {21.0f, 13.0f, 2, "Partly Cloudy", "Tomorrow"};
+    original.forecast[2] = {19.0f, 11.0f, 3, "Overcast", "Wednesday"};
+
+    // Save should succeed
+    bool save_ok = WeatherCache::saveCache(original);
+    TEST_ASSERT_TRUE(save_ok);
+
+    // Verify cache file exists in mock files map
+    TEST_ASSERT_TRUE(mock_files.find("/weather_cache.json") != mock_files.end());
+
+    // Load should succeed and match original
+    WeatherData recovered;
+    bool load_ok = WeatherCache::loadCache(recovered);
+    TEST_ASSERT_TRUE(load_ok);
+
+    TEST_ASSERT_EQUAL_FLOAT(original.temperature, recovered.temperature);
+    TEST_ASSERT_EQUAL_STRING(original.cityName.c_str(), recovered.cityName.c_str());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_cache_serialization_deserialization);
+    RUN_TEST(test_weather_cache_sd_save_and_load);
     return UNITY_END();
 }

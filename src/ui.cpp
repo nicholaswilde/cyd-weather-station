@@ -20,8 +20,10 @@ volatile bool settings_sd_logging_changed = false;
 volatile bool settings_screenshot_server_changed = false;
 volatile bool settings_orientation_changed = false;
 volatile bool settings_led_changed = false;
+volatile bool settings_mqtt_changed = false;
 
 static lv_obj_t *wifi_label;
+static lv_obj_t *offline_indicator = nullptr;
 static lv_obj_t *temp_label;
 static lv_obj_t *hum_label;
 static lv_obj_t *status_lbl;
@@ -68,6 +70,13 @@ static void screenshot_sw_event_cb(lv_event_t * e) {
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
     settings.setScreenshotServerEnabled(is_checked);
     settings_screenshot_server_changed = true;
+}
+
+static void mqtt_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setMqttEnabled(is_checked);
+    settings_mqtt_changed = true;
 }
 
 static void led_sw_event_cb(lv_event_t * e) {
@@ -213,6 +222,13 @@ void initUI() {
     lv_label_set_text(time_label, "--:--");
     lv_obj_set_style_text_color(time_label, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
     lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -18, 0);
+
+    // Offline Label in Header (initially hidden)
+    offline_indicator = lv_label_create(header);
+    lv_label_set_text(offline_indicator, LV_SYMBOL_WARNING " Offline");
+    lv_obj_set_style_text_color(offline_indicator, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+    lv_obj_align_to(offline_indicator, time_label, LV_ALIGN_OUT_LEFT_MID, -15, 0);
+    lv_obj_add_flag(offline_indicator, LV_OBJ_FLAG_HIDDEN);
 
     // 2. Tabview Setup
     lv_obj_t * tabview = lv_tabview_create(scr, LV_DIR_BOTTOM, 35);
@@ -638,6 +654,30 @@ void initUI() {
     }
     lv_obj_add_event_cb(scr_sw, screenshot_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
+    // MQTT row
+    lv_obj_t * mqtt_row = lv_obj_create(left_col);
+    lv_obj_set_size(mqtt_row, 144, 22);
+    lv_obj_set_flex_flow(mqtt_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(mqtt_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(mqtt_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(mqtt_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(mqtt_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(mqtt_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * mqtt_label = lv_label_create(mqtt_row);
+    lv_label_set_text(mqtt_label, "MQTT");
+    lv_obj_set_style_text_color(mqtt_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * mqtt_sw = lv_switch_create(mqtt_row);
+    lv_obj_set_size(mqtt_sw, 40, 20);
+    lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.getMqttEnabled()) {
+        lv_obj_add_state(mqtt_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(mqtt_sw, mqtt_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
     // --- Right column items ---
 
     // Brightness label
@@ -995,6 +1035,16 @@ void setUIOrientation(int rotation) {
         if (rotation != settings.getScreenOrientation()) {
             settings.setScreenOrientation(rotation);
             settings_orientation_changed = true;
+        }
+    }
+}
+
+void updateOfflineIndicator(bool isOffline) {
+    if (offline_indicator != nullptr) {
+        if (isOffline) {
+            lv_obj_clear_flag(offline_indicator, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(offline_indicator, LV_OBJ_FLAG_HIDDEN);
         }
     }
 }

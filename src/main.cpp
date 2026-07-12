@@ -9,6 +9,7 @@
 #include "led_manager.h"
 #include "sd_card_manager.h"
 #include "weather_logger.h"
+#include "weather_cache.h"
 #include "screenshot_manager.h"
 #include "backlight_manager.h"
 #include "settings_manager.h"
@@ -40,8 +41,12 @@ bool ntpInitialized = false;
 
 // --- Wi-Fi Event Handlers ---
 void onWiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
-    Serial.println("[System] Wi-Fi connected with IP! Signaling MQTT Manager...");
-    mqtt.onNetworkAvailable();
+    if (settings.getMqttEnabled()) {
+        Serial.println("[System] Wi-Fi connected with IP! Signaling MQTT Manager...");
+        mqtt.onNetworkAvailable();
+    } else {
+        Serial.println("[System] Wi-Fi connected with IP! MQTT is disabled, skipping connection.");
+    }
 }
 
 void onWiFiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -75,6 +80,18 @@ void setup() {
 
     // Initialize UI layouts
     initUI();
+
+    // Load offline cache on boot if available
+    WeatherData cachedData;
+    if (WeatherCache::loadCache(cachedData)) {
+        Serial.println("[System] Restored weather data from offline cache on boot.");
+        updateWeatherUI(cachedData.temperature, cachedData.humidity, cachedData.status.c_str(), cachedData.weatherCode, cachedData.windSpeed, cachedData.windDirection);
+        updateForecastUI(cachedData);
+        updateOfflineIndicator(true);
+        updateFooterUI("--:-- (Cached)", cachedData.cityName.c_str());
+        hasInitialFetch = true;
+    }
+
     mqtt.begin();
 
     // Register the Wi-Fi events so MQTT knows when the network drops/connects
@@ -179,6 +196,20 @@ void loop() {
         bool enabled = settings.getScreenshotServerEnabled();
         Serial.printf("[System] Screenshot server %s.\n", enabled ? "enabled" : "disabled");
         wifi.applyScreenshotServerSetting(enabled);
+    }
+
+    if (settings_mqtt_changed) {
+        settings_mqtt_changed = false;
+        bool enabled = settings.getMqttEnabled();
+        Serial.printf("[System] MQTT %s.\n", enabled ? "enabled" : "disabled");
+        if (enabled) {
+            if (wifi.getState() == WIFI_STATE_CONNECTED) {
+                Serial.println("[System] Wi-Fi connected, connecting to MQTT...");
+                mqtt.onNetworkAvailable();
+            }
+        } else {
+            mqtt.disconnect();
+        }
     }
 
 #if USE_RGB_LED_STATUS
@@ -339,6 +370,8 @@ void loop() {
                 if (data.valid) {
                     updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed, data.windDirection);
                     updateForecastUI(data);
+                    updateOfflineIndicator(false);
+                    WeatherCache::saveCache(data);
 
                     // --- NEW: Publish to MQTT ---
                     if (mqtt.isConnected()) {
