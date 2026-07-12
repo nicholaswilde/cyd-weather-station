@@ -9,16 +9,16 @@
     - [x] Add assertions in `tests/test_settings` to load, set, save, and reload different orientation values.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Settings Preference & State Management' (Protocol in workflow.md)
 
-## Phase 2: Dynamic Display & Touch Rotation Drivers [checkpoint: ]
-- [ ] Task: Implement dynamic touchscreen mapping functions in `display.cpp`.
-    - [ ] Update `my_touchpad_read()` to query the current orientation setting.
-    - [ ] Calculate coordinate mapping (X/Y axis swap, X inversion, Y inversion) for each of the 4 orientations (0, 1, 2, 3) to match visual pixels.
-- [ ] Task: Initialize rotation in boot sequence.
-    - [ ] Retrieve screen orientation preference before calling display initialization.
-    - [ ] Pass the orientation value to `TFT_eSPI` (using `tft.setRotation()`) and touch setup.
-- [ ] Task: Write unit tests to verify coordinates mapping logic.
-    - [ ] Implement mocks in test suite to verify coordinate conversion outputs for all four rotations.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Dynamic Display & Touch Rotation Drivers' (Protocol in workflow.md)
+## Phase 2: Dynamic Display & Touch Rotation Drivers [checkpoint: 799c7cb]
+- [x] Task: Implement dynamic touchscreen mapping functions in `display.cpp`. (799c7cb)
+    - [x] Update `my_touchpad_read()` to query the current orientation setting.
+    - [x] Calculate coordinate mapping (X/Y axis swap, X inversion, Y inversion) for each of the 4 orientations (0, 1, 2, 3) to match visual pixels.
+- [x] Task: Initialize rotation in boot sequence. (799c7cb)
+    - [x] Retrieve screen orientation preference before calling display initialization.
+    - [x] Pass the orientation value to `TFT_eSPI` (using `tft.setRotation()`) and touch setup.
+- [x] Task: Write unit tests to verify coordinates mapping logic. (799c7cb)
+    - [x] Implement mocks in test suite to verify coordinate conversion outputs for all four rotations.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Dynamic Display & Touch Rotation Drivers' (Protocol in workflow.md)
 
 ## Phase 3: Dynamic UI Layout Adaptation [checkpoint: ]
 - [ ] Task: Refactor layout generation to support dynamic dimensions.
