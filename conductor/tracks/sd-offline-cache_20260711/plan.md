@@ -6,6 +6,6 @@
 - [x] Task: Add test cases to verify serialization matches deserialization output (b7caae7)
 
 ## Phase 2: System Boot & UI Integration
-- [ ] Task: Implement offline check on boot; load `/weather_cache.json` if Wi-Fi cannot connect
-- [ ] Task: Design and display "Offline Cached Data" badge/indicator on status header
+- [x] Task: Implement offline check on boot; load `/weather_cache.json` if Wi-Fi cannot connect (69d6183)
+- [x] Task: Design and display "Offline Cached Data" badge/indicator on status header (69d6183)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md)
