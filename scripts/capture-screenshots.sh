@@ -123,6 +123,12 @@ function main() {
   curl -sS -m 5 -d "val=1" "http://${ip}/api/orientation" > /dev/null || true
   curl -sS -m 5 -d "index=0" "http://${ip}/api/tab" > /dev/null || true
 
+  # 4. Automatically convert BMP to PNG
+  if commandExists node && [ -f "./scripts/convert-screenshots.js" ]; then
+    log "INFO" "Converting captured BMPs to PNG format..."
+    node ./scripts/convert-screenshots.js || log "WARN" "Automatic PNG conversion failed."
+  fi
+
   log "INFO" "Screenshots automation process finished successfully."
 }
 
