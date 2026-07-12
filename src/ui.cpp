@@ -133,8 +133,16 @@ void initUI() {
     lv_obj_set_style_bg_color(scr, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
 
     // 1. Header Bar Container
+    int rotation = 1;
+#ifndef NATIVE_TEST
+    rotation = settings.getScreenOrientation();
+#endif
+    bool isLandscape = (rotation == 1 || rotation == 3);
+    int screen_w = isLandscape ? 320 : 240;
+    int screen_h = isLandscape ? 240 : 320;
+
     lv_obj_t * header = lv_obj_create(scr);
-    lv_obj_set_size(header, 320, 45);
+    lv_obj_set_size(header, screen_w, 45);
     lv_obj_align(header, LV_ALIGN_TOP_MID, 0, 0);
     lv_obj_set_style_bg_color(header, lv_color_hex(COLOR_CRUST), LV_PART_MAIN); // Crust header background
     lv_obj_set_style_border_width(header, 0, LV_PART_MAIN);
@@ -143,7 +151,7 @@ void initUI() {
 
     // Header Title (Time/App Name)
     lv_obj_t * title = lv_label_create(header);
-    lv_label_set_text(title, "CYD Weather Station");
+    lv_label_set_text(title, isLandscape ? "CYD Weather Station" : "CYD Weather");
     lv_obj_set_style_text_color(title, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
     lv_obj_align(title, LV_ALIGN_LEFT_MID, 10, 0);
 
@@ -161,7 +169,7 @@ void initUI() {
 
     // 2. Tabview Setup
     lv_obj_t * tabview = lv_tabview_create(scr, LV_DIR_BOTTOM, 35);
-    lv_obj_set_size(tabview, 320, 195);
+    lv_obj_set_size(tabview, screen_w, screen_h - 45);
     lv_obj_align(tabview, LV_ALIGN_BOTTOM_MID, 0, 0);
 
     // Style the tabview container and buttons
@@ -198,20 +206,30 @@ void initUI() {
     // Hide scrollbars so they don't appear visually
     lv_obj_set_scrollbar_mode(tab_curr, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_scrollbar_mode(tab_fore, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scrollbar_mode(tab_settings, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scrollbar_mode(tab_settings, isLandscape ? LV_SCROLLBAR_MODE_OFF : LV_SCROLLBAR_MODE_AUTO);
 
     // Weather Placeholders inside tab_curr
     icon_lbl = lv_label_create(tab_curr);
     lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    // lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 25, 0);
-    lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 12, -10);
+    
+    if (isLandscape) {
+        lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 12, -10);
+    } else {
+        lv_obj_align(icon_lbl, LV_ALIGN_TOP_MID, 0, 10);
+    }
  
     // Vertical container for details on the right side
     lv_obj_t * details_cnt = lv_obj_create(tab_curr);
     lv_obj_set_size(details_cnt, 200, 115);
-    lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, -10, -10);
+    
+    if (isLandscape) {
+        lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, -10, -10);
+    } else {
+        lv_obj_align(details_cnt, LV_ALIGN_BOTTOM_MID, 0, -25);
+    }
+    
     lv_obj_set_flex_flow(details_cnt, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(details_cnt, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 
@@ -324,21 +342,13 @@ void initUI() {
     lv_obj_set_style_text_color(footer_label, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
     lv_obj_set_style_text_font(footer_label, &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_long_mode(footer_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_width(footer_label, 300);
+    lv_obj_set_width(footer_label, isLandscape ? 300 : 220);
     lv_obj_set_style_text_align(footer_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_align(footer_label, LV_ALIGN_BOTTOM_MID, 0, -2);
 
     // 3-day Forecast Card Layout inside tab_fore
     for (int i = 0; i < 3; i++) {
         lv_obj_t *day_card = lv_obj_create(tab_fore);
-        lv_obj_set_size(day_card, 90, 130);
-        if (i == 0) {
-            lv_obj_align(day_card, LV_ALIGN_LEFT_MID, 10, 0);
-        } else if (i == 1) {
-            lv_obj_align(day_card, LV_ALIGN_CENTER, 0, 0);
-        } else {
-            lv_obj_align(day_card, LV_ALIGN_RIGHT_MID, -10, 0);
-        }
         
         // Card styling: Catppuccin Mantle background
         lv_obj_set_style_bg_color(day_card, lv_color_hex(COLOR_MANTLE), LV_PART_MAIN);
@@ -346,53 +356,102 @@ void initUI() {
         lv_obj_set_style_border_width(day_card, 1, LV_PART_MAIN);
         lv_obj_set_style_border_color(day_card, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
         lv_obj_clear_flag(day_card, LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_set_style_pad_all(day_card, 2, LV_PART_MAIN);
 
-        // 1. Day Name Label
-        fore_day_label[i] = lv_label_create(day_card);
-        lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tomorrow" : "Day"));
-        lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-        lv_obj_align(fore_day_label[i], LV_ALIGN_TOP_MID, 0, 5);
+        if (isLandscape) {
+            lv_obj_set_size(day_card, 90, 130);
+            if (i == 0) {
+                lv_obj_align(day_card, LV_ALIGN_LEFT_MID, 10, 0);
+            } else if (i == 1) {
+                lv_obj_align(day_card, LV_ALIGN_CENTER, 0, 0);
+            } else {
+                lv_obj_align(day_card, LV_ALIGN_RIGHT_MID, -10, 0);
+            }
+            lv_obj_set_style_pad_all(day_card, 2, LV_PART_MAIN);
 
-        // 2. Weather Icon Label
-        fore_icon_label[i] = lv_label_create(day_card);
-        lv_obj_set_style_text_font(fore_icon_label[i], &weather_icons_24, LV_PART_MAIN);
-        lv_label_set_text(fore_icon_label[i], "\xef\x81\xbb"); // fallback NA
-        lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-        lv_obj_align(fore_icon_label[i], LV_ALIGN_CENTER, 0, -5);
+            // 1. Day Name Label
+            fore_day_label[i] = lv_label_create(day_card);
+            lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tomorrow" : "Day"));
+            lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+            lv_obj_align(fore_day_label[i], LV_ALIGN_TOP_MID, 0, 5);
 
-        // 3. Temp Label (High / Low)
-        fore_temp_label[i] = lv_label_create(day_card);
-        lv_label_set_text(fore_temp_label[i], "--°/--°");
-        lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-        lv_obj_align(fore_temp_label[i], LV_ALIGN_BOTTOM_MID, 0, -22);
+            // 2. Weather Icon Label
+            fore_icon_label[i] = lv_label_create(day_card);
+            lv_obj_set_style_text_font(fore_icon_label[i], &weather_icons_24, LV_PART_MAIN);
+            lv_label_set_text(fore_icon_label[i], "\xef\x81\xbb"); // fallback NA
+            lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+            lv_obj_align(fore_icon_label[i], LV_ALIGN_CENTER, 0, -5);
 
-        // 4. Status Description Label
-        fore_desc_label[i] = lv_label_create(day_card);
-        lv_label_set_text(fore_desc_label[i], "Loading...");
-        lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
-        lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
-        lv_obj_set_width(fore_desc_label[i], 80);
-        lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_align(fore_desc_label[i], LV_ALIGN_BOTTOM_MID, 0, -4);
+            // 3. Temp Label (High / Low)
+            fore_temp_label[i] = lv_label_create(day_card);
+            lv_label_set_text(fore_temp_label[i], "--°/--°");
+            lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+            lv_obj_align(fore_temp_label[i], LV_ALIGN_BOTTOM_MID, 0, -22);
+
+            // 4. Status Description Label
+            fore_desc_label[i] = lv_label_create(day_card);
+            lv_label_set_text(fore_desc_label[i], "Loading...");
+            lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
+            lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
+            lv_obj_set_width(fore_desc_label[i], 80);
+            lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_CENTER, 0);
+            lv_obj_align(fore_desc_label[i], LV_ALIGN_BOTTOM_MID, 0, -4);
+        } else {
+            // Portrait layout: row flow, vertical list
+            lv_obj_set_size(day_card, 220, 42);
+            lv_obj_align(day_card, LV_ALIGN_TOP_MID, 0, 5 + i * 47);
+            lv_obj_set_flex_flow(day_card, LV_FLEX_FLOW_ROW);
+            lv_obj_set_flex_align(day_card, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+            lv_obj_set_style_pad_all(day_card, 6, LV_PART_MAIN);
+            lv_obj_set_style_pad_gap(day_card, 4, LV_PART_MAIN);
+
+            // 1. Day Name Label
+            fore_day_label[i] = lv_label_create(day_card);
+            lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tomorrow" : "Day"));
+            lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+            lv_obj_set_width(fore_day_label[i], 65);
+            lv_obj_set_style_text_align(fore_day_label[i], LV_TEXT_ALIGN_LEFT, 0);
+
+            // 2. Weather Icon Label
+            fore_icon_label[i] = lv_label_create(day_card);
+            lv_obj_set_style_text_font(fore_icon_label[i], &weather_icons_24, LV_PART_MAIN);
+            lv_label_set_text(fore_icon_label[i], "\xef\x81\xbb"); // fallback NA
+            lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+            lv_obj_set_width(fore_icon_label[i], 24);
+            lv_obj_set_style_text_align(fore_icon_label[i], LV_TEXT_ALIGN_CENTER, 0);
+
+            // 3. Temp Label (High / Low)
+            fore_temp_label[i] = lv_label_create(day_card);
+            lv_label_set_text(fore_temp_label[i], "--°/--°");
+            lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+            lv_obj_set_width(fore_temp_label[i], 55);
+            lv_obj_set_style_text_align(fore_temp_label[i], LV_TEXT_ALIGN_CENTER, 0);
+
+            // 4. Status Description Label
+            fore_desc_label[i] = lv_label_create(day_card);
+            lv_label_set_text(fore_desc_label[i], "Loading...");
+            lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
+            lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
+            lv_obj_set_width(fore_desc_label[i], 60);
+            lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_RIGHT, 0);
+        }
     }
 
     // --- 3. Settings Tab UI Widgets ---
     // Main container inside tab_settings
     lv_obj_t * settings_grid = lv_obj_create(tab_settings);
-    lv_obj_set_size(settings_grid, 310, 150);
-    lv_obj_align(settings_grid, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_set_flex_flow(settings_grid, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(settings_grid, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_set_size(settings_grid, isLandscape ? 310 : 230, isLandscape ? 150 : 250);
+    lv_obj_align(settings_grid, LV_ALIGN_CENTER, 0, isLandscape ? 0 : 5);
+    lv_obj_set_flex_flow(settings_grid, isLandscape ? LV_FLEX_FLOW_ROW : LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(settings_grid, isLandscape ? LV_FLEX_ALIGN_SPACE_BETWEEN : LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(settings_grid, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(settings_grid, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(settings_grid, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_gap(settings_grid, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_gap(settings_grid, isLandscape ? 0 : 4, LV_PART_MAIN);
     lv_obj_clear_flag(settings_grid, LV_OBJ_FLAG_SCROLLABLE);
 
     // Left Column — Unit switch, Auto Light switch, Theme dropdown
     lv_obj_t * left_col = lv_obj_create(settings_grid);
-    lv_obj_set_size(left_col, 148, 148);
+    lv_obj_set_size(left_col, 148, isLandscape ? 148 : 130);
     lv_obj_set_flex_flow(left_col, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(left_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(left_col, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -403,7 +462,7 @@ void initUI() {
 
     // Right Column — Brightness label+slider, Timezone label+buttons
     lv_obj_t * right_col = lv_obj_create(settings_grid);
-    lv_obj_set_size(right_col, 155, 148);
+    lv_obj_set_size(right_col, 155, isLandscape ? 148 : 110);
     lv_obj_set_flex_flow(right_col, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(right_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(right_col, LV_OPA_TRANSP, LV_PART_MAIN);
