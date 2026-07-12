@@ -1,13 +1,13 @@
 # Implementation Plan - screen-orientation_20260711
 
-## Phase 1: Settings Preference & State Management [checkpoint: ]
-- [ ] Task: Update `SettingsManager` class (header and source) to support screen orientation persistence.
-    - [ ] Add `_screenOrientation` member variable (default to 1 / Landscape).
-    - [ ] Implement `getScreenOrientation()` and `setScreenOrientation(int orientation)`.
-    - [ ] Save and load the preference key `"screen_rot"` using ESP32 Preferences library.
-- [ ] Task: Write unit tests to verify preference storage of screen orientation.
-    - [ ] Add assertions in `tests/test_settings` to load, set, save, and reload different orientation values.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Settings Preference & State Management' (Protocol in workflow.md)
+## Phase 1: Settings Preference & State Management [checkpoint: e32d8c6]
+- [x] Task: Update `SettingsManager` class (header and source) to support screen orientation persistence. (e32d8c6)
+    - [x] Add `_screenOrientation` member variable (default to 1 / Landscape).
+    - [x] Implement `getScreenOrientation()` and `setScreenOrientation(int orientation)`.
+    - [x] Save and load the preference key `"screen_rot"` using ESP32 Preferences library.
+- [x] Task: Write unit tests to verify preference storage of screen orientation. (e32d8c6)
+    - [x] Add assertions in `tests/test_settings` to load, set, save, and reload different orientation values.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Settings Preference & State Management' (Protocol in workflow.md)
 
 ## Phase 2: Dynamic Display & Touch Rotation Drivers [checkpoint: ]
 - [ ] Task: Implement dynamic touchscreen mapping functions in `display.cpp`.
