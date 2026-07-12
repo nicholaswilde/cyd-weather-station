@@ -20,6 +20,10 @@ void LedManager::begin() {
     ledcAttachPin(_redPin,   5);
     ledcAttachPin(_greenPin, 6);
     ledcAttachPin(_bluePin,  7);
+#else
+    pinMode(_redPin, OUTPUT);
+    pinMode(_greenPin, OUTPUT);
+    pinMode(_bluePin, OUTPUT);
 #endif
     turnOffAll();
     _stateInitialized = false;
@@ -39,6 +43,10 @@ void LedManager::writePins(bool r, bool g, bool b) {
     ledcWrite(5, rDuty);
     ledcWrite(6, gDuty);
     ledcWrite(7, bDuty);
+#else
+    digitalWrite(_redPin, r ? LOW : HIGH);
+    digitalWrite(_greenPin, g ? LOW : HIGH);
+    digitalWrite(_bluePin, b ? LOW : HIGH);
 #endif
 }
 
@@ -47,6 +55,10 @@ void LedManager::turnOffAll() {
     ledcWrite(5, 255); // active-LOW: duty 255 = OFF
     ledcWrite(6, 255);
     ledcWrite(7, 255);
+#else
+    digitalWrite(_redPin, HIGH);
+    digitalWrite(_greenPin, HIGH);
+    digitalWrite(_bluePin, HIGH);
 #endif
 }
 
