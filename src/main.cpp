@@ -191,6 +191,61 @@ void loop() {
         hasInitialFetch = false;
     }
 
+    if (settings_orientation_changed) {
+        settings_orientation_changed = false;
+        int orientation = settings.getScreenOrientation();
+        Serial.printf("[System] Screen orientation changed to %d. Updating display...\n", orientation);
+
+#ifndef NATIVE_TEST
+        tft.setRotation(orientation);
+        ts.setRotation(orientation);
+#endif
+
+        // Update default display driver resolutions
+        lv_disp_t * disp = lv_disp_get_default();
+        if (disp != NULL) {
+            lv_disp_drv_t * disp_drv = disp->driver;
+            if (disp_drv != NULL) {
+                if (orientation == 1 || orientation == 3) {
+                    disp_drv->hor_res = 320;
+                    disp_drv->ver_res = 240;
+                } else {
+                    disp_drv->hor_res = 240;
+                    disp_drv->ver_res = 320;
+                }
+                lv_disp_drv_update(disp, disp_drv);
+            }
+        }
+
+        // Clean active screen and rebuild
+        lv_obj_clean(lv_scr_act());
+        initUI();
+
+        // Force immediate updates of WiFi, time, and weather
+        bool isConnected = (wifi.getState() == WIFI_STATE_CONNECTED);
+        if (wifi.getState() == WIFI_STATE_AP_MODE) {
+            updateWifiAPMode(wifi.getAPSSID().c_str());
+        } else {
+            updateWifiStatus(isConnected);
+        }
+
+#ifndef NATIVE_TEST
+        if (ntpInitialized) {
+            struct tm timeinfo;
+            if (getLocalTime(&timeinfo)) {
+                char timeStr[16];
+                strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                updateTimeUI(timeStr);
+            }
+        }
+#else
+        updateTimeUI("12:00");
+#endif
+
+        // Trigger weather fetch to redraw UI with new dimensions
+        hasInitialFetch = false;
+    }
+
 #ifndef NATIVE_TEST
     if (settings.getAutoBrightness()) {
         if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {

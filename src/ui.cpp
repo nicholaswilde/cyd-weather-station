@@ -18,6 +18,7 @@ volatile bool settings_timezone_changed = false;
 volatile bool settings_theme_changed = false;
 volatile bool settings_sd_logging_changed = false;
 volatile bool settings_screenshot_server_changed = false;
+volatile bool settings_orientation_changed = false;
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *temp_label;
@@ -65,6 +66,20 @@ static void screenshot_sw_event_cb(lv_event_t * e) {
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
     settings.setScreenshotServerEnabled(is_checked);
     settings_screenshot_server_changed = true;
+}
+
+static const int dropdown_to_rotation[] = {1, 2, 3, 0};
+static const int rotation_to_dropdown[] = {3, 0, 1, 2};
+
+static void orientation_dropdown_event_cb(lv_event_t * e) {
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    uint16_t selected = lv_dropdown_get_selected(dropdown);
+    int rotation = 1;
+    if (selected < 4) {
+        rotation = dropdown_to_rotation[selected];
+    }
+    settings.setScreenOrientation(rotation);
+    settings_orientation_changed = true;
 }
 
 static void unit_sw_event_cb(lv_event_t * e) {
@@ -468,7 +483,7 @@ void initUI() {
     lv_obj_set_style_bg_opa(right_col, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(right_col, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(right_col, 2, LV_PART_MAIN);
-    lv_obj_set_style_pad_gap(right_col, 8, LV_PART_MAIN);
+    lv_obj_set_style_pad_gap(right_col, isLandscape ? 4 : 8, LV_PART_MAIN);
     lv_obj_clear_flag(right_col, LV_OBJ_FLAG_SCROLLABLE);
 
     // --- Left column items ---
@@ -676,7 +691,7 @@ void initUI() {
 
     // Theme selector dropdown
     lv_obj_t * theme_dropdown = lv_dropdown_create(right_col);
-    lv_obj_set_size(theme_dropdown, 148, 30);
+    lv_obj_set_size(theme_dropdown, 148, 26);
     lv_dropdown_set_options(theme_dropdown, "Mocha\nMacchiato\nFrappe\nLatte");
     lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
     lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -692,6 +707,28 @@ void initUI() {
     lv_obj_set_style_border_color(dropdown_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
     lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
     lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
+
+    // Orientation selector dropdown
+    lv_obj_t * orientation_dropdown = lv_dropdown_create(right_col);
+    lv_obj_set_size(orientation_dropdown, 148, 26);
+    lv_dropdown_set_options(orientation_dropdown, "Landscape\nPortrait\nLandscape Rev\nPortrait Rev");
+    int initial_rot = settings.getScreenOrientation();
+    if (initial_rot >= 0 && initial_rot < 4) {
+        lv_dropdown_set_selected(orientation_dropdown, rotation_to_dropdown[initial_rot]);
+    }
+    lv_obj_add_event_cb(orientation_dropdown, orientation_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    // Dropdown button body
+    lv_obj_set_style_bg_color(orientation_dropdown, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(orientation_dropdown, lv_color_hex(COLOR_TEXT), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(orientation_dropdown, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(orientation_dropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // Dropdown list
+    lv_obj_t * orient_list = lv_dropdown_get_list(orientation_dropdown);
+    lv_obj_set_style_bg_color(orient_list, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
+    lv_obj_set_style_text_color(orient_list, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_border_color(orient_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(orient_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(orient_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
 }
 
 void updateWifiStatus(bool connected) {
