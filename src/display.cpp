@@ -3,6 +3,9 @@
 #include <SPI.h>
 #include "config/config.h"
 #include "screenshot_manager.h"
+#include "settings_manager.h"
+
+extern SettingsManager settings;
 
 TFT_eSPI tft = TFT_eSPI();
 SPIClass touchscreenSPI(HSPI); // HSPI is used for the touch SPI bus on CYD
@@ -36,15 +39,13 @@ static void my_touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
     if (ts.touched()) {
         TS_Point p = ts.getPoint();
         
-        // Calibration values for landscape (rotation = 1)
-        // Adjust these mapped raw values to coordinate pixels on ESP32-2432S028R
-        int16_t x = map(p.x, 200, 3700, 0, 320);
-        int16_t y = map(p.y, 200, 3900, 0, 240);
-        
-        if (x < 0) x = 0;
-        if (x >= 320) x = 319;
-        if (y < 0) y = 0;
-        if (y >= 240) y = 239;
+        int16_t x = 0;
+        int16_t y = 0;
+        int orientation = 1;
+#ifndef NATIVE_TEST
+        orientation = settings.getScreenOrientation();
+#endif
+        mapTouchCoordinates(p.x, p.y, x, y, orientation);
 
         data->state = LV_INDEV_STATE_PR;
         data->point.x = x;
@@ -60,15 +61,20 @@ void initDisplayAndTouch() {
     // Setting it as a digital GPIO output first would prevent LEDC from controlling
     // brightness, causing the screen to be stuck at full brightness.
 
+    int rotation = 1;
+#ifndef NATIVE_TEST
+    rotation = settings.getScreenOrientation();
+#endif
+
     // Initialize display
     tft.init();
-    tft.setRotation(1); // Landscape
+    tft.setRotation(rotation);
     tft.fillScreen(TFT_BLACK);
 
     // Initialize touch SPI and controller
     touchscreenSPI.begin(XPT2046_CLK, XPT2046_MISO, XPT2046_MOSI, XPT2046_CS);
     ts.begin(touchscreenSPI);
-    ts.setRotation(1); // Set to match display
+    ts.setRotation(rotation);
 }
 
 void initLVGL() {
@@ -78,8 +84,19 @@ void initLVGL() {
     // Initialize display driver
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
-    disp_drv.hor_res = 320;
-    disp_drv.ver_res = 240;
+    
+    int rotation = 1;
+#ifndef NATIVE_TEST
+    rotation = settings.getScreenOrientation();
+#endif
+    if (rotation == 1 || rotation == 3) {
+        disp_drv.hor_res = 320;
+        disp_drv.ver_res = 240;
+    } else {
+        disp_drv.hor_res = 240;
+        disp_drv.ver_res = 320;
+    }
+    
     disp_drv.flush_cb = my_disp_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register(&disp_drv);
@@ -90,4 +107,46 @@ void initLVGL() {
     indev_drv.type = LV_INDEV_TYPE_POINTER;
     indev_drv.read_cb = my_touchpad_read;
     lv_indev_drv_register(&indev_drv);
+}
+
+/**
+ * @brief Maps raw touch coordinates to screen pixels based on rotation.
+ */
+void mapTouchCoordinates(int16_t raw_x, int16_t raw_y, int16_t& out_x, int16_t& out_y, int orientation) {
+    // --- map to base dimensions ---
+    int16_t lx = map(raw_x, 200, 3700, 0, 320);
+    int16_t ly = map(raw_y, 200, 3900, 0, 240);
+    
+    // --- adjust based on orientation ---
+    switch (orientation) {
+        case 0: // Portrait (240x320)
+            out_x = ly;
+            out_y = 320 - lx;
+            break;
+        case 1: // Landscape (320x240)
+            out_x = lx;
+            out_y = ly;
+            break;
+        case 2: // Portrait Rev (240x320)
+            out_x = 240 - ly;
+            out_y = lx;
+            break;
+        case 3: // Landscape Rev (320x240)
+            out_x = 320 - lx;
+            out_y = 240 - ly;
+            break;
+        default:
+            out_x = lx;
+            out_y = ly;
+            break;
+    }
+    
+    // --- bounds clamping ---
+    int16_t max_x = (orientation == 1 || orientation == 3) ? 319 : 239;
+    int16_t max_y = (orientation == 1 || orientation == 3) ? 239 : 319;
+    
+    if (out_x < 0) out_x = 0;
+    if (out_x > max_x) out_x = max_x;
+    if (out_y < 0) out_y = 0;
+    if (out_y > max_y) out_y = max_y;
 }

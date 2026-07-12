@@ -63,4 +63,16 @@ public:
 
 extern SerialMock Serial;
 
+// --- Arduino helper map function ---
+inline long map(long x, long in_min, long in_max, long out_min, long out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+// --- SPI and Touch controller pin mocks for native compilation ---
+#define XPT2046_CS 33
+#define XPT2046_IRQ 36
+#define XPT2046_MOSI 32
+#define XPT2046_MISO 39
+#define XPT2046_CLK 25
+
 #endif // ARDUINO_MOCK_H

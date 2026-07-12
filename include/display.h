@@ -10,5 +10,6 @@ extern XPT2046_Touchscreen ts;
 
 void initDisplayAndTouch();
 void initLVGL();
+void mapTouchCoordinates(int16_t raw_x, int16_t raw_y, int16_t& out_x, int16_t& out_y, int orientation);
 
 #endif // DISPLAY_H
