@@ -400,6 +400,8 @@ void loop() {
                         if (settings.getSdLoggingEnabled() && SdCardManager::isCardPresent()) {
                             WeatherLogger::logWeather(timeinfo, data);
                         }
+                    } else {
+                        updateFooterUI("--:--", data.cityName.c_str());
                     }
 #else
                     updateFooterUI("12:00", data.cityName.c_str());
