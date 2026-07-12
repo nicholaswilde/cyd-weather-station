@@ -45,7 +45,7 @@ void test_weather_client_fetch_weather_native_mock(void) {
 
     TEST_ASSERT_EQUAL_FLOAT(26.0f, data.forecast[1].tempMax);
     TEST_ASSERT_EQUAL_FLOAT(14.8f, data.forecast[1].tempMin);
-    TEST_ASSERT_EQUAL_STRING("Tomorrow", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
     TEST_ASSERT_EQUAL_STRING("Mainly clear", data.forecast[1].status.c_str());
 
     TEST_ASSERT_EQUAL_FLOAT(24.8f, data.forecast[2].tempMax);
@@ -99,7 +99,7 @@ void test_weather_client_parse_weather_json_custom(void) {
 
     TEST_ASSERT_EQUAL_FLOAT(16.0f, data.forecast[1].tempMax);
     TEST_ASSERT_EQUAL_FLOAT(11.0f, data.forecast[1].tempMin);
-    TEST_ASSERT_EQUAL_STRING("Tomorrow", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
     TEST_ASSERT_EQUAL_STRING("Foggy", data.forecast[1].status.c_str());
 
     TEST_ASSERT_EQUAL_FLOAT(22.0f, data.forecast[2].tempMax);

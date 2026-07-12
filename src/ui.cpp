@@ -385,7 +385,7 @@ void initUI() {
 
             // 1. Day Name Label
             fore_day_label[i] = lv_label_create(day_card);
-            lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tomorrow" : "Day"));
+            lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tmrw" : "Day"));
             lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
             lv_obj_align(fore_day_label[i], LV_ALIGN_TOP_MID, 0, 5);
 
@@ -421,7 +421,7 @@ void initUI() {
 
             // 1. Day Name Label
             fore_day_label[i] = lv_label_create(day_card);
-            lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tomorrow" : "Day"));
+            lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tmrw" : "Day"));
             lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
             lv_obj_set_width(fore_day_label[i], 75);
             lv_obj_set_style_text_align(fore_day_label[i], LV_TEXT_ALIGN_LEFT, 0);

@@ -309,12 +309,12 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
                 if (time_valid && dateStr == today_str) {
                     data.forecast[i].dayName = "Today";
                 } else if (time_valid && dateStr == tomorrow_str) {
-                    data.forecast[i].dayName = "Tomorrow";
+                    data.forecast[i].dayName = "Tmrw";
                 } else if (!time_valid && i == 0) {
                     // NTP not yet synced: assume API day 0 is today
                     data.forecast[i].dayName = "Today";
                 } else if (!time_valid && i == 1) {
-                    data.forecast[i].dayName = "Tomorrow";
+                    data.forecast[i].dayName = "Tmrw";
                 } else if (dateStr.length() >= 10) {
                     // Compute short day name from the date string
                     const char* dateCStr = dateStr.c_str();
@@ -532,11 +532,11 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
             if (time_valid && dateStr == today_str) {
                 data.forecast[i].dayName = "Today";
             } else if (time_valid && dateStr == tomorrow_str) {
-                data.forecast[i].dayName = "Tomorrow";
+                data.forecast[i].dayName = "Tmrw";
             } else if (!time_valid && i == 0) {
                 data.forecast[i].dayName = "Today";
             } else if (!time_valid && i == 1) {
-                data.forecast[i].dayName = "Tomorrow";
+                data.forecast[i].dayName = "Tmrw";
             } else {
                 // Compute short day name using Sakamoto
                 int y = (dateStr[0]-'0')*1000 + (dateStr[1]-'0')*100
