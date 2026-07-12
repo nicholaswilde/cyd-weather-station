@@ -487,10 +487,10 @@ void initUI() {
     // --- 3. Settings Tab UI Widgets ---
     // Main container inside tab_settings
     lv_obj_t * settings_grid = lv_obj_create(tab_settings);
-    lv_obj_set_size(settings_grid, isLandscape ? 310 : 230, isLandscape ? 150 : LV_SIZE_CONTENT);
-    lv_obj_align(settings_grid, isLandscape ? LV_ALIGN_CENTER : LV_ALIGN_TOP_MID, 0, isLandscape ? 0 : 5);
+    lv_obj_set_size(settings_grid, isLandscape ? 310 : 230, LV_SIZE_CONTENT);
+    lv_obj_align(settings_grid, LV_ALIGN_TOP_MID, 0, 5);
     lv_obj_set_flex_flow(settings_grid, isLandscape ? LV_FLEX_FLOW_ROW : LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(settings_grid, isLandscape ? LV_FLEX_ALIGN_SPACE_BETWEEN : LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_flex_align(settings_grid, isLandscape ? LV_FLEX_ALIGN_SPACE_BETWEEN : LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(settings_grid, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(settings_grid, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(settings_grid, 0, LV_PART_MAIN);
@@ -499,7 +499,7 @@ void initUI() {
 
     // Left Column — Unit switch, Auto Light switch, Theme dropdown
     lv_obj_t * left_col = lv_obj_create(settings_grid);
-    lv_obj_set_size(left_col, 148, isLandscape ? 148 : LV_SIZE_CONTENT);
+    lv_obj_set_size(left_col, 148, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(left_col, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(left_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(left_col, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -510,7 +510,7 @@ void initUI() {
 
     // Right Column — Brightness label+slider, Timezone label+buttons
     lv_obj_t * right_col = lv_obj_create(settings_grid);
-    lv_obj_set_size(right_col, 155, isLandscape ? 148 : LV_SIZE_CONTENT);
+    lv_obj_set_size(right_col, 155, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(right_col, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(right_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(right_col, LV_OPA_TRANSP, LV_PART_MAIN);
