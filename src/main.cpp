@@ -89,7 +89,6 @@ void setup() {
         updateForecastUI(cachedData);
         updateOfflineIndicator(true);
         updateFooterUI("--:-- (Cached)", cachedData.cityName.c_str());
-        hasInitialFetch = true;
     }
 
     mqtt.begin();

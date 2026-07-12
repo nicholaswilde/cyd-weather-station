@@ -4,25 +4,34 @@
 #include <FS.h>
 
 bool WeatherCache::saveCache(const WeatherData& data) {
-    if (!SdCardManager::begin()) {
-        Serial.println("[WeatherCache] Error: SD card not mounted, cannot save cache.");
-        return false;
+    bool wasMounted = SdCardManager::isMounted();
+    if (!wasMounted) {
+        if (!SdCardManager::begin()) {
+            Serial.println("[WeatherCache] Error: SD card not mounted, cannot save cache.");
+            return false;
+        }
     }
 
     String json = WeatherClient::serializeWeatherData(data);
     if (json.length() == 0) {
         Serial.println("[WeatherCache] Error: Serialization produced empty string.");
+        if (!wasMounted) SdCardManager::end();
         return false;
     }
 
     File file = SD.open("/weather_cache.json", "w");
     if (!file) {
         Serial.println("[WeatherCache] Error: Failed to open cache file for writing.");
+        if (!wasMounted) SdCardManager::end();
         return false;
     }
 
     size_t bytesWritten = file.print(json);
     file.close();
+
+    if (!wasMounted) {
+        SdCardManager::end();
+    }
 
     if (bytesWritten == 0) {
         Serial.println("[WeatherCache] Error: Failed to write JSON cache data.");
@@ -34,19 +43,24 @@ bool WeatherCache::saveCache(const WeatherData& data) {
 }
 
 bool WeatherCache::loadCache(WeatherData& data) {
-    if (!SdCardManager::begin()) {
-        Serial.println("[WeatherCache] Error: SD card not mounted, cannot load cache.");
-        return false;
+    bool wasMounted = SdCardManager::isMounted();
+    if (!wasMounted) {
+        if (!SdCardManager::begin()) {
+            Serial.println("[WeatherCache] Error: SD card not mounted, cannot load cache.");
+            return false;
+        }
     }
 
     if (!SD.exists("/weather_cache.json")) {
         Serial.println("[WeatherCache] Error: Cache file does not exist.");
+        if (!wasMounted) SdCardManager::end();
         return false;
     }
 
     File file = SD.open("/weather_cache.json", "r");
     if (!file) {
         Serial.println("[WeatherCache] Error: Failed to open cache file for reading.");
+        if (!wasMounted) SdCardManager::end();
         return false;
     }
 
@@ -55,6 +69,10 @@ bool WeatherCache::loadCache(WeatherData& data) {
         json += (char)file.read();
     }
     file.close();
+
+    if (!wasMounted) {
+        SdCardManager::end();
+    }
 
     bool success = WeatherClient::deserializeWeatherData(json, data);
     if (!success) {
