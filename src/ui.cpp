@@ -30,6 +30,7 @@ static lv_obj_t *icon_lbl;
 static lv_obj_t *wind_label;
 static lv_obj_t *tz_val_label;
 static lv_obj_t *footer_label;
+static lv_obj_t *tabview_obj = nullptr;
 
 // Forecast widgets
 static lv_obj_t *fore_day_label[3];
@@ -184,6 +185,7 @@ void initUI() {
 
     // 2. Tabview Setup
     lv_obj_t * tabview = lv_tabview_create(scr, LV_DIR_BOTTOM, 35);
+    tabview_obj = tabview;
     lv_obj_set_size(tabview, screen_w, screen_h - 45);
     lv_obj_align(tabview, LV_ALIGN_BOTTOM_MID, 0, 0);
 
@@ -902,4 +904,19 @@ void updateFooterUI(const char* update_time, const char* city) {
         snprintf(buf, sizeof(buf), "Last Update: %s", update_time);
     }
     lv_label_set_text(footer_label, buf);
+}
+
+void setUIActiveTab(int index) {
+    if (tabview_obj != nullptr && index >= 0 && index < 3) {
+        lv_tabview_set_act(tabview_obj, index, LV_ANIM_OFF);
+    }
+}
+
+void setUIOrientation(int rotation) {
+    if (rotation >= 0 && rotation < 4) {
+        if (rotation != settings.getScreenOrientation()) {
+            settings.setScreenOrientation(rotation);
+            settings_orientation_changed = true;
+        }
+    }
 }

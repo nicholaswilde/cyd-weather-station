@@ -7,7 +7,7 @@
 #
 # @author Nicholas Wilde, 0xb299a622
 # @date 11 Jul 2026
-# @version 0.1.1
+# @version 0.1.2
 #
 ################################################################################
 
@@ -52,13 +52,10 @@ function check_dependencies() {
   fi  
 }
 
-function capture_screen() {
+function set_orientation() {
   local ip="$1"
   local rot="$2"
   local rot_name="$3"
-  local tab="$4"
-  local tab_name="$5"
-  local out_file="screenshots/${rot_name}_${tab_name}.bmp"
   local err_msg
 
   log "INFO" "Setting orientation to ${rot_name} (val=${rot})..."
@@ -67,7 +64,16 @@ function capture_screen() {
     log "WARN" "Please ensure the Cheap Yellow Device is powered on, connected to the same network, and the Screenshot Server (Scr Srv) is turned ON in the Settings tab." >&2
     exit 1
   fi
-  sleep 2
+  sleep 2.5
+}
+
+function capture_tab() {
+  local ip="$1"
+  local rot_name="$2"
+  local tab="$3"
+  local tab_name="$4"
+  local out_file="screenshots/${rot_name}_${tab_name}.bmp"
+  local err_msg
 
   log "INFO" "Setting tab to ${tab_name} (index=${tab})..."
   if ! err_msg=$(curl -sS -m 5 -d "index=${tab}" "http://${ip}/api/tab" 2>&1); then
@@ -99,14 +105,16 @@ function main() {
   log "INFO" "Starting screenshot capture process from device ${ip}..."
 
   # 1. Capture Landscape screens (rotation 1)
-  capture_screen "${ip}" 1 "landscape" 0 "current"
-  capture_screen "${ip}" 1 "landscape" 1 "forecast"
-  capture_screen "${ip}" 1 "landscape" 2 "settings"
+  set_orientation "${ip}" 1 "landscape"
+  capture_tab "${ip}" "landscape" 0 "current"
+  capture_tab "${ip}" "landscape" 1 "forecast"
+  capture_tab "${ip}" "landscape" 2 "settings"
 
   # 2. Capture Portrait screens (rotation 2)
-  capture_screen "${ip}" 2 "portrait" 0 "current"
-  capture_screen "${ip}" 2 "portrait" 1 "forecast"
-  capture_screen "${ip}" 2 "portrait" 2 "settings"
+  set_orientation "${ip}" 2 "portrait"
+  capture_tab "${ip}" "portrait" 0 "current"
+  capture_tab "${ip}" "portrait" 1 "forecast"
+  capture_tab "${ip}" "portrait" 2 "settings"
 
   # 3. Restore to default Landscape orientation
   log "INFO" "Restoring default Landscape orientation..."
