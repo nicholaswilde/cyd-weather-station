@@ -37,4 +37,4 @@
     - [x] Create `orientation_dropdown_event_cb` callback.
     - [x] Update display rotation (`tft.setRotation`), touch controller rotation, and update preference.
     - [x] Trigger an LVGL screen size change event and call layout adapter to refresh UI layouts without rebooting.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Orientation Settings Dropdown UI & Runtime Refresh' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Orientation Settings Dropdown UI & Runtime Refresh' (Protocol in workflow.md)
