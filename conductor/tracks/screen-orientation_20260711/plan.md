@@ -20,14 +20,14 @@
     - [x] Implement mocks in test suite to verify coordinate conversion outputs for all four rotations.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Dynamic Display & Touch Rotation Drivers' (Protocol in workflow.md)
 
-## Phase 3: Dynamic UI Layout Adaptation [checkpoint: ]
-- [ ] Task: Refactor layout generation to support dynamic dimensions.
-    - [ ] Use `lv_disp_get_hor_res(NULL)` and `lv_disp_get_ver_res(NULL)` instead of hardcoded 320/240 dimensions.
-    - [ ] Implement a layout adapter function that adjusts container flows (flex column for portrait, flex row for landscape).
-- [ ] Task: Update the Settings and Forecast screen elements to wrap/stack cleanly.
-    - [ ] Reposition Settings column containers so they fit in 240 width (portrait).
-    - [ ] Rearrange multi-day forecast lists or cards to fit portrait flow.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Dynamic UI Layout Adaptation' (Protocol in workflow.md)
+## Phase 3: Dynamic UI Layout Adaptation [checkpoint: 19ecafa]
+- [x] Task: Refactor layout generation to support dynamic dimensions. (19ecafa)
+    - [x] Use `lv_disp_get_hor_res(NULL)` and `lv_disp_get_ver_res(NULL)` instead of hardcoded 320/240 dimensions.
+    - [x] Implement a layout adapter function that adjusts container flows (flex column for portrait, flex row for landscape).
+- [x] Task: Update the Settings and Forecast screen elements to wrap/stack cleanly. (19ecafa)
+    - [x] Reposition Settings column containers so they fit in 240 width (portrait).
+    - [x] Rearrange multi-day forecast lists or cards to fit portrait flow.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Dynamic UI Layout Adaptation' (Protocol in workflow.md)
 
 ## Phase 4: Orientation Settings Dropdown UI & Runtime Refresh [checkpoint: ]
 - [ ] Task: Add the "Orientation" dropdown in Settings panel.
