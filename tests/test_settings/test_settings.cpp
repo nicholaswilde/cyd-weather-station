@@ -25,6 +25,7 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL(true, settings.getDstEnabled());
     TEST_ASSERT_EQUAL(true, settings.getSdLoggingEnabled());
     TEST_ASSERT_EQUAL(true, settings.getScreenshotServerEnabled());
+    TEST_ASSERT_EQUAL(1, settings.getScreenOrientation());
 }
 
 void test_settings_save_and_load(void) {
@@ -39,6 +40,7 @@ void test_settings_save_and_load(void) {
     settings.setDstEnabled(false);
     settings.setSdLoggingEnabled(false);
     settings.setScreenshotServerEnabled(false);
+    settings.setScreenOrientation(2);
     
     // Create new instance to simulate re-reading from preferences
     SettingsManager settings_new;
@@ -51,6 +53,7 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL(false, settings_new.getDstEnabled());
     TEST_ASSERT_EQUAL(false, settings_new.getSdLoggingEnabled());
     TEST_ASSERT_EQUAL(false, settings_new.getScreenshotServerEnabled());
+    TEST_ASSERT_EQUAL(2, settings_new.getScreenOrientation());
 }
 
 void test_settings_wifi_credentials(void) {

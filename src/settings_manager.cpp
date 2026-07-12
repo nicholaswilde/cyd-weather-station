@@ -11,6 +11,7 @@ SettingsManager::SettingsManager() {
     _themeFlavor = CATPPUCCIN_MOCHA;
     _sdLoggingEnabled = USE_SD_LOGGING;
     _screenshotServerEnabled = true;
+    _screenOrientation = 1;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
 }
@@ -27,6 +28,7 @@ void SettingsManager::begin() {
     _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
     _sdLoggingEnabled = prefs.getBool("sd_log", USE_SD_LOGGING);
     _screenshotServerEnabled = prefs.getBool("scr_srv", true);
+    _screenOrientation = prefs.getInt("screen_rot", 1);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     
@@ -178,6 +180,23 @@ void SettingsManager::setScreenshotServerEnabled(bool enabled) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putBool("scr_srv", _screenshotServerEnabled);
+        prefs.end();
+    }
+}
+
+int SettingsManager::getScreenOrientation() const {
+    return _screenOrientation;
+}
+
+void SettingsManager::setScreenOrientation(int orientation) {
+    if (orientation < 0) orientation = 0;
+    if (orientation > 3) orientation = 3;
+
+    if (_screenOrientation != orientation) {
+        _screenOrientation = orientation;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putInt("screen_rot", _screenOrientation);
         prefs.end();
     }
 }

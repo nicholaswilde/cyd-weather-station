@@ -17,6 +17,7 @@ private:
     int _themeFlavor;
     bool _sdLoggingEnabled;
     bool _screenshotServerEnabled;
+    int _screenOrientation;
     String _wifiSSID;
     String _wifiPassword;
 
@@ -47,6 +48,9 @@ public:
 
     bool getScreenshotServerEnabled() const;
     void setScreenshotServerEnabled(bool enabled);
+
+    int getScreenOrientation() const;
+    void setScreenOrientation(int orientation);
 
     String getWifiSSID() const;
     void setWifiSSID(const String& ssid);
