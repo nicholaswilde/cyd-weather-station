@@ -5,7 +5,7 @@
 
 // Location Settings
 #define USE_ZIP_CODE true
-#define WEATHER_ZIP_CODE "92692"
+#define WEATHER_ZIP_CODE "90210"
 
 // Coordinates (Fallback if USE_ZIP_CODE is false)
 #define WEATHER_API_LATITUDE "37.7749"
