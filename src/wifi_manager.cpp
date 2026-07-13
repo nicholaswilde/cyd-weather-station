@@ -168,7 +168,6 @@ void WifiManager::startAPMode() {
     _webServer->on("/", [this]() { handleRoot(); });
     _webServer->on("/save", [this]() { handleSave(); });
     _webServer->on("/scan", [this]() {
-        WiFi.scanNetworks(true);
         _webServer->sendHeader("Location", "/", true);
         _webServer->send(302, "text/plain", "");
     });
@@ -176,19 +175,15 @@ void WifiManager::startAPMode() {
     registerOTARoutes();
     _webServer->begin();
 
-    // Start background network scan immediately
-    WiFi.scanNetworks(true);
-
     Serial.println("[WiFi] AP Mode Web Server and DNS Server started.");
 #endif
 }
 
 void WifiManager::handleRoot() {
 #ifndef NATIVE_TEST
-    int n = WiFi.scanComplete();
-    if (n == -2) {
-        WiFi.scanNetworks(true);
-        n = -1;
+    int n = WiFi.scanNetworks();
+    if (n < 0) {
+        n = 0;
     }
 
     String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
@@ -250,6 +245,7 @@ void WifiManager::handleRoot() {
     html += "</body></html>";
 
     _webServer->send(200, "text/html", html);
+    WiFi.scanDelete();
 #endif
 }
 
