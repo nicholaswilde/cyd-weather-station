@@ -216,23 +216,32 @@ void initUI() {
     lv_label_set_long_mode(header_title, LV_LABEL_LONG_DOT);
     lv_obj_set_width(header_title, isLandscape ? 220 : 155);
 
+    // Header Right-Side Status Area Container (handles WiFi, clock, offline label)
+    lv_obj_t * header_right_area = lv_obj_create(header);
+    lv_obj_set_size(header_right_area, LV_SIZE_CONTENT, 30);
+    lv_obj_align(header_right_area, LV_ALIGN_RIGHT_MID, -5, 0);
+    lv_obj_set_flex_flow(header_right_area, LV_FLEX_FLOW_ROW_REVERSE);
+    lv_obj_set_flex_align(header_right_area, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(header_right_area, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(header_right_area, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(header_right_area, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_gap(header_right_area, 8, LV_PART_MAIN);
+    lv_obj_clear_flag(header_right_area, LV_OBJ_FLAG_SCROLLABLE);
+
     // Wi-Fi Label in Header
-    wifi_label = lv_label_create(header);
+    wifi_label = lv_label_create(header_right_area);
     lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
     lv_obj_set_style_text_color(wifi_label, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN); // Yellow / Amber icon
-    lv_obj_align(wifi_label, LV_ALIGN_RIGHT_MID, -5, 0);
 
     // Time Label in Header
-    time_label = lv_label_create(header);
+    time_label = lv_label_create(header_right_area);
     lv_label_set_text(time_label, "--:--");
     lv_obj_set_style_text_color(time_label, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
-    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -8, 0);
 
     // Offline Label in Header (initially hidden)
-    offline_indicator = lv_label_create(header);
+    offline_indicator = lv_label_create(header_right_area);
     lv_label_set_text(offline_indicator, LV_SYMBOL_WARNING " Offline");
     lv_obj_set_style_text_color(offline_indicator, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-    lv_obj_align_to(offline_indicator, time_label, LV_ALIGN_OUT_LEFT_MID, -8, 0);
     lv_obj_add_flag(offline_indicator, LV_OBJ_FLAG_HIDDEN);
 
     // 2. Tabview Setup
