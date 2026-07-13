@@ -19,7 +19,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Sleep/Screen-Saver Mode (Screen Preservation)**
+- [x] **Track: Sleep/Screen-Saver Mode (Screen Preservation)**
   *Link: [./tracks/screensaver-mode_20260711/](./tracks/screensaver-mode_20260711/)*
 
 ---
