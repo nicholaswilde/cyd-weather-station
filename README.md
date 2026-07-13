@@ -29,13 +29,15 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **SD Log**: Enable/disable weather logging to a microSD card.
   - **Screenshot Server**: Enable/disable the remote screenshot HTTP server.
   - **MQTT**: Toggle publishing weather variables to MQTT topics.
-  - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks and touch coordinates update instantly.
+  - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks, header height dynamically increases to 60px in portrait to fit a wrapped two-line title without overlaps, and touch coordinates update instantly.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured timezone offset.
 - **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
 - **Wi-Fi AP Captive Portal Fallback**:
   - Automatically hosts an open Soft AP (`cyd-weather-station-<mac_short>`) if connection fails or times out after 30 seconds on boot.
   - Runs a captive portal configuration web server and DNS redirector on `192.168.4.1` for selecting networks and setting Wi-Fi credentials.
+  - Runs background async Wi-Fi scans after AP initialization to prevent client disconnections (common on ESP32 during active/blocking scans).
+  - Web interface `/scan` triggers background scanning with a friendly redirect loader screen, displaying updated networks on completion.
   - Dynamically displays step-by-step connection instructions (SSID name and IP address) directly on the screen while AP Mode is active.
   - Colors the header Wi-Fi icon **Mauve** when in setup configuration mode.
 - **SD Card Weather Logging**:
