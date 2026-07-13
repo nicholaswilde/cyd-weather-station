@@ -25,6 +25,8 @@ volatile bool settings_mqtt_changed = false;
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *offline_indicator = nullptr;
+static lv_obj_t *header_title = nullptr;
+static bool is_offline_mode = false;
 static lv_obj_t *temp_label;
 static lv_obj_t *hum_label;
 static lv_obj_t *status_lbl;
@@ -207,10 +209,12 @@ void initUI() {
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
 
     // Header Title (Time/App Name)
-    lv_obj_t * title = lv_label_create(header);
-    lv_label_set_text(title, isLandscape ? "CYD Weather Station" : "CYD Weather");
-    lv_obj_set_style_text_color(title, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
-    lv_obj_align(title, LV_ALIGN_LEFT_MID, 10, 0);
+    header_title = lv_label_create(header);
+    lv_label_set_text(header_title, "CYD Weather Station");
+    lv_obj_set_style_text_color(header_title, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
+    lv_obj_align(header_title, LV_ALIGN_LEFT_MID, 10, 0);
+    lv_label_set_long_mode(header_title, LV_LABEL_LONG_DOT);
+    lv_obj_set_width(header_title, isLandscape ? 220 : 160);
 
     // Wi-Fi Label in Header
     wifi_label = lv_label_create(header);
@@ -850,6 +854,11 @@ void initUI() {
     lv_obj_set_style_border_color(orient_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
     lv_obj_set_style_bg_color(orient_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
     lv_obj_set_style_text_color(orient_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
+
+    // Re-apply offline indicator state if active
+    if (is_offline_mode) {
+        updateOfflineIndicator(true);
+    }
 }
 
 void updateWifiStatus(bool connected) {
@@ -1042,11 +1051,25 @@ void setUIOrientation(int rotation) {
 }
 
 void updateOfflineIndicator(bool isOffline) {
+    is_offline_mode = isOffline;
     if (offline_indicator != nullptr) {
         if (isOffline) {
             lv_obj_clear_flag(offline_indicator, LV_OBJ_FLAG_HIDDEN);
         } else {
             lv_obj_add_flag(offline_indicator, LV_OBJ_FLAG_HIDDEN);
+        }
+
+        // Adjust title width to prevent overlap with the offline indicator
+        if (header_title != nullptr) {
+            int rotation = settings.getScreenOrientation();
+            bool isLandscape = (rotation == 1 || rotation == 3);
+            if (isOffline) {
+                // If offline indicator is shown, restrict title width
+                lv_obj_set_width(header_title, isLandscape ? 130 : 65);
+            } else {
+                // If offline indicator is hidden, allow title to take more space
+                lv_obj_set_width(header_title, isLandscape ? 220 : 160);
+            }
         }
     }
 }
