@@ -6,6 +6,6 @@
 - [x] Task: Integrate route registration inside `WifiManager::startAPMode` (bc6c2c2)
 
 ## Phase 2: Verification
-- [x] Task: Verify that upload attempts with invalid files fail gracefully (bc6c2c2)
-- [x] Task: Test flashing and auto-reboot sequence on hardware (bc6c2c2)
-- [x] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md) (bc6c2c2)
+- [x] Task: Verify that upload attempts with invalid files fail gracefully (bc6c2c2, 0221f94)
+- [x] Task: Test flashing and auto-reboot sequence on hardware (bc6c2c2, 0221f94)
+- [x] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md) (bc6c2c2, 0221f94)
