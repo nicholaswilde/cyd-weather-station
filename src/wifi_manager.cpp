@@ -20,6 +20,10 @@ WifiManager::WifiManager(const char* ssid, const char* password)
 
 void WifiManager::begin() {
     Serial.println("[WiFi] Starting Wi-Fi Manager...");
+#ifndef NATIVE_TEST
+    WiFi.setAutoReconnect(true);
+    WiFi.setTxPower(WIFI_POWER_11dBm);
+#endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(_ssid.c_str(), _password.c_str());
     _state = WIFI_STATE_CONNECTING;
@@ -135,10 +139,12 @@ void WifiManager::startAPMode() {
 
 #ifndef NATIVE_TEST
     WiFi.persistent(false);
+    WiFi.setAutoReconnect(false);
     WiFi.disconnect();
     delay(200);
 
     WiFi.mode(WIFI_AP_STA);
+    WiFi.setTxPower(WIFI_POWER_11dBm);
     delay(100);
     
     IPAddress apIP(192, 168, 4, 1);
