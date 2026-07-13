@@ -1,6 +1,6 @@
 # Implementation Plan - screensaver-mode_20260711
 
-## Phase 1: Inactivity Tracking & Screen State [checkpoint: dd0840b]
+## Phase 1: Inactivity Tracking & Screen State [checkpoint: ccfe7ce]
 - [x] Task: Create `ScreenSaverManager` or add touch timestamp monitoring in `main.cpp` (652bc79, 047e94e, f865fe3)
 - [x] Task: Implement soft-dimming and soft-brightening functions in `BacklightManager` (652bc79, 047e94e, f865fe3)
 
