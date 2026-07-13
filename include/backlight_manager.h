@@ -24,6 +24,7 @@ public:
     // Explicit manual backlight setting (0 to 100 percent)
     // Sets backlight directly (bypassing auto-dimming calculation)
     void setManualBrightness(uint8_t percent);
+    void fadeTo(uint8_t targetPercent, uint16_t durationMs = 150);
 
     // Getters for status & testing
     uint8_t getDutyCycle() const { return _currentDuty; }

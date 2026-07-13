@@ -61,11 +61,21 @@ void test_backlight_manual_brightness(void) {
     TEST_ASSERT_EQUAL(26, bm.getDutyCycle());
 }
 
+void test_backlight_fade_to(void) {
+    BacklightManager bm(21, 0, 10.0f);
+    bm.setManualBrightness(10); // Start at 10%
+    TEST_ASSERT_EQUAL(26, bm.getDutyCycle());
+    
+    bm.fadeTo(50, 50); // Fade to 50%
+    TEST_ASSERT_EQUAL(128, bm.getDutyCycle());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_backlight_initial_state);
     RUN_TEST(test_backlight_mapping_extremes);
     RUN_TEST(test_backlight_smoothing);
     RUN_TEST(test_backlight_manual_brightness);
+    RUN_TEST(test_backlight_fade_to);
     return UNITY_END();
 }

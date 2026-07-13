@@ -76,3 +76,35 @@ void BacklightManager::setManualBrightness(uint8_t percent) {
     #endif
 #endif
 }
+
+void BacklightManager::fadeTo(uint8_t targetPercent, uint16_t durationMs) {
+    float minPercent = _minBrightnessPercent;
+    float finalPercent = (float)targetPercent;
+    if (finalPercent < minPercent) finalPercent = minPercent;
+    if (finalPercent > 100.0f) finalPercent = 100.0f;
+
+    float targetDutyFloat = (finalPercent / 100.0f) * 255.0f;
+    uint8_t targetDuty = (uint8_t)(targetDutyFloat + 0.5f);
+
+    int16_t startDuty = _currentDuty;
+    int16_t diff = (int16_t)targetDuty - startDuty;
+    if (diff == 0) return;
+
+    int steps = 15;
+    uint32_t stepDelay = durationMs / steps;
+    if (stepDelay < 1) stepDelay = 1;
+
+    for (int i = 1; i <= steps; ++i) {
+        float progress = (float)i / steps;
+        uint8_t stepDuty = startDuty + (progress * diff);
+        _currentDuty = stepDuty;
+#ifndef NATIVE_TEST
+        #if defined(ESP_ARDUINO_VERSION) && ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+            ledcWrite(_pin, _currentDuty);
+        #else
+            ledcWrite(_channel, _currentDuty);
+        #endif
+        delay(stepDelay);
+#endif
+    }
+}
