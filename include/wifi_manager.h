@@ -40,6 +40,7 @@ private:
     unsigned long _connectionStartTime;
     const unsigned long _reconnectInterval = 10000; // 10 seconds
     const unsigned long _connectionTimeout = 30000; // 30 seconds
+    String _cachedNetworksHTML;
 
 #ifndef NATIVE_TEST
     DNSServer* _dnsServer = nullptr;

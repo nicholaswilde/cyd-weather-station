@@ -146,7 +146,7 @@ void WifiManager::startAPMode() {
     WiFi.mode(WIFI_AP_STA);
     WiFi.setTxPower(WIFI_POWER_11dBm);
     delay(100);
-    
+
     IPAddress apIP(192, 168, 4, 1);
     WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
     delay(100);
@@ -160,6 +160,10 @@ void WifiManager::startAPMode() {
     WiFi.softAP(apSSID.c_str(), apPass);
     delay(200);
 
+    // Start async scan now that softAP is active and settled
+    _cachedNetworksHTML = "<div class='net-item' style='color: #a6adc8;'>Scanning in progress... Please refresh.</div>";
+    WiFi.scanNetworks(true, false, false, 150);
+
     _dnsServer = new DNSServer();
     _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
     _dnsServer->start(53, "*", apIP);
@@ -168,8 +172,20 @@ void WifiManager::startAPMode() {
     _webServer->on("/", [this]() { handleRoot(); });
     _webServer->on("/save", [this]() { handleSave(); });
     _webServer->on("/scan", [this]() {
-        _webServer->sendHeader("Location", "/", true);
-        _webServer->send(302, "text/plain", "");
+        WiFi.scanNetworks(true, false, false, 150);
+        String html = "<!DOCTYPE html><html><head>";
+        html += "<meta http-equiv='refresh' content='3;url=/'>";
+        html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+        html += "<title>Scanning...</title>";
+        html += "<style>";
+        html += "body { font-family: 'Inter', system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }";
+        html += ".card { background: #181825; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); border: 1px solid #313244; text-align: center; }";
+        html += "h2 { color: #f5c2e7; margin-top: 0; }";
+        html += "p { color: #a6adc8; }";
+        html += "</style></head><body>";
+        html += "<div class='card'><h2>Scanning for Wi-Fi...</h2><p>Please wait while we refresh the network list.</p></div>";
+        html += "</body></html>";
+        _webServer->send(200, "text/html", html);
     });
     _webServer->onNotFound([this]() { handleNotFound(); });
     registerOTARoutes();
@@ -181,9 +197,22 @@ void WifiManager::startAPMode() {
 
 void WifiManager::handleRoot() {
 #ifndef NATIVE_TEST
-    int n = WiFi.scanNetworks();
-    if (n < 0) {
-        n = 0;
+    int16_t scanStatus = WiFi.scanComplete();
+    if (scanStatus >= 0) {
+        _cachedNetworksHTML = "";
+        for (int i = 0; i < scanStatus; ++i) {
+            String ssidName = WiFi.SSID(i);
+            int32_t rssi = WiFi.RSSI(i);
+            _cachedNetworksHTML += "<div class='net-item' onclick='selectSSID(\"" + ssidName + "\")'>";
+            _cachedNetworksHTML += "<span>" + ssidName + "</span>";
+            _cachedNetworksHTML += "<span style='color: #a6adc8; font-size: 12px;'>" + String(rssi) + " dBm</span>";
+            _cachedNetworksHTML += "</div>";
+        }
+        WiFi.scanDelete();
+    } else if (scanStatus == WIFI_SCAN_FAILED) {
+        if (_cachedNetworksHTML.length() == 0 || _cachedNetworksHTML.indexOf("Scanning in progress") != -1) {
+            _cachedNetworksHTML = "<div class='net-item' style='color: #a6adc8;'>No networks found</div>";
+        }
     }
 
     String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
@@ -217,20 +246,7 @@ void WifiManager::handleRoot() {
     html += "<div style='height: 8px;'></div>";
     
     html += "<div class='net-list'>";
-    if (n == -1) {
-        html += "<div class='net-item' style='color: #a6adc8;'>Scanning in progress...</div>";
-    } else if (n == 0) {
-        html += "<div class='net-item'>No networks found</div>";
-    } else {
-        for (int i = 0; i < n; ++i) {
-            String ssidName = WiFi.SSID(i);
-            int32_t rssi = WiFi.RSSI(i);
-            html += "<div class='net-item' onclick='selectSSID(\"" + ssidName + "\")'>";
-            html += "<span>" + ssidName + "</span>";
-            html += "<span style='color: #a6adc8; font-size: 12px;'>" + String(rssi) + " dBm</span>";
-            html += "</div>";
-        }
-    }
+    html += _cachedNetworksHTML;
     html += "</div>";
     
     html += "<label for='ssid'>SSID</label>";
@@ -245,7 +261,6 @@ void WifiManager::handleRoot() {
     html += "</body></html>";
 
     _webServer->send(200, "text/html", html);
-    WiFi.scanDelete();
 #endif
 }
 
