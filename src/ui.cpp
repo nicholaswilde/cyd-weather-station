@@ -214,7 +214,7 @@ void initUI() {
     lv_obj_set_style_text_color(header_title, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
     lv_obj_align(header_title, LV_ALIGN_LEFT_MID, 10, 0);
     lv_label_set_long_mode(header_title, LV_LABEL_LONG_DOT);
-    lv_obj_set_width(header_title, isLandscape ? 220 : 160);
+    lv_obj_set_width(header_title, isLandscape ? 220 : 155);
 
     // Wi-Fi Label in Header
     wifi_label = lv_label_create(header);
@@ -226,13 +226,13 @@ void initUI() {
     time_label = lv_label_create(header);
     lv_label_set_text(time_label, "--:--");
     lv_obj_set_style_text_color(time_label, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
-    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -18, 0);
+    lv_obj_align_to(time_label, wifi_label, LV_ALIGN_OUT_LEFT_MID, -8, 0);
 
     // Offline Label in Header (initially hidden)
     offline_indicator = lv_label_create(header);
     lv_label_set_text(offline_indicator, LV_SYMBOL_WARNING " Offline");
     lv_obj_set_style_text_color(offline_indicator, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-    lv_obj_align_to(offline_indicator, time_label, LV_ALIGN_OUT_LEFT_MID, -15, 0);
+    lv_obj_align_to(offline_indicator, time_label, LV_ALIGN_OUT_LEFT_MID, -8, 0);
     lv_obj_add_flag(offline_indicator, LV_OBJ_FLAG_HIDDEN);
 
     // 2. Tabview Setup
@@ -1065,10 +1065,10 @@ void updateOfflineIndicator(bool isOffline) {
             bool isLandscape = (rotation == 1 || rotation == 3);
             if (isOffline) {
                 // If offline indicator is shown, restrict title width
-                lv_obj_set_width(header_title, isLandscape ? 130 : 65);
+                lv_obj_set_width(header_title, isLandscape ? 130 : 90);
             } else {
                 // If offline indicator is hidden, allow title to take more space
-                lv_obj_set_width(header_title, isLandscape ? 220 : 160);
+                lv_obj_set_width(header_title, isLandscape ? 220 : 155);
             }
         }
     }
