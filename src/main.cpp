@@ -13,7 +13,9 @@
 #include "screenshot_manager.h"
 #include "backlight_manager.h"
 #include "settings_manager.h"
+#include "screensaver_manager.h"
 BacklightManager backlight(TFT_BL, 0, 10.0f);
+ScreenSaverManager screensaver(backlight, 300000);
 unsigned long lastBacklightUpdate = 0;
 const unsigned long backlightUpdateInterval = 1000; // 1 second
 SettingsManager settings;
@@ -80,6 +82,7 @@ void setup() {
 
     // Initialize UI layouts
     initUI();
+    screensaver.begin();
 
     // Load offline cache on boot if available
     WeatherData cachedData;
@@ -306,7 +309,8 @@ void loop() {
     }
 
 #ifndef NATIVE_TEST
-    if (settings.getAutoBrightness()) {
+    screensaver.update(currentMillis);
+    if (!screensaver.isActive() && settings.getAutoBrightness()) {
         if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {
             lastBacklightUpdate = currentMillis;
             uint16_t ldrRaw = analogRead(LDR_PIN);

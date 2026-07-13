@@ -4,6 +4,7 @@
 #include "config/config.h"
 #include "screenshot_manager.h"
 #include "settings_manager.h"
+#include "screensaver_manager.h"
 
 extern SettingsManager settings;
 
@@ -37,6 +38,9 @@ static void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_col
 // Touch read callback for LVGL input
 static void my_touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
     if (ts.touched()) {
+#ifndef NATIVE_TEST
+        screensaver.feedActivity();
+#endif
         TS_Point p = ts.getPoint();
         
         int16_t x = 0;

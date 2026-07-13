@@ -3,6 +3,7 @@
 #include "config/config.h"
 #include "settings_manager.h"
 #include "sd_card_manager.h"
+#include "screensaver_manager.h"
 
 extern "C" {
 LV_FONT_DECLARE(weather_icons_48);
@@ -993,6 +994,7 @@ void updateWeatherUI(float temperature, int humidity, const char* status, int we
 
 void updateTimeUI(const char* time_str) {
     lv_label_set_text(time_label, time_str);
+    updateScreenSaverTime(time_str);
 }
 
 void updateForecastUI(const WeatherData& data) {
@@ -1049,6 +1051,91 @@ void updateOfflineIndicator(bool isOffline) {
     }
 }
 
-void showScreenSaver() {}
-void hideScreenSaver() {}
-void updateScreenSaverTime(const char* time_str) {}
+static lv_obj_t *screensaver_overlay = nullptr;
+static lv_obj_t *screensaver_clock = nullptr;
+
+static void screensaver_click_event_cb(lv_event_t * e) {
+    uint8_t target = 80;
+#ifndef NATIVE_TEST
+    target = settings.getBrightness();
+#endif
+    if (target < 10) target = 10;
+    screensaver.wake(target);
+}
+
+void showScreenSaver() {
+    if (screensaver_overlay != nullptr) return;
+
+    // Create full screen overlay on active screen
+    screensaver_overlay = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(screensaver_overlay, LV_PCT(100), LV_PCT(100));
+    lv_obj_set_style_bg_color(screensaver_overlay, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(screensaver_overlay, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_width(screensaver_overlay, 0, 0);
+    lv_obj_set_style_radius(screensaver_overlay, 0, 0);
+    lv_obj_set_style_pad_all(screensaver_overlay, 0, 0);
+    lv_obj_align(screensaver_overlay, LV_ALIGN_TOP_LEFT, 0, 0);
+
+    // Create clock label
+    screensaver_clock = lv_label_create(screensaver_overlay);
+    lv_obj_set_style_text_color(screensaver_clock, lv_color_make(180, 180, 180), 0);
+    lv_obj_set_style_text_font(screensaver_clock, &lv_font_montserrat_48, 0);
+    
+    if (time_label != nullptr) {
+        lv_label_set_text(screensaver_clock, lv_label_get_text(time_label));
+    } else {
+        lv_label_set_text(screensaver_clock, "--:--");
+    }
+
+    lv_obj_align(screensaver_clock, LV_ALIGN_CENTER, 0, 0);
+
+    // Make overlay clickable and add callback
+    lv_obj_add_flag(screensaver_overlay, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(screensaver_overlay, screensaver_click_event_cb, LV_EVENT_CLICKED, nullptr);
+}
+
+void hideScreenSaver() {
+    if (screensaver_overlay != nullptr) {
+        lv_obj_del(screensaver_overlay);
+        screensaver_overlay = nullptr;
+        screensaver_clock = nullptr;
+    }
+}
+
+void updateScreenSaverTime(const char* time_str) {
+    if (screensaver_overlay == nullptr || screensaver_clock == nullptr) return;
+    
+    lv_label_set_text(screensaver_clock, time_str);
+
+    // Drift position periodically to prevent screen burn-in
+    static int update_counter = 0;
+    update_counter++;
+    if (update_counter >= 15) {
+        update_counter = 0;
+        
+        int max_x = 100;
+        int max_y = 100;
+#ifndef NATIVE_TEST
+        int rotation = settings.getScreenOrientation();
+        if (rotation == 1 || rotation == 3) {
+            max_x = 320 - 150;
+            max_y = 240 - 55;
+        } else {
+            max_x = 240 - 150;
+            max_y = 320 - 55;
+        }
+#endif
+        if (max_x < 10) max_x = 10;
+        if (max_y < 10) max_y = 10;
+
+#ifndef NATIVE_TEST
+        int new_x = random(5, max_x);
+        int new_y = random(5, max_y);
+#else
+        int new_x = 20;
+        int new_y = 20;
+#endif
+
+        lv_obj_align(screensaver_clock, LV_ALIGN_TOP_LEFT, new_x, new_y);
+    }
+}
