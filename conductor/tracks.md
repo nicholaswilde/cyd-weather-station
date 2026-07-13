@@ -5,7 +5,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 ---
 
 - [x] **Track: OTA (Over-The-Air) Firmware Updates**
-  *Link: [./tracks/ota-updates_20260711/](./tracks/ota-updates_20260711/)*
+  *Link: [./archive/ota-updates_20260711/](./archive/ota-updates_20260711/)*
 
 ---
 
