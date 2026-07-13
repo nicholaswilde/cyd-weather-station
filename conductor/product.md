@@ -23,6 +23,7 @@ The **ESP32 CYD LVGL Weather Station** is an interactive, touch-screen-enabled w
 9. **Interactive Settings Screen:** Adds a Settings tab to the Tabview allowing runtime configuration of temperature units (Celsius/Fahrenheit), manual screen brightness, Auto Light brightness mode, and GMT timezone offsets (-12 to +14) via touch controls, persisting settings across boots.
 10. **SD Weather History & Sensor Data Logging:** Periodically logs hourly weather and system variables (temperature, humidity, wind speed, wind direction, weather code) alongside synchronized NTP timestamps to a CSV format file (`weather_history.csv`) on the root of the microSD card, with boot-time mounting and robust error handling.
 11. **Wireless OTA Firmware Updates:** Supports Over-The-Air (OTA) firmware updates via a web browser (`http://192.168.4.1/update`) when the device is in AP Mode, utilizing a beautiful Catppuccin-themed HTML upload portal with progress feedback and automatic reboot.
+12. **Inactivity Sleep & Screen-Saver:** Auto-dims the screen backlight to 5% after 5 minutes of inactivity and displays a floating digital clock overlay that drifts periodically to prevent resistive screen pixel burn-in. Wakes instantly on any screen tap without triggering underlying widgets.
 
 ## References
 - [Random Nerd Tutorials - ESP32 CYD LVGL Weather Station](https://randomnerdtutorials.com/esp32-cyd-lvgl-weather-station/)
