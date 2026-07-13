@@ -1048,3 +1048,7 @@ void updateOfflineIndicator(bool isOffline) {
         }
     }
 }
+
+void showScreenSaver() {}
+void hideScreenSaver() {}
+void updateScreenSaverTime(const char* time_str) {}

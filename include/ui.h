@@ -22,6 +22,9 @@ void updateWeatherUI(float temperature, int humidity, const char* status, int we
 void updateTimeUI(const char* time_str);
 void updateForecastUI(const WeatherData& data);
 void updateFooterUI(const char* update_time, const char* city);
+void showScreenSaver();
+void hideScreenSaver();
+void updateScreenSaverTime(const char* time_str);
 void setUIActiveTab(int index);
 void setUIOrientation(int rotation);
 const char* getCardinalDirection(int degrees);
