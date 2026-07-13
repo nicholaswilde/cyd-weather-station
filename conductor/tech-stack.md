@@ -21,6 +21,8 @@
 * **Preferences Storage:** ESP32 `Preferences` library (for saving runtime configurations in Flash memory across reboot cycles)
 * **Captive Portal Servers:** `DNSServer` and `WebServer` standard ESP32 libraries (for routing and serving the setup configuration page in AP mode)
 * **Storage & File System:** `SD` and `FS` standard ESP32 libraries (for card mounting and appending weather data records in CSV format)
+* **OTA Firmware Updates:** ESP32 `Update` library (for chunked flashing of firmware binary files wirelessly via the WebServer)
+
 
 
 ## 3. Build, Execution, and Tooling
