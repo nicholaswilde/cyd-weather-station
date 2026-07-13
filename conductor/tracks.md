@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: OTA (Over-The-Air) Firmware Updates**
+- [~] **Track: OTA (Over-The-Air) Firmware Updates**
   *Link: [./tracks/ota-updates_20260711/](./tracks/ota-updates_20260711/)*
 
 ---
@@ -29,13 +29,13 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: SD Offline Cache Recovery**
+- [~] **Track: SD Offline Cache Recovery**
   *Link: [./tracks/sd-offline-cache_20260711/](./tracks/sd-offline-cache_20260711/)*
 
 ---
 
 - [x] **Track: 4-Way Screen Orientation and UI Adaptation**
-  *Link: [./tracks/screen-orientation_20260711/](./tracks/screen-orientation_20260711/)*
+  *Link: [./archive/screen-orientation_20260711/](./archive/screen-orientation_20260711/)*
 
 ---
 
