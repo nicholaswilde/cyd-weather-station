@@ -81,6 +81,15 @@ void MqttManager::publish(const char* topic, const char* payload) {
     }
 }
 
+void MqttManager::disconnect() {
+    Serial.println("[MQTT] Disconnecting from broker...");
+    if (_reconnectTimer) {
+        xTimerStop(_reconnectTimer, 0);
+    }
+    _mqttClient.disconnect();
+}
+
+
 void MqttManager::onMqttReconnectTimer(TimerHandle_t xTimer) {
     // Retrieve the class instance pointer from the timer ID
     MqttManager* instance = static_cast<MqttManager*>(pvTimerGetTimerID(xTimer));

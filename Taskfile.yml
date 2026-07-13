@@ -10,6 +10,11 @@ tasks:
           msg: "CYD_DEVICE_IP is not set. Please add it to your .env file."
       cmds:
         - bash ./scripts/capture-screenshots.sh $CYD_DEVICE_IP
+  eau:
+    desc: Erase and upload
+    cmds:
+      - pio run -t erase -t upload
+
   uam:
     desc: Upload and monitor
     cmds:

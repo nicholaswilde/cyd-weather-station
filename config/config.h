@@ -57,6 +57,9 @@ extern int getCurrentThemeFlavor();
 // LED_BRIGHTNESS: Default LED brightness (0–255). Full brightness = 255.
 #define LED_BRIGHTNESS 255
 
+// MQTT default status setting
+#define MQTT_ENABLED true
+
 // SD Card Weather Logging Settings
 #define USE_SD_LOGGING true
 

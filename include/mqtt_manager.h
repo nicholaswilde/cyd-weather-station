@@ -1,8 +1,13 @@
 #ifndef MQTT_MANAGER_H
 #define MQTT_MANAGER_H
 
-#include <Arduino.h>
+#ifndef NATIVE_TEST
 #include <AsyncMqttClient.h>
+#else
+#include "../tests/mocks/AsyncMqttClient.h"
+#include "../tests/mocks/Arduino.h"
+#endif
+#include <Arduino.h>
 #include <WiFi.h>
 
 class MqttManager {
@@ -40,6 +45,11 @@ public:
      * @brief Publishes a message to a specific topic (QoS 0).
      */
     void publish(const char* topic, const char* payload);
+
+    /**
+     * @brief Disconnects from the MQTT broker.
+     */
+    void disconnect();
 
 private:
     void connectToMqtt();

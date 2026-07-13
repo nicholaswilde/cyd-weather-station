@@ -6,13 +6,31 @@
 #include <iostream>
 #include <stdarg.h>
 
+// --- FreeRTOS Mocks ---
+#ifndef FREERTOS_MOCKS_H
+#define FREERTOS_MOCKS_H
+typedef void* TimerHandle_t;
+typedef void (*TimerCallbackFunction_t)(TimerHandle_t xTimer);
+
+#define pdFALSE (0)
+#define pdTRUE (1)
+
+inline void* xTimerCreate(const char* name, int period, int autoReload, void* id, TimerCallbackFunction_t callback) { return (void*)1; }
+inline void xTimerStart(void* timer, int ticks) {}
+inline void xTimerStop(void* timer, int ticks) {}
+inline void* pvTimerGetTimerID(void* timer) { return nullptr; }
+#define pdMS_TO_TICKS(x) (x)
+#endif // FREERTOS_MOCKS_H
+
+
+// --- Wi-Fi Mocks ---
 #define WL_CONNECTED 3
 #define WL_CONNECT_FAILED 4
 #define WL_NO_SSID_AVAIL 1
 #define WIFI_STA 1
-
 typedef int wl_status_t;
 
+// --- GPIO Mocks ---
 #define OUTPUT 0x03
 #define INPUT 0x01
 #define HIGH 0x01
@@ -22,18 +40,11 @@ extern uint8_t mock_pin_modes[100];
 extern uint8_t mock_pin_states[100];
 extern unsigned long mock_millis_val;
 
-inline unsigned long millis() {
-    return mock_millis_val;
-}
+inline unsigned long millis() { return mock_millis_val; }
+inline void pinMode(uint8_t pin, uint8_t mode) { if (pin < 100) mock_pin_modes[pin] = mode; }
+inline void digitalWrite(uint8_t pin, uint8_t val) { if (pin < 100) mock_pin_states[pin] = val; }
 
-inline void pinMode(uint8_t pin, uint8_t mode) {
-    if (pin < 100) mock_pin_modes[pin] = mode;
-}
-
-inline void digitalWrite(uint8_t pin, uint8_t val) {
-    if (pin < 100) mock_pin_states[pin] = val;
-}
-
+// --- Class Mocks ---
 class String : public std::string {
 public:
     String(const char* s) : std::string(s) {}
@@ -63,12 +74,11 @@ public:
 
 extern SerialMock Serial;
 
-// --- Arduino helper map function ---
 inline long map(long x, long in_min, long in_max, long out_min, long out_max) {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-// --- SPI and Touch controller pin mocks for native compilation ---
+// --- SPI Pins ---
 #define XPT2046_CS 33
 #define XPT2046_IRQ 36
 #define XPT2046_MOSI 32

@@ -31,4 +31,6 @@ private:
     bool _active;
 };
 
+extern ScreenSaverManager screensaver;
+
 #endif // SCREENSAVER_MANAGER_H

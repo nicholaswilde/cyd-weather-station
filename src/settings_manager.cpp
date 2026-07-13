@@ -14,6 +14,7 @@ SettingsManager::SettingsManager() {
     _screenOrientation = 1;
     _ledEnabled = LED_ENABLED;
     _ledBrightness = LED_BRIGHTNESS;
+    _mqttEnabled = MQTT_ENABLED;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
 }
@@ -33,6 +34,7 @@ void SettingsManager::begin() {
     _screenOrientation = prefs.getInt("screen_rot", 1);
     _ledEnabled = prefs.getBool("led_en", LED_ENABLED);
     _ledBrightness = prefs.getInt("led_bright", LED_BRIGHTNESS);
+    _mqttEnabled = prefs.getBool("mqtt_en", MQTT_ENABLED);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     
@@ -232,6 +234,20 @@ void SettingsManager::setLedBrightness(int brightness) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putInt("led_bright", _ledBrightness);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getMqttEnabled() const {
+    return _mqttEnabled;
+}
+
+void SettingsManager::setMqttEnabled(bool enabled) {
+    if (_mqttEnabled != enabled) {
+        _mqttEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("mqtt_en", _mqttEnabled);
         prefs.end();
     }
 }

@@ -20,6 +20,7 @@ private:
     int _screenOrientation;
     bool _ledEnabled;
     int _ledBrightness;
+    bool _mqttEnabled;
     String _wifiSSID;
     String _wifiPassword;
 
@@ -59,6 +60,9 @@ public:
 
     int getLedBrightness() const;
     void setLedBrightness(int brightness);
+
+    bool getMqttEnabled() const;
+    void setMqttEnabled(bool enabled);
 
     String getWifiSSID() const;
     void setWifiSSID(const String& ssid);
