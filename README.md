@@ -28,6 +28,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Timezone Offset**: `–` / `+` buttons to set a GMT offset (–12 to +14) for the NTP clock.
   - **SD Log**: Enable/disable weather logging to a microSD card.
   - **Screenshot Server**: Enable/disable the remote screenshot HTTP server.
+  - **MQTT**: Toggle publishing weather variables to MQTT topics.
   - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks and touch coordinates update instantly.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured timezone offset.
@@ -45,6 +46,13 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Physical button**: Press the BOOT button (GPIO 0) to save a timestamped BMP to the SD card as `/screenshot_YYYYMMDD_HHMMSS.bmp`.
   - Zero large-allocation design — screen tiles are intercepted from the LVGL flush callback and written directly to file.
   - Toggle the screenshot server on/off from the **Settings tab** (`Scr Srv`).
+- **SD Offline Cache Recovery**:
+  - Automatically caches the latest retrieved weather data to `/weather_cache.json` on the microSD card.
+  - If the device boots without Wi-Fi, it restores the weather screen from the cache instead of displaying blank widgets, displaying a `⚠️ Offline` status badge in the header.
+- **Wireless OTA Firmware Updates**:
+  - Easily update firmware wirelessly by navigating to `/update` in a browser when connected to the configuration AP (`http://192.168.4.1/update`) or the local network IP (`http://<DEVICE_IP>/update` when the Screenshot Server is enabled).
+  - Portal features a responsive Catppuccin-themed HTML interface, drag-and-drop binary selector, dynamic progress bar, error handling, and auto-reboot upon completion.
+
 
 ## :hammer_and_wrench: Hardware Requirements
 
@@ -186,6 +194,7 @@ All settings below are configured by touch on the device and saved to flash:
 | **DST** | Toggle Daylight Saving Time on/off (adds 1 hour to NTP offset when enabled). |
 | **SD Log** | Toggle SD card weather logging. Disabled automatically if no card is inserted. |
 | **Scr Srv** | Toggle the remote screenshot HTTP server on/off. |
+| **MQTT** | Toggle publishing weather variables to MQTT topics. |
 
 ---
 
