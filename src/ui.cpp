@@ -199,9 +199,10 @@ void initUI() {
     bool isLandscape = (rotation == 1 || rotation == 3);
     int screen_w = isLandscape ? 320 : 240;
     int screen_h = isLandscape ? 240 : 320;
+    int header_h = isLandscape ? 45 : 60; // 60px in portrait to fit 2-line title
 
     lv_obj_t * header = lv_obj_create(scr);
-    lv_obj_set_size(header, screen_w, 45);
+    lv_obj_set_size(header, screen_w, header_h);
     lv_obj_align(header, LV_ALIGN_TOP_MID, 0, 0);
     lv_obj_set_style_bg_color(header, lv_color_hex(COLOR_CRUST), LV_PART_MAIN); // Crust header background
     lv_obj_set_style_border_width(header, 0, LV_PART_MAIN);
@@ -210,11 +211,11 @@ void initUI() {
 
     // Header Title (Time/App Name)
     header_title = lv_label_create(header);
-    lv_label_set_text(header_title, "CYD Weather Station");
+    lv_label_set_text(header_title, isLandscape ? "CYD Weather Station" : "CYD Weather\nStation");
     lv_obj_set_style_text_color(header_title, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
     lv_obj_align(header_title, LV_ALIGN_LEFT_MID, 10, 0);
     lv_label_set_long_mode(header_title, LV_LABEL_LONG_DOT);
-    lv_obj_set_width(header_title, isLandscape ? 220 : 155);
+    lv_obj_set_width(header_title, isLandscape ? 220 : 120);
 
     // Header Right-Side Status Area Container (handles WiFi, clock, offline label)
     lv_obj_t * header_right_area = lv_obj_create(header);
@@ -247,7 +248,7 @@ void initUI() {
     // 2. Tabview Setup
     lv_obj_t * tabview = lv_tabview_create(scr, LV_DIR_BOTTOM, 35);
     tabview_obj = tabview;
-    lv_obj_set_size(tabview, screen_w, screen_h - 45);
+    lv_obj_set_size(tabview, screen_w, screen_h - header_h);
     lv_obj_align(tabview, LV_ALIGN_BOTTOM_MID, 0, 0);
 
     // Style the tabview container and buttons
@@ -1077,7 +1078,7 @@ void updateOfflineIndicator(bool isOffline) {
                 lv_obj_set_width(header_title, isLandscape ? 130 : 90);
             } else {
                 // If offline indicator is hidden, allow title to take more space
-                lv_obj_set_width(header_title, isLandscape ? 220 : 155);
+                lv_obj_set_width(header_title, isLandscape ? 220 : 120);
             }
         }
     }
