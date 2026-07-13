@@ -1,7 +1,7 @@
 # Implementation Plan - ota-updates_20260711
 
 ## Phase 1: Web Server Updates
-- [ ] Task: Implement HTTP GET/POST handlers for `/update` using `Update.h` framework
+- [~] Task: Implement HTTP GET/POST handlers for `/update` using `Update.h` framework
 - [ ] Task: Create Catppuccin-themed HTML upload web page
 - [ ] Task: Integrate route registration inside `WifiManager::startAPMode`
 
