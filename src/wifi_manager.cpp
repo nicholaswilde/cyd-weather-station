@@ -8,7 +8,9 @@
 #include "sd_card_manager.h"
 #include <lvgl.h>
 #include <SD.h>
+#include <Update.h>
 #include "ui.h"
+#include "ota_html.h"
 #endif
 
 extern SettingsManager settings;
@@ -165,6 +167,7 @@ void WifiManager::startAPMode() {
         _webServer->send(302, "text/plain", "");
     });
     _webServer->onNotFound([this]() { handleNotFound(); });
+    registerOTARoutes();
     _webServer->begin();
 
     // Start background network scan immediately
@@ -321,6 +324,7 @@ void WifiManager::startScreenshotServer() {
             _webServer->send(400, "text/plain", "Missing val parameter");
         }
     });
+    registerOTARoutes();
     _webServer->begin();
     Serial.println("[WiFi] Screenshot server started on port 80.");
 }
@@ -368,5 +372,42 @@ void WifiManager::handleScreenshot() {
     f.close();
     SD.remove(tmpPath);
     Serial.println("[WiFi] Screenshot streamed to remote client.");
+}
+
+void WifiManager::registerOTARoutes() {
+    if (!_webServer) return;
+
+    _webServer->on("/update", HTTP_GET, [this]() {
+        _webServer->send_P(200, "text/html", ota_html);
+    });
+
+    _webServer->on("/update", HTTP_POST, [this]() {
+        _webServer->sendHeader("Connection", "close");
+        if (Update.hasError()) {
+            _webServer->send(500, "text/plain", String(Update.errorString()));
+        } else {
+            _webServer->send(200, "text/plain", "OK");
+            delay(1000);
+            ESP.restart();
+        }
+    }, [this]() {
+        HTTPUpload& upload = _webServer->upload();
+        if (upload.status == UPLOAD_FILE_START) {
+            Serial.printf("Update start: %s\n", upload.filename.c_str());
+            if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
+                Update.printError(Serial);
+            }
+        } else if (upload.status == UPLOAD_FILE_WRITE) {
+            if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+                Update.printError(Serial);
+            }
+        } else if (upload.status == UPLOAD_FILE_END) {
+            if (Update.end(true)) {
+                Serial.printf("Update Success: %u bytes\nRebooting...\n", upload.totalSize);
+            } else {
+                Update.printError(Serial);
+            }
+        }
+    });
 }
 #endif

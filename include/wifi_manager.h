@@ -47,6 +47,7 @@ private:
     void startScreenshotServer();
     void stopScreenshotServer();
     void handleScreenshot();
+    void registerOTARoutes();
 #endif
 };
 
