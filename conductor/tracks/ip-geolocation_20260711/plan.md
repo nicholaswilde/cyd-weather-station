@@ -1,6 +1,6 @@
 # Implementation Plan - ip-geolocation_20260711
 
-## Phase 1: Client & Parsing Logic
+## Phase 1: Client & Parsing Logic [checkpoint: c8531c1]
 - [x] Task: Write tests for geolocation response parsing in `test_weather_client` (a369693)
 - [x] Task: Create `fetchIpLocation` method inside `WeatherClient` (a369693)
 - [x] Task: Implement HTTP JSON parser for `ip-api.com` structure (a369693)
