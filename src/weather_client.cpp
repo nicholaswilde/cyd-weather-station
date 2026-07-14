@@ -669,7 +669,8 @@ bool WeatherClient::fetchIpLocation(String& latStr, String& lonStr, String& city
     HTTPClient http;
 
     String url = "http://ip-api.com/json/";
-    Serial.println("[Weather] Querying IP Geolocation fallback...");
+    Serial.print("[Weather] Fetching IP Geolocation URL: ");
+    Serial.println(url);
 
     if (http.begin(client, url)) {
         int httpCode = http.GET();
