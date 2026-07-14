@@ -14,8 +14,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Hourly Forecast Chart (LVGL Chart Tab)**
-  *Link: [./tracks/hourly-forecast-chart_20260711/](./tracks/hourly-forecast-chart_20260711/)*
+- [x] **Track: Hourly Forecast Chart (LVGL Chart Tab)**
+  *Link: [./archive/hourly-forecast-chart_20260711/](./archive/hourly-forecast-chart_20260711/)*
 
 ---
 
