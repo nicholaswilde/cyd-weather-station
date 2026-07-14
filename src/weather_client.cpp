@@ -203,6 +203,7 @@ WeatherData WeatherClient::fetchWeather() {
         url += lng;
         url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m";
         url += "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3";
+        url += "&hourly=temperature_2m,precipitation_probability";
         url += "&timezone=auto"; // Return dates in local timezone, not UTC
         if (settings.getUnitSystem() == UNIT_IMPERIAL) {
             url += "&temperature_unit=fahrenheit";
@@ -241,7 +242,7 @@ WeatherData WeatherClient::fetchWeather() {
 }
 
 bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
-    StaticJsonDocument<2048> doc;
+    StaticJsonDocument<4096> doc;
     DeserializationError error = deserializeJson(doc, json);
 
     if (error) {
@@ -260,6 +261,24 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
         data.windDirection = doc["current"]["wind_direction_10m"].is<int>() ? doc["current"]["wind_direction_10m"].as<int>() : 0;
         data.valid = true;
         data.weatherCode = code;
+    }
+
+    // Parse hourly forecast
+    if (doc.containsKey("hourly")) {
+        JsonArray hourly_temp = doc["hourly"]["temperature_2m"];
+        JsonArray hourly_precip = doc["hourly"]["precipitation_probability"];
+        for (int i = 0; i < 24; i++) {
+            if (i < (int)hourly_temp.size()) {
+                data.hourly[i].temperature = hourly_temp[i].as<float>();
+            } else {
+                data.hourly[i].temperature = 0.0f;
+            }
+            if (i < (int)hourly_precip.size()) {
+                data.hourly[i].precipitationProbability = hourly_precip[i].as<int>();
+            } else {
+                data.hourly[i].precipitationProbability = 0;
+            }
+        }
     }
 
     // Parse daily forecast
@@ -391,6 +410,7 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
     filter["list"][0]["wind"]["deg"] = true;
     filter["list"][0]["weather"][0]["id"] = true;
     filter["list"][0]["weather"][0]["description"] = true;
+    filter["list"][0]["pop"] = true;
     filter["city"]["name"] = true;
 
     DynamicJsonDocument doc(12288);
@@ -559,6 +579,22 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
         }
     }
 
+    // 3. Parse hourly forecast (24 hours at 3-hour intervals)
+    // OWM list array contains 3-hourly entries. We map them to 24 slots.
+    for (int i = 0; i < 8; i++) {
+        float tempVal = 0.0f;
+        int precipProb = 0;
+        if (i < (int)list.size()) {
+            tempVal = list[i]["main"]["temp"].as<float>();
+            precipProb = (int)(list[i]["pop"].as<float>() * 100.0f + 0.5f);
+        }
+        for (int h = 0; h < 3; h++) {
+            int targetIdx = i * 3 + h;
+            data.hourly[targetIdx].temperature = tempVal;
+            data.hourly[targetIdx].precipitationProbability = precipProb;
+        }
+    }
+
     return true;
 }
 
@@ -579,7 +615,7 @@ int WeatherClient::owmToWmoCode(int owmCode) {
 }
 
 String WeatherClient::serializeWeatherData(const WeatherData& data) {
-    StaticJsonDocument<1024> doc;
+    StaticJsonDocument<4096> doc;
     doc["temp"] = data.temperature;
     doc["hum"] = data.humidity;
     doc["status"] = data.status;
@@ -599,6 +635,13 @@ String WeatherClient::serializeWeatherData(const WeatherData& data) {
         fDay["day"] = data.forecast[i].dayName;
     }
 
+    JsonArray hourly = doc.createNestedArray("hourly");
+    for (int i = 0; i < 24; i++) {
+        JsonObject hHour = hourly.createNestedObject();
+        hHour["temp"] = data.hourly[i].temperature;
+        hHour["precip"] = data.hourly[i].precipitationProbability;
+    }
+
     String output;
     serializeJson(doc, output);
     return output;
@@ -606,7 +649,7 @@ String WeatherClient::serializeWeatherData(const WeatherData& data) {
 
 bool WeatherClient::deserializeWeatherData(const String& json, WeatherData& data) {
     if (json.length() == 0) return false;
-    StaticJsonDocument<1024> doc;
+    StaticJsonDocument<4096> doc;
     DeserializationError error = deserializeJson(doc, json);
     if (error) {
         return false;
@@ -630,6 +673,15 @@ bool WeatherClient::deserializeWeatherData(const String& json, WeatherData& data
             data.forecast[i].weatherCode = fDay["code"] | 0;
             data.forecast[i].status = fDay["status"].as<String>();
             data.forecast[i].dayName = fDay["day"].as<String>();
+        }
+    }
+
+    JsonArray hourly = doc["hourly"];
+    if (!hourly.isNull()) {
+        for (int i = 0; i < 24 && i < (int)hourly.size(); i++) {
+            JsonObject hHour = hourly[i];
+            data.hourly[i].temperature = hHour["temp"] | 0.0f;
+            data.hourly[i].precipitationProbability = hHour["precip"] | 0;
         }
     }
     return true;

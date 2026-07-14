@@ -5,11 +5,11 @@
 
 // Location Settings
 #define USE_ZIP_CODE true
-#define WEATHER_ZIP_CODE "90210"
+#define WEATHER_ZIP_CODE ""
 
 // Coordinates (Fallback if USE_ZIP_CODE is false)
-#define WEATHER_API_LATITUDE "37.7749"
-#define WEATHER_API_LONGITUDE "-122.4194"
+#define WEATHER_API_LATITUDE ""
+#define WEATHER_API_LONGITUDE ""
 
 // Open-Meteo API Settings
 #define WEATHER_UPDATE_INTERVAL_MINS 1

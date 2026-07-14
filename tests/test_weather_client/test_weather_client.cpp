@@ -184,6 +184,73 @@ void test_weather_client_is_location_empty(void) {
     TEST_ASSERT_FALSE(client6.isLocationEmpty());
 }
 
+void test_weather_client_parse_weather_json_hourly(void) {
+    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {}, {} };
+    const char* customJson = "{"
+        "\"current\":{"
+            "\"temperature_2m\":15.5,"
+            "\"relative_humidity_2m\":80,"
+            "\"weather_code\":3,"
+            "\"wind_speed_10m\":12.4"
+        "},"
+        "\"daily\":{"
+            "\"time\":[\"2026-07-09\",\"2026-07-10\",\"2026-07-11\"],"
+            "\"weather_code\":[3,45,95],"
+            "\"temperature_2m_max\":[18.5,16.0,22.0],"
+            "\"temperature_2m_min\":[12.0,11.0,14.5]"
+        "},"
+        "\"hourly\":{"
+            "\"temperature_2m\":[10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0,33.0],"
+            "\"precipitation_probability\":[0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,5,10,15]"
+        "}"
+    "}";
+    
+    bool parsed = WeatherClient::parseWeatherJson(customJson, data);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_TRUE(data.valid);
+    
+    // Check hourly data
+    TEST_ASSERT_EQUAL_FLOAT(10.0f, data.hourly[0].temperature);
+    TEST_ASSERT_EQUAL(0, data.hourly[0].precipitationProbability);
+    TEST_ASSERT_EQUAL_FLOAT(21.0f, data.hourly[11].temperature);
+    TEST_ASSERT_EQUAL(55, data.hourly[11].precipitationProbability);
+    TEST_ASSERT_EQUAL_FLOAT(33.0f, data.hourly[23].temperature);
+    TEST_ASSERT_EQUAL(15, data.hourly[23].precipitationProbability);
+}
+
+void test_weather_client_parse_owm_json_hourly(void) {
+    WeatherClient client("33.60002", "-117.67200");
+    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {}, {} };
+
+    // OWM payload with at least 8 elements (24 hours at 3-hour intervals)
+    const char* owmJson = "{"
+        "\"list\":["
+            "{\"dt_txt\":\"2026-07-11 12:00:00\",\"main\":{\"temp\":70.0,\"humidity\":50},\"wind\":{\"speed\":5.0,\"deg\":180},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"pop\":0.10},"
+            "{\"dt_txt\":\"2026-07-11 15:00:00\",\"main\":{\"temp\":71.0},\"weather\":[{\"id\":800}],\"pop\":0.20},"
+            "{\"dt_txt\":\"2026-07-11 18:00:00\",\"main\":{\"temp\":72.0},\"weather\":[{\"id\":800}],\"pop\":0.30},"
+            "{\"dt_txt\":\"2026-07-11 21:00:00\",\"main\":{\"temp\":73.0},\"weather\":[{\"id\":800}],\"pop\":0.40},"
+            "{\"dt_txt\":\"2026-07-12 00:00:00\",\"main\":{\"temp\":74.0},\"weather\":[{\"id\":800}],\"pop\":0.50},"
+            "{\"dt_txt\":\"2026-07-12 03:00:00\",\"main\":{\"temp\":75.0},\"weather\":[{\"id\":800}],\"pop\":0.60},"
+            "{\"dt_txt\":\"2026-07-12 06:00:00\",\"main\":{\"temp\":76.0},\"weather\":[{\"id\":800}],\"pop\":0.70},"
+            "{\"dt_txt\":\"2026-07-12 09:00:00\",\"main\":{\"temp\":77.0},\"weather\":[{\"id\":800}],\"pop\":0.80}"
+        "],"
+        "\"city\":{\"name\":\"Orange County\"}"
+    "}";
+
+    bool parsed = client.parseOwmJson(owmJson, data);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_TRUE(data.valid);
+    
+    // Check hourly mapped from the 3-hour list
+    TEST_ASSERT_EQUAL_FLOAT(70.0f, data.hourly[0].temperature);
+    TEST_ASSERT_EQUAL(10, data.hourly[0].precipitationProbability);
+    TEST_ASSERT_EQUAL_FLOAT(70.0f, data.hourly[1].temperature); // Mapped
+    TEST_ASSERT_EQUAL_FLOAT(71.0f, data.hourly[3].temperature);
+    TEST_ASSERT_EQUAL(20, data.hourly[3].precipitationProbability);
+    TEST_ASSERT_EQUAL_FLOAT(77.0f, data.hourly[23].temperature);
+    TEST_ASSERT_EQUAL(80, data.hourly[23].precipitationProbability);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -195,5 +262,7 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_parse_ip_location_json);
     RUN_TEST(test_weather_client_parse_ip_location_json_fail);
     RUN_TEST(test_weather_client_is_location_empty);
+    RUN_TEST(test_weather_client_parse_weather_json_hourly);
+    RUN_TEST(test_weather_client_parse_owm_json_hourly);
     return UNITY_END();
 }

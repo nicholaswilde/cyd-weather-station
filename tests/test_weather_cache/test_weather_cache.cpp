@@ -31,6 +31,10 @@ void test_weather_cache_serialization_deserialization(void) {
     original.forecast[1] = {27.0f, 16.0f, 3, "Overcast", "Tomorrow"};
     original.forecast[2] = {22.0f, 14.0f, 0, "Clear", "Tuesday"};
 
+    for (int i = 0; i < 24; i++) {
+        original.hourly[i] = {(float)(10.0f + i), i * 4};
+    }
+
     String json = WeatherClient::serializeWeatherData(original);
     
     TEST_ASSERT_TRUE(json.length() > 0);
@@ -56,6 +60,11 @@ void test_weather_cache_serialization_deserialization(void) {
         TEST_ASSERT_EQUAL_STRING(original.forecast[i].status.c_str(), recovered.forecast[i].status.c_str());
         TEST_ASSERT_EQUAL_STRING(original.forecast[i].dayName.c_str(), recovered.forecast[i].dayName.c_str());
     }
+
+    for (int i = 0; i < 24; i++) {
+        TEST_ASSERT_EQUAL_FLOAT(original.hourly[i].temperature, recovered.hourly[i].temperature);
+        TEST_ASSERT_EQUAL(original.hourly[i].precipitationProbability, recovered.hourly[i].precipitationProbability);
+    }
 }
 
 void test_weather_cache_sd_save_and_load(void) {
@@ -73,6 +82,10 @@ void test_weather_cache_sd_save_and_load(void) {
     original.forecast[1] = {21.0f, 13.0f, 2, "Partly Cloudy", "Tomorrow"};
     original.forecast[2] = {19.0f, 11.0f, 3, "Overcast", "Wednesday"};
 
+    for (int i = 0; i < 24; i++) {
+        original.hourly[i] = {(float)(10.0f + i), i * 4};
+    }
+
     // Save should succeed
     bool save_ok = WeatherCache::saveCache(original);
     TEST_ASSERT_TRUE(save_ok);
@@ -87,6 +100,8 @@ void test_weather_cache_sd_save_and_load(void) {
 
     TEST_ASSERT_EQUAL_FLOAT(original.temperature, recovered.temperature);
     TEST_ASSERT_EQUAL_STRING(original.cityName.c_str(), recovered.cityName.c_str());
+    TEST_ASSERT_EQUAL_FLOAT(original.hourly[0].temperature, recovered.hourly[0].temperature);
+    TEST_ASSERT_EQUAL(original.hourly[0].precipitationProbability, recovered.hourly[0].precipitationProbability);
 }
 
 int main(int argc, char **argv) {

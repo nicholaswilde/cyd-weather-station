@@ -11,6 +11,11 @@ struct ForecastDay {
     String dayName;
 };
 
+struct HourlyForecast {
+    float temperature;
+    int precipitationProbability;
+};
+
 struct WeatherData {
     float temperature;
     int humidity;
@@ -21,6 +26,7 @@ struct WeatherData {
     int windDirection;
     String cityName;
     ForecastDay forecast[3];
+    HourlyForecast hourly[24];
 };
 
 class WeatherClient {
