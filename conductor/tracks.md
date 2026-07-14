@@ -29,7 +29,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: SD Offline Cache Recovery**
+- [x] **Track: SD Offline Cache Recovery**
   *Link: [./tracks/sd-offline-cache_20260711/](./tracks/sd-offline-cache_20260711/)*
 
 ---
