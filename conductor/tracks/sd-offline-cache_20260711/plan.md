@@ -8,4 +8,4 @@
 ## Phase 2: System Boot & UI Integration
 - [x] Task: Implement offline check on boot; load `/weather_cache.json` if Wi-Fi cannot connect (69d6183, 28dde68, 53cce96)
 - [x] Task: Design and display "Offline Cached Data" badge/indicator on status header (69d6183, 28dde68, 53cce96)
-- [ ] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md)
