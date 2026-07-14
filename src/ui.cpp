@@ -318,10 +318,10 @@ void initUI() {
     lv_obj_clear_flag(tab_content, LV_OBJ_FLAG_SCROLL_MOMENTUM);
 
     // Create the tabs
-    lv_obj_t * tab_curr = lv_tabview_add_tab(tabview, "Current");
-    lv_obj_t * tab_fore = lv_tabview_add_tab(tabview, "Forecast");
-    lv_obj_t * tab_hourly = lv_tabview_add_tab(tabview, "Hourly");
-    lv_obj_t * tab_settings = lv_tabview_add_tab(tabview, "Settings");
+    lv_obj_t * tab_curr = lv_tabview_add_tab(tabview, isLandscape ? "Current" : "Now");
+    lv_obj_t * tab_fore = lv_tabview_add_tab(tabview, isLandscape ? "Forecast" : "Fore");
+    lv_obj_t * tab_hourly = lv_tabview_add_tab(tabview, isLandscape ? "Hourly" : "Hour");
+    lv_obj_t * tab_settings = lv_tabview_add_tab(tabview, isLandscape ? "Settings" : "Setup");
 
     // Set base color & padding on tabs
     // NOTE: Do NOT clear LV_OBJ_FLAG_SCROLLABLE on the tab panels —
