@@ -86,6 +86,17 @@ static void screenshot_sw_event_cb(lv_event_t * e) {
     settings_screenshot_server_changed = true;
 }
 
+static void screensaver_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setScreensaverEnabled(is_checked);
+#ifndef NATIVE_TEST
+    if (!is_checked && screensaver.isActive()) {
+        screensaver.wake(settings.getBrightness());
+    }
+#endif
+}
+
 static void mqtt_sw_event_cb(lv_event_t * e) {
     lv_obj_t * sw = lv_event_get_target(e);
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
@@ -339,7 +350,7 @@ void initUI() {
     lv_obj_set_scrollbar_mode(tab_curr, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_scrollbar_mode(tab_fore, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_scrollbar_mode(tab_hourly, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scrollbar_mode(tab_settings, isLandscape ? LV_SCROLLBAR_MODE_OFF : LV_SCROLLBAR_MODE_AUTO);
+    lv_obj_set_scrollbar_mode(tab_settings, LV_SCROLLBAR_MODE_AUTO);
 
     // Create Hourly Forecast Chart
     hourly_chart = lv_chart_create(tab_hourly);
@@ -789,6 +800,30 @@ void initUI() {
         lv_obj_add_state(scr_sw, LV_STATE_CHECKED);
     }
     lv_obj_add_event_cb(scr_sw, screenshot_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    // Screensaver row
+    lv_obj_t * saver_row = lv_obj_create(left_col);
+    lv_obj_set_size(saver_row, 144, 22);
+    lv_obj_set_flex_flow(saver_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(saver_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(saver_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(saver_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(saver_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(saver_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * saver_label = lv_label_create(saver_row);
+    lv_label_set_text(saver_label, "Scr Saver");
+    lv_obj_set_style_text_color(saver_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * saver_sw = lv_switch_create(saver_row);
+    lv_obj_set_size(saver_sw, 40, 20);
+    lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.getScreensaverEnabled()) {
+        lv_obj_add_state(saver_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(saver_sw, screensaver_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // MQTT row
     lv_obj_t * mqtt_row = lv_obj_create(left_col);

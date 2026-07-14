@@ -341,9 +341,9 @@ void loop() {
     }
 
 #ifndef NATIVE_TEST
-#if SCREENSAVER_ENABLED
-    screensaver.update(currentMillis);
-#endif
+    if (settings.getScreensaverEnabled()) {
+        screensaver.update(currentMillis);
+    }
     if (!screensaver.isActive() && settings.getAutoBrightness()) {
         if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {
             lastBacklightUpdate = currentMillis;

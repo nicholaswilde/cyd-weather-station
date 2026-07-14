@@ -24,6 +24,7 @@ private:
     String _wifiSSID;
     String _wifiPassword;
     bool _sdCacheEnabled;
+    bool _screensaverEnabled;
 
 public:
     SettingsManager();
@@ -73,6 +74,9 @@ public:
 
     bool getSdCacheEnabled() const;
     void setSdCacheEnabled(bool enabled);
+
+    bool getScreensaverEnabled() const;
+    void setScreensaverEnabled(bool enabled);
 };
 
 #endif // SETTINGS_MANAGER_H

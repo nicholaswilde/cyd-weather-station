@@ -18,6 +18,7 @@ SettingsManager::SettingsManager() {
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
     _sdCacheEnabled = USE_SD_CACHE;
+    _screensaverEnabled = SCREENSAVER_ENABLED;
 }
 
 void SettingsManager::begin() {
@@ -39,6 +40,7 @@ void SettingsManager::begin() {
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
+    _screensaverEnabled = prefs.getBool("scr_enabled", SCREENSAVER_ENABLED);
     
     prefs.end();
 }
@@ -264,6 +266,20 @@ void SettingsManager::setSdCacheEnabled(bool enabled) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putBool("sd_cache", _sdCacheEnabled);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getScreensaverEnabled() const {
+    return _screensaverEnabled;
+}
+
+void SettingsManager::setScreensaverEnabled(bool enabled) {
+    if (_screensaverEnabled != enabled) {
+        _screensaverEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("scr_enabled", _screensaverEnabled);
         prefs.end();
     }
 }

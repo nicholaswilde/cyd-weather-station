@@ -31,6 +31,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **SD Cache**: Enable/disable weather caching to a microSD card (restores UI offline).
   - **Screenshot Server**: Enable/disable the remote screenshot HTTP server.
   - **MQTT**: Toggle publishing weather variables to MQTT topics.
+  - **Screensaver**: Enable/disable screensaver mode (dims backlight and displays clock after inactivity).
   - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks, header height dynamically increases to 60px in portrait to fit a wrapped two-line title without overlaps, and touch coordinates update instantly.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured timezone offset.
@@ -206,6 +207,7 @@ All settings below are configured by touch on the device and saved to flash:
 | **SD Log** | Toggle SD card weather logging. Disabled automatically if no card is inserted. |
 | **SD Cache** | Toggle SD card weather caching. |
 | **Scr Srv** | Toggle the remote screenshot HTTP server on/off. |
+| **Scr Saver** | Toggle the screensaver on/off. |
 | **MQTT** | Toggle publishing weather variables to MQTT topics. |
 
 ---

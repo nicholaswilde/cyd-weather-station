@@ -24,6 +24,7 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL(1, settings.getScreenOrientation());
     TEST_ASSERT_EQUAL(MQTT_ENABLED, settings.getMqttEnabled());
     TEST_ASSERT_EQUAL(USE_SD_CACHE, settings.getSdCacheEnabled());
+    TEST_ASSERT_EQUAL(SCREENSAVER_ENABLED, settings.getScreensaverEnabled());
 }
 
 void test_settings_save_and_load(void) {
@@ -41,6 +42,7 @@ void test_settings_save_and_load(void) {
     settings.setScreenOrientation(2);
     settings.setMqttEnabled(false);
     settings.setSdCacheEnabled(false);
+    settings.setScreensaverEnabled(!SCREENSAVER_ENABLED);
     
     // Create new instance to simulate re-reading from preferences
     SettingsManager settings_new;
@@ -56,6 +58,7 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL(2, settings_new.getScreenOrientation());
     TEST_ASSERT_EQUAL(false, settings_new.getMqttEnabled());
     TEST_ASSERT_EQUAL(false, settings_new.getSdCacheEnabled());
+    TEST_ASSERT_EQUAL(!SCREENSAVER_ENABLED, settings_new.getScreensaverEnabled());
 }
 
 void test_settings_wifi_credentials(void) {
