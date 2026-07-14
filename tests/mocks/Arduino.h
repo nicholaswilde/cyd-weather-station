@@ -33,6 +33,7 @@ typedef int wl_status_t;
 // --- GPIO Mocks ---
 #define OUTPUT 0x03
 #define INPUT 0x01
+#define INPUT_PULLUP 0x02
 #define HIGH 0x01
 #define LOW 0x00
 

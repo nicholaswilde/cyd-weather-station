@@ -7,7 +7,7 @@ ButtonManager::ButtonManager(uint8_t pin, uint32_t debounceDelayMs, uint32_t lon
       _pressStartTime(0), _longPressTriggered(false) {}
 
 void ButtonManager::begin() {
-    pinMode(_pin, INPUT);
+    pinMode(_pin, INPUT_PULLUP);
     // Initialize state
     uint8_t initVal = digitalRead(_pin);
     _lastPinState = initVal;
@@ -48,4 +48,8 @@ ButtonAction ButtonManager::update(unsigned long currentMillis) {
     }
 
     return action;
+}
+
+bool ButtonManager::isPressed() const {
+    return _stableState == LOW || _lastPinState == LOW;
 }

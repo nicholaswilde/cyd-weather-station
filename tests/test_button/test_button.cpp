@@ -15,7 +15,7 @@ void tearDown(void) {}
 void test_button_initial_state(void) {
     ButtonManager bm(0);
     bm.begin();
-    TEST_ASSERT_EQUAL(INPUT, mock_pin_modes[0]);
+    TEST_ASSERT_EQUAL(INPUT_PULLUP, mock_pin_modes[0]);
 }
 
 void test_button_no_press(void) {
@@ -74,11 +74,37 @@ void test_button_long_press(void) {
     TEST_ASSERT_EQUAL(ButtonAction::NONE, bm.update(2350));
 }
 
+void test_button_is_pressed(void) {
+    ButtonManager bm(0);
+    bm.begin();
+
+    TEST_ASSERT_FALSE(bm.isPressed());
+
+    // Press button
+    mock_pin_states[0] = LOW;
+    bm.update(100);
+    TEST_ASSERT_TRUE(bm.isPressed()); // Instantly true because _lastPinState is LOW
+
+    // Stable press
+    bm.update(150);
+    TEST_ASSERT_TRUE(bm.isPressed());
+
+    // Release button
+    mock_pin_states[0] = HIGH;
+    bm.update(200);
+    TEST_ASSERT_TRUE(bm.isPressed()); // Still true because _stableState is LOW (debouncing)
+
+    // Stable release
+    bm.update(250);
+    TEST_ASSERT_FALSE(bm.isPressed()); // Now false because both are HIGH
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_button_initial_state);
     RUN_TEST(test_button_no_press);
     RUN_TEST(test_button_single_quick_press);
     RUN_TEST(test_button_long_press);
+    RUN_TEST(test_button_is_pressed);
     return UNITY_END();
 }

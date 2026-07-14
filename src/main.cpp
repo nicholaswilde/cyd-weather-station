@@ -14,8 +14,10 @@
 #include "backlight_manager.h"
 #include "settings_manager.h"
 #include "screensaver_manager.h"
+#include "button_manager.h"
 BacklightManager backlight(TFT_BL, 0, 10.0f);
 ScreenSaverManager screensaver(backlight, 300000);
+ButtonManager buttonManager(BOOT_BUTTON_PIN);
 unsigned long lastBacklightUpdate = 0;
 const unsigned long backlightUpdateInterval = 1000; // 1 second
 SettingsManager settings;
@@ -111,7 +113,7 @@ void setup() {
 #endif
     
     // Initialize physical BOOT button (GPIO 0)
-    pinMode(BOOT_BUTTON_PIN, INPUT_PULLUP);
+    buttonManager.begin();
 }
 
 void loop() {
@@ -130,32 +132,61 @@ void loop() {
     led.update(currentMillis);
 #endif
 
-    // Handle physical BOOT button press to save screenshot to SD
-    static unsigned long lastButtonPressTime = 0;
-    static bool lastButtonState = HIGH;
-    bool currentButtonState = digitalRead(BOOT_BUTTON_PIN);
-    
-    if (currentButtonState == LOW && lastButtonState == HIGH) {
-        lastButtonPressTime = millis();
-    } else if (currentButtonState == HIGH && lastButtonState == LOW) {
-        if (millis() - lastButtonPressTime > 50) { // Debounce threshold (50ms)
-            Serial.println("[System] BOOT button pressed. Taking screenshot...");
-            
-            struct tm timeinfo;
-            std::string filename;
+    // Handle physical BOOT button events
+    static bool ignoreButtonAction = false;
+    static bool lastRawButtonState = HIGH;
+    bool currentRawButtonState = digitalRead(BOOT_BUTTON_PIN);
+
+    if (currentRawButtonState == LOW && lastRawButtonState == HIGH) {
 #ifndef NATIVE_TEST
-            if (getLocalTime(&timeinfo)) {
-                filename = ScreenshotManager::generateFilename(&timeinfo, 0);
-            } else {
-                filename = ScreenshotManager::generateFilename(nullptr, millis());
-            }
+        if (screensaver.isActive()) {
+            screensaver.wake(settings.getBrightness());
+            ignoreButtonAction = true;
+        } else {
+            ignoreButtonAction = false;
+        }
 #else
-            filename = ScreenshotManager::generateFilename(nullptr, millis());
+        ignoreButtonAction = false;
 #endif
-            ScreenshotManager::captureToSD(filename.c_str());
+    } else if (currentRawButtonState == HIGH && lastRawButtonState == LOW) {
+        // Clear ignore flag once fully released
+        if (ignoreButtonAction && !buttonManager.isPressed()) {
+            ignoreButtonAction = false;
         }
     }
-    lastButtonState = currentButtonState;
+    lastRawButtonState = currentRawButtonState;
+
+    ButtonAction action = buttonManager.update(currentMillis);
+    if (ignoreButtonAction) {
+        action = ButtonAction::NONE;
+        // Keep checking if we can clear the ignore flag once the button is released
+        if (currentRawButtonState == HIGH && !buttonManager.isPressed()) {
+            ignoreButtonAction = false;
+        }
+    }
+
+    if (action == ButtonAction::SINGLE_PRESS) {
+        Serial.println("[System] BOOT button single press: Triggering weather refresh...");
+        showUIStatusMessage("Refreshing weather...");
+        hasInitialFetch = false;
+        lastWifiUpdate = 0; // Force immediate refresh on next loop iteration
+    } else if (action == ButtonAction::LONG_PRESS) {
+        Serial.println("[System] BOOT button long press: Taking screenshot...");
+        showUIStatusMessage("Screenshot saved!");
+        
+        struct tm timeinfo;
+        std::string filename;
+#ifndef NATIVE_TEST
+        if (getLocalTime(&timeinfo)) {
+            filename = ScreenshotManager::generateFilename(&timeinfo, 0);
+        } else {
+            filename = ScreenshotManager::generateFilename(nullptr, millis());
+        }
+#else
+        filename = ScreenshotManager::generateFilename(nullptr, millis());
+#endif
+        ScreenshotManager::captureToSD(filename.c_str());
+    }
 
     // Handle runtime settings changes from UI
     if (settings_unit_changed) {

@@ -15,6 +15,7 @@ public:
 
     void begin();
     ButtonAction update(unsigned long currentMillis);
+    bool isPressed() const;
 
 private:
     uint8_t _pin;
