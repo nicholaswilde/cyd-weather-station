@@ -636,6 +636,9 @@ bool WeatherClient::deserializeWeatherData(const String& json, WeatherData& data
 }
 
 bool WeatherClient::isLocationEmpty() const {
+    if (_resolvedLat.length() > 0 && _resolvedLng.length() > 0) {
+        return false;
+    }
     if (_useZip) {
         return _zipCode == nullptr || strlen(_zipCode) == 0 || strcmp(_zipCode, "YOUR_ZIP_CODE") == 0;
     } else {
@@ -654,6 +657,7 @@ bool WeatherClient::fetchIpLocation(String& latStr, String& lonStr, String& city
     _resolvedLng = lonStr;
     _cityName = city;
     _useZip = false;
+    _zipResolved = true;
     return true;
 #else
     if (WiFi.status() != WL_CONNECTED) {
@@ -680,6 +684,7 @@ bool WeatherClient::fetchIpLocation(String& latStr, String& lonStr, String& city
                 _resolvedLng = lonStr;
                 _cityName = city;
                 _useZip = false;
+                _zipResolved = true;
                 http.end();
                 return true;
             }
