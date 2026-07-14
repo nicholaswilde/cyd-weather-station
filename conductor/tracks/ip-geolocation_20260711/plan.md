@@ -8,4 +8,4 @@
 ## Phase 2: Integration
 - [x] Task: Trigger fallback geolocation lookup in `main.cpp` if settings are empty (897510e)
 - [x] Task: Update local coordinates on success and invoke weather refetch (897510e)
-- [~] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md)
