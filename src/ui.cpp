@@ -1156,10 +1156,81 @@ void updateForecastUI(const WeatherData& data) {
     }
 }
 
+static std::string sanitizeCityName(const char* input) {
+    if (!input) return "";
+    std::string result = "";
+    int i = 0;
+    while (input[i] != '\0') {
+        unsigned char c = input[i];
+        if (c < 128) {
+            result += (char)c;
+            i++;
+        } else if (c == 0xC3) {
+            unsigned char next = input[i+1];
+            if (next == '\0') break;
+            if (next == 0xA1 || next == 0xA2 || next == 0xA4 || next == 0xA5) result += 'a';
+            else if (next == 0x81 || next == 0x84) result += 'A';
+            else if (next == 0xA6) result += "ae";
+            else if (next == 0xA7) result += 'c';
+            else if (next == 0xA9 || next == 0xAA || next == 0xAB) result += 'e';
+            else if (next == 0x89) result += 'E';
+            else if (next == 0xAD) result += 'i';
+            else if (next == 0xB1) result += 'n';
+            else if (next == 0xB2 || next == 0xB3 || next == 0xB4 || next == 0xB6 || next == 0xB8) result += 'o';
+            else if (next == 0x93 || next == 0x96) result += 'O';
+            else if (next == 0xBA || next == 0xBC) result += 'u';
+            else if (next == 0x9A || next == 0x9C) result += 'U';
+            else if (next == 0x9F) result += "ss";
+            else result += '?';
+            i += 2;
+        } else if (c == 0xC4) {
+            unsigned char next = input[i+1];
+            if (next == '\0') break;
+            if (next == 0x80) result += 'A';
+            else if (next == 0x81) result += 'a';
+            else if (next == 0x8C) result += 'C';
+            else if (next == 0x8D) result += 'c';
+            else if (next == 0x92) result += 'E';
+            else if (next == 0x93) result += 'e';
+            else if (next == 0xA2) result += 'G';
+            else if (next == 0xA3) result += 'g';
+            else if (next == 0xAA) result += 'I';
+            else if (next == 0xAB) result += 'i';
+            else result += '?';
+            i += 2;
+        } else if (c == 0xC5) {
+            unsigned char next = input[i+1];
+            if (next == '\0') break;
+            if (next == 0x8A) result += 'K';
+            else if (next == 0x8B) result += 'k';
+            else if (next == 0x92) result += 'L';
+            else if (next == 0x93) result += 'l';
+            else if (next == 0xA0) result += 'N';
+            else if (next == 0xA1) result += 'n';
+            else if (next == 0xA6) result += 'S';
+            else if (next == 0xA7) result += 's';
+            else if (next == 0xAA) result += 'U';
+            else if (next == 0xAB) result += 'u';
+            else if (next == 0xBD) result += 'Z';
+            else if (next == 0xBE) result += 'z';
+            else result += '?';
+            i += 2;
+        } else {
+            result += '?';
+            i++;
+            while (input[i] != '\0' && (input[i] & 0xC0) == 0x80) {
+                i++;
+            }
+        }
+    }
+    return result;
+}
+
 void updateFooterUI(const char* update_time, const char* city) {
     char buf[64];
     if (city && city[0] != '\0') {
-        snprintf(buf, sizeof(buf), "Last Update: %s | %s", update_time, city);
+        std::string clean_city = sanitizeCityName(city);
+        snprintf(buf, sizeof(buf), "Last Update: %s | %s", update_time, clean_city.c_str());
     } else {
         snprintf(buf, sizeof(buf), "Last Update: %s", update_time);
     }
