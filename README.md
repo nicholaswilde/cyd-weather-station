@@ -158,6 +158,12 @@ Static settings (location, update interval) live in [`config/config.h`](config/c
 #define WEATHER_UPDATE_INTERVAL_MINS 15
 ```
 
+**Screensaver:**
+```cpp
+#define SCREENSAVER_ENABLED     true
+#define SCREENSAVER_TIMEOUT_MS  300000 // 5 minutes (in milliseconds)
+```
+
 **Display performance** — tune animation smoothness vs. touch responsiveness:
 ```cpp
 // Height of the LVGL draw buffer (pixel rows).

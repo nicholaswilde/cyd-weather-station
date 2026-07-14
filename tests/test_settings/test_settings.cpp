@@ -14,20 +14,16 @@ void test_settings_default_values(void) {
     settings.begin();
     
     // Default values expected:
-    // - Unit System: UNIT_IMPERIAL (since default config is Imperial)
-    // - Brightness: 80
-    // - Auto Brightness: false
-    // - Timezone Offset: -8 (GMT-8, GMT_OFFSET_SEC = -8 * 3600)
-    TEST_ASSERT_EQUAL(2, settings.getUnitSystem()); // 2 is UNIT_IMPERIAL
+    TEST_ASSERT_EQUAL(UNIT_SYSTEM, settings.getUnitSystem());
     TEST_ASSERT_EQUAL(80, settings.getBrightness());
-    TEST_ASSERT_EQUAL(false, settings.getAutoBrightness());
-    TEST_ASSERT_EQUAL(-8, settings.getTimezoneOffset());
-    TEST_ASSERT_EQUAL(true, settings.getDstEnabled());
-    TEST_ASSERT_EQUAL(true, settings.getSdLoggingEnabled());
+    TEST_ASSERT_EQUAL(USE_LDR_AUTO_BACKLIGHT, settings.getAutoBrightness());
+    TEST_ASSERT_EQUAL(GMT_OFFSET_SEC / 3600, settings.getTimezoneOffset());
+    TEST_ASSERT_EQUAL((DST_OFFSET_SEC > 0), settings.getDstEnabled());
+    TEST_ASSERT_EQUAL(USE_SD_LOGGING, settings.getSdLoggingEnabled());
     TEST_ASSERT_EQUAL(true, settings.getScreenshotServerEnabled());
     TEST_ASSERT_EQUAL(1, settings.getScreenOrientation());
-    TEST_ASSERT_EQUAL(true, settings.getMqttEnabled());
-    TEST_ASSERT_EQUAL(true, settings.getSdCacheEnabled());
+    TEST_ASSERT_EQUAL(MQTT_ENABLED, settings.getMqttEnabled());
+    TEST_ASSERT_EQUAL(USE_SD_CACHE, settings.getSdCacheEnabled());
 }
 
 void test_settings_save_and_load(void) {

@@ -48,6 +48,10 @@ extern int getCurrentThemeFlavor();
 // Auto Backlight Settings
 #define USE_LDR_AUTO_BACKLIGHT false
 
+// Screensaver Settings
+#define SCREENSAVER_ENABLED true
+#define SCREENSAVER_TIMEOUT_MS 300000 // 5 minutes (in milliseconds)
+
 // RGB LED Status Settings
 #define USE_RGB_LED_STATUS true
 

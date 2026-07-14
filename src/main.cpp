@@ -16,7 +16,7 @@
 #include "screensaver_manager.h"
 #include "button_manager.h"
 BacklightManager backlight(TFT_BL, 0, 10.0f);
-ScreenSaverManager screensaver(backlight, 300000);
+ScreenSaverManager screensaver(backlight, SCREENSAVER_TIMEOUT_MS);
 ButtonManager buttonManager(BOOT_BUTTON_PIN);
 unsigned long lastBacklightUpdate = 0;
 const unsigned long backlightUpdateInterval = 1000; // 1 second
@@ -341,7 +341,9 @@ void loop() {
     }
 
 #ifndef NATIVE_TEST
+#if SCREENSAVER_ENABLED
     screensaver.update(currentMillis);
+#endif
     if (!screensaver.isActive() && settings.getAutoBrightness()) {
         if (currentMillis - lastBacklightUpdate >= backlightUpdateInterval) {
             lastBacklightUpdate = currentMillis;
