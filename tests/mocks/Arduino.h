@@ -43,6 +43,7 @@ extern unsigned long mock_millis_val;
 inline unsigned long millis() { return mock_millis_val; }
 inline void pinMode(uint8_t pin, uint8_t mode) { if (pin < 100) mock_pin_modes[pin] = mode; }
 inline void digitalWrite(uint8_t pin, uint8_t val) { if (pin < 100) mock_pin_states[pin] = val; }
+inline int digitalRead(uint8_t pin) { return (pin < 100) ? mock_pin_states[pin] : HIGH; }
 
 // --- Class Mocks ---
 class String : public std::string {
