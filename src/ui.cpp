@@ -68,6 +68,12 @@ static void sd_sw_event_cb(lv_event_t * e) {
     settings_sd_logging_changed = true;
 }
 
+static void sd_cache_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setSdCacheEnabled(is_checked);
+}
+
 static void screenshot_sw_event_cb(lv_event_t * e) {
     lv_obj_t * sw = lv_event_get_target(e);
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
@@ -643,6 +649,34 @@ void initUI() {
         lv_obj_add_event_cb(sd_sw, sd_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     } else {
         lv_obj_add_state(sd_sw, LV_STATE_DISABLED);
+    }
+
+    // SD Cache row
+    lv_obj_t * sd_cache_row = lv_obj_create(left_col);
+    lv_obj_set_size(sd_cache_row, 144, 22);
+    lv_obj_set_flex_flow(sd_cache_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(sd_cache_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(sd_cache_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(sd_cache_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(sd_cache_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(sd_cache_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * sd_cache_label = lv_label_create(sd_cache_row);
+    lv_label_set_text(sd_cache_label, "SD Cache");
+    lv_obj_set_style_text_color(sd_cache_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+
+    lv_obj_t * sd_cache_sw = lv_switch_create(sd_cache_row);
+    lv_obj_set_size(sd_cache_sw, 40, 20);
+    lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (SdCardManager::isCardPresent()) {
+        if (settings.getSdCacheEnabled()) {
+            lv_obj_add_state(sd_cache_sw, LV_STATE_CHECKED);
+        }
+        lv_obj_add_event_cb(sd_cache_sw, sd_cache_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    } else {
+        lv_obj_add_state(sd_cache_sw, LV_STATE_DISABLED);
     }
 
     // Screenshot Server row

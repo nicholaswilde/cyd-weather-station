@@ -23,6 +23,7 @@ private:
     bool _mqttEnabled;
     String _wifiSSID;
     String _wifiPassword;
+    bool _sdCacheEnabled;
 
 public:
     SettingsManager();
@@ -69,6 +70,9 @@ public:
 
     String getWifiPassword() const;
     void setWifiPassword(const String& password);
+
+    bool getSdCacheEnabled() const;
+    void setSdCacheEnabled(bool enabled);
 };
 
 #endif // SETTINGS_MANAGER_H

@@ -17,6 +17,7 @@ SettingsManager::SettingsManager() {
     _mqttEnabled = MQTT_ENABLED;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
+    _sdCacheEnabled = true;
 }
 
 void SettingsManager::begin() {
@@ -37,6 +38,7 @@ void SettingsManager::begin() {
     _mqttEnabled = prefs.getBool("mqtt_en", MQTT_ENABLED);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
+    _sdCacheEnabled = prefs.getBool("sd_cache", true);
     
     prefs.end();
 }
@@ -248,6 +250,20 @@ void SettingsManager::setMqttEnabled(bool enabled) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putBool("mqtt_en", _mqttEnabled);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getSdCacheEnabled() const {
+    return _sdCacheEnabled;
+}
+
+void SettingsManager::setSdCacheEnabled(bool enabled) {
+    if (_sdCacheEnabled != enabled) {
+        _sdCacheEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("sd_cache", _sdCacheEnabled);
         prefs.end();
     }
 }

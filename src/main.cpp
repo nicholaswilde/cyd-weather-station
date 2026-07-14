@@ -88,7 +88,7 @@ void setup() {
 
     // Load offline cache on boot if available
     WeatherData cachedData;
-    if (WeatherCache::loadCache(cachedData)) {
+    if (settings.getSdCacheEnabled() && WeatherCache::loadCache(cachedData)) {
         Serial.println("[System] Restored weather data from offline cache on boot.");
         updateWeatherUI(cachedData.temperature, cachedData.humidity, cachedData.status.c_str(), cachedData.weatherCode, cachedData.windSpeed, cachedData.windDirection);
         updateForecastUI(cachedData);
@@ -415,7 +415,9 @@ void loop() {
                     updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed, data.windDirection);
                     updateForecastUI(data);
                     updateOfflineIndicator(false);
-                    WeatherCache::saveCache(data);
+                    if (settings.getSdCacheEnabled()) {
+                        WeatherCache::saveCache(data);
+                    }
 
                     // --- NEW: Publish to MQTT ---
                     if (mqtt.isConnected()) {
