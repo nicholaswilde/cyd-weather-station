@@ -7,11 +7,11 @@ This plan details the steps to implement and verify the new Boot button behavior
     - [x] Create test file `tests/test_button/test_button.cpp` to verify debouncing, single press, and long press transitions.
     - [x] Define `ButtonManager` class interface in `include/button_manager.h`.
     - [x] Ensure that native tests fail initially (Red Phase).
-- [ ] Task: Implement `ButtonManager` class logic
-    - [ ] Write implementation in `src/button_manager.cpp`.
-    - [ ] Detect single press on release (< 2s).
-    - [ ] Detect long press immediately upon reaching the 2s threshold.
-    - [ ] Verify that all native unit tests pass (Green Phase).
+- [x] Task: Implement `ButtonManager` class logic (9521b4e)
+    - [x] Write implementation in `src/button_manager.cpp`.
+    - [x] Detect single press on release (< 2s).
+    - [x] Detect long press immediately upon reaching the 2s threshold.
+    - [x] Verify that all native unit tests pass (Green Phase).
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Logic & Tests (TDD)' (Protocol in workflow.md)
 
 ## Phase 2: Action Bindings & UI Feedback
