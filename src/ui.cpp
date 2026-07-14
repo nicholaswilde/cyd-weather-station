@@ -337,6 +337,12 @@ void initUI() {
     lv_obj_set_style_line_rounded(hourly_chart, true, LV_PART_ITEMS);
     lv_obj_set_style_line_width(hourly_chart, 3, LV_PART_ITEMS);
 
+    // Make room for axis labels by adding padding on the chart's main part
+    lv_obj_set_style_pad_left(hourly_chart, 40, LV_PART_MAIN);
+    lv_obj_set_style_pad_right(hourly_chart, 40, LV_PART_MAIN);
+    lv_obj_set_style_pad_bottom(hourly_chart, 25, LV_PART_MAIN);
+    lv_obj_set_style_pad_top(hourly_chart, 10, LV_PART_MAIN);
+
     // Number of points is 24 (one for each hour)
     lv_chart_set_point_count(hourly_chart, 24);
 
