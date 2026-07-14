@@ -3,10 +3,10 @@
 This plan details the steps to implement and verify the new Boot button behavior using a test-driven approach (TDD).
 
 ## Phase 1: Logic & Tests (TDD)
-- [ ] Task: Create `ButtonManager` class and unit tests
-    - [ ] Create test file `tests/test_button/test_button.cpp` to verify debouncing, single press, and long press transitions.
-    - [ ] Define `ButtonManager` class interface in `include/button_manager.h`.
-    - [ ] Ensure that native tests fail initially (Red Phase).
+- [x] Task: Create `ButtonManager` class and unit tests (3e43a89)
+    - [x] Create test file `tests/test_button/test_button.cpp` to verify debouncing, single press, and long press transitions.
+    - [x] Define `ButtonManager` class interface in `include/button_manager.h`.
+    - [x] Ensure that native tests fail initially (Red Phase).
 - [ ] Task: Implement `ButtonManager` class logic
     - [ ] Write implementation in `src/button_manager.cpp`.
     - [ ] Detect single press on release (< 2s).
