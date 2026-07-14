@@ -58,6 +58,23 @@ void test_wifi_manager_transitions_to_ap_mode(void) {
     TEST_ASSERT_EQUAL(WIFI_STATE_AP_MODE, wifi.getState());
 }
 
+void test_wifi_manager_ap_mode_reconnects_in_background(void) {
+    mock_millis_val = 0;
+    WifiManager wifi("SSID", "PASS");
+    wifi.begin();
+    
+    // Transition to AP mode on timeout
+    mock_millis_val = 31000;
+    WiFi._status = 0;
+    wifi.update();
+    TEST_ASSERT_EQUAL(WIFI_STATE_AP_MODE, wifi.getState());
+    
+    // WiFi gets connected in background
+    WiFi._status = WL_CONNECTED;
+    wifi.update();
+    TEST_ASSERT_EQUAL(WIFI_STATE_CONNECTED, wifi.getState());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_wifi_manager_initial_state);
@@ -65,5 +82,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_wifi_manager_transitions_to_connected);
     RUN_TEST(test_wifi_manager_loses_connection);
     RUN_TEST(test_wifi_manager_transitions_to_ap_mode);
+    RUN_TEST(test_wifi_manager_ap_mode_reconnects_in_background);
     return UNITY_END();
 }

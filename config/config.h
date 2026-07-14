@@ -5,11 +5,11 @@
 
 // Location Settings
 #define USE_ZIP_CODE true
-#define WEATHER_ZIP_CODE ""
+#define WEATHER_ZIP_CODE "90210"
 
 // Coordinates (Fallback if USE_ZIP_CODE is false)
-#define WEATHER_API_LATITUDE ""
-#define WEATHER_API_LONGITUDE ""
+#define WEATHER_API_LATITUDE "34.10313"
+#define WEATHER_API_LONGITUDE "-118.41625"
 
 // Open-Meteo API Settings
 #define WEATHER_UPDATE_INTERVAL_MINS 1
@@ -58,11 +58,11 @@ extern int getCurrentThemeFlavor();
 #define LED_BRIGHTNESS 255
 
 // MQTT default status setting
-#define MQTT_ENABLED true
+#define MQTT_ENABLED false
 
 // SD Card Weather Logging Settings
-#define USE_SD_LOGGING true
-#define USE_SD_CACHE true
+#define USE_SD_LOGGING false
+#define USE_SD_CACHE false
 
 // Display Performance Settings
 // DISPLAY_DRAW_BUF_ROWS: Height of the LVGL draw buffer in pixel rows.

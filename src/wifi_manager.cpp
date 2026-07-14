@@ -79,10 +79,34 @@ void WifiManager::update() {
             break;
 
         case WIFI_STATE_AP_MODE:
+            if (WiFi.status() == WL_CONNECTED) {
+                Serial.println("[WiFi] Wi-Fi connected in background. Stopping AP Mode...");
 #ifndef NATIVE_TEST
-            if (_dnsServer) _dnsServer->processNextRequest();
-            if (_webServer) _webServer->handleClient();
+                if (_dnsServer) {
+                    _dnsServer->stop();
+                    delete _dnsServer;
+                    _dnsServer = nullptr;
+                }
+                if (_webServer) {
+                    _webServer->stop();
+                    delete _webServer;
+                    _webServer = nullptr;
+                }
+                WiFi.softAPdisconnect(true);
+                WiFi.mode(WIFI_STA);
+                if (settings.getScreenshotServerEnabled()) {
+                    startScreenshotServer();
+                }
 #endif
+                _state = WIFI_STATE_CONNECTED;
+                Serial.print("[WiFi] Connected! IP address: ");
+                Serial.println(WiFi.localIP());
+            } else {
+#ifndef NATIVE_TEST
+                if (_dnsServer) _dnsServer->processNextRequest();
+                if (_webServer) _webServer->handleClient();
+#endif
+            }
             break;
     }
 }

@@ -242,7 +242,7 @@ WeatherData WeatherClient::fetchWeather() {
 }
 
 bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
-    StaticJsonDocument<4096> doc;
+    DynamicJsonDocument doc(8192);
     DeserializationError error = deserializeJson(doc, json);
 
     if (error) {
