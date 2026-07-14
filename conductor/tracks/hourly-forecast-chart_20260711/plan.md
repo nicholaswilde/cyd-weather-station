@@ -8,4 +8,4 @@
 - [x] Task: Create new tab widget inside tabview in `src/ui.cpp` (e4584f0)
 - [x] Task: Instantiate `lv_chart` with proper bounds, spacing, and axis divisions (e4584f0)
 - [x] Task: Write code to map the data points onto the chart series and dynamically redraw it (e4584f0)
-- [ ] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1 & 2' (Protocol in workflow.md) (d350757)
