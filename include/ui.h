@@ -28,5 +28,6 @@ void updateScreenSaverTime(const char* time_str);
 void setUIActiveTab(int index);
 void setUIOrientation(int rotation);
 const char* getCardinalDirection(int degrees);
+void showUIStatusMessage(const char* message);
 
 #endif // UI_H

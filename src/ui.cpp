@@ -1172,3 +1172,37 @@ void updateScreenSaverTime(const char* time_str) {
         lv_obj_align(screensaver_clock, LV_ALIGN_TOP_LEFT, new_x, new_y);
     }
 }
+
+void showUIStatusMessage(const char* message) {
+    lv_obj_t * scr = lv_scr_act();
+    // Create a container for the status message
+    lv_obj_t * card = lv_obj_create(scr);
+    if (!card) return;
+    
+    // Clear scrollable flag
+    lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
+    
+    // Style card
+    lv_obj_set_style_bg_color(card, lv_color_hex(COLOR_MANTLE), LV_PART_MAIN);
+    lv_obj_set_style_border_color(card, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
+    lv_obj_set_style_border_width(card, 2, LV_PART_MAIN);
+    lv_obj_set_style_border_opa(card, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_radius(card, 8, LV_PART_MAIN);
+    
+    // Size and align
+    lv_obj_set_size(card, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(card, 15, LV_PART_MAIN);
+    lv_obj_align(card, LV_ALIGN_CENTER, 0, 0);
+    
+    // Create label
+    lv_obj_t * label = lv_label_create(card);
+    if (label) {
+        lv_label_set_text(label, message);
+        lv_obj_set_style_text_color(label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+        lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+    }
+    
+    // Auto-delete after 2 seconds
+    lv_obj_del_delayed(card, 2000);
+}
+
