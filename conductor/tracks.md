@@ -9,7 +9,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: IP-Based Auto-Location (Geolocation fallback)**
+- [x] **Track: IP-Based Auto-Location (Geolocation fallback)**
   *Link: [./tracks/ip-geolocation_20260711/](./tracks/ip-geolocation_20260711/)*
 
 ---
