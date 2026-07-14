@@ -26,6 +26,7 @@ The **ESP32 CYD LVGL Weather Station** is an interactive, touch-screen-enabled w
 12. **Inactivity Sleep & Screen-Saver:** Auto-dims the screen backlight to 5% after 5 minutes of inactivity and displays a floating digital clock overlay that drifts periodically to prevent resistive screen pixel burn-in. Wakes instantly on any screen tap without triggering underlying widgets.
 13. **Multi-Action Physical Button:** Re-purposes the onboard BOOT button (GPIO 0) for multiple actions: a single quick press triggers an immediate weather update (with an on-screen "Refreshing weather..." notification), and a long press (>= 2 seconds) takes a screenshot saved to the SD card (showing "Screenshot saved!"). Waking from screensaver ignores the action.
 14. **SD Offline Cache Recovery:** Periodically saves weather data to microSD card (`/weather_cache.json`) in JSON format. On boot, if Wi-Fi connection fails or is unavailable, the device restores the cached weather data, updates the UI, and displays an offline status badge.
+15. **IP-Based Auto-Location:** Automatically queries an IP geolocation API (`ip-api.com`) to resolve coordinates and city name on boot if the user has not configured manual coordinates or a ZIP code. Instantly updates the weather forecast metrics for the resolved city.
 
 ## References
 - [Random Nerd Tutorials - ESP32 CYD LVGL Weather Station](https://randomnerdtutorials.com/esp32-cyd-lvgl-weather-station/)
