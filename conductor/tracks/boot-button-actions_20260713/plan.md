@@ -12,7 +12,7 @@ This plan details the steps to implement and verify the new Boot button behavior
     - [x] Detect single press on release (< 2s).
     - [x] Detect long press immediately upon reaching the 2s threshold.
     - [x] Verify that all native unit tests pass (Green Phase).
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Logic & Tests (TDD)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Logic & Tests (TDD)' (Protocol in workflow.md)
 
 ## Phase 2: Action Bindings & UI Feedback
 - [ ] Task: Implement transient UI messages
