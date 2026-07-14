@@ -198,7 +198,18 @@ static void tz_btn_event_cb(lv_event_t * e) {
 
 static void chart_draw_event_cb(lv_event_t * e) {
     lv_obj_draw_part_dsc_t * dsc = lv_event_get_draw_part_dsc(e);
-    if (dsc->part == LV_PART_TICKS) {
+    if (dsc->part == LV_PART_TICKS || dsc->type == LV_CHART_DRAW_PART_TICK_LABEL) {
+        // Style the tick lines
+        if (dsc->line_dsc) {
+            dsc->line_dsc->color = lv_color_hex(COLOR_OVERLAY);
+            dsc->line_dsc->width = 2;
+        }
+        
+        // Style the tick text labels
+        if (dsc->label_dsc) {
+            dsc->label_dsc->color = lv_color_hex(COLOR_TEXT);
+        }
+
         if (dsc->id == LV_CHART_AXIS_PRIMARY_X && dsc->text) {
             int hour_idx = dsc->value;
             if (hour_idx == 0) {
@@ -325,8 +336,12 @@ void initUI() {
 
     // Create Hourly Forecast Chart
     hourly_chart = lv_chart_create(tab_hourly);
-    lv_obj_set_size(hourly_chart, LV_PCT(100), LV_PCT(100));
-    lv_obj_align(hourly_chart, LV_ALIGN_CENTER, 0, 0);
+    if (isLandscape) {
+        lv_obj_set_size(hourly_chart, 230, 130);
+    } else {
+        lv_obj_set_size(hourly_chart, 160, 190);
+    }
+    lv_obj_align(hourly_chart, LV_ALIGN_CENTER, 0, -10);
     lv_chart_set_type(hourly_chart, LV_CHART_TYPE_LINE);
 
     // Styling Catppuccin
@@ -336,12 +351,6 @@ void initUI() {
     lv_obj_set_style_text_color(hourly_chart, lv_color_hex(COLOR_TEXT), LV_PART_TICKS); // axis tick text
     lv_obj_set_style_line_rounded(hourly_chart, true, LV_PART_ITEMS);
     lv_obj_set_style_line_width(hourly_chart, 3, LV_PART_ITEMS);
-
-    // Make room for axis labels by adding padding on the chart's main part
-    lv_obj_set_style_pad_left(hourly_chart, 40, LV_PART_MAIN);
-    lv_obj_set_style_pad_right(hourly_chart, 40, LV_PART_MAIN);
-    lv_obj_set_style_pad_bottom(hourly_chart, 25, LV_PART_MAIN);
-    lv_obj_set_style_pad_top(hourly_chart, 10, LV_PART_MAIN);
 
     // Number of points is 24 (one for each hour)
     lv_chart_set_point_count(hourly_chart, 24);
