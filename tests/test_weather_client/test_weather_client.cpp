@@ -164,6 +164,26 @@ void test_weather_client_parse_ip_location_json_fail(void) {
     TEST_ASSERT_FALSE(parsed);
 }
 
+void test_weather_client_is_location_empty(void) {
+    WeatherClient client1("");
+    TEST_ASSERT_TRUE(client1.isLocationEmpty());
+
+    WeatherClient client2("YOUR_ZIP_CODE");
+    TEST_ASSERT_TRUE(client2.isLocationEmpty());
+
+    WeatherClient client3("90210");
+    TEST_ASSERT_FALSE(client3.isLocationEmpty());
+
+    WeatherClient client4("", "");
+    TEST_ASSERT_TRUE(client4.isLocationEmpty());
+
+    WeatherClient client5("YOUR_LATITUDE", "-122.4194");
+    TEST_ASSERT_TRUE(client5.isLocationEmpty());
+
+    WeatherClient client6("37.7749", "-122.4194");
+    TEST_ASSERT_FALSE(client6.isLocationEmpty());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -174,5 +194,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_parse_owm_json);
     RUN_TEST(test_weather_client_parse_ip_location_json);
     RUN_TEST(test_weather_client_parse_ip_location_json_fail);
+    RUN_TEST(test_weather_client_is_location_empty);
     return UNITY_END();
 }

@@ -399,6 +399,16 @@ void loop() {
 
             // Check for weather updates
             if (!hasInitialFetch || (currentMillis - lastWeatherUpdate >= weatherUpdateInterval)) {
+                if (weather.isLocationEmpty()) {
+                    Serial.println("[System] Location settings empty/default. Querying IP location fallback...");
+                    String latStr, lonStr, city;
+                    if (weather.fetchIpLocation(latStr, lonStr, city)) {
+                        Serial.printf("[System] Fallback geolocation resolved: %s (%s, %s)\n",
+                                      city.c_str(), latStr.c_str(), lonStr.c_str());
+                    } else {
+                        Serial.println("[System] Fallback geolocation query failed.");
+                    }
+                }
                 Serial.println("[System] Fetching weather update...");
                 WeatherData data = weather.fetchWeather();
                 if (data.valid) {
