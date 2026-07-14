@@ -14,7 +14,7 @@ This plan details the steps to implement and verify the new Boot button behavior
     - [x] Verify that all native unit tests pass (Green Phase).
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Logic & Tests (TDD)' (Protocol in workflow.md)
 
-## Phase 2: Action Bindings & UI Feedback
+## Phase 2: Action Bindings & UI Feedback [checkpoint: 26b7c1a]
 - [x] Task: Implement transient UI messages (f724b75)
     - [x] Implement `showUIStatusMessage(const char*)` in `src/ui.cpp` and `include/ui.h` using a timed `lv_obj_del_delayed` overlay.
 - [x] Task: Integrate button actions in main loop (4e92033)
