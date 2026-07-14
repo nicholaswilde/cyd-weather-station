@@ -15,8 +15,8 @@ This plan details the steps to implement and verify the new Boot button behavior
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Logic & Tests (TDD)' (Protocol in workflow.md)
 
 ## Phase 2: Action Bindings & UI Feedback
-- [ ] Task: Implement transient UI messages
-    - [ ] Implement `showUIStatusMessage(const char*)` in `src/ui.cpp` and `include/ui.h` using a timed `lv_obj_del_delayed` overlay.
+- [x] Task: Implement transient UI messages (f724b75)
+    - [x] Implement `showUIStatusMessage(const char*)` in `src/ui.cpp` and `include/ui.h` using a timed `lv_obj_del_delayed` overlay.
 - [ ] Task: Integrate button actions in main loop
     - [ ] Instantiate `ButtonManager` in `src/main.cpp`.
     - [ ] On single press: trigger weather refresh and show "Refreshing weather..." UI message.
