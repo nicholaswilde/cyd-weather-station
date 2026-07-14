@@ -24,4 +24,4 @@ This plan details the steps to implement and verify the new Boot button behavior
 - [x] Task: Implement screensaver override (4e92033)
     - [x] Check `screensaver.isActive()` when button press begins.
     - [x] If screensaver is active, wake it and ignore/discard the button action.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Action Bindings & UI Feedback' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Action Bindings & UI Feedback' (Protocol in workflow.md)
