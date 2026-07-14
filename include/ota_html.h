@@ -108,7 +108,7 @@ button:disabled {
 </head>
 <body>
 <div class="card">
-    <h2>Firmware Update</h2>
+    <h2>CYD Firmware Update</h2>
     <p style="color: #a5adcb; font-size: 14px; margin-bottom: 20px;">Upload a compiled .bin file to flash the device.</p>
     <div class="drop-zone" id="drop-zone">
         <p id="file-name">Click or drag & drop binary file here</p>
