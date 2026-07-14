@@ -44,5 +44,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Change the behavior of the boot button to where a single quick push refreshes the weather and a long press takes a screenshot**
+- [x] **Track: Change the behavior of the boot button to where a single quick push refreshes the weather and a long press takes a screenshot**
 *Link: [./tracks/boot-button-actions_20260713/](./tracks/boot-button-actions_20260713/)*
