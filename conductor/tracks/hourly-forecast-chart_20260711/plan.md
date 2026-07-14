@@ -1,8 +1,8 @@
 # Implementation Plan - hourly-forecast-chart_20260711
 
 ## Phase 1: API and Data Parsing
-- [ ] Task: Update Open-Meteo and OpenWeatherMap APIs to request hourly parameters
-- [ ] Task: Parse hourly JSON arrays and implement unit tests in `test_weather_client`
+- [x] Task: Update Open-Meteo and OpenWeatherMap APIs to request hourly parameters (c95c88c)
+- [x] Task: Parse hourly JSON arrays and implement unit tests in `test_weather_client` (c95c88c)
 
 ## Phase 2: LVGL Chart UI Setup
 - [ ] Task: Create new tab widget inside tabview in `src/ui.cpp`
