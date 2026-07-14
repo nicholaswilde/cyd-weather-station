@@ -110,13 +110,15 @@ function main() {
   set_orientation "${ip}" 1 "landscape"
   capture_tab "${ip}" "landscape" 0 "current"
   capture_tab "${ip}" "landscape" 1 "forecast"
-  capture_tab "${ip}" "landscape" 2 "settings"
+  capture_tab "${ip}" "landscape" 2 "hourly"
+  capture_tab "${ip}" "landscape" 3 "settings"
 
   # 2. Capture Portrait screens (rotation 2)
   set_orientation "${ip}" 2 "portrait"
   capture_tab "${ip}" "portrait" 0 "current"
   capture_tab "${ip}" "portrait" 1 "forecast"
-  capture_tab "${ip}" "portrait" 2 "settings"
+  capture_tab "${ip}" "portrait" 2 "hourly"
+  capture_tab "${ip}" "portrait" 3 "settings"
 
   # 3. Restore to default Landscape orientation
   log "INFO" "Restoring default Landscape orientation..."

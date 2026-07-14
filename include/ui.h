@@ -21,6 +21,7 @@ void updateOfflineIndicator(bool isOffline);
 void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed, int windDirection);
 void updateTimeUI(const char* time_str);
 void updateForecastUI(const WeatherData& data);
+void updateHourlyUI(const WeatherData& data);
 void updateFooterUI(const char* update_time, const char* city);
 void showScreenSaver();
 void hideScreenSaver();

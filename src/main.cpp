@@ -92,6 +92,7 @@ void setup() {
         Serial.println("[System] Restored weather data from offline cache on boot.");
         updateWeatherUI(cachedData.temperature, cachedData.humidity, cachedData.status.c_str(), cachedData.weatherCode, cachedData.windSpeed, cachedData.windDirection);
         updateForecastUI(cachedData);
+        updateHourlyUI(cachedData);
         updateOfflineIndicator(true);
         updateFooterUI("--:-- (Cached)", cachedData.cityName.c_str());
     }
@@ -414,6 +415,7 @@ void loop() {
                 if (data.valid) {
                     updateWeatherUI(data.temperature, data.humidity, data.status.c_str(), data.weatherCode, data.windSpeed, data.windDirection);
                     updateForecastUI(data);
+                    updateHourlyUI(data);
                     updateOfflineIndicator(false);
                     if (settings.getSdCacheEnabled()) {
                         WeatherCache::saveCache(data);

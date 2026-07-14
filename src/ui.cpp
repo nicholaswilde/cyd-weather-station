@@ -44,6 +44,11 @@ static lv_obj_t *fore_icon_label[3];
 static lv_obj_t *fore_temp_label[3];
 static lv_obj_t *fore_desc_label[3];
 
+// Hourly forecast chart widgets
+static lv_obj_t *hourly_chart = nullptr;
+static lv_chart_series_t *hourly_temp_series = nullptr;
+static lv_chart_series_t *hourly_precip_series = nullptr;
+
 static void theme_dropdown_event_cb(lv_event_t * e) {
     lv_obj_t * dropdown = lv_event_get_target(e);
     int selected = lv_dropdown_get_selected(dropdown);
@@ -191,6 +196,27 @@ static void tz_btn_event_cb(lv_event_t * e) {
     }
 }
 
+static void chart_draw_event_cb(lv_event_t * e) {
+    lv_obj_draw_part_dsc_t * dsc = lv_event_get_draw_part_dsc(e);
+    if (dsc->part == LV_PART_TICKS) {
+        if (dsc->id == LV_CHART_AXIS_PRIMARY_X && dsc->text) {
+            int hour_idx = dsc->value;
+            if (hour_idx == 0) {
+                lv_snprintf(dsc->text, dsc->text_length, "Now");
+            } else if (hour_idx % 4 == 0) {
+                lv_snprintf(dsc->text, dsc->text_length, "+%dh", hour_idx);
+            } else {
+                dsc->text[0] = '\0';
+            }
+        } else if (dsc->id == LV_CHART_AXIS_PRIMARY_Y && dsc->text) {
+            int val = dsc->value;
+            lv_snprintf(dsc->text, dsc->text_length, "%d°", val);
+        } else if (dsc->id == LV_CHART_AXIS_SECONDARY_Y && dsc->text) {
+            int val = dsc->value;
+            lv_snprintf(dsc->text, dsc->text_length, "%d%%", val);
+        }
+    }
+}
 
 void initUI() {
     // Main screen setup (light grey background -> Catppuccin Base)
@@ -276,6 +302,7 @@ void initUI() {
     // Create the tabs
     lv_obj_t * tab_curr = lv_tabview_add_tab(tabview, "Current");
     lv_obj_t * tab_fore = lv_tabview_add_tab(tabview, "Forecast");
+    lv_obj_t * tab_hourly = lv_tabview_add_tab(tabview, "Hourly");
     lv_obj_t * tab_settings = lv_tabview_add_tab(tabview, "Settings");
 
     // Set base color & padding on tabs
@@ -284,14 +311,52 @@ void initUI() {
     // animate between tabs when the user swipes left/right.
     lv_obj_set_style_bg_color(tab_curr, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
     lv_obj_set_style_bg_color(tab_fore, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_hourly, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
     lv_obj_set_style_bg_color(tab_settings, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_curr, 5, LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_fore, 5, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(tab_hourly, 5, LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_settings, 5, LV_PART_MAIN);
     // Hide scrollbars so they don't appear visually
     lv_obj_set_scrollbar_mode(tab_curr, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_scrollbar_mode(tab_fore, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scrollbar_mode(tab_hourly, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_scrollbar_mode(tab_settings, isLandscape ? LV_SCROLLBAR_MODE_OFF : LV_SCROLLBAR_MODE_AUTO);
+
+    // Create Hourly Forecast Chart
+    hourly_chart = lv_chart_create(tab_hourly);
+    lv_obj_set_size(hourly_chart, LV_PCT(100), LV_PCT(100));
+    lv_obj_align(hourly_chart, LV_ALIGN_CENTER, 0, 0);
+    lv_chart_set_type(hourly_chart, LV_CHART_TYPE_LINE);
+
+    // Styling Catppuccin
+    lv_obj_set_style_bg_color(hourly_chart, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_border_width(hourly_chart, 0, LV_PART_MAIN);
+    lv_obj_set_style_line_color(hourly_chart, lv_color_hex(COLOR_OVERLAY), LV_PART_ITEMS); // grid lines
+    lv_obj_set_style_text_color(hourly_chart, lv_color_hex(COLOR_TEXT), LV_PART_TICKS); // axis tick text
+    lv_obj_set_style_line_rounded(hourly_chart, true, LV_PART_ITEMS);
+    lv_obj_set_style_line_width(hourly_chart, 3, LV_PART_ITEMS);
+
+    // Number of points is 24 (one for each hour)
+    lv_chart_set_point_count(hourly_chart, 24);
+
+    // Grid lines count
+    lv_chart_set_div_line_count(hourly_chart, 5, 7); // 5 horizontal grid lines, 7 vertical grid lines
+
+    // Enable axes labels and ticks
+    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_PRIMARY_X, 6, 3, 7, 2, true, 20);
+    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_PRIMARY_Y, 6, 3, 5, 2, true, 40);
+    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_SECONDARY_Y, 6, 3, 5, 2, true, 40);
+
+    // Set secondary Y range to 0 - 100
+    lv_chart_set_range(hourly_chart, LV_CHART_AXIS_SECONDARY_Y, 0, 100);
+
+    // Add event callback for tick labeling
+    lv_obj_add_event_cb(hourly_chart, chart_draw_event_cb, LV_EVENT_DRAW_PART_BEGIN, NULL);
+
+    // Add series
+    hourly_temp_series = lv_chart_add_series(hourly_chart, lv_color_hex(COLOR_MAUVE), LV_CHART_AXIS_PRIMARY_Y);
+    hourly_precip_series = lv_chart_add_series(hourly_chart, lv_color_hex(COLOR_BLUE), LV_CHART_AXIS_SECONDARY_Y);
 
     // Weather Placeholders inside tab_curr
     icon_lbl = lv_label_create(tab_curr);
@@ -1080,7 +1145,7 @@ void updateFooterUI(const char* update_time, const char* city) {
 }
 
 void setUIActiveTab(int index) {
-    if (tabview_obj != nullptr && index >= 0 && index < 3) {
+    if (tabview_obj != nullptr && index >= 0 && index < 4) {
         lv_tabview_set_act(tabview_obj, index, LV_ANIM_OFF);
     }
 }
@@ -1238,5 +1303,38 @@ void showUIStatusMessage(const char* message) {
     
     // Auto-delete after 2 seconds
     lv_obj_del_delayed(card, 2000);
+}
+
+void updateHourlyUI(const WeatherData& data) {
+    if (hourly_chart == nullptr || hourly_temp_series == nullptr || hourly_precip_series == nullptr) return;
+
+    // Dynamically adjust Y range based on actual temperature min/max to maximize visual precision
+    float temp_min = 999.0f;
+    float temp_max = -999.0f;
+    for (int i = 0; i < 24; i++) {
+        float temp = data.hourly[i].temperature;
+        if (temp < temp_min) temp_min = temp;
+        if (temp > temp_max) temp_max = temp;
+    }
+
+    // Safety margin of 3 degrees on min and max
+    int y_min = (int)(temp_min - 3.0f);
+    int y_max = (int)(temp_max + 3.0f);
+    
+    // Ensure we don't have min >= max
+    if (y_min >= y_max) {
+        y_min = (int)temp_min - 5;
+        y_max = (int)temp_min + 5;
+    }
+    
+    lv_chart_set_range(hourly_chart, LV_CHART_AXIS_PRIMARY_Y, y_min, y_max);
+
+    // Populate data using direct array access
+    for (int i = 0; i < 24; i++) {
+        hourly_temp_series->y_points[i] = (lv_coord_t)data.hourly[i].temperature;
+        hourly_precip_series->y_points[i] = (lv_coord_t)data.hourly[i].precipitationProbability;
+    }
+
+    lv_chart_refresh(hourly_chart);
 }
 

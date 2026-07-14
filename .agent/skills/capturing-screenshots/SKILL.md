@@ -25,9 +25,11 @@ Run the automation script with the device's IP address:
 This script will automatically transition the screen across orientations and tabs to generate:
 - `screenshots/landscape_current.png`
 - `screenshots/landscape_forecast.png`
+- `screenshots/landscape_hourly.png`
 - `screenshots/landscape_settings.png`
 - `screenshots/portrait_current.png`
 - `screenshots/portrait_forecast.png`
+- `screenshots/portrait_hourly.png`
 - `screenshots/portrait_settings.png`
 
 ## Updating README.md
