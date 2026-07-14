@@ -17,11 +17,11 @@ This plan details the steps to implement and verify the new Boot button behavior
 ## Phase 2: Action Bindings & UI Feedback
 - [x] Task: Implement transient UI messages (f724b75)
     - [x] Implement `showUIStatusMessage(const char*)` in `src/ui.cpp` and `include/ui.h` using a timed `lv_obj_del_delayed` overlay.
-- [ ] Task: Integrate button actions in main loop
-    - [ ] Instantiate `ButtonManager` in `src/main.cpp`.
-    - [ ] On single press: trigger weather refresh and show "Refreshing weather..." UI message.
-    - [ ] On long press: capture screenshot and show "Screenshot saved!" UI message.
-- [ ] Task: Implement screensaver override
-    - [ ] Check `screensaver.isActive()` when button press begins.
-    - [ ] If screensaver is active, wake it and ignore/discard the button action.
+- [x] Task: Integrate button actions in main loop (4e92033)
+    - [x] Instantiate `ButtonManager` in `src/main.cpp`.
+    - [x] On single press: trigger weather refresh and show "Refreshing weather..." UI message.
+    - [x] On long press: capture screenshot and show "Screenshot saved!" UI message.
+- [x] Task: Implement screensaver override (4e92033)
+    - [x] Check `screensaver.isActive()` when button press begins.
+    - [x] If screensaver is active, wake it and ignore/discard the button action.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Action Bindings & UI Feedback' (Protocol in workflow.md)
