@@ -653,6 +653,7 @@ bool WeatherClient::fetchIpLocation(String& latStr, String& lonStr, String& city
     _resolvedLat = latStr;
     _resolvedLng = lonStr;
     _cityName = city;
+    _useZip = false;
     return true;
 #else
     if (WiFi.status() != WL_CONNECTED) {
@@ -678,6 +679,7 @@ bool WeatherClient::fetchIpLocation(String& latStr, String& lonStr, String& city
                 _resolvedLat = latStr;
                 _resolvedLng = lonStr;
                 _cityName = city;
+                _useZip = false;
                 http.end();
                 return true;
             }
