@@ -304,6 +304,13 @@ void initUI() {
     lv_obj_set_style_bg_color(tab_btns, lv_color_hex(COLOR_BASE), LV_PART_ITEMS | LV_STATE_CHECKED);
     lv_obj_set_style_text_color(tab_btns, lv_color_hex(COLOR_PEACH), LV_PART_ITEMS | LV_STATE_CHECKED);
 
+    // Adjust button padding and gaps to prevent text cramping in portrait mode (where width is only 240px)
+    lv_obj_set_style_pad_left(tab_btns, isLandscape ? 8 : 2, LV_PART_ITEMS);
+    lv_obj_set_style_pad_right(tab_btns, isLandscape ? 8 : 2, LV_PART_ITEMS);
+    lv_obj_set_style_pad_top(tab_btns, 4, LV_PART_ITEMS);
+    lv_obj_set_style_pad_bottom(tab_btns, 4, LV_PART_ITEMS);
+    lv_obj_set_style_pad_gap(tab_btns, isLandscape ? 4 : 1, LV_PART_MAIN);
+
     // Tune swipe animation: speed it up and disable momentum throw for crisp
     // tab transitions on the embedded display.
     lv_obj_t * tab_content = lv_tabview_get_content(tabview);
