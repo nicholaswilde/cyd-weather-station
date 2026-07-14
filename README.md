@@ -16,6 +16,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **Location Resolution & City Name Footer**:
   - Displays `Last Update: <time> | <city name>` centered at the bottom of the screen.
   - **Zip Code Geocoding**: Enter a US Zip Code (e.g. `90210`); coordinates are resolved on boot.
+  - **IP Geolocation Fallback**: Automatically falls back to resolving location via IP geolocation (using `ip-api.com`) on boot if Zip Code and coordinates are left blank.
   - **Reverse Geocoding**: When using coordinates + Open-Meteo, the city is resolved using Nominatim OSM. OWM resolves and returns the city name natively.
 - **3-Day Forecast View**: Swipe to a dedicated Forecast tab showing daily high/low temperature and weather condition icons.
 - **Swipe Navigation**: Swipe left/right anywhere on the screen to switch between the Current, Forecast, and Settings tabs.
@@ -27,6 +28,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Manual Brightness**: Slider to set a fixed screen brightness level (when Auto is off).
   - **Timezone Offset**: `–` / `+` buttons to set a GMT offset (–12 to +14) for the NTP clock.
   - **SD Log**: Enable/disable weather logging to a microSD card.
+  - **SD Cache**: Enable/disable weather caching to a microSD card (restores UI offline).
   - **Screenshot Server**: Enable/disable the remote screenshot HTTP server.
   - **MQTT**: Toggle publishing weather variables to MQTT topics.
   - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks, header height dynamically increases to 60px in portrait to fit a wrapped two-line title without overlaps, and touch coordinates update instantly.
@@ -45,7 +47,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - Automatic formatting fallback to FAT32 on mount failure.
 - **Screenshot Capture**:
   - **Remote via HTTP**: `GET /screenshot` streams a pixel-perfect 24-bit BMP of the current screen directly over Wi-Fi.
-  - **Physical button**: Press the BOOT button (GPIO 0) to save a timestamped BMP to the SD card as `/screenshot_YYYYMMDD_HHMMSS.bmp`.
+  - **Physical button**: Press and hold the BOOT button (GPIO 0) for 2 seconds to save a timestamped BMP to the SD card as `/screenshot_YYYYMMDD_HHMMSS.bmp`. A single quick press of the BOOT button triggers an immediate weather refresh.
   - Zero large-allocation design — screen tiles are intercepted from the LVGL flush callback and written directly to file.
   - Toggle the screenshot server on/off from the **Settings tab** (`Scr Srv`).
 - **SD Offline Cache Recovery**:
@@ -99,7 +101,7 @@ curl -s http://<DEVICE_IP>/screenshot | display -
 
 ### Physical BOOT button capture
 
-Press the **BOOT button** (GPIO 0) on the CYD board. The screenshot is saved to the SD card root as `/screenshot_YYYYMMDD_HHMMSS.bmp` (NTP-synced timestamp).
+Press and hold the **BOOT button** (GPIO 0) on the CYD board for 2 seconds. The screenshot is saved to the SD card root as `/screenshot_YYYYMMDD_HHMMSS.bmp` (NTP-synced timestamp). A single quick press of the BOOT button triggers an immediate weather refresh.
 
 Serial output confirms the save:
 ```
@@ -149,6 +151,7 @@ Static settings (location, update interval) live in [`config/config.h`](config/c
 #define WEATHER_API_LATITUDE  "37.7749"
 #define WEATHER_API_LONGITUDE "-122.4194"
 ```
+*(Note: Leave `WEATHER_ZIP_CODE`, `WEATHER_API_LATITUDE`, and `WEATHER_API_LONGITUDE` empty (`""`) to enable automatic IP Geolocation fallback on boot).*
 
 **Weather update interval:**
 ```cpp
@@ -195,6 +198,7 @@ All settings below are configured by touch on the device and saved to flash:
 | **Timezone** | GMT offset (– / + buttons, range –12 to +14). |
 | **DST** | Toggle Daylight Saving Time on/off (adds 1 hour to NTP offset when enabled). |
 | **SD Log** | Toggle SD card weather logging. Disabled automatically if no card is inserted. |
+| **SD Cache** | Toggle SD card weather caching. |
 | **Scr Srv** | Toggle the remote screenshot HTTP server on/off. |
 | **MQTT** | Toggle publishing weather variables to MQTT topics. |
 
