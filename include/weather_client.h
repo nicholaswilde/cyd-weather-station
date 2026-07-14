@@ -34,6 +34,9 @@ public:
     bool parseOwmJson(const char* json, WeatherData& data);
     static String serializeWeatherData(const WeatherData& data);
     static bool deserializeWeatherData(const String& json, WeatherData& data);
+    bool isLocationEmpty() const;
+    bool fetchIpLocation(String& latStr, String& lonStr, String& city);
+    static bool parseIpLocationJson(const char* json, float& lat, float& lon, String& city);
 
 private:
     bool geocodeZip();

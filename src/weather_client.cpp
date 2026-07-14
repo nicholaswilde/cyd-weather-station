@@ -154,8 +154,8 @@ WeatherData WeatherClient::fetchWeather() {
         reverseGeocode();
     }
 
-    const char* lat = _useZip ? _resolvedLat.c_str() : _latitude;
-    const char* lng = _useZip ? _resolvedLng.c_str() : _longitude;
+    const char* lat = _useZip ? _resolvedLat.c_str() : ((_latitude && strlen(_latitude) > 0) ? _latitude : _resolvedLat.c_str());
+    const char* lng = _useZip ? _resolvedLng.c_str() : ((_longitude && strlen(_longitude) > 0) ? _longitude : _resolvedLng.c_str());
 
 #ifdef NATIVE_TEST
     // Mock response for native unit tests
@@ -634,3 +634,84 @@ bool WeatherClient::deserializeWeatherData(const String& json, WeatherData& data
     }
     return true;
 }
+
+bool WeatherClient::isLocationEmpty() const {
+    if (_useZip) {
+        return _zipCode == nullptr || strlen(_zipCode) == 0 || strcmp(_zipCode, "YOUR_ZIP_CODE") == 0;
+    } else {
+        return _latitude == nullptr || strlen(_latitude) == 0 || 
+               _longitude == nullptr || strlen(_longitude) == 0 ||
+               strcmp(_latitude, "YOUR_LATITUDE") == 0;
+    }
+}
+
+bool WeatherClient::fetchIpLocation(String& latStr, String& lonStr, String& city) {
+#ifdef NATIVE_TEST
+    latStr = "37.7749";
+    lonStr = "-122.4194";
+    city = "San Francisco";
+    _resolvedLat = latStr;
+    _resolvedLng = lonStr;
+    _cityName = city;
+    return true;
+#else
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("[Weather] WiFi not connected. Cannot fetch IP location.");
+        return false;
+    }
+
+    WiFiClient client;
+    HTTPClient http;
+
+    String url = "http://ip-api.com/json/";
+    Serial.println("[Weather] Querying IP Geolocation fallback...");
+
+    if (http.begin(client, url)) {
+        int httpCode = http.GET();
+        if (httpCode == HTTP_CODE_OK) {
+            String payload = http.getString();
+            float lat = 0.0f;
+            float lon = 0.0f;
+            if (parseIpLocationJson(payload.c_str(), lat, lon, city)) {
+                latStr = String(lat, 5);
+                lonStr = String(lon, 5);
+                _resolvedLat = latStr;
+                _resolvedLng = lonStr;
+                _cityName = city;
+                http.end();
+                return true;
+            }
+        } else {
+            Serial.printf("[Weather] Geolocation HTTP GET failed: %d\n", httpCode);
+        }
+        http.end();
+    }
+    return false;
+#endif
+}
+
+bool WeatherClient::parseIpLocationJson(const char* json, float& lat, float& lon, String& city) {
+    StaticJsonDocument<512> doc;
+    DeserializationError error = deserializeJson(doc, json);
+
+    if (error) {
+        Serial.print("[Weather] Geolocation JSON Deserialization failed: ");
+        Serial.println(error.c_str());
+        return false;
+    }
+
+    const char* status = doc["status"] | "fail";
+    if (strcmp(status, "success") != 0) {
+        Serial.print("[Weather] Geolocation failed status: ");
+        Serial.println(status);
+        return false;
+    }
+
+    lat = doc["lat"] | 0.0f;
+    lon = doc["lon"] | 0.0f;
+    const char* city_c = doc["city"] | "Unknown";
+    city = String(city_c);
+
+    return true;
+}
+

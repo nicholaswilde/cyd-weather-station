@@ -135,6 +135,35 @@ void test_weather_client_parse_owm_json(void) {
     TEST_ASSERT_EQUAL_STRING("Clear sky", data.status.c_str());
 }
 
+void test_weather_client_parse_ip_location_json(void) {
+    const char* ipLocationJson = "{"
+        "\"status\":\"success\","
+        "\"city\":\"San Francisco\","
+        "\"lat\":37.7749,"
+        "\"lon\":-122.4194"
+    "}";
+    float lat = 0.0f;
+    float lon = 0.0f;
+    String city = "";
+    bool parsed = WeatherClient::parseIpLocationJson(ipLocationJson, lat, lon, city);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_FLOAT(37.7749f, lat);
+    TEST_ASSERT_EQUAL_FLOAT(-122.4194f, lon);
+    TEST_ASSERT_EQUAL_STRING("San Francisco", city.c_str());
+}
+
+void test_weather_client_parse_ip_location_json_fail(void) {
+    const char* ipLocationJson = "{"
+        "\"status\":\"fail\","
+        "\"message\":\"invalid query\""
+    "}";
+    float lat = 0.0f;
+    float lon = 0.0f;
+    String city = "";
+    bool parsed = WeatherClient::parseIpLocationJson(ipLocationJson, lat, lon, city);
+    TEST_ASSERT_FALSE(parsed);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -143,5 +172,7 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_zip_code_initialization);
     RUN_TEST(test_weather_client_parse_weather_json_custom);
     RUN_TEST(test_weather_client_parse_owm_json);
+    RUN_TEST(test_weather_client_parse_ip_location_json);
+    RUN_TEST(test_weather_client_parse_ip_location_json_fail);
     return UNITY_END();
 }
