@@ -17,7 +17,7 @@ SettingsManager::SettingsManager() {
     _mqttEnabled = MQTT_ENABLED;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
-    _sdCacheEnabled = true;
+    _sdCacheEnabled = USE_SD_CACHE;
 }
 
 void SettingsManager::begin() {
@@ -38,7 +38,7 @@ void SettingsManager::begin() {
     _mqttEnabled = prefs.getBool("mqtt_en", MQTT_ENABLED);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
-    _sdCacheEnabled = prefs.getBool("sd_cache", true);
+    _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
     
     prefs.end();
 }

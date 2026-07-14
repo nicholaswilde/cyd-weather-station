@@ -62,6 +62,7 @@ extern int getCurrentThemeFlavor();
 
 // SD Card Weather Logging Settings
 #define USE_SD_LOGGING true
+#define USE_SD_CACHE true
 
 // Display Performance Settings
 // DISPLAY_DRAW_BUF_ROWS: Height of the LVGL draw buffer in pixel rows.
