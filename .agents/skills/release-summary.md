@@ -8,7 +8,7 @@ This skill retrieves the git commit logs for a specified range (or defaults to t
 ## Protocol
 
 1. **Determine the Git Log Range:**
-   - Check if a `[range]` argument (e.g., `v0.1.15..v0.1.16` or `HEAD`) is provided.
+   - Check if a `[range]` argument (e.g., `v0.1.2..v0.1.3` or `HEAD`) is provided.
    - If no range is specified, execute git commands to detect the latest two tags:
      - Run `git tag --sort=-v:refname | head -n 2`
      - Extract `LATEST` (the first line) and `PREVIOUS` (the second line).
@@ -27,9 +27,9 @@ This skill retrieves the git commit logs for a specified range (or defaults to t
    - Clean up the commit messages:
      - Exclude any commit messages related to `conductor` or `checkpoint` tasks (e.g., commits containing `conductor` or `checkpoint` in their type, scope, or message body).
      - Strip the type prefix (e.g. "feat:", "fix:").
-     - If a scope is present (e.g., "auth:"), keep it (e.g., `auth: add token validation` -> `auth: Add token validation`).
+     - If a scope is present (e.g., "api:"), keep it (e.g., `api: add status endpoint` -> `api: Add status endpoint`).
      - Ensure the first letter of each bullet is capitalized.
-     - Use backticks for technical terms (e.g., `reqwest`, `rumqttc`, `tokio`, `sysinfo`).
+     - Use backticks for technical terms (e.g., `TFT_eSPI`, `LVGL`, `ArduinoJson`, `AsyncTCP`, `AsyncMqttClient`, `DNSServer`, `WebServer`, `esptool`).
    - Format restrictions:
      - Do not include line numbers in the output.
      - Use standard triple backticks (```) for any code blocks.
@@ -39,5 +39,5 @@ This skill retrieves the git commit logs for a specified range (or defaults to t
 
 4. **Add Changelog Comparison Link:**
    - At the bottom of the summary, add a comparison link:
-     `**Full Changelog**: https://github.com/nicholaswilde/sysmqttd/compare/<url_range>`
-     where `<url_range>` is the range with `..` replaced by `...` (e.g., `v0.1.15...v0.1.16` or `HEAD`).
+     `**Full Changelog**: https://github.com/nicholaswilde/cyd-weather-station/compare/<url_range>`
+     where `<url_range>` is the range with `..` replaced by `...` (e.g., `v0.1.2...v0.1.3` or `HEAD`).
