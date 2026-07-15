@@ -84,3 +84,5 @@ node_modules/
 .env
 lcov.info
 lcov_raw.info
+# CodeGraph local index and database files
+.codegraph/
