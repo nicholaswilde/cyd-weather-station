@@ -82,3 +82,5 @@ config/secrets.h
 # Node.js
 node_modules/
 .env
+lcov.info
+lcov_raw.info
