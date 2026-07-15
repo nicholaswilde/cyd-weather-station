@@ -1,7 +1,8 @@
 # :partly_sunny: CYD Weather Station :pager:
+[![Coveralls](https://img.shields.io/coveralls/github/nicholaswilde/cyd-weather-station/main?style=for-the-badge&logo=coveralls)](https://coveralls.io/github/nicholaswilde/cyd-weather-station?branch=main)
 [![task](https://img.shields.io/badge/Task-Enabled-brightgreen?style=for-the-badge&logo=task&logoColor=white)](https://taskfile.dev/#/)
-[![test](https://img.shields.io/github/actions/workflow/status/nicholaswilde/cyd-weather-station/test.yaml?label=test&style=for-the-badge&branch=main)](https://github.com/nicholaswilde/cyd-weather-station/actions/workflows/test.yaml)
-[![ci](https://img.shields.io/github/actions/workflow/status/nicholaswilde/cyd-weather-station/ci.yaml?label=ci&style=for-the-badge&branch=main)](https://github.com/nicholaswilde/cyd-weather-station/actions/workflows/ci.yaml)
+[![test](https://img.shields.io/github/actions/workflow/status/nicholaswilde/cyd-weather-station/test.yaml?label=test&style=for-the-badge&branch=main&logo=github-actions)](https://github.com/nicholaswilde/cyd-weather-station/actions/workflows/test.yaml)
+[![ci](https://img.shields.io/github/actions/workflow/status/nicholaswilde/cyd-weather-station/ci.yaml?label=ci&style=for-the-badge&branch=main&logo=github-actions)](https://github.com/nicholaswilde/cyd-weather-station/actions/workflows/ci.yaml)
 
 A beautiful, configurable real-time weather station and desk clock built for the **ESP32 Cheap Yellow Device (CYD)** (board model ESP32-2432S028R) utilizing the **LVGL v8** graphics library, **Open-Meteo / OpenWeatherMap APIs**, and the **Catppuccin Color Theme**.
 
