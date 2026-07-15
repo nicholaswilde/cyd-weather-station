@@ -10,7 +10,7 @@ This skill provides the instructions and guidelines for an agent to capture, org
 ## Prerequisites
 
 - The Cheap Yellow Device (CYD) must be powered on, running the latest firmware, and connected to the same local network as the host.
-- The web server must be running and accessible.
+- The API server (`API Srv` toggle in the Settings tab) must be running and accessible on the device.
 - The utility script [capture-screenshots.sh](file:///home/nicholas/git/nicholaswilde/cyd-weather-station/scripts/capture-screenshots.sh) must be executable.
 - Python 3 and the `uv` tool must be installed on the host.
 
