@@ -91,17 +91,18 @@ function flash_device() {
   log "INFO" "Ready to flash the device on port ${SERIAL_PORT}."
 
   esptool \
-    --chip esp32s3 \
+    --chip esp32 \
     --port "${SERIAL_PORT}" \
     --baud 921600 \
-    --before default-reset \
-    --after hard-reset \
-    write-flash \
+    --before default_reset \
+    --after hard_reset \
+    --no-stub \
+    write_flash \
       -z \
-      --flash-mode dio \
-      --flash-freq 80m \
-      --flash-size 16MB \
-      0x0000 "${TMP_DIR}/bootloader.bin" \
+      --flash_mode dio \
+      --flash_freq 80m \
+      --flash_size 4MB \
+      0x1000 "${TMP_DIR}/bootloader.bin" \
       0x8000 "${TMP_DIR}/partitions.bin" \
       0x10000 "${TMP_DIR}/firmware.bin"
 }

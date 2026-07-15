@@ -5,11 +5,14 @@
 
 // Location Settings
 #define USE_ZIP_CODE true
-#define WEATHER_ZIP_CODE "90210"
+// #define WEATHER_ZIP_CODE "90210"
+#define WEATHER_ZIP_CODE ""
 
 // Coordinates (Fallback if USE_ZIP_CODE is false)
-#define WEATHER_API_LATITUDE "34.10313"
-#define WEATHER_API_LONGITUDE "-118.41625"
+// #define WEATHER_API_LATITUDE "34.10313"
+#define WEATHER_API_LATITUDE ""
+// #define WEATHER_API_LONGITUDE "-118.41625"
+#define WEATHER_API_LONGITUDE ""
 
 // Open-Meteo API Settings
 #define WEATHER_UPDATE_INTERVAL_MINS 1
@@ -49,7 +52,7 @@ extern int getCurrentThemeFlavor();
 #define USE_LDR_AUTO_BACKLIGHT false
 
 // Screensaver Settings
-#define SCREENSAVER_ENABLED true
+#define SCREENSAVER_ENABLED false
 #define SCREENSAVER_TIMEOUT_MS 300000 // 5 minutes (in milliseconds)
 
 // RGB LED Status Settings
@@ -63,6 +66,9 @@ extern int getCurrentThemeFlavor();
 
 // MQTT default status setting
 #define MQTT_ENABLED false
+
+// API Server default status setting
+#define API_SERVER_ENABLED false
 
 // SD Card Weather Logging Settings
 #define USE_SD_LOGGING false
@@ -104,5 +110,13 @@ extern int getCurrentThemeFlavor();
 
 // Physical BOOT Button Settings
 #define BOOT_BUTTON_PIN 0
+
+// Static IP Settings
+// Uncomment the lines below to configure a static IP address.
+// If commented out, the device will use DHCP.
+// #define STATIC_IP          "192.168.1.100"
+// #define STATIC_GATEWAY     "192.168.1.1"
+// #define STATIC_SUBNET      "255.255.255.0"
+// #define STATIC_DNS         "1.1.1.1"
 
 #endif // CONFIG_H

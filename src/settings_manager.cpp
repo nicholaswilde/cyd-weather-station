@@ -10,7 +10,7 @@ SettingsManager::SettingsManager() {
     _dstEnabled = (DST_OFFSET_SEC > 0);
     _themeFlavor = CATPPUCCIN_MOCHA;
     _sdLoggingEnabled = USE_SD_LOGGING;
-    _screenshotServerEnabled = true;
+    _screenshotServerEnabled = API_SERVER_ENABLED;
     _screenOrientation = 1;
     _ledEnabled = LED_ENABLED;
     _ledBrightness = LED_BRIGHTNESS;
@@ -32,7 +32,7 @@ void SettingsManager::begin() {
     _dstEnabled = prefs.getBool("dst_enabled", DST_OFFSET_SEC > 0);
     _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
     _sdLoggingEnabled = prefs.getBool("sd_log", USE_SD_LOGGING);
-    _screenshotServerEnabled = prefs.getBool("scr_srv", true);
+    _screenshotServerEnabled = prefs.getBool("scr_srv", API_SERVER_ENABLED);
     _screenOrientation = prefs.getInt("screen_rot", 1);
     _ledEnabled = prefs.getBool("led_en", LED_ENABLED);
     _ledBrightness = prefs.getInt("led_bright", LED_BRIGHTNESS);

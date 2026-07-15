@@ -50,7 +50,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Remote via HTTP**: `GET /screenshot` streams a pixel-perfect 24-bit BMP of the current screen directly over Wi-Fi.
   - **Physical button**: Press and hold the BOOT button (GPIO 0) for 2 seconds to save a timestamped BMP to the SD card as `/screenshot_YYYYMMDD_HHMMSS.bmp`. A single quick press of the BOOT button triggers an immediate weather refresh.
   - Zero large-allocation design — screen tiles are intercepted from the LVGL flush callback and written directly to file.
-  - Toggle the screenshot server on/off from the **Settings tab** (`Scr Srv`).
+  - Toggle the screenshot server on/off from the **Settings tab** (`API Srv`).
 - **SD Offline Cache Recovery**:
   - Automatically caches the latest retrieved weather data to `/weather_cache.json` on the microSD card.
   - If the device boots without Wi-Fi, it restores the weather screen from the cache instead of displaying blank widgets, displaying a `⚠️ Offline` status badge in the header.
@@ -87,17 +87,45 @@ The weather station periodically logs weather reports to a microSD card in CSV f
 
 The device supports capturing the current screen as a standard 24-bit BMP image via two methods:
 
-### Remote HTTP capture
+### Remote HTTP API & Screen Capture
 
 > [!NOTE]
-> The screenshot server must be enabled in the **Settings tab** (`Scr Srv` toggle) and Wi-Fi must be connected. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
+> The screenshot server must be enabled in the **Settings tab** (`API Srv` toggle) and Wi-Fi must be connected. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
 
+**Capture Screenshot:**
 ```bash
 # Save to file
 curl http://<DEVICE_IP>/screenshot -o screenshot.bmp
 
 # View inline (if ImageMagick is installed)
 curl -s http://<DEVICE_IP>/screenshot | display -
+```
+
+**Get Configuration Settings:**
+Retrieve the current settings in JSON format:
+```bash
+curl http://<DEVICE_IP>/api/config
+```
+
+Example JSON response:
+```json
+{
+  "unit_system": 2,
+  "brightness": 255,
+  "auto_brightness": false,
+  "timezone_offset": -8,
+  "dst_enabled": true,
+  "theme_flavor": 0,
+  "sd_logging_enabled": false,
+  "screenshot_server_enabled": true,
+  "screen_orientation": 1,
+  "led_enabled": true,
+  "led_brightness": 255,
+  "mqtt_enabled": false,
+  "wifi_ssid": "Your_SSID",
+  "sd_cache_enabled": false,
+  "screensaver_enabled": true
+}
 ```
 
 ### Physical BOOT button capture
@@ -165,6 +193,15 @@ Static settings (location, update interval) live in [`config/config.h`](config/c
 #define SCREENSAVER_TIMEOUT_MS  300000 // 5 minutes (in milliseconds)
 ```
 
+**Static IP:**
+Uncomment the static IP settings block in `config/config.h` to assign a static IP to the device. If kept commented out, the device will default to DHCP:
+```cpp
+// #define STATIC_IP          "192.168.1.100"
+// #define STATIC_GATEWAY     "192.168.1.1"
+// #define STATIC_SUBNET      "255.255.255.0"
+// #define STATIC_DNS         "1.1.1.1"
+```
+
 **Display performance** — tune animation smoothness vs. touch responsiveness:
 ```cpp
 // Height of the LVGL draw buffer (pixel rows).
@@ -206,7 +243,7 @@ All settings below are configured by touch on the device and saved to flash:
 | **DST** | Toggle Daylight Saving Time on/off (adds 1 hour to NTP offset when enabled). |
 | **SD Log** | Toggle SD card weather logging. Disabled automatically if no card is inserted. |
 | **SD Cache** | Toggle SD card weather caching. |
-| **Scr Srv** | Toggle the remote screenshot HTTP server on/off. |
+| **API Srv** | Toggle the remote screenshot & configuration HTTP API server on/off. |
 | **Scr Saver** | Toggle the screensaver on/off. |
 | **MQTT** | Toggle publishing weather variables to MQTT topics. |
 

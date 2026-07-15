@@ -11,9 +11,39 @@
 #include <Update.h>
 #include "ui.h"
 #include "ota_html.h"
+#include <ArduinoJson.h>
 #endif
 
 extern SettingsManager settings;
+
+static void configureStaticIP() {
+#ifndef NATIVE_TEST
+#ifdef STATIC_IP
+    IPAddress local_ip;
+    if (local_ip.fromString(STATIC_IP)) {
+        IPAddress gateway_ip;
+        IPAddress subnet_ip;
+        IPAddress dns_ip;
+
+        #ifdef STATIC_GATEWAY
+        gateway_ip.fromString(STATIC_GATEWAY);
+        #endif
+        #ifdef STATIC_SUBNET
+        subnet_ip.fromString(STATIC_SUBNET);
+        #endif
+        #ifdef STATIC_DNS
+        dns_ip.fromString(STATIC_DNS);
+        #endif
+
+        if (WiFi.config(local_ip, gateway_ip, subnet_ip, dns_ip)) {
+            Serial.println("[WiFi] Static IP configured successfully.");
+        } else {
+            Serial.println("[WiFi] Failed to configure Static IP.");
+        }
+    }
+#endif
+#endif
+}
 
 WifiManager::WifiManager(const char* ssid, const char* password)
     : _ssid(ssid), _password(password), _state(WIFI_STATE_DISCONNECTED), _lastReconnectAttempt(0), _connectionStartTime(0) {}
@@ -25,6 +55,7 @@ void WifiManager::begin() {
     WiFi.setTxPower(WIFI_POWER_11dBm);
 #endif
     WiFi.mode(WIFI_STA);
+    configureStaticIP();
     WiFi.begin(_ssid.c_str(), _password.c_str());
     _state = WIFI_STATE_CONNECTING;
     _connectionStartTime = millis();
@@ -39,6 +70,7 @@ void WifiManager::update() {
             if (millis() - _lastReconnectAttempt > _reconnectInterval) {
                 _lastReconnectAttempt = millis();
                 Serial.println("[WiFi] Reconnecting...");
+                configureStaticIP();
                 WiFi.begin(_ssid.c_str(), _password.c_str());
                 _state = WIFI_STATE_CONNECTING;
                 _connectionStartTime = millis();
@@ -347,6 +379,28 @@ void WifiManager::startScreenshotServer() {
     }
     _webServer = new WebServer(80);
     _webServer->on("/screenshot", [this]() { handleScreenshot(); });
+    _webServer->on("/api/config", [this]() {
+        StaticJsonDocument<512> doc;
+        doc["unit_system"] = settings.getUnitSystem();
+        doc["brightness"] = settings.getBrightness();
+        doc["auto_brightness"] = settings.getAutoBrightness();
+        doc["timezone_offset"] = settings.getTimezoneOffset();
+        doc["dst_enabled"] = settings.getDstEnabled();
+        doc["theme_flavor"] = settings.getThemeFlavor();
+        doc["sd_logging_enabled"] = settings.getSdLoggingEnabled();
+        doc["screenshot_server_enabled"] = settings.getScreenshotServerEnabled();
+        doc["screen_orientation"] = settings.getScreenOrientation();
+        doc["led_enabled"] = settings.getLedEnabled();
+        doc["led_brightness"] = settings.getLedBrightness();
+        doc["mqtt_enabled"] = settings.getMqttEnabled();
+        doc["wifi_ssid"] = settings.getWifiSSID();
+        doc["sd_cache_enabled"] = settings.getSdCacheEnabled();
+        doc["screensaver_enabled"] = settings.getScreensaverEnabled();
+
+        String response;
+        serializeJson(doc, response);
+        _webServer->send(200, "application/json", response);
+    });
     _webServer->on("/api/tab", [this]() {
         if (_webServer->hasArg("index")) {
             int idx = _webServer->arg("index").toInt();

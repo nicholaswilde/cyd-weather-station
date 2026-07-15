@@ -788,7 +788,7 @@ void initUI() {
     lv_obj_clear_flag(scr_row, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * scr_label = lv_label_create(scr_row);
-    lv_label_set_text(scr_label, "Scr Srv");
+    lv_label_set_text(scr_label, "API Srv");
     lv_obj_set_style_text_color(scr_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
 
     lv_obj_t * scr_sw = lv_switch_create(scr_row);

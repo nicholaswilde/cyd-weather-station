@@ -61,7 +61,7 @@ function set_orientation() {
   log "INFO" "Setting orientation to ${rot_name} (val=${rot})..."
   if ! err_msg=$(curl -sS -m 5 -d "val=${rot}" "http://${ip}/api/orientation" 2>&1); then
     log "ERRO" "Connection failed: ${err_msg}" >&2
-    log "WARN" "Please ensure the Cheap Yellow Device is powered on, connected to the same network, and the Screenshot Server (Scr Srv) is turned ON in the Settings tab." >&2
+    log "WARN" "Please ensure the Cheap Yellow Device is powered on, connected to the same network, and the API Server (API Srv) is turned ON in the Settings tab." >&2
     exit 1
   fi
   sleep 2.5
