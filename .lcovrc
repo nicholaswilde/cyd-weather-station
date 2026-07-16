@@ -1,0 +1,11 @@
+# Always enable branch coverage
+branch_coverage = 1
+
+# Disable exception branches to prevent mismatch errors in templated libraries like ArduinoJson
+no_exception_branch = 1
+
+# Set of errors to ignore (LCOV 1.x ignores unsupported words, LCOV 2.x applies them all)
+ignore_errors = gcov,source,mismatch,inconsistent,inconsistent
+
+# Disable strict compiler-to-source file line consistency checks
+check_data_consistency = 0
