@@ -144,7 +144,24 @@ Serial output confirms the save:
 
 ## :rocket: Getting Started
 
-### 1. Secrets Setup
+### 1. Quick Install (Pre-compiled Binaries)
+
+You can flash the device directly from your terminal using the provided flash script. Replace `/dev/ttyUSB0` with your actual serial port. By default, it flashes the `cyd_28r` version, but you can specify the device as the first argument.
+
+```bash
+# Flash the default cyd_28r (320x240 screen)
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ cyd_28r /dev/ttyUSB0
+
+# Or flash the cyd_35c version (480x320 screen)
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ cyd_35c /dev/ttyUSB0
+```
+
+> [!WARNING]
+> Running a script directly from the internet with `bash -c "$(curl...)"` is a potential security risk. Always review the script's source code before executing it to ensure it is safe. You can view the script [here](https://github.com/nicholaswilde/cyd-weather-station/blob/main/scripts/flash.sh).
+
+### 2. Build from Source
+
+#### Secrets Setup
 
 Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent committing them.
 
@@ -168,7 +185,7 @@ Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent com
    #define OPENWEATHERMAP_API_KEY "YOUR_OPENWEATHERMAP_API_KEY"
    ```
 
-### 2. Configuration
+#### Configuration
 
 Static settings (location, update interval) live in [`config/config.h`](config/config.h). Runtime user preferences (units, brightness, theme, timezone) are changed via the on-device **Settings tab** and saved to flash.
 
@@ -220,7 +237,7 @@ Uncomment the static IP settings block in `config/config.h` to assign a static I
 #define DISPLAY_SWIPE_ANIM_MS 150
 ```
 
-### 3. Build & Upload
+#### Build & Upload
 
 ```bash
 task build    # Compile firmware
