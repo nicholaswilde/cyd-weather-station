@@ -74,7 +74,7 @@ jobs:
       - name: Generate Coverage Report
         run: |
           lcov --capture --base-directory . --directory .pio/build/native/ --output-file lcov_raw.info
-          lcov --remove lcov_raw.info '*/.pio/*' '*/tests/*' '*/tests/mocks/*' '/usr/*' -o lcov.info
+          lcov --remove lcov_raw.info '*/.pio/*' '*/tests/*' '*/tests/mocks/*' '/usr/*' --ignore-errors unused -o lcov.info
       # 7. Upload coverage report directly to Coveralls.io
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2
