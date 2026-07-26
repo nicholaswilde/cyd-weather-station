@@ -160,7 +160,7 @@ bool ScreenshotManager::beginCapture(const char* filepath) {
 
     // --- Pre-fill entire pixel area with zeros using a small stack buffer.
     //     This reserves the space so later seek+write calls land in bounds. ---
-    uint8_t zeroBuf[320 * 3]; // Max 960 bytes on stack
+    uint8_t zeroBuf[480 * 3]; // Max 1440 bytes on stack
     memset(zeroBuf, 0, sizeof(zeroBuf));
     for (uint32_t row = 0; row < _captureHeight; row++) {
         _captureFile.write(zeroBuf, _captureWidth * 3);
@@ -181,8 +181,8 @@ void ScreenshotManager::onFlushTile(int32_t x1, int32_t y1, int32_t x2, int32_t 
     uint32_t tileW = (uint32_t)(x2 - x1 + 1);
     uint32_t tileH = (uint32_t)(y2 - y1 + 1);
 
-    // --- BGR row buffer sized to the tile width (max 320*3 = 960 bytes) ---
-    uint8_t rowBuf[320 * 3];
+    // --- BGR row buffer sized to the tile width (max 480*3 = 1440 bytes) ---
+    uint8_t rowBuf[480 * 3];
 
     for (uint32_t row = 0; row < tileH; row++) {
         const uint16_t* srcRow = pixels + row * tileW;

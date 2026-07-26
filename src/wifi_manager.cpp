@@ -450,7 +450,7 @@ void WifiManager::handleScreenshot() {
         return;
     }
 
-    const uint32_t totalSize = 54 + 320 * 240 * 3; // 230454
+    const uint32_t totalSize = f.size();
     _webServer->setContentLength(totalSize);
     _webServer->send(200, "image/bmp", "");
 
