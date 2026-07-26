@@ -19,6 +19,9 @@ SettingsManager::SettingsManager() {
     _wifiPassword = WIFI_PASSWORD;
     _sdCacheEnabled = USE_SD_CACHE;
     _screensaverEnabled = SCREENSAVER_ENABLED;
+    _zipCode = WEATHER_ZIP_CODE;
+    _latitude = WEATHER_API_LATITUDE;
+    _longitude = WEATHER_API_LONGITUDE;
 }
 
 void SettingsManager::begin() {
@@ -41,6 +44,9 @@ void SettingsManager::begin() {
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
     _screensaverEnabled = prefs.getBool("scr_enabled", SCREENSAVER_ENABLED);
+    _zipCode = prefs.getString("zip", WEATHER_ZIP_CODE);
+    _latitude = prefs.getString("lat", WEATHER_API_LATITUDE);
+    _longitude = prefs.getString("lon", WEATHER_API_LONGITUDE);
     
     prefs.end();
 }
@@ -280,6 +286,48 @@ void SettingsManager::setScreensaverEnabled(bool enabled) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putBool("scr_enabled", _screensaverEnabled);
+        prefs.end();
+    }
+}
+
+String SettingsManager::getZipCode() const {
+    return _zipCode;
+}
+
+void SettingsManager::setZipCode(const String& zipCode) {
+    if (_zipCode != zipCode) {
+        _zipCode = zipCode;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("zip", _zipCode);
+        prefs.end();
+    }
+}
+
+String SettingsManager::getLatitude() const {
+    return _latitude;
+}
+
+void SettingsManager::setLatitude(const String& latitude) {
+    if (_latitude != latitude) {
+        _latitude = latitude;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("lat", _latitude);
+        prefs.end();
+    }
+}
+
+String SettingsManager::getLongitude() const {
+    return _longitude;
+}
+
+void SettingsManager::setLongitude(const String& longitude) {
+    if (_longitude != longitude) {
+        _longitude = longitude;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("lon", _longitude);
         prefs.end();
     }
 }

@@ -31,8 +31,7 @@ struct WeatherData {
 
 class WeatherClient {
 public:
-    WeatherClient(const char* latitude, const char* longitude);
-    WeatherClient(const char* zipCode);
+    WeatherClient();
     WeatherData fetchWeather();
     const String& getCityName() const { return _cityName; }
     static String getWeatherDesc(int code);
@@ -40,7 +39,7 @@ public:
     bool parseOwmJson(const char* json, WeatherData& data);
     static String serializeWeatherData(const WeatherData& data);
     static bool deserializeWeatherData(const String& json, WeatherData& data);
-    bool isLocationEmpty() const;
+    bool isLocationEmpty();
     bool fetchIpLocation(String& latStr, String& lonStr, String& city);
     static bool parseIpLocationJson(const char* json, float& lat, float& lon, String& city);
 
@@ -49,9 +48,9 @@ private:
     bool reverseGeocode();
     static int owmToWmoCode(int owmCode);
 
-    const char* _latitude;
-    const char* _longitude;
-    const char* _zipCode;
+    String _latitude;
+    String _longitude;
+    String _zipCode;
     bool _useZip;
     bool _zipResolved;
     String _resolvedLat;

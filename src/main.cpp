@@ -24,11 +24,7 @@ SettingsManager settings;
 
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
 MqttManager mqtt(MQTT_SERVER, MQTT_PORT, MQTT_USER, MQTT_PASSWORD);
-#if USE_ZIP_CODE
-WeatherClient weather(WEATHER_ZIP_CODE);
-#else
-WeatherClient weather(WEATHER_API_LATITUDE, WEATHER_API_LONGITUDE);
-#endif
+WeatherClient weather;
 
 #if USE_RGB_LED_STATUS
 LedManager led(4, 16, 17);

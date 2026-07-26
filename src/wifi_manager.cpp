@@ -311,6 +311,17 @@ void WifiManager::handleRoot() {
     html += "<label for='pass'>Password</label>";
     html += "<input type='password' id='pass' name='pass' placeholder='Password'>";
     
+    html += "<label for='zip'>Zip Code (US Only)</label>";
+    html += "<input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='" + settings.getZipCode() + "'>";
+    
+    html += "<label for='lat'>Latitude</label>";
+    html += "<input type='text' id='lat' name='lat' placeholder='e.g. 34.1031' value='" + settings.getLatitude() + "'>";
+    
+    html += "<label for='lon'>Longitude</label>";
+    html += "<input type='text' id='lon' name='lon' placeholder='e.g. -118.416' value='" + settings.getLongitude() + "'>";
+    
+    html += "<p style='color: #a6adc8; font-size: 12px; margin-top: -10px; margin-bottom: 20px; text-align: center;'><em>Leave location fields blank to auto-detect your location via IP address.</em></p>";
+    
     html += "<button type='submit'>Save & Connect</button>";
     html += "</form>";
     html += "</div>";
@@ -324,6 +335,9 @@ void WifiManager::handleSave() {
 #ifndef NATIVE_TEST
     String ssid = _webServer->arg("ssid");
     String pass = _webServer->arg("pass");
+    String zip = _webServer->arg("zip");
+    String lat = _webServer->arg("lat");
+    String lon = _webServer->arg("lon");
 
     Serial.printf("[WiFi] Saved new credentials via captive portal: %s\n", ssid.c_str());
 
@@ -347,6 +361,9 @@ void WifiManager::handleSave() {
 
     settings.setWifiSSID(ssid);
     settings.setWifiPassword(pass);
+    settings.setZipCode(zip);
+    settings.setLatitude(lat);
+    settings.setLongitude(lon);
 
     ESP.restart();
 #endif

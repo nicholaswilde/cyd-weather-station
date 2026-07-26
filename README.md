@@ -39,7 +39,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
 - **Wi-Fi AP Captive Portal Fallback**:
   - Automatically hosts an open Soft AP (`cyd-weather-station-<mac_short>`) if connection fails or times out after 30 seconds on boot.
-  - Runs a captive portal configuration web server and DNS redirector on `192.168.4.1` for selecting networks and setting Wi-Fi credentials.
+  - Runs a captive portal configuration web server and DNS redirector on `192.168.4.1` for selecting networks, setting Wi-Fi credentials, and configuring your location (Zip Code or Coordinates).
   - Runs background async Wi-Fi scans after AP initialization to prevent client disconnections (common on ESP32 during active/blocking scans).
   - Web interface `/scan` triggers background scanning with a friendly redirect loader screen, displaying updated networks on completion.
   - Dynamically displays step-by-step connection instructions (SSID name and IP address) directly on the screen while AP Mode is active.
@@ -84,6 +84,7 @@ The weather station periodically logs weather reports to a microSD card in CSV f
 |---|---|---|
 | **Current Weather** | ![Landscape Current](screenshots/landscape_current.png) | ![Portrait Current](screenshots/portrait_current.png) |
 | **3-Day Forecast** | ![Landscape Forecast](screenshots/landscape_forecast.png) | ![Portrait Forecast](screenshots/portrait_forecast.png) |
+| **24-Hour Forecast** | ![Landscape Hourly](screenshots/landscape_hourly.png) | ![Portrait Hourly](screenshots/portrait_hourly.png) |
 | **System Settings** | ![Landscape Settings](screenshots/landscape_settings.png) | ![Portrait Settings](screenshots/portrait_settings.png) |
 
 The device supports capturing the current screen as a standard 24-bit BMP image via two methods:
@@ -190,15 +191,14 @@ Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent com
 Static settings (location, update interval) live in [`config/config.h`](config/config.h). Runtime user preferences (units, brightness, theme, timezone) are changed via the on-device **Settings tab** and saved to flash.
 
 **Location:**
+Location (Zip Code or Coordinates) is configured dynamically via the **Captive Portal Wi-Fi Manager** when the device boots in AP mode. You can pre-configure the fallback defaults in `config/config.h`:
 ```cpp
-#define USE_ZIP_CODE      true
+// Default values (if not configured via Wi-Fi Setup)
 #define WEATHER_ZIP_CODE  "90210"
-
-// Fallback coordinates (used when USE_ZIP_CODE is false)
-#define WEATHER_API_LATITUDE  "37.7749"
-#define WEATHER_API_LONGITUDE "-122.4194"
+#define WEATHER_API_LATITUDE  ""
+#define WEATHER_API_LONGITUDE ""
 ```
-*(Note: Leave `WEATHER_ZIP_CODE`, `WEATHER_API_LATITUDE`, and `WEATHER_API_LONGITUDE` empty (`""`) to enable automatic IP Geolocation fallback on boot).*
+*(Note: If you leave these fields empty in both the code and the Wi-Fi Setup page, the device will automatically detect your location via IP Geolocation).*
 
 **Weather update interval:**
 ```cpp

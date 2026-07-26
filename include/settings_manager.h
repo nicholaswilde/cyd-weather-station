@@ -25,6 +25,9 @@ private:
     String _wifiPassword;
     bool _sdCacheEnabled;
     bool _screensaverEnabled;
+    String _zipCode;
+    String _latitude;
+    String _longitude;
 
 public:
     SettingsManager();
@@ -77,6 +80,15 @@ public:
 
     bool getScreensaverEnabled() const;
     void setScreensaverEnabled(bool enabled);
+
+    String getZipCode() const;
+    void setZipCode(const String& zipCode);
+
+    String getLatitude() const;
+    void setLatitude(const String& latitude);
+
+    String getLongitude() const;
+    void setLongitude(const String& longitude);
 };
 
 #endif // SETTINGS_MANAGER_H

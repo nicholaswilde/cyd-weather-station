@@ -4,7 +4,6 @@
 #include "secrets.h"
 
 // Location Settings
-#define USE_ZIP_CODE true
 // #define WEATHER_ZIP_CODE "90210"
 #define WEATHER_ZIP_CODE ""
 

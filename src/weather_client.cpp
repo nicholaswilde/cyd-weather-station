@@ -16,11 +16,8 @@ extern SettingsManager settings;
 #include <WiFiClient.h>
 #endif
 
-WeatherClient::WeatherClient(const char* latitude, const char* longitude)
-    : _latitude(latitude), _longitude(longitude), _zipCode(nullptr), _useZip(false), _zipResolved(false), _cityName("") {}
-
-WeatherClient::WeatherClient(const char* zipCode)
-    : _latitude(nullptr), _longitude(nullptr), _zipCode(zipCode), _useZip(true), _zipResolved(false), _cityName("") {}
+WeatherClient::WeatherClient()
+    : _useZip(false), _zipResolved(false), _cityName("") {}
 
 bool WeatherClient::geocodeZip() {
 #ifdef NATIVE_TEST
@@ -62,7 +59,7 @@ bool WeatherClient::geocodeZip() {
                 _zipResolved = true;
 
                 Serial.printf("[Weather] Zip %s resolved to %s (%s, %s)\n",
-                    _zipCode, name, _resolvedLat.c_str(), _resolvedLng.c_str());
+                    _zipCode.c_str(), name, _resolvedLat.c_str(), _resolvedLng.c_str());
                 http.end();
                 return true;
             } else {
@@ -137,6 +134,11 @@ bool WeatherClient::reverseGeocode() {
 }
 
 WeatherData WeatherClient::fetchWeather() {
+
+    _zipCode = settings.getZipCode();
+    _latitude = settings.getLatitude();
+    _longitude = settings.getLongitude();
+    _useZip = (_zipCode.length() > 0 && _zipCode != "YOUR_ZIP_CODE");
     WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {} };
 
     bool useOWM = (String(OPENWEATHERMAP_API_KEY).length() > 0);
@@ -154,8 +156,8 @@ WeatherData WeatherClient::fetchWeather() {
         reverseGeocode();
     }
 
-    const char* lat = _useZip ? _resolvedLat.c_str() : ((_latitude && strlen(_latitude) > 0) ? _latitude : _resolvedLat.c_str());
-    const char* lng = _useZip ? _resolvedLng.c_str() : ((_longitude && strlen(_longitude) > 0) ? _longitude : _resolvedLng.c_str());
+    const char* lat = _useZip ? _resolvedLat.c_str() : ((_latitude.length() > 0) ? _latitude.c_str() : _resolvedLat.c_str());
+    const char* lng = _useZip ? _resolvedLng.c_str() : ((_longitude.length() > 0) ? _longitude.c_str() : _resolvedLng.c_str());
 
 #ifdef NATIVE_TEST
     // Mock response for native unit tests
@@ -687,16 +689,19 @@ bool WeatherClient::deserializeWeatherData(const String& json, WeatherData& data
     return true;
 }
 
-bool WeatherClient::isLocationEmpty() const {
+bool WeatherClient::isLocationEmpty() {
+    _zipCode = settings.getZipCode();
+    _latitude = settings.getLatitude();
+    _longitude = settings.getLongitude();
+    _useZip = (_zipCode.length() > 0 && _zipCode != "YOUR_ZIP_CODE");
+
     if (_resolvedLat.length() > 0 && _resolvedLng.length() > 0) {
         return false;
     }
     if (_useZip) {
-        return _zipCode == nullptr || strlen(_zipCode) == 0 || strcmp(_zipCode, "YOUR_ZIP_CODE") == 0;
+        return _zipCode.length() == 0 || _zipCode == "YOUR_ZIP_CODE";
     } else {
-        return _latitude == nullptr || strlen(_latitude) == 0 || 
-               _longitude == nullptr || strlen(_longitude) == 0 ||
-               strcmp(_latitude, "YOUR_LATITUDE") == 0;
+        return _latitude.length() == 0 || _longitude.length() == 0 || _latitude == "YOUR_LATITUDE";
     }
 }
 
