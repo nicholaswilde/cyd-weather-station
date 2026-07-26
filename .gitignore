@@ -86,3 +86,4 @@ lcov.info
 lcov_raw.info
 # CodeGraph local index and database files
 .codegraph/
+include/version.h
