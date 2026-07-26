@@ -348,7 +348,7 @@ void initUI() {
     // Header Title (Time/App Name)
     header_title = lv_label_create(header);
 #ifdef APP_VERSION
-    lv_label_set_text(header_title, isLandscape ? "CYD Weather Station " APP_VERSION : "CYD Weather\nStation " APP_VERSION);
+    lv_label_set_text(header_title, isLandscape ? "CYD Weather Station\n" APP_VERSION : "CYD Weather\nStation\n" APP_VERSION);
 #else
     lv_label_set_text(header_title, isLandscape ? "CYD Weather Station" : "CYD Weather\nStation");
 #endif
