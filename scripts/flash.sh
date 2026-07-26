@@ -4,14 +4,10 @@
 # flash.sh
 # -------
 # Downloads the latest release from GitHub to the /tmp directory,
-# extracts the bin files to the /tmp directory, checks if esptool is
-# installed, and flashes the device.
+# extracts the bin files, checks if esptool is installed, and flashes the device.
 #
-# Usage: ./flash_latest.sh <SERIAL_PORT
-#
-# @author Nicholas Wilde, 0xb299a622                                                        
-# @date 07 Aug 2025  
-# @version 0.1.0
+# Usage: bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ [DEVICE] [SERIAL_PORT]
+# Example: ./flash.sh cyd_28r /dev/ttyUSB0
 #
 # ==============================================================================
 
@@ -19,66 +15,62 @@ set -euo pipefail
 
 # --- variables ---
 GITHUB_REPO="nicholaswilde/cyd-weather-station"
-SERIAL_PORT="${1:-/dev/ttyACM0}"
+DEVICE="${1:-cyd_28r}"
+SERIAL_PORT="${2:-/dev/ttyUSB0}"
 
 # --- Constants ---
-readonly BLUE=$(tput setaf 4)
-readonly RED=$(tput setaf 1)
-readonly YELLOW=$(tput setaf 3)
-readonly RESET=$(tput sgr0)
-
-readonly SCRIPT_NAME=$(basename "$0")
+readonly BLUE=$(tput setaf 4 || echo "")
+readonly RED=$(tput setaf 1 || echo "")
+readonly YELLOW=$(tput setaf 3 || echo "")
+readonly RESET=$(tput sgr0 || echo "")
 
 # --- functions ---
 
-# Logging function
 function log() {
   local type="$1"
   local message="$2"
   local color="$RESET"
 
   case "$type" in
-    INFO)
-      color="$BLUE";;
-    WARN)
-      color="$YELLOW";;
-    ERRO)
-      color="$RED";;
+    INFO) color="$BLUE";;
+    WARN) color="$YELLOW";;
+    ERRO) color="$RED";;
   esac
 
   echo -e "${color}${type}${RESET}[$(date +'%Y-%m-%d %H:%M:%S')] ${message}"
 }
 
-
-# Checks if a command exists.
 function commandExists() {
   command -v "$1" >/dev/null 2>&1
 }
 
 function check_dependencies() {
-  # --- check for dependencies ---
   if ! commandExists curl || ! commandExists grep || ! commandExists unzip || ! commandExists esptool ; then
     log "ERRO" "Required dependencies (curl, grep, unzip, esptool) are not installed." >&2
     exit 1
-  fi  
+  fi
 }
 
 function download_release(){
-  RELEASE=$(curl -fsSL https://api.github.com/repos/${GITHUB_REPO}/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d '"' -f 4)
-  log "INFO" "Latest release: ${RELEASE}"
+  local release
+  release=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d '"' -f 4 || true)
+  if [ -z "$release" ]; then
+    log "ERRO" "Could not determine the latest release version." >&2
+    exit 1
+  fi
+  log "INFO" "Latest release: ${release}"
+  log "INFO" "Target device: ${DEVICE}"
 
-  # --- get the latest release download URL ---
-  log "INFO" "Fetching the latest release from ${GITHUB_REPO}..."
-  LATEST_RELEASE_URL=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" |  grep "browser_download_url" | grep -o 'https://[^"]*')
+  # Get the download URL for the specific device zip file
+  LATEST_RELEASE_URL=$(curl -s "https://api.github.com/repos/${GITHUB_REPO}/releases/latest" | grep "browser_download_url" | grep "${DEVICE}.zip" | grep -o 'https://[^"]*' || true)
 
   if [ -z "${LATEST_RELEASE_URL}" ]; then
-    log "ERRO" "Could not find the latest release zip file." >&2
+    log "ERRO" "Could not find the release zip file for device: ${DEVICE}." >&2
     exit 1
   fi
 
-  # --- download and extract the release ---
   TMP_DIR=$(mktemp -d)
-  log "INFO" "Downloading latest release from ${LATEST_RELEASE_URL}..."
+  log "INFO" "Downloading release from ${LATEST_RELEASE_URL}..."
   curl -sL "${LATEST_RELEASE_URL}" -o "${TMP_DIR}/latest_release.zip"
 }
 
@@ -90,31 +82,29 @@ function extract_files() {
 function flash_device() {
   log "INFO" "Ready to flash the device on port ${SERIAL_PORT}."
 
-  esptool \
+  # CYD is typically an ESP32 (not ESP32-S3 like T-Dongle)
+  esptool.py \
     --chip esp32 \
     --port "${SERIAL_PORT}" \
     --baud 921600 \
-    --before default_reset \
-    --after hard_reset \
-    --no-stub \
-    write_flash \
+    --before default-reset \
+    --after hard-reset \
+    write-flash \
       -z \
-      --flash_mode dio \
-      --flash_freq 80m \
-      --flash_size 4MB \
+      --flash-mode dio \
+      --flash-freq 40m \
+      --flash-size 4MB \
       0x1000 "${TMP_DIR}/bootloader.bin" \
       0x8000 "${TMP_DIR}/partitions.bin" \
       0x10000 "${TMP_DIR}/firmware.bin"
 }
 
-# Downloads and flashes the latest release.
 function main() {
-  check_dependencies  
+  check_dependencies
   download_release
   extract_files
-  # find "${TMP_DIR}" -name "*.bin" -print
   flash_device
-  log "INFO" "--- Flashing complete (simulation) ---"
+  log "INFO" "--- Flashing complete ---"
 }
 
 main "$@"
