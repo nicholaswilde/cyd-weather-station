@@ -4,6 +4,7 @@
 #include "settings_manager.h"
 #include "sd_card_manager.h"
 #include "screensaver_manager.h"
+#include <WiFi.h>
 
 extern "C" {
 LV_FONT_DECLARE(weather_icons_72);
@@ -28,6 +29,86 @@ static lv_obj_t *wifi_label;
 static lv_obj_t *offline_indicator = nullptr;
 static lv_obj_t *header_title = nullptr;
 static bool is_offline_mode = false;
+
+static lv_obj_t *wifi_info_dialog = nullptr;
+
+static void close_wifi_info_cb(lv_event_t * e) {
+    if (wifi_info_dialog != nullptr) {
+        lv_obj_del(wifi_info_dialog);
+        wifi_info_dialog = nullptr;
+    }
+}
+
+static void wifi_icon_click_cb(lv_event_t * e) {
+    if (WiFi.status() != WL_CONNECTED && WiFi.getMode() != WIFI_AP) return;
+    if (wifi_info_dialog != nullptr) return;
+
+    bool isLargeScreen = (lv_disp_get_hor_res(NULL) >= 480 || lv_disp_get_ver_res(NULL) >= 480);
+
+    wifi_info_dialog = lv_obj_create(lv_scr_act());
+    lv_obj_set_size(wifi_info_dialog, lv_pct(85), lv_pct(85));
+    lv_obj_align(wifi_info_dialog, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_style_bg_color(wifi_info_dialog, lv_color_hex(COLOR_MANTLE), 0);
+    lv_obj_set_style_border_color(wifi_info_dialog, lv_color_hex(COLOR_OVERLAY), 0);
+    lv_obj_set_style_border_width(wifi_info_dialog, 2, 0);
+    lv_obj_set_style_radius(wifi_info_dialog, 10, 0);
+    lv_obj_clear_flag(wifi_info_dialog, LV_OBJ_FLAG_SCROLLABLE);
+
+    // Title label
+    lv_obj_t * lbl_title = lv_label_create(wifi_info_dialog);
+    lv_label_set_text(lbl_title, "WiFi Info");
+    lv_obj_set_style_text_font(lbl_title, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(lbl_title, lv_color_hex(COLOR_TEXT), 0);
+    lv_obj_align(lbl_title, LV_ALIGN_TOP_MID, 0, isLargeScreen ? 10 : 5);
+
+    // Status label
+    lv_obj_t * lbl_status = lv_label_create(wifi_info_dialog);
+    if (WiFi.getMode() == WIFI_AP) {
+        lv_label_set_text(lbl_status, "AP Mode Active");
+        lv_obj_set_style_text_color(lbl_status, lv_color_hex(COLOR_MAUVE), 0);
+    } else {
+        lv_label_set_text(lbl_status, "Connected");
+        lv_obj_set_style_text_color(lbl_status, lv_color_hex(COLOR_GREEN), 0);
+    }
+    lv_obj_set_style_text_font(lbl_status, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, 0);
+    lv_obj_align(lbl_status, LV_ALIGN_TOP_MID, 0, isLargeScreen ? 40 : 25);
+
+    // Info details
+    lv_obj_t * lbl_info = lv_label_create(wifi_info_dialog);
+    char infoBuf[256];
+    if (WiFi.getMode() == WIFI_AP) {
+        snprintf(infoBuf, sizeof(infoBuf), 
+                 "SSID: %s\nIP: %s\nMAC: %s", 
+                 WiFi.softAPSSID().c_str(), 
+                 WiFi.softAPIP().toString().c_str(), 
+                 WiFi.softAPmacAddress().c_str());
+    } else {
+        snprintf(infoBuf, sizeof(infoBuf), 
+                 "SSID: %s\nIP: %s\nMAC: %s\nRSSI: %d dBm", 
+                 WiFi.SSID().c_str(), 
+                 WiFi.localIP().toString().c_str(), 
+                 WiFi.macAddress().c_str(), 
+                 WiFi.RSSI());
+    }
+    lv_label_set_text(lbl_info, infoBuf);
+    lv_obj_set_style_text_font(lbl_info, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_align(lbl_info, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_text_color(lbl_info, lv_color_hex(COLOR_TEXT), 0);
+    lv_obj_align(lbl_info, LV_ALIGN_CENTER, 0, isLargeScreen ? 10 : 15);
+
+    // Close Button
+    lv_obj_t * btn_close = lv_btn_create(wifi_info_dialog);
+    lv_obj_set_size(btn_close, isLargeScreen ? 120 : 80, isLargeScreen ? 40 : 30);
+    lv_obj_align(btn_close, LV_ALIGN_BOTTOM_MID, 0, isLargeScreen ? -15 : -5);
+    lv_obj_set_style_bg_color(btn_close, lv_color_hex(COLOR_OVERLAY), 0);
+    lv_obj_add_event_cb(btn_close, close_wifi_info_cb, LV_EVENT_CLICKED, NULL);
+
+    lv_obj_t * lbl_close = lv_label_create(btn_close);
+    lv_label_set_text(lbl_close, "Close");
+    lv_obj_set_style_text_color(lbl_close, lv_color_hex(COLOR_CRUST), 0);
+    lv_obj_set_style_text_font(lbl_close, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, 0);
+    lv_obj_align(lbl_close, LV_ALIGN_CENTER, 0, 0);
+}
 static lv_obj_t *temp_label;
 static lv_obj_t *hum_label;
 static lv_obj_t *status_lbl;
@@ -287,6 +368,9 @@ void initUI() {
     wifi_label = lv_label_create(header_right_area);
     lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
     lv_obj_set_style_text_color(wifi_label, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN); // Yellow / Amber icon
+    lv_obj_add_flag(wifi_label, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(wifi_label, 15);
+    lv_obj_add_event_cb(wifi_label, wifi_icon_click_cb, LV_EVENT_CLICKED, NULL);
 
     // Time Label in Header
     time_label = lv_label_create(header_right_area);
