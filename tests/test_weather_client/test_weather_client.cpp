@@ -12,7 +12,7 @@ void tearDown(void) {
 }
 
 void test_weather_client_initialization(void) {
-    WeatherClient client("37.7749", "-122.4194");
+    settings.setZipCode(""); settings.setLatitude("37.7749"); settings.setLongitude("-122.4194"); WeatherClient client;
     // Assert it builds and sets up without crashing
     TEST_ASSERT_TRUE(true);
 }
@@ -27,7 +27,7 @@ void test_weather_client_get_weather_desc(void) {
 }
 
 void test_weather_client_fetch_weather_native_mock(void) {
-    WeatherClient client("37.7749", "-122.4194");
+    settings.setZipCode(""); settings.setLatitude("37.7749"); settings.setLongitude("-122.4194"); WeatherClient client;
     WeatherData data = client.fetchWeather();
     
     TEST_ASSERT_TRUE(data.valid);
@@ -55,7 +55,7 @@ void test_weather_client_fetch_weather_native_mock(void) {
 }
 
 void test_weather_client_zip_code_initialization(void) {
-    WeatherClient client("90210");
+    settings.setZipCode("90210"); WeatherClient client;
     WeatherData data = client.fetchWeather();
     
     TEST_ASSERT_TRUE(data.valid);
@@ -109,7 +109,7 @@ void test_weather_client_parse_weather_json_custom(void) {
 }
 
 void test_weather_client_parse_owm_json(void) {
-    WeatherClient client("33.60002", "-117.67200");
+    settings.setZipCode(""); settings.setLatitude("33.60002"); settings.setLongitude("-117.67200"); WeatherClient client;
     WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {} };
 
     const char* owmJson = "{"
@@ -165,22 +165,22 @@ void test_weather_client_parse_ip_location_json_fail(void) {
 }
 
 void test_weather_client_is_location_empty(void) {
-    WeatherClient client1("");
+    settings.setZipCode(""); settings.setLatitude(""); settings.setLongitude(""); WeatherClient client1;
     TEST_ASSERT_TRUE(client1.isLocationEmpty());
 
-    WeatherClient client2("YOUR_ZIP_CODE");
+    settings.setZipCode("YOUR_ZIP_CODE"); WeatherClient client2;
     TEST_ASSERT_TRUE(client2.isLocationEmpty());
 
-    WeatherClient client3("90210");
+    settings.setZipCode("90210"); WeatherClient client3;
     TEST_ASSERT_FALSE(client3.isLocationEmpty());
 
-    WeatherClient client4("", "");
+    settings.setZipCode(""); settings.setLatitude(""); settings.setLongitude(""); WeatherClient client4;
     TEST_ASSERT_TRUE(client4.isLocationEmpty());
 
-    WeatherClient client5("YOUR_LATITUDE", "-122.4194");
+    settings.setZipCode(""); settings.setLatitude("YOUR_LATITUDE"); settings.setLongitude("-122.4194"); WeatherClient client5;
     TEST_ASSERT_TRUE(client5.isLocationEmpty());
 
-    WeatherClient client6("37.7749", "-122.4194");
+    settings.setZipCode(""); settings.setLatitude("37.7749"); settings.setLongitude("-122.4194"); WeatherClient client6;
     TEST_ASSERT_FALSE(client6.isLocationEmpty());
 }
 
@@ -219,7 +219,7 @@ void test_weather_client_parse_weather_json_hourly(void) {
 }
 
 void test_weather_client_parse_owm_json_hourly(void) {
-    WeatherClient client("33.60002", "-117.67200");
+    settings.setZipCode(""); settings.setLatitude("33.60002"); settings.setLongitude("-117.67200"); WeatherClient client;
     WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {}, {} };
 
     // OWM payload with at least 8 elements (24 hours at 3-hour intervals)
