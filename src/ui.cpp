@@ -6,6 +6,7 @@
 #include "screensaver_manager.h"
 
 extern "C" {
+LV_FONT_DECLARE(weather_icons_72);
 LV_FONT_DECLARE(weather_icons_48);
 LV_FONT_DECLARE(weather_icons_24);
 LV_FONT_DECLARE(weather_icons_16);
@@ -225,10 +226,8 @@ static void chart_draw_event_cb(lv_event_t * e) {
             int hour_idx = dsc->value;
             if (hour_idx == 0) {
                 lv_snprintf(dsc->text, dsc->text_length, "Now");
-            } else if (hour_idx % 4 == 0) {
-                lv_snprintf(dsc->text, dsc->text_length, "+%dh", hour_idx);
             } else {
-                dsc->text[0] = '\0';
+                lv_snprintf(dsc->text, dsc->text_length, "+%dh", hour_idx);
             }
         } else if (dsc->id == LV_CHART_AXIS_PRIMARY_Y && dsc->text) {
             int val = dsc->value;
@@ -251,9 +250,10 @@ void initUI() {
     rotation = settings.getScreenOrientation();
 #endif
     bool isLandscape = (rotation == 1 || rotation == 3);
-    int screen_w = isLandscape ? 320 : 240;
-    int screen_h = isLandscape ? 240 : 320;
-    int header_h = isLandscape ? 45 : 60; // 60px in portrait to fit 2-line title
+    int screen_w = lv_disp_get_hor_res(NULL);
+    int screen_h = lv_disp_get_ver_res(NULL);
+    int header_h = isLandscape ? 45 : 60;
+    bool isLargeScreen = (lv_disp_get_hor_res(NULL) >= 480 || lv_disp_get_ver_res(NULL) >= 480); // 60px in portrait to fit 2-line title
 
     lv_obj_t * header = lv_obj_create(scr);
     lv_obj_set_size(header, screen_w, header_h);
@@ -355,9 +355,9 @@ void initUI() {
     // Create Hourly Forecast Chart
     hourly_chart = lv_chart_create(tab_hourly);
     if (isLandscape) {
-        lv_obj_set_size(hourly_chart, 230, 130);
+        lv_obj_set_size(hourly_chart, lv_pct(85), lv_pct(90));
     } else {
-        lv_obj_set_size(hourly_chart, 160, 190);
+        lv_obj_set_size(hourly_chart, lv_pct(80), lv_pct(90));
     }
     lv_obj_align(hourly_chart, LV_ALIGN_CENTER, 0, -10);
     lv_chart_set_type(hourly_chart, LV_CHART_TYPE_LINE);
@@ -367,6 +367,7 @@ void initUI() {
     lv_obj_set_style_border_width(hourly_chart, 0, LV_PART_MAIN);
     lv_obj_set_style_line_color(hourly_chart, lv_color_hex(COLOR_OVERLAY), LV_PART_ITEMS); // grid lines
     lv_obj_set_style_text_color(hourly_chart, lv_color_hex(COLOR_TEXT), LV_PART_TICKS); // axis tick text
+    lv_obj_set_style_text_font(hourly_chart, isLargeScreen ? &lv_font_montserrat_14 : &lv_font_montserrat_10, LV_PART_TICKS);
     lv_obj_set_style_line_rounded(hourly_chart, true, LV_PART_ITEMS);
     lv_obj_set_style_line_width(hourly_chart, 3, LV_PART_ITEMS);
 
@@ -377,9 +378,9 @@ void initUI() {
     lv_chart_set_div_line_count(hourly_chart, 5, 7); // 5 horizontal grid lines, 7 vertical grid lines
 
     // Enable axes labels and ticks
-    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_PRIMARY_X, 6, 3, 7, 2, true, 20);
-    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_PRIMARY_Y, 6, 3, 5, 2, true, 40);
-    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_SECONDARY_Y, 6, 3, 5, 2, true, 40);
+    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_PRIMARY_X, 6, 3, 7, 2, true, isLargeScreen ? 40 : 20);
+    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_PRIMARY_Y, 6, 3, 5, 2, true, isLargeScreen ? 80 : 50);
+    lv_chart_set_axis_tick(hourly_chart, LV_CHART_AXIS_SECONDARY_Y, 6, 3, 5, 2, true, isLargeScreen ? 85 : 55);
 
     // Set secondary Y range to 0 - 100
     lv_chart_set_range(hourly_chart, LV_CHART_AXIS_SECONDARY_Y, 0, 100);
@@ -391,26 +392,40 @@ void initUI() {
     hourly_temp_series = lv_chart_add_series(hourly_chart, lv_color_hex(COLOR_MAUVE), LV_CHART_AXIS_PRIMARY_Y);
     hourly_precip_series = lv_chart_add_series(hourly_chart, lv_color_hex(COLOR_BLUE), LV_CHART_AXIS_SECONDARY_Y);
 
-    // Weather Placeholders inside tab_curr
-    icon_lbl = lv_label_create(tab_curr);
-    lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
+    // Container for the icon to accurately center it in the remaining space
+    lv_obj_t * icon_cnt = lv_obj_create(tab_curr);
+    lv_obj_set_style_bg_opa(icon_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(icon_cnt, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(icon_cnt, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
+
+    if (isLandscape) {
+        lv_obj_set_size(icon_cnt, lv_pct(40), lv_pct(100));
+        lv_obj_align(icon_cnt, LV_ALIGN_LEFT_MID, 0, 0);
+    } else {
+        lv_obj_set_size(icon_cnt, lv_pct(100), lv_pct(30));
+        lv_obj_align(icon_cnt, LV_ALIGN_TOP_MID, 0, 10);
+    }
+
+    // Weather Placeholders inside icon_cnt
+    icon_lbl = lv_label_create(icon_cnt);
+    if (isLargeScreen) {
+        lv_obj_set_style_text_font(icon_lbl, &weather_icons_72, LV_PART_MAIN);
+    } else {
+        lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
+    }
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
     lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    
-    if (isLandscape) {
-        lv_obj_align(icon_lbl, LV_ALIGN_LEFT_MID, 12, -10);
-    } else {
-        lv_obj_align(icon_lbl, LV_ALIGN_TOP_MID, 0, 10);
-    }
+    lv_obj_align(icon_lbl, LV_ALIGN_CENTER, 0, 0);
  
     // Vertical container for details on the right side
     lv_obj_t * details_cnt = lv_obj_create(tab_curr);
-    lv_obj_set_size(details_cnt, 200, 115);
-    
+    lv_obj_clear_flag(details_cnt, LV_OBJ_FLAG_CLICKABLE);
     if (isLandscape) {
-        lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, -10, -10);
+        lv_obj_set_size(details_cnt, lv_pct(60), lv_pct(100));
+        lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, 0, 0);
     } else {
-        lv_obj_align(details_cnt, LV_ALIGN_BOTTOM_MID, 0, -25);
+        lv_obj_set_size(details_cnt, lv_pct(100), lv_pct(70));
+        lv_obj_align(details_cnt, LV_ALIGN_BOTTOM_MID, 0, 0);
     }
     
     lv_obj_set_flex_flow(details_cnt, LV_FLEX_FLOW_COLUMN);
@@ -428,6 +443,7 @@ void initUI() {
 
     // --- Temperature row (wi-thermometer + value) ---
     lv_obj_t * temp_cnt = lv_obj_create(details_cnt);
+    lv_obj_clear_flag(temp_cnt, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_size(temp_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(temp_cnt, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(temp_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -438,10 +454,10 @@ void initUI() {
     lv_obj_clear_flag(temp_cnt, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * temp_icon_lbl = lv_label_create(temp_cnt);
-    lv_obj_set_style_text_font(temp_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
+    lv_obj_set_style_text_font(temp_icon_lbl, isLargeScreen ? &weather_icons_24 : &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(temp_icon_lbl, "\xef\x81\x95"); // U+F055 wi-thermometer
     lv_obj_set_style_text_color(temp_icon_lbl, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-    lv_obj_set_width(temp_icon_lbl, 20);
+    lv_obj_set_width(temp_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(temp_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     temp_label = lv_label_create(temp_cnt);
@@ -450,11 +466,12 @@ void initUI() {
     } else {
         lv_label_set_text(temp_label, "--.- °C");
     }
-    lv_obj_set_style_text_font(temp_label, &lv_font_montserrat_28, LV_PART_MAIN);
+    lv_obj_set_style_text_font(temp_label, isLargeScreen ? &lv_font_montserrat_48 : &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
 
     // --- Humidity row (wi-humidity + value) ---
     lv_obj_t * hum_cnt = lv_obj_create(details_cnt);
+    lv_obj_clear_flag(hum_cnt, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_size(hum_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(hum_cnt, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(hum_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -465,18 +482,20 @@ void initUI() {
     lv_obj_clear_flag(hum_cnt, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * hum_icon_lbl = lv_label_create(hum_cnt);
-    lv_obj_set_style_text_font(hum_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
+    lv_obj_set_style_text_font(hum_icon_lbl, isLargeScreen ? &weather_icons_24 : &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(hum_icon_lbl, "\xef\x81\xba"); // U+F07A wi-humidity
     lv_obj_set_style_text_color(hum_icon_lbl, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
-    lv_obj_set_width(hum_icon_lbl, 20);
+    lv_obj_set_width(hum_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(hum_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     hum_label = lv_label_create(hum_cnt);
+    lv_obj_set_style_text_font(hum_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(hum_label, "--%");
     lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
 
     // --- Wind row (wi-windy + value) ---
     lv_obj_t * wind_cnt = lv_obj_create(details_cnt);
+    lv_obj_clear_flag(wind_cnt, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_size(wind_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(wind_cnt, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(wind_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -487,18 +506,20 @@ void initUI() {
     lv_obj_clear_flag(wind_cnt, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * wind_icon_lbl = lv_label_create(wind_cnt);
-    lv_obj_set_style_text_font(wind_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
+    lv_obj_set_style_text_font(wind_icon_lbl, isLargeScreen ? &weather_icons_24 : &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
     lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
-    lv_obj_set_width(wind_icon_lbl, 20);
+    lv_obj_set_width(wind_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(wind_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     wind_label = lv_label_create(wind_cnt);
+    lv_obj_set_style_text_font(wind_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(wind_label, "Wind: -- km/h");
     lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
 
     // --- Status row (dynamic weather-code icon + description text) ---
     lv_obj_t * status_cnt = lv_obj_create(details_cnt);
+    lv_obj_clear_flag(status_cnt, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_size(status_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(status_cnt, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(status_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -509,13 +530,14 @@ void initUI() {
     lv_obj_clear_flag(status_cnt, LV_OBJ_FLAG_SCROLLABLE);
 
     status_icon_lbl = lv_label_create(status_cnt);
-    lv_obj_set_style_text_font(status_icon_lbl, &weather_icons_16, LV_PART_MAIN); // 16px icon
+    lv_obj_set_style_text_font(status_icon_lbl, isLargeScreen ? &weather_icons_24 : &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(status_icon_lbl, "\xef\x81\xbb"); // U+F07B wi-na (updated on fetch)
     lv_obj_set_style_text_color(status_icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_set_width(status_icon_lbl, 20);
+    lv_obj_set_width(status_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(status_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     status_lbl = lv_label_create(status_cnt);
+    lv_obj_set_style_text_font(status_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(status_lbl, "Updating...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
 
@@ -541,7 +563,7 @@ void initUI() {
         lv_obj_clear_flag(day_card, LV_OBJ_FLAG_SCROLLABLE);
 
         if (isLandscape) {
-            lv_obj_set_size(day_card, 90, 130);
+            lv_obj_set_size(day_card, lv_pct(31), lv_pct(90));
             if (i == 0) {
                 lv_obj_align(day_card, LV_ALIGN_LEFT_MID, 10, 0);
             } else if (i == 1) {
@@ -554,12 +576,13 @@ void initUI() {
             // 1. Day Name Label
             fore_day_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tmrw" : "Day"));
+            lv_obj_set_style_text_font(fore_day_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
             lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
             lv_obj_align(fore_day_label[i], LV_ALIGN_TOP_MID, 0, 5);
 
             // 2. Weather Icon Label
             fore_icon_label[i] = lv_label_create(day_card);
-            lv_obj_set_style_text_font(fore_icon_label[i], &weather_icons_24, LV_PART_MAIN);
+            lv_obj_set_style_text_font(fore_icon_label[i], isLargeScreen ? &weather_icons_48 : &weather_icons_24, LV_PART_MAIN);
             lv_label_set_text(fore_icon_label[i], "\xef\x81\xbb"); // fallback NA
             lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
             lv_obj_align(fore_icon_label[i], LV_ALIGN_CENTER, 0, -5);
@@ -567,54 +590,63 @@ void initUI() {
             // 3. Temp Label (High / Low)
             fore_temp_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_temp_label[i], "--°/--°");
+            lv_obj_set_style_text_font(fore_temp_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
             lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-            lv_obj_align(fore_temp_label[i], LV_ALIGN_BOTTOM_MID, 0, -22);
+            lv_obj_align(fore_temp_label[i], LV_ALIGN_BOTTOM_MID, 0, isLargeScreen ? -40 : -22);
 
             // 4. Status Description Label
             fore_desc_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_desc_label[i], "Loading...");
+            lv_obj_set_style_text_font(fore_desc_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
             lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
             lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
-            lv_obj_set_width(fore_desc_label[i], 80);
+            lv_obj_set_width(fore_desc_label[i], lv_pct(95));
             lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_CENTER, 0);
             lv_obj_align(fore_desc_label[i], LV_ALIGN_BOTTOM_MID, 0, -4);
         } else {
             // Portrait layout: row flow, vertical list
-            lv_obj_set_size(day_card, 220, 42);
-            lv_obj_align(day_card, LV_ALIGN_TOP_MID, 0, 5 + i * 47);
+            int card_w = isLargeScreen ? 300 : 220;
+            int card_h = isLargeScreen ? 70 : 42;
+            int card_step = isLargeScreen ? 80 : 47;
+            
+            lv_obj_set_size(day_card, card_w, card_h);
+            lv_obj_align(day_card, LV_ALIGN_TOP_MID, 0, 10 + i * card_step);
             lv_obj_set_flex_flow(day_card, LV_FLEX_FLOW_ROW);
             lv_obj_set_flex_align(day_card, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
             lv_obj_set_style_pad_all(day_card, 6, LV_PART_MAIN);
-            lv_obj_set_style_pad_gap(day_card, 4, LV_PART_MAIN);
+            lv_obj_set_style_pad_gap(day_card, isLargeScreen ? 8 : 4, LV_PART_MAIN);
 
             // 1. Day Name Label
             fore_day_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tmrw" : "Day"));
+            lv_obj_set_style_text_font(fore_day_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
             lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-            lv_obj_set_width(fore_day_label[i], 50);
+            lv_obj_set_width(fore_day_label[i], isLargeScreen ? 65 : 50); // Increased from 60
             lv_obj_set_style_text_align(fore_day_label[i], LV_TEXT_ALIGN_LEFT, 0);
 
             // 2. Weather Icon Label
             fore_icon_label[i] = lv_label_create(day_card);
-            lv_obj_set_style_text_font(fore_icon_label[i], &weather_icons_24, LV_PART_MAIN);
+            lv_obj_set_style_text_font(fore_icon_label[i], isLargeScreen ? &weather_icons_48 : &weather_icons_24, LV_PART_MAIN);
             lv_label_set_text(fore_icon_label[i], "\xef\x81\xbb"); // fallback NA
             lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-            lv_obj_set_width(fore_icon_label[i], 24);
+            lv_obj_set_width(fore_icon_label[i], isLargeScreen ? 48 : 24);
             lv_obj_set_style_text_align(fore_icon_label[i], LV_TEXT_ALIGN_CENTER, 0);
 
             // 3. Temp Label (High / Low)
             fore_temp_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_temp_label[i], "--°/--°");
+            lv_obj_set_style_text_font(fore_temp_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
             lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
-            lv_obj_set_width(fore_temp_label[i], 65);
+            lv_obj_set_width(fore_temp_label[i], isLargeScreen ? 85 : 65); // Increased from 70
             lv_obj_set_style_text_align(fore_temp_label[i], LV_TEXT_ALIGN_CENTER, 0);
 
             // 4. Status Description Label
             fore_desc_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_desc_label[i], "Loading...");
+            lv_obj_set_style_text_font(fore_desc_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
             lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
             lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
-            lv_obj_set_width(fore_desc_label[i], 55);
+            lv_obj_set_flex_grow(fore_desc_label[i], 1);
             lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_RIGHT, 0);
         }
     }
@@ -622,7 +654,8 @@ void initUI() {
     // --- 3. Settings Tab UI Widgets ---
     // Main container inside tab_settings
     lv_obj_t * settings_grid = lv_obj_create(tab_settings);
-    lv_obj_set_size(settings_grid, isLandscape ? 310 : 230, LV_SIZE_CONTENT);
+    lv_obj_clear_flag(settings_grid, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(settings_grid, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_align(settings_grid, LV_ALIGN_TOP_MID, 0, 5);
     lv_obj_set_flex_flow(settings_grid, isLandscape ? LV_FLEX_FLOW_ROW : LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(settings_grid, isLandscape ? LV_FLEX_ALIGN_SPACE_BETWEEN : LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -634,7 +667,8 @@ void initUI() {
 
     // Left Column — Unit switch, Auto Light switch, Theme dropdown
     lv_obj_t * left_col = lv_obj_create(settings_grid);
-    lv_obj_set_size(left_col, 148, LV_SIZE_CONTENT);
+    lv_obj_clear_flag(left_col, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(left_col, isLandscape ? lv_pct(48) : lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(left_col, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(left_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(left_col, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -645,7 +679,8 @@ void initUI() {
 
     // Right Column — Brightness label+slider, Timezone label+buttons
     lv_obj_t * right_col = lv_obj_create(settings_grid);
-    lv_obj_set_size(right_col, 155, LV_SIZE_CONTENT);
+    lv_obj_clear_flag(right_col, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(right_col, isLandscape ? lv_pct(48) : lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(right_col, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(right_col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_opa(right_col, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -658,7 +693,8 @@ void initUI() {
 
     // Unit (C/F) row
     lv_obj_t * unit_row = lv_obj_create(left_col);
-    lv_obj_set_size(unit_row, 144, 22);
+    lv_obj_clear_flag(unit_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(unit_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(unit_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(unit_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(unit_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -669,9 +705,10 @@ void initUI() {
     lv_obj_t * unit_label = lv_label_create(unit_row);
     lv_label_set_text(unit_label, "Unit (C/F)");
     lv_obj_set_style_text_color(unit_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(unit_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * unit_sw = lv_switch_create(unit_row);
-    lv_obj_set_size(unit_sw, 40, 20);
+    lv_obj_set_size(unit_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     // Switch track — off state
     lv_obj_set_style_bg_color(unit_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     // Switch track — on/checked state
@@ -685,7 +722,8 @@ void initUI() {
 
     // Auto Light row
     lv_obj_t * auto_row = lv_obj_create(left_col);
-    lv_obj_set_size(auto_row, 144, 22);
+    lv_obj_clear_flag(auto_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(auto_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(auto_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(auto_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(auto_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -696,10 +734,12 @@ void initUI() {
     lv_obj_t * auto_label = lv_label_create(auto_row);
     lv_label_set_text(auto_label, "Auto Light");
     lv_obj_set_style_text_color(auto_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(auto_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     // DST switch row
     lv_obj_t * dst_row = lv_obj_create(left_col);
-    lv_obj_set_size(dst_row, 144, 22);
+    lv_obj_clear_flag(dst_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(dst_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(dst_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(dst_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(dst_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -710,9 +750,10 @@ void initUI() {
     lv_obj_t * dst_label = lv_label_create(dst_row);
     lv_label_set_text(dst_label, "DST");
     lv_obj_set_style_text_color(dst_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(dst_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * dst_sw = lv_switch_create(dst_row);
-    lv_obj_set_size(dst_sw, 40, 20);
+    lv_obj_set_size(dst_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -723,7 +764,8 @@ void initUI() {
 
     // SD Log row
     lv_obj_t * sd_row = lv_obj_create(left_col);
-    lv_obj_set_size(sd_row, 144, 22);
+    lv_obj_clear_flag(sd_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(sd_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(sd_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(sd_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(sd_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -734,9 +776,10 @@ void initUI() {
     lv_obj_t * sd_label = lv_label_create(sd_row);
     lv_label_set_text(sd_label, "SD Log");
     lv_obj_set_style_text_color(sd_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(sd_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * sd_sw = lv_switch_create(sd_row);
-    lv_obj_set_size(sd_sw, 40, 20);
+    lv_obj_set_size(sd_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -751,7 +794,8 @@ void initUI() {
 
     // SD Cache row
     lv_obj_t * sd_cache_row = lv_obj_create(left_col);
-    lv_obj_set_size(sd_cache_row, 144, 22);
+    lv_obj_clear_flag(sd_cache_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(sd_cache_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(sd_cache_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(sd_cache_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(sd_cache_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -762,9 +806,10 @@ void initUI() {
     lv_obj_t * sd_cache_label = lv_label_create(sd_cache_row);
     lv_label_set_text(sd_cache_label, "SD Cache");
     lv_obj_set_style_text_color(sd_cache_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(sd_cache_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * sd_cache_sw = lv_switch_create(sd_cache_row);
-    lv_obj_set_size(sd_cache_sw, 40, 20);
+    lv_obj_set_size(sd_cache_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -779,7 +824,8 @@ void initUI() {
 
     // Screenshot Server row
     lv_obj_t * scr_row = lv_obj_create(left_col);
-    lv_obj_set_size(scr_row, 144, 22);
+    lv_obj_clear_flag(scr_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(scr_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(scr_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(scr_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(scr_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -790,9 +836,10 @@ void initUI() {
     lv_obj_t * scr_label = lv_label_create(scr_row);
     lv_label_set_text(scr_label, "API Srv");
     lv_obj_set_style_text_color(scr_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(scr_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * scr_sw = lv_switch_create(scr_row);
-    lv_obj_set_size(scr_sw, 40, 20);
+    lv_obj_set_size(scr_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -803,7 +850,8 @@ void initUI() {
 
     // Screensaver row
     lv_obj_t * saver_row = lv_obj_create(left_col);
-    lv_obj_set_size(saver_row, 144, 22);
+    lv_obj_clear_flag(saver_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(saver_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(saver_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(saver_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(saver_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -814,9 +862,10 @@ void initUI() {
     lv_obj_t * saver_label = lv_label_create(saver_row);
     lv_label_set_text(saver_label, "Scr Saver");
     lv_obj_set_style_text_color(saver_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(saver_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * saver_sw = lv_switch_create(saver_row);
-    lv_obj_set_size(saver_sw, 40, 20);
+    lv_obj_set_size(saver_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -827,7 +876,8 @@ void initUI() {
 
     // MQTT row
     lv_obj_t * mqtt_row = lv_obj_create(left_col);
-    lv_obj_set_size(mqtt_row, 144, 22);
+    lv_obj_clear_flag(mqtt_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(mqtt_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(mqtt_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(mqtt_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(mqtt_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -838,9 +888,10 @@ void initUI() {
     lv_obj_t * mqtt_label = lv_label_create(mqtt_row);
     lv_label_set_text(mqtt_label, "MQTT");
     lv_obj_set_style_text_color(mqtt_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(mqtt_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * mqtt_sw = lv_switch_create(mqtt_row);
-    lv_obj_set_size(mqtt_sw, 40, 20);
+    lv_obj_set_size(mqtt_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -857,10 +908,11 @@ void initUI() {
     snprintf(slider_buf, sizeof(slider_buf), "Bright: %d%%", settings.getBrightness());
     lv_label_set_text(slider_label, slider_buf);
     lv_obj_set_style_text_color(slider_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(slider_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     // Brightness slider — suppress thumb padding so it doesn't bloat height
     lv_obj_t * brightness_slider = lv_slider_create(right_col);
-    lv_obj_set_size(brightness_slider, 136, 14);
+    lv_obj_set_size(brightness_slider, lv_pct(92), 14);
     lv_obj_set_style_pad_top(brightness_slider, 4, LV_PART_KNOB);
     lv_obj_set_style_pad_bottom(brightness_slider, 4, LV_PART_KNOB);
     // Slider track (unfilled)
@@ -878,7 +930,8 @@ void initUI() {
 
     // LED row
     lv_obj_t * led_row = lv_obj_create(left_col);
-    lv_obj_set_size(led_row, 144, 22);
+    lv_obj_clear_flag(led_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(led_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(led_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(led_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(led_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -889,6 +942,7 @@ void initUI() {
     lv_obj_t * led_label_txt = lv_label_create(led_row);
     lv_label_set_text(led_label_txt, "LED");
     lv_obj_set_style_text_color(led_label_txt, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(led_label_txt, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     // --- right column LED Brightness label + slider (created first so we can pass as user_data) ---
     lv_obj_t * led_slider_label = lv_label_create(right_col);
@@ -897,9 +951,10 @@ void initUI() {
     snprintf(led_slider_buf, sizeof(led_slider_buf), "LED: %d%%", led_bright_pct);
     lv_label_set_text(led_slider_label, led_slider_buf);
     lv_obj_set_style_text_color(led_slider_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(led_slider_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * led_brightness_slider = lv_slider_create(right_col);
-    lv_obj_set_size(led_brightness_slider, 136, 14);
+    lv_obj_set_size(led_brightness_slider, lv_pct(92), 14);
     lv_obj_set_style_pad_top(led_brightness_slider, 4, LV_PART_KNOB);
     lv_obj_set_style_pad_bottom(led_brightness_slider, 4, LV_PART_KNOB);
     lv_obj_set_style_bg_color(led_brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -914,7 +969,7 @@ void initUI() {
 
     // --- LED enable switch (created after slider so slider can be passed as user_data) ---
     lv_obj_t * led_sw = lv_switch_create(led_row);
-    lv_obj_set_size(led_sw, 40, 20);
+    lv_obj_set_size(led_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -925,7 +980,7 @@ void initUI() {
 
     // Auto switch (created after slider so we can pass slider as user_data)
     lv_obj_t * auto_sw = lv_switch_create(auto_row);
-    lv_obj_set_size(auto_sw, 40, 20);
+    lv_obj_set_size(auto_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
@@ -938,10 +993,12 @@ void initUI() {
     lv_obj_t * tz_label = lv_label_create(right_col);
     lv_label_set_text(tz_label, "Timezone");
     lv_obj_set_style_text_color(tz_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(tz_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     // Timezone +/- row
     lv_obj_t * tz_row = lv_obj_create(right_col);
-    lv_obj_set_size(tz_row, 148, 30);
+    lv_obj_clear_flag(tz_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(tz_row, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(tz_row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(tz_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(tz_row, LV_OPA_TRANSP, LV_PART_MAIN);
@@ -969,6 +1026,7 @@ void initUI() {
     }
     lv_label_set_text(tz_val_label, tz_buf);
     lv_obj_set_style_text_color(tz_val_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+    lv_obj_set_style_text_font(tz_val_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * tz_plus_btn = lv_btn_create(tz_row);
     lv_obj_set_size(tz_plus_btn, 30, 24);
@@ -982,7 +1040,7 @@ void initUI() {
 
     // Theme selector dropdown
     lv_obj_t * theme_dropdown = lv_dropdown_create(right_col);
-    lv_obj_set_size(theme_dropdown, 148, 26);
+    lv_obj_set_size(theme_dropdown, lv_pct(92), 26);
     lv_dropdown_set_options(theme_dropdown, "Mocha\nMacchiato\nFrappe\nLatte");
     lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
     lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
@@ -1001,7 +1059,7 @@ void initUI() {
 
     // Orientation selector dropdown
     lv_obj_t * orientation_dropdown = lv_dropdown_create(right_col);
-    lv_obj_set_size(orientation_dropdown, 148, 26);
+    lv_obj_set_size(orientation_dropdown, lv_pct(92), 26);
     lv_dropdown_set_options(orientation_dropdown, "Landscape\nPortrait\nLandscape Rev\nPortrait Rev");
     int initial_rot = settings.getScreenOrientation();
     if (initial_rot >= 0 && initial_rot < 4) {
