@@ -14,13 +14,14 @@ jobs:
     strategy:
       matrix:
         env:
-          - esp32dev
+          - cyd_28r
+          - cyd_35c
     runs-on: ubuntu-latest
 
     steps:
       - name: "Create filename"
         run: |
-          VAR="cyn-weather-station-${{ github.ref_name }}-${{ matrix.env }}"
+          VAR="cyd-weather-station-${{ github.ref_name }}-${{ matrix.env }}"
           echo "BASENAME=${VAR,,}" >> $GITHUB_ENV
 
       - name: "Checkout repository"
@@ -90,7 +91,7 @@ jobs:
       - name: "Download all artifacts"
         uses: actions/download-artifact@v4
         with:
-          pattern: "cyn-weather-station-*"
+          pattern: "cyd-weather-station-*"
           path: dist
                   
       - name: "Create Draft Release"

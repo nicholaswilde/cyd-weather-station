@@ -1,7 +1,24 @@
 ---
 version: '3'
 
+dotenv: ['.env']
+
+vars:
+  PIO_ENV: '{{.PIO_ENV | default "cyd_28r"}}'
+
 tasks:
+  init:
+    desc: Initialize project environment file and secrets
+    status:
+      - test -f .env
+      - test -f config/secrets.h
+    preconditions:
+      - test -f .env.example
+      - test -f config/secrets.h.example
+    cmds:
+      - cp .env.example .env
+      - cp config/secrets.h.example config/secrets.h
+
   coverage:report:
     desc: Show coverage report
     cmds:
@@ -11,58 +28,92 @@ tasks:
       - defer: rm lcov.info
       
   coverage:upload:
-      desc: Generate and upload coverage report to Coveralls.io
-      dotenv: ['.env']
-      preconditions:
-        - sh: 'test -n "$COVERALLS_REPO_TOKEN"'
-          msg: "COVERALLS_REPO_TOKEN is not set. Please add it to your .env file."
-      cmds:
-        # 1. Run native tests to output coverage data
-        - task: test
-          ignore_error: true
-        # 2. Extract and capture raw code coverage reports
-        - lcov --capture --base-directory . --directory .pio/build/native/ --output-file lcov_raw.info --rc branch_coverage=1 --ignore-errors "gcov,source"
-        # 3. Clean up the report by filtering out system and test files
-        - lcov --remove lcov_raw.info '*/.pio/*' '*/tests/*' '*/tests/mocks/*' '/usr/*' -o lcov.info --rc branch_coverage=1 --ignore-errors source
-        # 4. Upload to coveralls using the CLI binary
-        - coveralls report lcov.info -n -r $COVERALLS_REPO_TOKEN
-        # 5. Clean up temporary local files
-        - defer: rm lcov_raw.info lcov.info
-      # ignore_errors: true
+    desc: Generate and upload coverage report to Coveralls.io
+    dotenv: ['.env']
+    preconditions:
+      - sh: 'test -n "$COVERALLS_REPO_TOKEN"'
+        msg: "COVERALLS_REPO_TOKEN is not set. Please add it to your .env file."
+    cmds:
+      # 1. Run native tests to output coverage data
+      - task: test
+        ignore_error: true
+      # 2. Extract and capture raw code coverage reports
+      - lcov --capture --base-directory . --directory .pio/build/native/ --output-file lcov_raw.info --rc branch_coverage=1 --ignore-errors "gcov,source"
+      # 3. Clean up the report by filtering out system and test files
+      - lcov --remove lcov_raw.info '*/.pio/*' '*/tests/*' '*/tests/mocks/*' '/usr/*' -o lcov.info --rc branch_coverage=1 --ignore-errors source
+      # 4. Upload to coveralls using the CLI binary
+      - coveralls report lcov.info -n -r $COVERALLS_REPO_TOKEN
+      # 5. Clean up temporary local files
+      - defer: rm lcov_raw.info lcov.info
     
   screenshots:
-      desc: Capture all screenshots from the ESP32 CYD board
-      dotenv: ['.env']
-      preconditions:
-        - sh: 'test -n "$CYD_DEVICE_IP"'
-          msg: "CYD_DEVICE_IP is not set. Please add it to your .env file."
-      cmds:
-        - bash ./scripts/capture-screenshots.sh $CYD_DEVICE_IP
+    desc: Capture all screenshots from the ESP32 CYD board
+    dotenv: ['.env']
+    preconditions:
+      - sh: 'test -n "$CYD_DEVICE_IP"'
+        msg: "CYD_DEVICE_IP is not set. Please add it to your .env file."
+    cmds:
+      - bash ./scripts/capture-screenshots.sh $CYD_DEVICE_IP
+
   eau:
     desc: Erase and upload
     cmds:
-      - pio run -t erase -t upload
+      - pio run -e {{.PIO_ENV}} -t erase -t upload
+
+  eau:cyd_28r:
+    desc: Erase and upload for cyd_28r
+    cmds:
+      - pio run -e cyd_28r -t erase -t upload
+
+  eau:cyd_35c:
+    desc: Erase and upload for cyd_35c
+    cmds:
+      - pio run -e cyd_35c -t erase -t upload
 
   uam:
     desc: Upload and monitor
     cmds:
-      - pio run -t upload -t monitor
-  init:
-    desc: Initialize the project
-    preconditions:
-      - test -f config/secrets.h.example
+      - pio run -e {{.PIO_ENV}} -t upload -t monitor
+
+  uam:cyd_28r:
+    desc: Upload and monitor for cyd_28r
     cmds:
-      - cp config/secrets.h.example config/secrets.h
+      - pio run -e cyd_28r -t upload -t monitor
+
+  uam:cyd_35c:
+    desc: Upload and monitor for cyd_35c
+    cmds:
+      - pio run -e cyd_35c -t upload -t monitor
 
   build:
     desc: Build the firmware
     cmds:
-      - pio run
+      - pio run -e {{.PIO_ENV}}
+
+  build:cyd_28r:
+    desc: Build firmware for cyd_28r
+    cmds:
+      - pio run -e cyd_28r
+
+  build:cyd_35c:
+    desc: Build firmware for cyd_35c
+    cmds:
+      - pio run -e cyd_35c
 
   upload:
     desc: Upload the firmware to the ESP32 CYD board
     cmds:
-      - pio run --target upload
+      - pio run -e {{.PIO_ENV}} --target upload
+
+  upload:cyd_28r:
+    desc: Upload firmware for cyd_28r
+    cmds:
+      - pio run -e cyd_28r --target upload
+
+  upload:cyd_35c:
+    desc: Upload firmware for cyd_35c
+    cmds:
+      - pio run -e cyd_35c --target upload
 
   monitor:
     desc: Start the serial monitor
@@ -77,17 +128,47 @@ tasks:
   check:
     desc: Run static code analysis / linting
     cmds:
-      - pio check
+      - pio check -e {{.PIO_ENV}}
+
+  check:cyd_28r:
+    desc: Run static code analysis / linting for cyd_28r
+    cmds:
+      - pio check -e cyd_28r
+
+  check:cyd_35c:
+    desc: Run static code analysis / linting for cyd_35c
+    cmds:
+      - pio check -e cyd_35c
 
   clean:
     desc: Clean build files
     cmds:
-      - pio run --target clean
+      - pio run -e {{.PIO_ENV}} --target clean
+
+  clean:cyd_28r:
+    desc: Clean build files for cyd_28r
+    cmds:
+      - pio run -e cyd_28r --target clean
+
+  clean:cyd_35c:
+    desc: Clean build files for cyd_35c
+    cmds:
+      - pio run -e cyd_35c --target clean
 
   erase:
     desc: Erase the ESP32 flash memory (clears all saved settings)
     cmds:
-      - pio run --target erase
+      - pio run -e {{.PIO_ENV}} --target erase
+
+  erase:cyd_28r:
+    desc: Erase flash memory for cyd_28r
+    cmds:
+      - pio run -e cyd_28r --target erase
+
+  erase:cyd_35c:
+    desc: Erase flash memory for cyd_35c
+    cmds:
+      - pio run -e cyd_35c --target erase
 
   setup:node:
     desc: Install Node.js dependencies for font generation
@@ -100,6 +181,7 @@ tasks:
     cmds:
       - npm run font:generate
       - npm run font:generate:24
+      - npm run font:generate:72
 
   default:
     cmds:

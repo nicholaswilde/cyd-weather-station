@@ -18,7 +18,8 @@ jobs:
     strategy:
       matrix:
         env:
-          - esp32dev
+          - cyd_28r
+          - cyd_35c
     steps:
       - uses: actions/checkout@v4
         with:
