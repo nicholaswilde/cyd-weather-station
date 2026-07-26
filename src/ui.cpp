@@ -4,6 +4,7 @@
 #include "settings_manager.h"
 #include "sd_card_manager.h"
 #include "screensaver_manager.h"
+#include "version.h"
 #include <WiFi.h>
 
 extern "C" {
@@ -346,7 +347,11 @@ void initUI() {
 
     // Header Title (Time/App Name)
     header_title = lv_label_create(header);
+#ifdef APP_VERSION
+    lv_label_set_text(header_title, isLandscape ? "CYD Weather Station " APP_VERSION : "CYD Weather\nStation " APP_VERSION);
+#else
     lv_label_set_text(header_title, isLandscape ? "CYD Weather Station" : "CYD Weather\nStation");
+#endif
     lv_obj_set_style_text_color(header_title, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
     lv_obj_align(header_title, LV_ALIGN_LEFT_MID, 10, 0);
     lv_label_set_long_mode(header_title, LV_LABEL_LONG_DOT);

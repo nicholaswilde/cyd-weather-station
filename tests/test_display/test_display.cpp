@@ -1,6 +1,7 @@
 #include <unity.h>
 #include "../mocks/mocks.cpp"
 #include "display.h"
+#include "../../src/touch_manager.cpp"
 #include "../../src/display.cpp"
 #include "../../src/screenshot_manager.cpp"
 
