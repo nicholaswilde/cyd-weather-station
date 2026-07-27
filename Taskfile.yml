@@ -65,10 +65,20 @@ tasks:
     cmds:
       - pio run -e cyd_28r -t erase -t upload
 
+  eau:cyd_28r_inv:
+    desc: Erase and upload for cyd_28r_inv
+    cmds:
+      - pio run -e cyd_28r_inv -t erase -t upload
+
   eau:cyd_35c:
     desc: Erase and upload for cyd_35c
     cmds:
       - pio run -e cyd_35c -t erase -t upload
+
+  eau:cyd_35c_inv:
+    desc: Erase and upload for cyd_35c_inv
+    cmds:
+      - pio run -e cyd_35c_inv -t erase -t upload
 
   uam:
     desc: Upload and monitor
@@ -80,10 +90,20 @@ tasks:
     cmds:
       - pio run -e cyd_28r -t upload -t monitor
 
+  uam:cyd_28r_inv:
+    desc: Upload and monitor for cyd_28r_inv
+    cmds:
+      - pio run -e cyd_28r_inv -t upload -t monitor
+
   uam:cyd_35c:
     desc: Upload and monitor for cyd_35c
     cmds:
       - pio run -e cyd_35c -t upload -t monitor
+
+  uam:cyd_35c_inv:
+    desc: Upload and monitor for cyd_35c_inv
+    cmds:
+      - pio run -e cyd_35c_inv -t upload -t monitor
 
   build:
     desc: Build the firmware
@@ -95,10 +115,20 @@ tasks:
     cmds:
       - pio run -e cyd_28r
 
+  build:cyd_28r_inv:
+    desc: Build firmware for cyd_28r_inv
+    cmds:
+      - pio run -e cyd_28r_inv
+
   build:cyd_35c:
     desc: Build firmware for cyd_35c
     cmds:
       - pio run -e cyd_35c
+
+  build:cyd_35c_inv:
+    desc: Build firmware for cyd_35c_inv
+    cmds:
+      - pio run -e cyd_35c_inv
 
   upload:
     desc: Upload the firmware to the ESP32 CYD board
@@ -110,10 +140,20 @@ tasks:
     cmds:
       - pio run -e cyd_28r --target upload
 
+  upload:cyd_28r_inv:
+    desc: Upload firmware for cyd_28r_inv
+    cmds:
+      - pio run -e cyd_28r_inv --target upload
+
   upload:cyd_35c:
     desc: Upload firmware for cyd_35c
     cmds:
       - pio run -e cyd_35c --target upload
+
+  upload:cyd_35c_inv:
+    desc: Upload firmware for cyd_35c_inv
+    cmds:
+      - pio run -e cyd_35c_inv --target upload
 
   monitor:
     desc: Start the serial monitor
@@ -135,10 +175,20 @@ tasks:
     cmds:
       - pio check -e cyd_28r
 
+  check:cyd_28r_inv:
+    desc: Run static code analysis / linting for cyd_28r_inv
+    cmds:
+      - pio check -e cyd_28r_inv
+
   check:cyd_35c:
     desc: Run static code analysis / linting for cyd_35c
     cmds:
       - pio check -e cyd_35c
+
+  check:cyd_35c_inv:
+    desc: Run static code analysis / linting for cyd_35c_inv
+    cmds:
+      - pio check -e cyd_35c_inv
 
   clean:
     desc: Clean build files
@@ -150,10 +200,20 @@ tasks:
     cmds:
       - pio run -e cyd_28r --target clean
 
+  clean:cyd_28r_inv:
+    desc: Clean build files for cyd_28r_inv
+    cmds:
+      - pio run -e cyd_28r_inv --target clean
+
   clean:cyd_35c:
     desc: Clean build files for cyd_35c
     cmds:
       - pio run -e cyd_35c --target clean
+
+  clean:cyd_35c_inv:
+    desc: Clean build files for cyd_35c_inv
+    cmds:
+      - pio run -e cyd_35c_inv --target clean
 
   erase:
     desc: Erase the ESP32 flash memory (clears all saved settings)
@@ -165,10 +225,20 @@ tasks:
     cmds:
       - pio run -e cyd_28r --target erase
 
+  erase:cyd_28r_inv:
+    desc: Erase flash memory for cyd_28r_inv
+    cmds:
+      - pio run -e cyd_28r_inv --target erase
+
   erase:cyd_35c:
     desc: Erase flash memory for cyd_35c
     cmds:
       - pio run -e cyd_35c --target erase
+
+  erase:cyd_35c_inv:
+    desc: Erase flash memory for cyd_35c_inv
+    cmds:
+      - pio run -e cyd_35c_inv --target erase
 
   setup:node:
     desc: Install Node.js dependencies for font generation

@@ -298,6 +298,39 @@ Weather icons use Erik Flowers' Weather Icons font converted to LVGL C source vi
 | **Generate Font** | `task font:generate` | `npm run font:generate` | Rebuilds the weather icons C source from TTF. |
 | **Clean** | `task clean` | `pio run --target clean` | Removes build output and temp files. |
 
+## :wrench: Troubleshooting
+
+If you encounter any issues with your screen or the software, please review the solutions below or [create an issue](https://github.com/nicholaswilde/cyd-weather-station/issues) on GitHub if you are still stuck.
+
+### Inverted Colors
+If the colors on your display appear inverted, this is a common issue with some batches of the CYD TFT screens. You can easily resolve it by:
+- Flashing the pre-compiled `_inv` releases (e.g. `cyd-weather-station-v0.1.7-cyd_28r_inv.zip` or `cyd_35c_inv.zip`).
+- Or, if building from source, using the `cyd_28r_inv` or `cyd_35c_inv` PlatformIO environments. These environments automatically enable the `TFT_INVERSION_ON=1` build flag.
+
+### RGB / BGR Swap
+If your screen has red and blue colors swapped, it means the display expects a BGR color order instead of RGB. A dedicated release is not currently provided for this variation, but you can fix it by building from source: simply append `-D TFT_RGB_ORDER=TFT_BGR` to your environment's `build_flags` in `platformio.ini`.
+
+### Touch Calibration (Resistive Screens)
+The 2.8" version (`cyd_28r`) uses a resistive touch layer which can sometimes be misaligned or mapped to inverted coordinates depending on the batch. If touches are registering in the wrong place, you may need to run a touch calibration sketch to determine the correct offsets for your specific screen.
+
+### Backlight Pin and Polarity Differences
+If your screen is completely black but the board seems to be running, it might be a backlight pin mapping issue. While most boards use GPIO 21 or 27 for the backlight (`TFT_BL`), some obscure batches might map it differently. Furthermore, some boards require `TFT_BACKLIGHT_ON=LOW` instead of `HIGH`. 
+
+### Different Driver Chips
+Most 2.8" screens use the `ILI9341` driver. However, occasionally manufacturers substitute it with an `ST7789V` driver without changing the board's appearance. This will result in a completely blank or noisy screen until you change the driver flag in your `platformio.ini` from `-D ILI9341_DRIVER=1` to `-D ST7789_DRIVER=1`.
+
+### SD Card Formatting
+The CYD board can be picky about SD cards. If you encounter a "Failed to initialize SD card" error:
+- Ensure the microSD card is formatted as **FAT32** (not exFAT).
+- Try to use an SD card that is 32GB or smaller.
+- Ensure it is inserted fully before booting the device.
+
+### Power Delivery Glitches
+Intermittent touch issues, screen flickering, or spontaneous reboots are frequently caused by inadequate power. Ensure you are using a high-quality USB power supply and a good USB cable that can supply the burst current the ESP32 and backlight need simultaneously.
+
+### Audio Output / DAC Pins
+If you ever intend to use the speaker connector on the back, be aware that the DAC pin mapping changes between board revisions. Sometimes it's mapped to GPIO 25, and sometimes GPIO 26.
+
 ## :balance_scale: License
 
 [Apache License 2.0](LICENSE)
