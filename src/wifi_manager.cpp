@@ -281,13 +281,14 @@ void WifiManager::handleRoot() {
         }
         WiFi.scanDelete();
     } else if (scanStatus == WIFI_SCAN_FAILED) {
+        WiFi.scanNetworks(true, false, false, 150);
         if (_cachedNetworksHTML.length() == 0 || _cachedNetworksHTML.indexOf("Scanning in progress") != -1) {
-            _cachedNetworksHTML = "<div class='net-item' style='color: #a6adc8;'>No networks found</div>";
+            _cachedNetworksHTML = "<div class='net-item' style='color: #a6adc8;'>Scanning in progress... Please refresh.</div>";
         }
     }
 
     String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
-    if (scanStatus == WIFI_SCAN_RUNNING) {
+    if (scanStatus == WIFI_SCAN_RUNNING || scanStatus == WIFI_SCAN_FAILED) {
         html += "<meta http-equiv='refresh' content='3'>";
     }
     html += "<title>CYD Weather Station Setup</title>";
