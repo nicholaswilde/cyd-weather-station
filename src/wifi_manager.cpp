@@ -65,11 +65,17 @@ void WifiManager::begin() {
     });
 #endif
     WiFi.mode(WIFI_STA);
-    configureStaticIP();
-    WiFi.begin(_ssid.c_str(), _password.c_str());
-    _state = WIFI_STATE_CONNECTING;
-    _connectionStartTime = millis();
-    Serial.printf("[WiFi] Connecting to %s...\n", _ssid.c_str());
+    
+    if (_ssid.length() == 0) {
+        Serial.println("[WiFi] No credentials configured. Launching AP mode directly...");
+        startAPMode();
+    } else {
+        configureStaticIP();
+        WiFi.begin(_ssid.c_str(), _password.c_str());
+        _state = WIFI_STATE_CONNECTING;
+        _connectionStartTime = millis();
+        Serial.printf("[WiFi] Connecting to %s...\n", _ssid.c_str());
+    }
 }
 
 void WifiManager::update() {
@@ -231,9 +237,8 @@ void WifiManager::startAPMode() {
     WiFi.softAP(apSSID.c_str(), apPass);
     delay(200);
 
-    // Start async scan now that softAP is active and settled
+    // Wait for the captive portal to trigger the scan
     _cachedNetworksHTML = "<div class='net-item' style='color: #a6adc8;'>Scanning in progress... Please refresh.</div>";
-    WiFi.scanNetworks(true, false, false, 150);
 
     _dnsServer = new DNSServer();
     _dnsServer->setErrorReplyCode(DNSReplyCode::NoError);
