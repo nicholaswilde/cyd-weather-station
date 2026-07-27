@@ -5,15 +5,24 @@ Import("env")
 
 def get_git_version():
     try:
-        result = subprocess.run(
-            ["git", "describe", "--dirty", "--always", "--tags"],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        return result.stdout.strip()
+        # Check if we are in a git repository
+        if os.path.exists(os.path.join(env.subst("$PROJECT_DIR"), ".git")):
+            result = subprocess.run(
+                ["git", "describe", "--dirty", "--always", "--tags"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return result.stdout.strip()
     except Exception as e:
         print(f"Git version check failed: {e}")
+        
+    # Fallback to reading version.txt (e.g. for users downloading the source ZIP)
+    try:
+        version_file = os.path.join(env.subst("$PROJECT_DIR"), "version.txt")
+        with open(version_file, "r") as f:
+            return f.read().strip()
+    except Exception:
         return "unknown"
 
 firmware_version = get_git_version()
