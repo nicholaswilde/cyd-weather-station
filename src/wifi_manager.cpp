@@ -53,6 +53,16 @@ void WifiManager::begin() {
 #ifndef NATIVE_TEST
     WiFi.setAutoReconnect(true);
     WiFi.setTxPower(WIFI_POWER_11dBm);
+
+    _improv = new ImprovWiFi(&Serial);
+    _improv->setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32, "CYD-Weather-Station", "1.0", "CYD Weather Station", "http://{LOCAL_IPV4}");
+    _improv->onImprovConnected([](const char *ssid, const char *password) {
+        Serial.printf("\n[WiFi] Improv provisioned: %s\n", ssid);
+        settings.setWifiSSID(String(ssid));
+        settings.setWifiPassword(String(password));
+        delay(500);
+        ESP.restart();
+    });
 #endif
     WiFi.mode(WIFI_STA);
     configureStaticIP();
@@ -63,6 +73,11 @@ void WifiManager::begin() {
 }
 
 void WifiManager::update() {
+#ifndef NATIVE_TEST
+    if (_improv) {
+        _improv->handleSerial();
+    }
+#endif
     wl_status_t status = WiFi.status();
 
     switch (_state) {

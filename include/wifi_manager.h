@@ -6,6 +6,7 @@
 #ifndef NATIVE_TEST
 #include <DNSServer.h>
 #include <WebServer.h>
+#include <ImprovWiFiLibrary.h>
 #endif
 
 enum WifiState {
@@ -45,6 +46,7 @@ private:
 #ifndef NATIVE_TEST
     DNSServer* _dnsServer = nullptr;
     WebServer* _webServer = nullptr;
+    ImprovWiFi* _improv = nullptr;
     void startScreenshotServer();
     void stopScreenshotServer();
     void handleScreenshot();
