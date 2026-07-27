@@ -287,6 +287,9 @@ void WifiManager::handleRoot() {
     }
 
     String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+    if (scanStatus == WIFI_SCAN_RUNNING) {
+        html += "<meta http-equiv='refresh' content='3'>";
+    }
     html += "<title>CYD Weather Station Setup</title>";
     html += "<style>";
     html += "body { font-family: 'Inter', system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }";
