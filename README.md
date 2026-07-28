@@ -271,6 +271,10 @@ All settings below are configured by touch on the device and saved to flash:
 
 The CYD Weather Station uses POSIX timezone strings to natively handle Daylight Saving Time (DST) changes. You can configure this via the device UI, the Wi-Fi Captive Portal, or pre-configure the default in `config.h`.
 
+> [!NOTE]
+> **Why POSIX strings instead of timezone names?**
+> The ESP32's C library natively parses POSIX strings to calculate local time and DST transitions. It does *not* include the massive IANA timezone database (tzdata) required to map names like `America/New_York` to offsets. Sticking to POSIX strings avoids embedding a bloated lookup table into flash memory, keeping the firmware extremely efficient.
+
 For a comprehensive list of POSIX timezone strings for all regions, see the [IBM POSIX Timezone Reference](https://www.ibm.com/docs/en/aix/7.2?topic=concepts-posix-time-zone-format) or community-maintained lists like [this Gist](https://gist.github.com/alwynallan/24d96091655391107939).
 
 The device UI Settings tab allows cycling through the following common presets:
