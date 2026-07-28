@@ -64,7 +64,9 @@ jobs:
         run: pio run --environment ${{ matrix.env }}
 
       - name: "Zip binaries"
-        run: zip -j ${{ env.BASENAME }}.zip .pio/build/${{ matrix.env }}/*.bin
+        run: |
+          zip -j ${{ env.BASENAME }}.zip .pio/build/${{ matrix.env }}/*.bin README.md LICENSE version.txt
+          zip ${{ env.BASENAME }}.zip scripts/prepare_images.py scripts/flash.sh
 
       # - name: Debug Environment Variable
       #   run: |
