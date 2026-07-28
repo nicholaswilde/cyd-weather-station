@@ -56,12 +56,30 @@ void WifiManager::begin() {
 
     _improv = new ImprovWiFi(&Serial);
     _improv->setDeviceInfo(ImprovTypes::ChipFamily::CF_ESP32, "CYD-Weather-Station", "1.0", "CYD Weather Station", "http://{LOCAL_IPV4}");
+    
+    _improv->setCustomConnectWiFi([](const char *ssid, const char *password) {
+        Serial.printf("\n[WiFi] Improv connecting to %s...\n", ssid);
+        // Turn off AP mode to speed up STA connection and avoid channel conflicts
+        WiFi.softAPdisconnect(true);
+        WiFi.mode(WIFI_STA);
+        WiFi.disconnect();
+        delay(100);
+        
+        WiFi.begin(ssid, password);
+        int attempts = 0;
+        // Wait up to 8 seconds (16 * 500ms) to prevent browser RPC timeout (usually 10s)
+        while (WiFi.status() != WL_CONNECTED && attempts < 16) { 
+            delay(500);
+            attempts++;
+        }
+        return WiFi.status() == WL_CONNECTED;
+    });
+
     _improv->onImprovConnected([](const char *ssid, const char *password) {
-        Serial.printf("\n[WiFi] Improv provisioned: %s\n", ssid);
+        Serial.printf("\n[WiFi] Improv provisioned successfully!\n");
         settings.setWifiSSID(String(ssid));
         settings.setWifiPassword(String(password));
-        delay(500);
-        ESP.restart();
+        // No need to restart; WifiManager::update() handles the state transition to WIFI_STATE_CONNECTED
     });
 #endif
     WiFi.mode(WIFI_STA);
