@@ -258,13 +258,38 @@ All settings below are configured by touch on the device and saved to flash:
 | **Auto Light** | Enable/disable LDR-driven automatic backlight control. |
 | **Brightness** | Manual backlight level slider (disabled when Auto Light is on). |
 | **Theme** | Catppuccin flavor selector — Mocha / Macchiato / Frappé / Latte. Full UI redraws on change. |
-| **Timezone** | GMT offset (– / + buttons, range –12 to +14). |
-| **DST** | Toggle Daylight Saving Time on/off (adds 1 hour to NTP offset when enabled). |
+| **Timezone** | POSIX timezone selector (– / + buttons) to automatically handle DST offsets. |
 | **SD Log** | Toggle SD card weather logging. Disabled automatically if no card is inserted. |
 | **SD Cache** | Toggle SD card weather caching. |
 | **API Srv** | Toggle the remote screenshot & configuration HTTP API server on/off. |
 | **Scr Saver** | Toggle the screensaver on/off. |
 | **MQTT** | Toggle publishing weather variables to MQTT topics. |
+
+---
+
+### POSIX Timezone Configuration
+
+The CYD Weather Station uses POSIX timezone strings to natively handle Daylight Saving Time (DST) changes. You can configure this via the device UI, the Wi-Fi Captive Portal, or pre-configure the default in `config.h`.
+
+For a comprehensive list of POSIX timezone strings for all regions, see the [IBM POSIX Timezone Reference](https://www.ibm.com/docs/en/aix/7.2?topic=concepts-posix-time-zone-format) or community-maintained lists like [this Gist](https://gist.github.com/alwynallan/24d96091655391107939).
+
+The device UI Settings tab allows cycling through the following common presets:
+
+| Region | Preset Display | POSIX String |
+| :--- | :--- | :--- |
+| **UTC** | UTC | `UTC0` |
+| **London** | London | `GMT0BST,M3.5.0/1,M10.5.0` |
+| **Central Europe** | CET | `CET-1CEST,M3.5.0,M10.5.0/3` |
+| **Eastern Europe** | EET | `EET-2EEST,M3.5.0/3,M10.5.0/4` |
+| **US Eastern** | US East | `EST5EDT,M3.2.0,M11.1.0` |
+| **US Central** | US Central | `CST6CDT,M3.2.0,M11.1.0` |
+| **US Mountain** | US Mount. | `MST7MDT,M3.2.0,M11.1.0` |
+| **US Pacific** | US Pacific | `PST8PDT,M3.2.0,M11.1.0` |
+| **US Alaska** | US Alaska | `AKST9AKDT,M3.2.0,M11.1.0` |
+| **US Hawaii** | US Hawaii | `HST10` |
+| **AU Eastern** | AU East | `AEST-10AEDT,M10.1.0,M4.1.0/3` |
+| **AU Central** | AU Central | `ACST-9:30ACDT,M10.1.0,M4.1.0/3` |
+| **AU Western** | AU West | `AWST-8` |
 
 ---
 
