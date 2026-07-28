@@ -27,7 +27,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Catppuccin Theme Flavor**: Choose between Mocha, Macchiato, Frappé, or Latte — the full UI redraws instantly in the selected palette.
   - **Auto Brightness**: Toggle automatic backlight dimming/brightening driven by the onboard LDR light sensor (GPIO 34).
   - **Manual Brightness**: Slider to set a fixed screen brightness level (when Auto is off).
-  - **Timezone Offset**: `–` / `+` buttons to set a GMT offset (–12 to +14) for the NTP clock.
+  - **Timezone**: `–` / `+` buttons to cycle through common POSIX timezone presets for automatic DST handling.
   - **SD Log**: Enable/disable weather logging to a microSD card.
   - **SD Cache**: Enable/disable weather caching to a microSD card (restores UI offline).
   - **Screenshot Server**: Enable/disable the remote screenshot HTTP server.
@@ -35,7 +35,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Screensaver**: Enable/disable screensaver mode (dims backlight and displays clock after inactivity).
   - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks, header height dynamically increases to 60px in portrait to fit a wrapped two-line title without overlaps, and touch coordinates update instantly.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
-- **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured timezone offset.
+- **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured POSIX timezone.
 - **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
 - **Improv Wi-Fi Serial Provisioning**: Configure Wi-Fi credentials directly over a serial connection using the [Improv Wi-Fi](https://www.improv-wifi.com/) standard.
 - **Wi-Fi AP Captive Portal Fallback**:
