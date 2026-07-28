@@ -6,8 +6,7 @@ SettingsManager::SettingsManager() {
     _unitSystem = UNIT_SYSTEM;
     _brightness = 80;
     _autoBrightness = USE_LDR_AUTO_BACKLIGHT;
-    _timezoneOffset = GMT_OFFSET_SEC / 3600;
-    _dstEnabled = (DST_OFFSET_SEC > 0);
+    _timezone = TIMEZONE_DEFAULT;
     _themeFlavor = CATPPUCCIN_MOCHA;
     _sdLoggingEnabled = USE_SD_LOGGING;
     _screenshotServerEnabled = API_SERVER_ENABLED;
@@ -31,8 +30,7 @@ void SettingsManager::begin() {
     _unitSystem = prefs.getInt("unit", UNIT_SYSTEM);
     _brightness = prefs.getInt("bright", 80);
     _autoBrightness = prefs.getBool("auto_bright", USE_LDR_AUTO_BACKLIGHT);
-    _timezoneOffset = prefs.getInt("tz_offset", GMT_OFFSET_SEC / 3600);
-    _dstEnabled = prefs.getBool("dst_enabled", DST_OFFSET_SEC > 0);
+    _timezone = prefs.getString("tz", TIMEZONE_DEFAULT);
     _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
     _sdLoggingEnabled = prefs.getBool("sd_log", USE_SD_LOGGING);
     _screenshotServerEnabled = prefs.getBool("scr_srv", API_SERVER_ENABLED);
@@ -96,33 +94,16 @@ void SettingsManager::setAutoBrightness(bool autoBrightness) {
     }
 }
 
-int SettingsManager::getTimezoneOffset() const {
-    return _timezoneOffset;
+String SettingsManager::getTimezone() const {
+    return _timezone;
 }
 
-void SettingsManager::setTimezoneOffset(int offset) {
-    if (offset < -12) offset = -12;
-    if (offset > 14) offset = 14;
-
-    if (_timezoneOffset != offset) {
-        _timezoneOffset = offset;
+void SettingsManager::setTimezone(const String& timezone) {
+    if (_timezone != timezone) {
+        _timezone = timezone;
         Preferences prefs;
         prefs.begin("settings", false);
-        prefs.putInt("tz_offset", _timezoneOffset);
-        prefs.end();
-    }
-}
-
-bool SettingsManager::getDstEnabled() const {
-    return _dstEnabled;
-}
-
-void SettingsManager::setDstEnabled(bool enabled) {
-    if (_dstEnabled != enabled) {
-        _dstEnabled = enabled;
-        Preferences prefs;
-        prefs.begin("settings", false);
-        prefs.putBool("dst_enabled", _dstEnabled);
+        prefs.putString("tz", _timezone);
         prefs.end();
     }
 }

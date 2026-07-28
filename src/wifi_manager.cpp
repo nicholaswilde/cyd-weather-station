@@ -344,6 +344,9 @@ void WifiManager::handleRoot() {
     html += "<label for='lon'>Longitude</label>";
     html += "<input type='text' id='lon' name='lon' placeholder='e.g. -118.416' value='" + settings.getLongitude() + "'>";
     
+    html += "<label for='tz'>Timezone (POSIX format)</label>";
+    html += "<input type='text' id='tz' name='tz' placeholder='e.g. PST8PDT,M3.2.0,M11.1.0' value='" + settings.getTimezone() + "'>";
+    
     html += "<p style='color: #a6adc8; font-size: 12px; margin-top: -10px; margin-bottom: 20px; text-align: center;'><em>Leave location fields blank to auto-detect your location via IP address.</em></p>";
     
     html += "<button type='submit'>Save & Connect</button>";
@@ -362,6 +365,7 @@ void WifiManager::handleSave() {
     String zip = _webServer->arg("zip");
     String lat = _webServer->arg("lat");
     String lon = _webServer->arg("lon");
+    String tz = _webServer->arg("tz");
 
     Serial.printf("[WiFi] Saved new credentials via captive portal: %s\n", ssid.c_str());
 
@@ -388,6 +392,7 @@ void WifiManager::handleSave() {
     settings.setZipCode(zip);
     settings.setLatitude(lat);
     settings.setLongitude(lon);
+    settings.setTimezone(tz);
 
     ESP.restart();
 #endif
@@ -425,8 +430,7 @@ void WifiManager::startScreenshotServer() {
         doc["unit_system"] = settings.getUnitSystem();
         doc["brightness"] = settings.getBrightness();
         doc["auto_brightness"] = settings.getAutoBrightness();
-        doc["timezone_offset"] = settings.getTimezoneOffset();
-        doc["dst_enabled"] = settings.getDstEnabled();
+        doc["timezone"] = settings.getTimezone();
         doc["theme_flavor"] = settings.getThemeFlavor();
         doc["sd_logging_enabled"] = settings.getSdLoggingEnabled();
         doc["screenshot_server_enabled"] = settings.getScreenshotServerEnabled();

@@ -142,12 +142,7 @@ static void theme_dropdown_event_cb(lv_event_t * e) {
     }
 }
 
-static void dst_sw_event_cb(lv_event_t * e) {
-    lv_obj_t * sw = lv_event_get_target(e);
-    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
-    settings.setDstEnabled(is_checked);
-    settings_timezone_changed = true;
-}
+
 
 static void sd_sw_event_cb(lv_event_t * e) {
     lv_obj_t * sw = lv_event_get_target(e);
@@ -269,25 +264,46 @@ static void brightness_slider_event_cb(lv_event_t * e) {
     }
 }
 
+struct TimezonePreset {
+    const char* label;
+    const char* value;
+};
+static const TimezonePreset tz_presets[] = {
+    {"UTC", "UTC0"},
+    {"London", "GMT0BST,M3.5.0/1,M10.5.0"},
+    {"CET", "CET-1CEST,M3.5.0,M10.5.0/3"},
+    {"EET", "EET-2EEST,M3.5.0/3,M10.5.0/4"},
+    {"US East", "EST5EDT,M3.2.0,M11.1.0"},
+    {"US Central", "CST6CDT,M3.2.0,M11.1.0"},
+    {"US Mount.", "MST7MDT,M3.2.0,M11.1.0"},
+    {"US Pacific", "PST8PDT,M3.2.0,M11.1.0"},
+    {"US Alaska", "AKST9AKDT,M3.2.0,M11.1.0"},
+    {"US Hawaii", "HST10"},
+    {"AU East", "AEST-10AEDT,M10.1.0,M4.1.0/3"},
+    {"AU Central", "ACST-9:30ACDT,M10.1.0,M4.1.0/3"},
+    {"AU West", "AWST-8"}
+};
+static const int num_tz_presets = sizeof(tz_presets)/sizeof(tz_presets[0]);
+
 static void tz_btn_event_cb(lv_event_t * e) {
     intptr_t dir = (intptr_t)lv_event_get_user_data(e);
-    int current_offset = settings.getTimezoneOffset();
-    int new_offset = current_offset + dir;
-    if (new_offset < -12) new_offset = -12;
-    if (new_offset > 14) new_offset = 14;
     
-    if (new_offset != current_offset) {
-        settings.setTimezoneOffset(new_offset);
-        settings_timezone_changed = true;
-        
-        char buf[32];
-        if (new_offset >= 0) {
-            snprintf(buf, sizeof(buf), "GMT +%d", new_offset);
-        } else {
-            snprintf(buf, sizeof(buf), "GMT %d", new_offset);
+    int current_idx = 0;
+    String current_tz = settings.getTimezone();
+    for (int i = 0; i < num_tz_presets; i++) {
+        if (current_tz == tz_presets[i].value) {
+            current_idx = i;
+            break;
         }
-        lv_label_set_text(tz_val_label, buf);
     }
+    
+    current_idx += dir;
+    if (current_idx < 0) current_idx = num_tz_presets - 1;
+    if (current_idx >= num_tz_presets) current_idx = 0;
+    
+    settings.setTimezone(tz_presets[current_idx].value);
+    settings_timezone_changed = true;
+    lv_label_set_text(tz_val_label, tz_presets[current_idx].label);
 }
 
 static void chart_draw_event_cb(lv_event_t * e) {
@@ -825,31 +841,7 @@ void initUI() {
     lv_obj_set_style_text_color(auto_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
     lv_obj_set_style_text_font(auto_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
-    // DST switch row
-    lv_obj_t * dst_row = lv_obj_create(left_col);
-    lv_obj_clear_flag(dst_row, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size(dst_row, lv_pct(100), LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(dst_row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(dst_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_bg_opa(dst_row, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(dst_row, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(dst_row, 0, LV_PART_MAIN);
-    lv_obj_clear_flag(dst_row, LV_OBJ_FLAG_SCROLLABLE);
 
-    lv_obj_t * dst_label = lv_label_create(dst_row);
-    lv_label_set_text(dst_label, "DST");
-    lv_obj_set_style_text_color(dst_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-    lv_obj_set_style_text_font(dst_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
-
-    lv_obj_t * dst_sw = lv_switch_create(dst_row);
-    lv_obj_set_size(dst_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(dst_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
-    if (settings.getDstEnabled()) {
-        lv_obj_add_state(dst_sw, LV_STATE_CHECKED);
-    }
-    lv_obj_add_event_cb(dst_sw, dst_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // SD Log row
     lv_obj_t * sd_row = lv_obj_create(left_col);
@@ -1106,14 +1098,15 @@ void initUI() {
     lv_obj_add_event_cb(tz_minus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)-1);
 
     tz_val_label = lv_label_create(tz_row);
-    char tz_buf[16];
-    int offset = settings.getTimezoneOffset();
-    if (offset >= 0) {
-        snprintf(tz_buf, sizeof(tz_buf), "GMT +%d", offset);
-    } else {
-        snprintf(tz_buf, sizeof(tz_buf), "GMT %d", offset);
+    const char* init_tz_label = "Custom";
+    String current_tz = settings.getTimezone();
+    for (int i = 0; i < num_tz_presets; i++) {
+        if (current_tz == tz_presets[i].value) {
+            init_tz_label = tz_presets[i].label;
+            break;
+        }
     }
-    lv_label_set_text(tz_val_label, tz_buf);
+    lv_label_set_text(tz_val_label, init_tz_label);
     lv_obj_set_style_text_color(tz_val_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
     lv_obj_set_style_text_font(tz_val_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 

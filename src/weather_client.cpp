@@ -299,13 +299,10 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
         time_t now = time(nullptr);
         const bool time_valid = (now > 946684800L); // after year 2000 = NTP synced
         if (time_valid) {
-            // Apply the configured offset so we compare against local midnight,
-            // not UTC midnight.
-            long tz_sec = (long)settings.getTimezoneOffset() * 3600L;
-            time_t local_now = now + tz_sec;
             struct tm tm_today, tm_tomorrow;
-            gmtime_r(&local_now,          &tm_today);
-            gmtime_r(&(local_now += 86400), &tm_tomorrow);
+            localtime_r(&now, &tm_today);
+            time_t tmrw = now + 86400;
+            localtime_r(&tmrw, &tm_tomorrow);
             snprintf(today_str,    sizeof(today_str),    "%04d-%02d-%02d",
                 tm_today.tm_year + 1900,    tm_today.tm_mon + 1,    tm_today.tm_mday);
             snprintf(tomorrow_str, sizeof(tomorrow_str), "%04d-%02d-%02d",
@@ -530,11 +527,10 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
     time_t now = time(nullptr);
     time_valid = (now > 946684800L); // after year 2000
     if (time_valid) {
-        long tz_sec = (long)settings.getTimezoneOffset() * 3600L;
-        time_t local_now = now + tz_sec;
         struct tm tm_today, tm_tomorrow;
-        gmtime_r(&local_now, &tm_today);
-        gmtime_r(&(local_now += 86400), &tm_tomorrow);
+        localtime_r(&now, &tm_today);
+        time_t tmrw = now + 86400;
+        localtime_r(&tmrw, &tm_tomorrow);
         snprintf(today_str, sizeof(today_str), "%04d-%02d-%02d",
             tm_today.tm_year + 1900, tm_today.tm_mon + 1, tm_today.tm_mday);
         snprintf(tomorrow_str, sizeof(tomorrow_str), "%04d-%02d-%02d",

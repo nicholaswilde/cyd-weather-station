@@ -12,8 +12,7 @@ private:
     int _unitSystem;
     int _brightness;
     bool _autoBrightness;
-    int _timezoneOffset;
-    bool _dstEnabled;
+    String _timezone;
     int _themeFlavor;
     bool _sdLoggingEnabled;
     bool _screenshotServerEnabled;
@@ -42,12 +41,8 @@ public:
     bool getAutoBrightness() const;
     void setAutoBrightness(bool autoBrightness);
     
-    int getTimezoneOffset() const;
-    void setTimezoneOffset(int offset);
-    
-    bool getDstEnabled() const;
-    void setDstEnabled(bool enabled);
-
+    String getTimezone() const;
+    void setTimezone(const String& timezone);
     int getThemeFlavor() const;
     void setThemeFlavor(int flavor);
 

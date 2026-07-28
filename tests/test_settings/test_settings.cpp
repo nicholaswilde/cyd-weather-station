@@ -17,8 +17,7 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL(UNIT_SYSTEM, settings.getUnitSystem());
     TEST_ASSERT_EQUAL(80, settings.getBrightness());
     TEST_ASSERT_EQUAL(USE_LDR_AUTO_BACKLIGHT, settings.getAutoBrightness());
-    TEST_ASSERT_EQUAL(GMT_OFFSET_SEC / 3600, settings.getTimezoneOffset());
-    TEST_ASSERT_EQUAL((DST_OFFSET_SEC > 0), settings.getDstEnabled());
+    TEST_ASSERT_EQUAL_STRING(TIMEZONE_DEFAULT, settings.getTimezone().c_str());
     TEST_ASSERT_EQUAL(USE_SD_LOGGING, settings.getSdLoggingEnabled());
     TEST_ASSERT_EQUAL(false, settings.getScreenshotServerEnabled());
     TEST_ASSERT_EQUAL(1, settings.getScreenOrientation());
@@ -35,8 +34,7 @@ void test_settings_save_and_load(void) {
     settings.setUnitSystem(1); // 1 is UNIT_METRIC
     settings.setBrightness(50);
     settings.setAutoBrightness(true);
-    settings.setTimezoneOffset(5);
-    settings.setDstEnabled(false);
+    settings.setTimezone("EST5EDT,M3.2.0,M11.1.0");
     settings.setSdLoggingEnabled(false);
     settings.setScreenshotServerEnabled(false);
     settings.setScreenOrientation(2);
@@ -51,8 +49,7 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL(1, settings_new.getUnitSystem());
     TEST_ASSERT_EQUAL(50, settings_new.getBrightness());
     TEST_ASSERT_EQUAL(true, settings_new.getAutoBrightness());
-    TEST_ASSERT_EQUAL(5, settings_new.getTimezoneOffset());
-    TEST_ASSERT_EQUAL(false, settings_new.getDstEnabled());
+    TEST_ASSERT_EQUAL_STRING("EST5EDT,M3.2.0,M11.1.0", settings_new.getTimezone().c_str());
     TEST_ASSERT_EQUAL(false, settings_new.getSdLoggingEnabled());
     TEST_ASSERT_EQUAL(false, settings_new.getScreenshotServerEnabled());
     TEST_ASSERT_EQUAL(2, settings_new.getScreenOrientation());

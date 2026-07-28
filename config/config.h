@@ -18,8 +18,7 @@
 
 // NTP and Timezone Settings
 #define NTP_SERVER "pool.ntp.org"
-#define GMT_OFFSET_SEC (-8 * 3600)  // GMT -8 (PST)
-#define DST_OFFSET_SEC 3600         // Daylight Savings offset (1 hour)
+#define TIMEZONE_DEFAULT "UTC0"       // POSIX Timezone string
 
 #include "catppuccin.h"
 
