@@ -19,6 +19,7 @@ SettingsManager::SettingsManager() {
     _sdCacheEnabled = USE_SD_CACHE;
     _screensaverEnabled = SCREENSAVER_ENABLED;
     _zipCode = WEATHER_ZIP_CODE;
+    _cityCode = WEATHER_CITY_CODE;
     _latitude = WEATHER_API_LATITUDE;
     _longitude = WEATHER_API_LONGITUDE;
 }
@@ -43,6 +44,7 @@ void SettingsManager::begin() {
     _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
     _screensaverEnabled = prefs.getBool("scr_enabled", SCREENSAVER_ENABLED);
     _zipCode = prefs.getString("zip", WEATHER_ZIP_CODE);
+    _cityCode = prefs.getString("city", WEATHER_CITY_CODE);
     _latitude = prefs.getString("lat", WEATHER_API_LATITUDE);
     _longitude = prefs.getString("lon", WEATHER_API_LONGITUDE);
     
@@ -281,6 +283,20 @@ void SettingsManager::setZipCode(const String& zipCode) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("zip", _zipCode);
+        prefs.end();
+    }
+}
+
+String SettingsManager::getCityCode() const {
+    return _cityCode;
+}
+
+void SettingsManager::setCityCode(const String& cityCode) {
+    if (_cityCode != cityCode) {
+        _cityCode = cityCode;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("city", _cityCode);
         prefs.end();
     }
 }

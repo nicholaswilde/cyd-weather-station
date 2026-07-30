@@ -195,12 +195,15 @@ Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent com
 Static settings (location, update interval) live in [`config/config.h`](config/config.h). Runtime user preferences (units, brightness, theme, timezone) are changed via the on-device **Settings tab** and saved to flash.
 
 **Location:**
-Location (Zip Code or Coordinates) is configured dynamically via the **Captive Portal Wi-Fi Manager** when the device boots in AP mode. You can pre-configure the fallback defaults in `config/config.h`:
+Location (Zip Code, City Code, or Coordinates) is configured dynamically via the **Captive Portal Wi-Fi Manager** when the device boots in AP mode. You can pre-configure the fallback defaults in `config/config.h`:
 ```cpp
 // Default values (if not configured via Wi-Fi Setup)
 #define WEATHER_ZIP_CODE  "90210"
 #define WEATHER_API_LATITUDE  ""
 #define WEATHER_API_LONGITUDE ""
+
+// City Code (For OpenWeatherMap only)
+#define WEATHER_CITY_CODE ""
 ```
 *(Note: If you leave these fields empty in both the code and the Wi-Fi Setup page, the device will automatically detect your location via IP Geolocation).*
 

@@ -190,10 +190,16 @@ WeatherData WeatherClient::fetchWeather() {
 
     String url;
     if (useOWM) {
-        url = "http://api.openweathermap.org/data/2.5/forecast?lat=";
-        url += lat;
-        url += "&lon=";
-        url += lng;
+        String cityCode = settings.getCityCode();
+        if (cityCode.length() > 0) {
+            url = "http://api.openweathermap.org/data/2.5/forecast?id=";
+            url += cityCode;
+        } else {
+            url = "http://api.openweathermap.org/data/2.5/forecast?lat=";
+            url += lat;
+            url += "&lon=";
+            url += lng;
+        }
         url += "&appid=";
         url += OPENWEATHERMAP_API_KEY;
         url += "&units=";
