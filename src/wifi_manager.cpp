@@ -356,6 +356,9 @@ void WifiManager::handleRoot() {
     html += "<label for='zip'>Zip Code (US Only)</label>";
     html += "<input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='" + settings.getZipCode() + "'>";
     
+    html += "<label for='city'>City ID (OpenWeatherMap)</label>";
+    html += "<input type='text' id='city' name='city' placeholder='e.g. 2643743' value='" + settings.getCityCode() + "'>";
+    
     html += "<label for='lat'>Latitude</label>";
     html += "<input type='text' id='lat' name='lat' placeholder='e.g. 34.1031' value='" + settings.getLatitude() + "'>";
     
@@ -381,6 +384,7 @@ void WifiManager::handleSave() {
     String ssid = _webServer->arg("ssid");
     String pass = _webServer->arg("pass");
     String zip = _webServer->arg("zip");
+    String city = _webServer->arg("city");
     String lat = _webServer->arg("lat");
     String lon = _webServer->arg("lon");
     String tz = _webServer->arg("tz");
@@ -408,6 +412,7 @@ void WifiManager::handleSave() {
     settings.setWifiSSID(ssid);
     settings.setWifiPassword(pass);
     settings.setZipCode(zip);
+    settings.setCityCode(city);
     settings.setLatitude(lat);
     settings.setLongitude(lon);
     settings.setTimezone(tz);

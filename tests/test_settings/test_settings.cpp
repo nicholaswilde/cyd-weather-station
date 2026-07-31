@@ -77,11 +77,35 @@ void test_settings_wifi_credentials(void) {
     TEST_ASSERT_EQUAL_STRING("New_SSID", settings_new.getWifiSSID().c_str());
     TEST_ASSERT_EQUAL_STRING("New_Password", settings_new.getWifiPassword().c_str());
 }
+void test_settings_location_data(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    // Verify default values fallback to config.h/secrets.h macros
+    TEST_ASSERT_EQUAL_STRING(WEATHER_ZIP_CODE, settings.getZipCode().c_str());
+    TEST_ASSERT_EQUAL_STRING(WEATHER_CITY_CODE, settings.getCityCode().c_str());
+
+    // Modify location data
+    settings.setZipCode("90210");
+    settings.setCityCode("2643743");
+    settings.setLatitude("34.103");
+    settings.setLongitude("-118.410");
+
+    // Re-instantiate to simulate reboot
+    SettingsManager settings_new;
+    settings_new.begin();
+
+    TEST_ASSERT_EQUAL_STRING("90210", settings_new.getZipCode().c_str());
+    TEST_ASSERT_EQUAL_STRING("2643743", settings_new.getCityCode().c_str());
+    TEST_ASSERT_EQUAL_STRING("34.103", settings_new.getLatitude().c_str());
+    TEST_ASSERT_EQUAL_STRING("-118.410", settings_new.getLongitude().c_str());
+}
 
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_settings_default_values);
     RUN_TEST(test_settings_save_and_load);
     RUN_TEST(test_settings_wifi_credentials);
+    RUN_TEST(test_settings_location_data);
     return UNITY_END();
 }

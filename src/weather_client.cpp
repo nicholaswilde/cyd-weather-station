@@ -455,7 +455,7 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
     data.valid = true;
 
     // Resolve city name from OWM city object
-    if (_cityName.length() == 0 && doc.containsKey("city")) {
+    if (doc.containsKey("city")) {
         const char* name = doc["city"]["name"] | "";
         if (name && name[0] != '\0') {
             _cityName = String(name);
