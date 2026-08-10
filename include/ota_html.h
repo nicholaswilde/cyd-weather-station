@@ -10,8 +10,8 @@ const char ota_html[] PROGMEM = R"rawhtml(
 <style>
 body {
     font-family: 'Inter', system-ui, sans-serif;
-    background: #1e2030;
-    color: #cad3f5;
+    background: #1e1e2e;
+    color: #cdd6f4;
     margin: 0;
     padding: 20px;
     display: flex;
@@ -21,23 +21,23 @@ body {
     box-sizing: border-box;
 }
 .card {
-    background: #24273a;
+    background: #181825;
     border-radius: 12px;
     padding: 30px;
     width: 100%;
     max-width: 400px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    border: 1px solid #363a4f;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    border: 1px solid #313244;
     text-align: center;
 }
 h2 {
-    color: #c6a0f6;
+    color: #f5c2e7;
     margin-top: 0;
     margin-bottom: 20px;
     font-weight: 600;
 }
 .drop-zone {
-    border: 2px dashed #494d64;
+    border: 2px dashed #45475a;
     border-radius: 8px;
     padding: 30px 10px;
     margin-bottom: 20px;
@@ -45,12 +45,12 @@ h2 {
     transition: border-color 0.2s, background-color 0.2s;
 }
 .drop-zone:hover, .drop-zone.dragover {
-    border-color: #8aadf4;
-    background: #363a4f;
+    border-color: #89b4fa;
+    background: #313244;
 }
 .drop-zone p {
     margin: 0;
-    color: #a5adcb;
+    color: #a6adc8;
     font-size: 14px;
 }
 input[type="file"] {
@@ -59,21 +59,21 @@ input[type="file"] {
 button {
     width: 100%;
     padding: 12px;
-    background: #8aadf4;
+    background: #cba6f7;
     border: none;
     border-radius: 6px;
-    color: #181926;
+    color: #11111b;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 button:hover {
-    background: #c6a0f6;
+    background: #f5c2e7;
 }
 button:disabled {
-    background: #494d64;
-    color: #a5adcb;
+    background: #45475a;
+    color: #a6adc8;
     cursor: not-allowed;
 }
 .progress-container {
@@ -83,7 +83,7 @@ button:disabled {
 .progress-bar {
     width: 100%;
     height: 12px;
-    background: #363a4f;
+    background: #313244;
     border-radius: 6px;
     overflow: hidden;
     margin-bottom: 8px;
@@ -91,25 +91,25 @@ button:disabled {
 .progress-fill {
     height: 100%;
     width: 0%;
-    background: #a6da95;
+    background: #a6e3a1;
     transition: width 0.1s;
 }
 .status-text {
     font-size: 14px;
-    color: #a5adcb;
+    color: #a6adc8;
 }
 .error-text {
-    color: #ed8796;
+    color: #f38ba8;
 }
 .success-text {
-    color: #a6da95;
+    color: #a6e3a1;
 }
 </style>
 </head>
 <body>
 <div class="card">
     <h2>CYD Firmware Update</h2>
-    <p style="color: #a5adcb; font-size: 14px; margin-bottom: 20px;">Upload a compiled .bin file to flash the device.</p>
+    <p style="color: #a6adc8; font-size: 14px; margin-bottom: 20px;">Upload a compiled .bin file to flash the device.</p>
     <div class="drop-zone" id="drop-zone">
         <p id="file-name">Click or drag & drop binary file here</p>
         <input type="file" id="file-input" accept=".bin">
@@ -191,13 +191,13 @@ uploadBtn.addEventListener('click', () => {
     
     xhr.onload = function() {
         if (xhr.status === 200) {
-            progressFill.style.backgroundColor = '#a6da95';
+            progressFill.style.backgroundColor = '#a6e3a1';
             statusText.innerHTML = '<span class="success-text">Success! Firmware uploaded. Rebooting...</span>';
             setTimeout(() => {
                 window.location.href = '/';
             }, 5000);
         } else {
-            progressFill.style.backgroundColor = '#ed8796';
+            progressFill.style.backgroundColor = '#f38ba8';
             statusText.innerHTML = '<span class="error-text">Failed: ' + xhr.responseText + '</span>';
             uploadBtn.disabled = false;
             dropZone.style.pointerEvents = 'auto';
@@ -205,7 +205,7 @@ uploadBtn.addEventListener('click', () => {
     };
     
     xhr.onerror = function() {
-        progressFill.style.backgroundColor = '#ed8796';
+        progressFill.style.backgroundColor = '#f38ba8';
         statusText.innerHTML = '<span class="error-text">Connection lost during upload.</span>';
         uploadBtn.disabled = false;
         dropZone.style.pointerEvents = 'auto';

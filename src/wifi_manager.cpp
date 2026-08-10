@@ -539,6 +539,11 @@ void WifiManager::registerOTARoutes() {
         _webServer->send_P(200, "text/html", ota_html);
     });
 
+    _webServer->on("/settings", HTTP_GET, [this]() {
+        Serial.println("[WiFi] Connected to /settings page");
+        _webServer->send(200, "text/html", "<html><body><h1>Settings</h1><p>Not implemented</p></body></html>");
+    });
+
     _webServer->on("/update", HTTP_POST, [this]() {
         _webServer->sendHeader("Connection", "close");
         if (Update.hasError()) {
