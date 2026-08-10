@@ -1,15 +1,27 @@
 #include "mqtt_manager.h"
 
-MqttManager::MqttManager(const char* server, uint16_t port, const char* user, const char* password)
+MqttManager::MqttManager(const String& server, uint16_t port, const String& user, const String& password)
     : _server(server), _port(port), _user(user), _password(password), _reconnectTimer(nullptr) {}
+
+void MqttManager::updateConfig(const String& server, uint16_t port, const String& user, const String& password) {
+    _server = server;
+    _port = port;
+    _user = user;
+    _password = password;
+    
+    // If we're already connected, we should disconnect and let it reconnect with new settings, 
+    // or just apply credentials for the next reconnect.
+    _mqttClient.setServer(_server.c_str(), _port);
+    _mqttClient.setCredentials(_user.c_str(), _password.c_str());
+}
 
 void MqttManager::begin() {
     // 1. Create a FreeRTOS timer for non-blocking reconnects.
     _reconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(5000), pdFALSE, (void*)this, onMqttReconnectTimer);
 
     // 2. Configure broker details
-    _mqttClient.setServer(_server, _port);
-    _mqttClient.setCredentials(_user, _password);
+    _mqttClient.setServer(_server.c_str(), _port);
+    _mqttClient.setCredentials(_user.c_str(), _password.c_str());
 
     // 3. Register the asynchronous callbacks using C++ lambdas
     _mqttClient.onConnect([this](bool sessionPresent) {

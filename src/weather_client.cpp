@@ -141,7 +141,7 @@ WeatherData WeatherClient::fetchWeather() {
     _useZip = (_zipCode.length() > 0 && _zipCode != "YOUR_ZIP_CODE");
     WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {} };
 
-    bool useOWM = (String(OPENWEATHERMAP_API_KEY).length() > 0);
+    bool useOWM = (settings.getOwmApiKey().length() > 0);
 
     // Resolve zip code if using zip code and not yet resolved
     if (_useZip && !_zipResolved) {
@@ -201,7 +201,7 @@ WeatherData WeatherClient::fetchWeather() {
             url += lng;
         }
         url += "&appid=";
-        url += OPENWEATHERMAP_API_KEY;
+        url += settings.getOwmApiKey();
         url += "&units=";
         url += (settings.getUnitSystem() == UNIT_IMPERIAL ? "imperial" : "metric");
     } else {

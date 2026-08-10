@@ -12,6 +12,7 @@
 #include "ui.h"
 #include "ota_html.h"
 #include "settings_html.h"
+#include "version.h"
 #include <ArduinoJson.h>
 #endif
 
@@ -350,10 +351,13 @@ void WifiManager::handleRoot() {
     html += "<label for='pass'>Password</label>";
     html += "<input type='password' id='pass' name='pass' placeholder='Password'>";
     
+    html += "<label for='owm_api'>OpenWeatherMap API Key</label>";
+    html += "<input type='password' id='owm_api' name='owm_api' placeholder='API Key' value='" + settings.getOwmApiKey() + "'>";
+    
     html += "<label for='zip'>Zip Code (US Only)</label>";
     html += "<input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='" + settings.getZipCode() + "'>";
     
-    html += "<label for='city'>City ID (OpenWeatherMap)</label>";
+    html += "<label for='city'>City ID (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OpenWeatherMap</a>)</label>";
     html += "<input type='text' id='city' name='city' placeholder='e.g. 2643743' value='" + settings.getCityCode() + "'>";
     
     html += "<label for='lat'>Latitude</label>";
@@ -362,8 +366,11 @@ void WifiManager::handleRoot() {
     html += "<label for='lon'>Longitude</label>";
     html += "<input type='text' id='lon' name='lon' placeholder='e.g. -118.416' value='" + settings.getLongitude() + "'>";
     
-    html += "<label for='tz'>Timezone (POSIX format)</label>";
+    html += "<label for='tz'>Timezone (<a href='https://gist.github.com/alwynallan/24d96091655391107939' target='_blank' style='color: #89b4fa; text-decoration: none;'>POSIX format</a>)</label>";
     html += "<input type='text' id='tz' name='tz' placeholder='e.g. PST8PDT,M3.2.0,M11.1.0' value='" + settings.getTimezone() + "'>";
+    
+    html += "<label for='ntp_server'>NTP Server</label>";
+    html += "<input type='text' id='ntp_server' name='ntp_server' placeholder='e.g. pool.ntp.org' value='" + settings.getNtpServer() + "'>";
     
     html += "<p style='color: #a6adc8; font-size: 12px; margin-top: -10px; margin-bottom: 20px; text-align: center;'><em>Leave location fields blank to auto-detect your location via IP address.</em></p>";
     
@@ -385,6 +392,8 @@ void WifiManager::handleSave() {
     String lat = _webServer->arg("lat");
     String lon = _webServer->arg("lon");
     String tz = _webServer->arg("tz");
+    String owmApi = _webServer->arg("owm_api");
+    String ntpServer = _webServer->arg("ntp_server");
 
     Serial.printf("[WiFi] Saved new credentials via captive portal: %s\n", ssid.c_str());
 
@@ -410,9 +419,11 @@ void WifiManager::handleSave() {
     settings.setWifiPassword(pass);
     settings.setZipCode(zip);
     settings.setCityCode(city);
-    settings.setLatitude(lat);
-    settings.setLongitude(lon);
-    settings.setTimezone(tz);
+    if (lat.length() > 0) settings.setLatitude(lat);
+    if (lon.length() > 0) settings.setLongitude(lon);
+    if (tz.length() > 0) settings.setTimezone(tz);
+    if (owmApi.length() > 0) settings.setOwmApiKey(owmApi);
+    if (ntpServer.length() > 0) settings.setNtpServer(ntpServer);
 
     ESP.restart();
 #endif
@@ -581,6 +592,12 @@ void WifiManager::registerOTARoutes() {
 void WifiManager::handleSettings() {
     String html = String(settings_html);
     
+#ifdef APP_VERSION
+    html.replace("%APP_VERSION%", APP_VERSION);
+#else
+    html.replace("%APP_VERSION%", "unknown");
+#endif
+
     html.replace("%UNIT_METRIC%", settings.getUnitSystem() == 0 ? "selected" : "");
     html.replace("%UNIT_IMPERIAL%", settings.getUnitSystem() == 1 ? "selected" : "");
     
@@ -598,16 +615,23 @@ void WifiManager::handleSettings() {
     html.replace("%AUTO_BRIGHTNESS%", settings.getAutoBrightness() ? "checked" : "");
     html.replace("%SCREENSAVER_ENABLED%", settings.getScreensaverEnabled() ? "checked" : "");
     
+    html.replace("%OWM_API%", settings.getOwmApiKey());
     html.replace("%ZIP%", settings.getZipCode());
     html.replace("%CITY%", settings.getCityCode());
     html.replace("%LAT%", settings.getLatitude());
     html.replace("%LON%", settings.getLongitude());
     html.replace("%TZ%", settings.getTimezone());
+    html.replace("%NTP_SERVER%", settings.getNtpServer());
     
     html.replace("%LED_ENABLED%", settings.getLedEnabled() ? "checked" : "");
     html.replace("%LED_BRIGHTNESS%", String(settings.getLedBrightness()));
     
     html.replace("%MQTT_ENABLED%", settings.getMqttEnabled() ? "checked" : "");
+    html.replace("%MQTT_SERVER%", settings.getMqttServer());
+    html.replace("%MQTT_PORT%", String(settings.getMqttPort()));
+    html.replace("%MQTT_USER%", settings.getMqttUser());
+    html.replace("%MQTT_PASSWORD%", settings.getMqttPassword());
+    
     html.replace("%SCREENSHOT_ENABLED%", settings.getScreenshotServerEnabled() ? "checked" : "");
     html.replace("%SD_LOGGING%", settings.getSdLoggingEnabled() ? "checked" : "");
     html.replace("%SD_CACHE%", settings.getSdCacheEnabled() ? "checked" : "");
@@ -624,16 +648,23 @@ void WifiManager::handleSettingsSave() {
     settings.setAutoBrightness(_webServer->hasArg("auto_brightness"));
     settings.setScreensaverEnabled(_webServer->hasArg("screensaver_enabled"));
     
+    if (_webServer->hasArg("owm_api")) settings.setOwmApiKey(_webServer->arg("owm_api"));
     if (_webServer->hasArg("zip")) settings.setZipCode(_webServer->arg("zip"));
     if (_webServer->hasArg("city")) settings.setCityCode(_webServer->arg("city"));
     if (_webServer->hasArg("lat")) settings.setLatitude(_webServer->arg("lat"));
     if (_webServer->hasArg("lon")) settings.setLongitude(_webServer->arg("lon"));
     if (_webServer->hasArg("tz")) settings.setTimezone(_webServer->arg("tz"));
+    if (_webServer->hasArg("ntp_server")) settings.setNtpServer(_webServer->arg("ntp_server"));
     
     settings.setLedEnabled(_webServer->hasArg("led_enabled"));
     if (_webServer->hasArg("led_brightness")) settings.setLedBrightness(_webServer->arg("led_brightness").toInt());
     
     settings.setMqttEnabled(_webServer->hasArg("mqtt_enabled"));
+    if (_webServer->hasArg("mqtt_server")) settings.setMqttServer(_webServer->arg("mqtt_server"));
+    if (_webServer->hasArg("mqtt_port")) settings.setMqttPort(_webServer->arg("mqtt_port").toInt());
+    if (_webServer->hasArg("mqtt_user")) settings.setMqttUser(_webServer->arg("mqtt_user"));
+    if (_webServer->hasArg("mqtt_password")) settings.setMqttPassword(_webServer->arg("mqtt_password"));
+    
     settings.setScreenshotServerEnabled(_webServer->hasArg("screenshot_server_enabled"));
     settings.setSdLoggingEnabled(_webServer->hasArg("sd_logging_enabled"));
     settings.setSdCacheEnabled(_webServer->hasArg("sd_cache_enabled"));

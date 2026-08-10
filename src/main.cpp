@@ -23,7 +23,7 @@ const unsigned long backlightUpdateInterval = 1000; // 1 second
 SettingsManager settings;
 
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
-MqttManager mqtt(MQTT_SERVER, MQTT_PORT, MQTT_USER, MQTT_PASSWORD);
+MqttManager mqtt("", 1883, "", "");
 WeatherClient weather;
 
 #if USE_RGB_LED_STATUS
@@ -93,6 +93,7 @@ void setup() {
         updateFooterUI("--:-- (Cached)", cachedData.cityName.c_str());
     }
 
+    mqtt.updateConfig(settings.getMqttServer(), settings.getMqttPort(), settings.getMqttUser(), settings.getMqttPassword());
     mqtt.begin();
 
     // Register the Wi-Fi events so MQTT knows when the network drops/connects
@@ -174,7 +175,7 @@ void loop() {
         struct tm timeinfo;
         std::string filename;
 #ifndef NATIVE_TEST
-        if (getLocalTime(&timeinfo)) {
+        if (getLocalTime(&timeinfo, 10)) {
             filename = ScreenshotManager::generateFilename(&timeinfo, 0);
         } else {
             filename = ScreenshotManager::generateFilename(nullptr, millis());
@@ -204,7 +205,7 @@ void loop() {
 #ifndef NATIVE_TEST
         if (ntpInitialized) {
             Serial.println("[System] Timezone/DST settings changed. Reconfiguring NTP...");
-            configTzTime(settings.getTimezone().c_str(), NTP_SERVER);
+            configTzTime(settings.getTimezone().c_str(), settings.getNtpServer().c_str());
         }
 #endif
     }
@@ -232,6 +233,7 @@ void loop() {
         bool enabled = settings.getMqttEnabled();
         Serial.printf("[System] MQTT %s.\n", enabled ? "enabled" : "disabled");
         if (enabled) {
+            mqtt.updateConfig(settings.getMqttServer(), settings.getMqttPort(), settings.getMqttUser(), settings.getMqttPassword());
             if (wifi.getState() == WIFI_STATE_CONNECTED) {
                 Serial.println("[System] Wi-Fi connected, connecting to MQTT...");
                 mqtt.onNetworkAvailable();
@@ -267,7 +269,7 @@ void loop() {
 #ifndef NATIVE_TEST
         if (ntpInitialized) {
             struct tm timeinfo;
-            if (getLocalTime(&timeinfo)) {
+            if (getLocalTime(&timeinfo, 10)) {
                 char timeStr[16];
                 strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
                 updateTimeUI(timeStr);
@@ -338,11 +340,11 @@ void loop() {
 #ifndef NATIVE_TEST
             if (!ntpInitialized) {
                 Serial.println("[System] Initializing NTP client...");
-                configTzTime(settings.getTimezone().c_str(), NTP_SERVER);
+                configTzTime(settings.getTimezone().c_str(), settings.getNtpServer().c_str());
                 ntpInitialized = true;
             }
             struct tm timeinfo;
-            if (getLocalTime(&timeinfo)) {
+            if (getLocalTime(&timeinfo, 10)) {
                 char timeStr[16];
                 strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
                 updateTimeUI(timeStr);
@@ -393,7 +395,7 @@ void loop() {
 #ifndef NATIVE_TEST
                     // Update footer: "Last Update: HH:MM | City"
                     struct tm timeinfo;
-                    if (getLocalTime(&timeinfo)) {
+                    if (getLocalTime(&timeinfo, 10)) {
                         char timeStr[16];
                         strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
                         updateFooterUI(timeStr, data.cityName.c_str());

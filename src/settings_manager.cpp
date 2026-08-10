@@ -2,6 +2,17 @@
 #include <Preferences.h>
 #include "config/config.h"
 
+#ifndef OPENWEATHERMAP_API_KEY
+#define OPENWEATHERMAP_API_KEY ""
+#endif
+
+#ifndef MQTT_SERVER
+#define MQTT_SERVER ""
+#define MQTT_PORT 1883
+#define MQTT_USER ""
+#define MQTT_PASSWORD ""
+#endif
+
 SettingsManager::SettingsManager() {
     _unitSystem = UNIT_SYSTEM;
     _brightness = 80;
@@ -14,6 +25,10 @@ SettingsManager::SettingsManager() {
     _ledEnabled = LED_ENABLED;
     _ledBrightness = LED_BRIGHTNESS;
     _mqttEnabled = MQTT_ENABLED;
+    _mqttServer = MQTT_SERVER;
+    _mqttPort = MQTT_PORT;
+    _mqttUser = MQTT_USER;
+    _mqttPassword = MQTT_PASSWORD;
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
     _sdCacheEnabled = USE_SD_CACHE;
@@ -22,6 +37,8 @@ SettingsManager::SettingsManager() {
     _cityCode = WEATHER_CITY_CODE;
     _latitude = WEATHER_API_LATITUDE;
     _longitude = WEATHER_API_LONGITUDE;
+    _owmApiKey = OPENWEATHERMAP_API_KEY;
+    _ntpServer = NTP_SERVER;
 }
 
 void SettingsManager::begin() {
@@ -39,6 +56,10 @@ void SettingsManager::begin() {
     _ledEnabled = prefs.getBool("led_en", LED_ENABLED);
     _ledBrightness = prefs.getInt("led_bright", LED_BRIGHTNESS);
     _mqttEnabled = prefs.getBool("mqtt_en", MQTT_ENABLED);
+    _mqttServer = prefs.getString("mqtt_srv", MQTT_SERVER);
+    _mqttPort = prefs.getInt("mqtt_prt", MQTT_PORT);
+    _mqttUser = prefs.getString("mqtt_usr", MQTT_USER);
+    _mqttPassword = prefs.getString("mqtt_pwd", MQTT_PASSWORD);
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
@@ -47,6 +68,8 @@ void SettingsManager::begin() {
     _cityCode = prefs.getString("city", WEATHER_CITY_CODE);
     _latitude = prefs.getString("lat", WEATHER_API_LATITUDE);
     _longitude = prefs.getString("lon", WEATHER_API_LONGITUDE);
+    _owmApiKey = prefs.getString("owm_api", OPENWEATHERMAP_API_KEY);
+    _ntpServer = prefs.getString("ntp_srv", NTP_SERVER);
     
     prefs.end();
 }
@@ -96,7 +119,7 @@ void SettingsManager::setAutoBrightness(bool autoBrightness) {
     }
 }
 
-String SettingsManager::getTimezone() const {
+const String& SettingsManager::getTimezone() const {
     return _timezone;
 }
 
@@ -127,7 +150,7 @@ void SettingsManager::setThemeFlavor(int flavor) {
     }
 }
 
-String SettingsManager::getWifiSSID() const {
+const String& SettingsManager::getWifiSSID() const {
     return _wifiSSID;
 }
 
@@ -141,7 +164,7 @@ void SettingsManager::setWifiSSID(const String& ssid) {
     }
 }
 
-String SettingsManager::getWifiPassword() const {
+const String& SettingsManager::getWifiPassword() const {
     return _wifiPassword;
 }
 
@@ -273,7 +296,7 @@ void SettingsManager::setScreensaverEnabled(bool enabled) {
     }
 }
 
-String SettingsManager::getZipCode() const {
+const String& SettingsManager::getZipCode() const {
     return _zipCode;
 }
 
@@ -287,7 +310,7 @@ void SettingsManager::setZipCode(const String& zipCode) {
     }
 }
 
-String SettingsManager::getCityCode() const {
+const String& SettingsManager::getCityCode() const {
     return _cityCode;
 }
 
@@ -301,7 +324,7 @@ void SettingsManager::setCityCode(const String& cityCode) {
     }
 }
 
-String SettingsManager::getLatitude() const {
+const String& SettingsManager::getLatitude() const {
     return _latitude;
 }
 
@@ -315,7 +338,7 @@ void SettingsManager::setLatitude(const String& latitude) {
     }
 }
 
-String SettingsManager::getLongitude() const {
+const String& SettingsManager::getLongitude() const {
     return _longitude;
 }
 
@@ -326,5 +349,69 @@ void SettingsManager::setLongitude(const String& longitude) {
         prefs.begin("settings", false);
         prefs.putString("lon", _longitude);
         prefs.end();
+    }
+}
+
+const String& SettingsManager::getOwmApiKey() const {
+    return _owmApiKey;
+}
+
+void SettingsManager::setOwmApiKey(const String& apiKey) {
+    if (_owmApiKey != apiKey) {
+        _owmApiKey = apiKey;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("owm_api", _owmApiKey);
+        prefs.end();
+    }
+}
+
+const String& SettingsManager::getNtpServer() const {
+    return _ntpServer;
+}
+
+void SettingsManager::setNtpServer(const String& ntpServer) {
+    if (_ntpServer != ntpServer) {
+        _ntpServer = ntpServer;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("ntp_srv", _ntpServer);
+        prefs.end();
+    }
+}
+
+const String& SettingsManager::getMqttServer() const { return _mqttServer; }
+void SettingsManager::setMqttServer(const String& server) {
+    if (_mqttServer != server) {
+        _mqttServer = server;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("mqtt_srv", _mqttServer); prefs.end();
+    }
+}
+
+int SettingsManager::getMqttPort() const { return _mqttPort; }
+void SettingsManager::setMqttPort(int port) {
+    if (_mqttPort != port) {
+        _mqttPort = port;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putInt("mqtt_prt", _mqttPort); prefs.end();
+    }
+}
+
+const String& SettingsManager::getMqttUser() const { return _mqttUser; }
+void SettingsManager::setMqttUser(const String& user) {
+    if (_mqttUser != user) {
+        _mqttUser = user;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("mqtt_usr", _mqttUser); prefs.end();
+    }
+}
+
+const String& SettingsManager::getMqttPassword() const { return _mqttPassword; }
+void SettingsManager::setMqttPassword(const String& password) {
+    if (_mqttPassword != password) {
+        _mqttPassword = password;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("mqtt_pwd", _mqttPassword); prefs.end();
     }
 }

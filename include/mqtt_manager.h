@@ -19,7 +19,9 @@ public:
      * @param user MQTT username
      * @param password MQTT password
      */
-    MqttManager(const char* server, uint16_t port, const char* user, const char* password);
+    MqttManager(const String& server, uint16_t port, const String& user, const String& password);
+
+    void updateConfig(const String& server, uint16_t port, const String& user, const String& password);
 
     /**
      * @brief Initializes the FreeRTOS timers and MQTT client callbacks.
@@ -64,10 +66,10 @@ private:
     AsyncMqttClient _mqttClient;
     TimerHandle_t _reconnectTimer;
 
-    const char* _server;
+    String _server;
     uint16_t _port;
-    const char* _user;
-    const char* _password;
+    String _user;
+    String _password;
 };
 
 #endif // MQTT_MANAGER_H
