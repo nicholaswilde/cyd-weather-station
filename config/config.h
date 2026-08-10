@@ -13,6 +13,10 @@
 // #define WEATHER_API_LONGITUDE "-118.41625"
 #define WEATHER_API_LONGITUDE ""
 
+// City Code (For OpenWeatherMap only)
+// #define WEATHER_CITY_CODE "2643743" // London
+#define WEATHER_CITY_CODE ""
+
 // Open-Meteo API Settings
 #define WEATHER_UPDATE_INTERVAL_MINS 1
 
@@ -20,10 +24,10 @@
 // Note: We use POSIX strings for efficiency to avoid bundling a giant tzdata lookup table.
 // Find your region's POSIX string here: https://gist.github.com/alwynallan/24d96091655391107939
 #define NTP_SERVER "pool.ntp.org"
-// #define TIMEZONE_DEFAULT "UTC0"       // POSIX Timezone string
+#define TIMEZONE_DEFAULT "UTC0"       // POSIX Timezone string
 
 // US Eastern
-#define TIMEZONE_DEFAULT "EST5EDT,M3.2.0,M11.1.0"
+// #define TIMEZONE_DEFAULT "EST5EDT,M3.2.0,M11.1.0"
 // US Central
 // #define TIMEZONE_DEFAULT "CST6CDT,M3.2.0,M11.1.0"
 // US Mountain

@@ -47,9 +47,11 @@ private:
     DNSServer* _dnsServer = nullptr;
     WebServer* _webServer = nullptr;
     ImprovWiFi* _improv = nullptr;
-    void startScreenshotServer();
-    void stopScreenshotServer();
+    void startWebServer();
+    void stopWebServer();
     void handleScreenshot();
+    void handleSettings();
+    void handleSettingsSave();
     void registerOTARoutes();
 #endif
 };

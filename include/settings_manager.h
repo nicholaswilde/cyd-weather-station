@@ -25,6 +25,7 @@ private:
     bool _sdCacheEnabled;
     bool _screensaverEnabled;
     String _zipCode;
+    String _cityCode;
     String _latitude;
     String _longitude;
 
@@ -78,6 +79,9 @@ public:
 
     String getZipCode() const;
     void setZipCode(const String& zipCode);
+
+    String getCityCode() const;
+    void setCityCode(const String& cityCode);
 
     String getLatitude() const;
     void setLatitude(const String& latitude);

@@ -11,6 +11,7 @@
 #include <Update.h>
 #include "ui.h"
 #include "ota_html.h"
+#include "settings_html.h"
 #include <ArduinoJson.h>
 #endif
 
@@ -122,9 +123,7 @@ void WifiManager::update() {
                 Serial.print("[WiFi] Connected! IP address: ");
                 Serial.println(WiFi.localIP());
 #ifndef NATIVE_TEST
-                if (settings.getScreenshotServerEnabled()) {
-                    startScreenshotServer();
-                }
+                startWebServer();
 #endif
             } else if (status == WL_CONNECT_FAILED || status == WL_NO_SSID_AVAIL || (millis() - _connectionStartTime > _connectionTimeout)) {
                 Serial.println("[WiFi] Connection failed or timed out. Transitioning to AP Mode...");
@@ -138,7 +137,7 @@ void WifiManager::update() {
                 _lastReconnectAttempt = millis();
                 Serial.println("[WiFi] Connection lost.");
 #ifndef NATIVE_TEST
-                stopScreenshotServer();
+                stopWebServer();
 #endif
             } else {
 #ifndef NATIVE_TEST
@@ -165,9 +164,7 @@ void WifiManager::update() {
                 }
                 WiFi.softAPdisconnect(true);
                 WiFi.mode(WIFI_STA);
-                if (settings.getScreenshotServerEnabled()) {
-                    startScreenshotServer();
-                }
+                startWebServer();
 #endif
                 _state = WIFI_STATE_CONNECTED;
                 Serial.print("[WiFi] Connected! IP address: ");
@@ -356,6 +353,9 @@ void WifiManager::handleRoot() {
     html += "<label for='zip'>Zip Code (US Only)</label>";
     html += "<input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='" + settings.getZipCode() + "'>";
     
+    html += "<label for='city'>City ID (OpenWeatherMap)</label>";
+    html += "<input type='text' id='city' name='city' placeholder='e.g. 2643743' value='" + settings.getCityCode() + "'>";
+    
     html += "<label for='lat'>Latitude</label>";
     html += "<input type='text' id='lat' name='lat' placeholder='e.g. 34.1031' value='" + settings.getLatitude() + "'>";
     
@@ -381,6 +381,7 @@ void WifiManager::handleSave() {
     String ssid = _webServer->arg("ssid");
     String pass = _webServer->arg("pass");
     String zip = _webServer->arg("zip");
+    String city = _webServer->arg("city");
     String lat = _webServer->arg("lat");
     String lon = _webServer->arg("lon");
     String tz = _webServer->arg("tz");
@@ -408,6 +409,7 @@ void WifiManager::handleSave() {
     settings.setWifiSSID(ssid);
     settings.setWifiPassword(pass);
     settings.setZipCode(zip);
+    settings.setCityCode(city);
     settings.setLatitude(lat);
     settings.setLongitude(lon);
     settings.setTimezone(tz);
@@ -427,22 +429,19 @@ void WifiManager::handleNotFound() {
  * @brief Starts or stops the screenshot server based on the given flag.
  */
 void WifiManager::applyScreenshotServerSetting(bool enabled) {
-#ifndef NATIVE_TEST
-    if (enabled && _state == WIFI_STATE_CONNECTED) {
-        startScreenshotServer();
-    } else {
-        stopScreenshotServer();
-    }
-#endif
+    // Web server is always running in STA mode for settings.
+    // Screenshot endpoint checks this setting dynamically.
 }
 
 #ifndef NATIVE_TEST
-void WifiManager::startScreenshotServer() {
+void WifiManager::startWebServer() {
     if (_webServer) {
-        stopScreenshotServer();
+        stopWebServer();
     }
     _webServer = new WebServer(80);
     _webServer->on("/screenshot", [this]() { handleScreenshot(); });
+    _webServer->on("/settings", HTTP_GET, [this]() { handleSettings(); });
+    _webServer->on("/settings/save", HTTP_POST, [this]() { handleSettingsSave(); });
     _webServer->on("/api/config", [this]() {
         StaticJsonDocument<512> doc;
         doc["unit_system"] = settings.getUnitSystem();
@@ -487,16 +486,21 @@ void WifiManager::startScreenshotServer() {
     Serial.println("[WiFi] Screenshot server started on port 80.");
 }
 
-void WifiManager::stopScreenshotServer() {
+void WifiManager::stopWebServer() {
     if (_webServer) {
         _webServer->stop();
         delete _webServer;
         _webServer = nullptr;
-        Serial.println("[WiFi] Screenshot server stopped.");
+        Serial.println("[WiFi] Web server stopped.");
     }
 }
 
 void WifiManager::handleScreenshot() {
+    if (!settings.getScreenshotServerEnabled()) {
+        _webServer->send(403, "text/plain", "Forbidden: Screenshot server disabled in settings");
+        return;
+    }
+
     const char* tmpPath = "/~scr_tmp.bmp";
 
     // --- Capture the current screen to a temp BMP on SD first ---
@@ -572,5 +576,85 @@ void WifiManager::registerOTARoutes() {
             }
         }
     });
+}
+
+void WifiManager::handleSettings() {
+    String html = String(settings_html);
+    
+    html.replace("%UNIT_METRIC%", settings.getUnitSystem() == 0 ? "selected" : "");
+    html.replace("%UNIT_IMPERIAL%", settings.getUnitSystem() == 1 ? "selected" : "");
+    
+    html.replace("%THEME_MOCHA%", settings.getThemeFlavor() == 0 ? "selected" : "");
+    html.replace("%THEME_MACCHIATO%", settings.getThemeFlavor() == 1 ? "selected" : "");
+    html.replace("%THEME_FRAPPE%", settings.getThemeFlavor() == 2 ? "selected" : "");
+    html.replace("%THEME_LATTE%", settings.getThemeFlavor() == 3 ? "selected" : "");
+    
+    html.replace("%ORIENT_0%", settings.getScreenOrientation() == 0 ? "selected" : "");
+    html.replace("%ORIENT_1%", settings.getScreenOrientation() == 1 ? "selected" : "");
+    html.replace("%ORIENT_2%", settings.getScreenOrientation() == 2 ? "selected" : "");
+    html.replace("%ORIENT_3%", settings.getScreenOrientation() == 3 ? "selected" : "");
+    
+    html.replace("%BRIGHTNESS%", String(settings.getBrightness()));
+    html.replace("%AUTO_BRIGHTNESS%", settings.getAutoBrightness() ? "checked" : "");
+    html.replace("%SCREENSAVER_ENABLED%", settings.getScreensaverEnabled() ? "checked" : "");
+    
+    html.replace("%ZIP%", settings.getZipCode());
+    html.replace("%CITY%", settings.getCityCode());
+    html.replace("%LAT%", settings.getLatitude());
+    html.replace("%LON%", settings.getLongitude());
+    html.replace("%TZ%", settings.getTimezone());
+    
+    html.replace("%LED_ENABLED%", settings.getLedEnabled() ? "checked" : "");
+    html.replace("%LED_BRIGHTNESS%", String(settings.getLedBrightness()));
+    
+    html.replace("%MQTT_ENABLED%", settings.getMqttEnabled() ? "checked" : "");
+    html.replace("%SCREENSHOT_ENABLED%", settings.getScreenshotServerEnabled() ? "checked" : "");
+    html.replace("%SD_LOGGING%", settings.getSdLoggingEnabled() ? "checked" : "");
+    html.replace("%SD_CACHE%", settings.getSdCacheEnabled() ? "checked" : "");
+    
+    _webServer->send(200, "text/html", html);
+}
+
+void WifiManager::handleSettingsSave() {
+    if (_webServer->hasArg("unit_system")) settings.setUnitSystem(_webServer->arg("unit_system").toInt());
+    if (_webServer->hasArg("theme_flavor")) settings.setThemeFlavor(_webServer->arg("theme_flavor").toInt());
+    if (_webServer->hasArg("screen_orientation")) settings.setScreenOrientation(_webServer->arg("screen_orientation").toInt());
+    
+    if (_webServer->hasArg("brightness")) settings.setBrightness(_webServer->arg("brightness").toInt());
+    settings.setAutoBrightness(_webServer->hasArg("auto_brightness"));
+    settings.setScreensaverEnabled(_webServer->hasArg("screensaver_enabled"));
+    
+    if (_webServer->hasArg("zip")) settings.setZipCode(_webServer->arg("zip"));
+    if (_webServer->hasArg("city")) settings.setCityCode(_webServer->arg("city"));
+    if (_webServer->hasArg("lat")) settings.setLatitude(_webServer->arg("lat"));
+    if (_webServer->hasArg("lon")) settings.setLongitude(_webServer->arg("lon"));
+    if (_webServer->hasArg("tz")) settings.setTimezone(_webServer->arg("tz"));
+    
+    settings.setLedEnabled(_webServer->hasArg("led_enabled"));
+    if (_webServer->hasArg("led_brightness")) settings.setLedBrightness(_webServer->arg("led_brightness").toInt());
+    
+    settings.setMqttEnabled(_webServer->hasArg("mqtt_enabled"));
+    settings.setScreenshotServerEnabled(_webServer->hasArg("screenshot_server_enabled"));
+    settings.setSdLoggingEnabled(_webServer->hasArg("sd_logging_enabled"));
+    settings.setSdCacheEnabled(_webServer->hasArg("sd_cache_enabled"));
+
+    String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+    html += "<title>Settings Saved</title>";
+    html += "<style>";
+    html += "body { font-family: 'Inter', system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }";
+    html += ".card { background: #181825; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); border: 1px solid #313244; text-align: center; }";
+    html += "h2 { color: #a6e3a1; margin-top: 0; margin-bottom: 20px; }";
+    html += "p { color: #cdd6f4; margin-bottom: 20px; line-height: 1.5; }";
+    html += "</style></head><body>";
+    html += "<div class='card'>";
+    html += "<h2>Settings Saved</h2>";
+    html += "<p>Your device configuration has been updated.</p>";
+    html += "<p>Rebooting device...</p>";
+    html += "</div>";
+    html += "</body></html>";
+
+    _webServer->send(200, "text/html", html);
+    delay(2000);
+    ESP.restart();
 }
 #endif

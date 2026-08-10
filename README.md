@@ -90,10 +90,13 @@ The weather station periodically logs weather reports to a microSD card in CSV f
 
 The device supports capturing the current screen as a standard 24-bit BMP image via two methods:
 
-### Remote HTTP API & Screen Capture
+### Remote Settings & API
 
 > [!NOTE]
-> The screenshot server must be enabled in the **Settings tab** (`API Srv` toggle) and Wi-Fi must be connected. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
+> The screenshot API must be enabled in the **Settings tab** (`API Srv` toggle) and Wi-Fi must be connected. However, the Settings Web UI and Configuration API are always available while the device is connected to Wi-Fi. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
+
+**Settings Web UI:**
+Navigate to `http://<DEVICE_IP>/settings` in any browser to access a responsive, Catppuccin-themed form. Here you can dynamically configure all device parameters at runtime (Units, Theme, Brightness, Timezone, API Server, SD Settings, MQTT, etc.) and remotely save them to the device without needing to reflash the firmware.
 
 **Capture Screenshot:**
 ```bash
@@ -147,7 +150,11 @@ Serial output confirms the save:
 
 ### 1. Quick Install (Pre-compiled Binaries)
 
-You can flash the device directly from your terminal using the provided flash script. Replace `/dev/ttyUSB0` with your actual serial port. By default, it flashes the `cyd_28r` version, but you can specify the device as the first argument.
+**Option A: Web Flasher (Easiest)**
+You can easily flash the pre-compiled firmware directly from your browser using the [ESP32 Web Flasher](https://nicholaswilde.io/esp32-web-flasher/). This requires a Web Serial compatible browser (like Chrome or Edge).
+
+**Option B: Terminal Flash Script**
+Alternatively, you can flash the device directly from your terminal using the provided flash script. Replace `/dev/ttyUSB0` with your actual serial port. By default, it flashes the `cyd_28r` version, but you can specify the device as the first argument.
 
 ```bash
 # Flash the default cyd_28r (320x240 screen)
@@ -191,12 +198,15 @@ Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent com
 Static settings (location, update interval) live in [`config/config.h`](config/config.h). Runtime user preferences (units, brightness, theme, timezone) are changed via the on-device **Settings tab** and saved to flash.
 
 **Location:**
-Location (Zip Code or Coordinates) is configured dynamically via the **Captive Portal Wi-Fi Manager** when the device boots in AP mode. You can pre-configure the fallback defaults in `config/config.h`:
+Location (Zip Code, City Code, or Coordinates) is configured dynamically via the **Captive Portal Wi-Fi Manager** when the device boots in AP mode. You can pre-configure the fallback defaults in `config/config.h`:
 ```cpp
 // Default values (if not configured via Wi-Fi Setup)
 #define WEATHER_ZIP_CODE  "90210"
 #define WEATHER_API_LATITUDE  ""
 #define WEATHER_API_LONGITUDE ""
+
+// City Code (For OpenWeatherMap only)
+#define WEATHER_CITY_CODE ""
 ```
 *(Note: If you leave these fields empty in both the code and the Wi-Fi Setup page, the device will automatically detect your location via IP Geolocation).*
 

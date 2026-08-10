@@ -19,3 +19,11 @@
   ```bash
   rtk gh issue list | cat
   ```
+
+## Issue Creation
+- When asked to create an issue, use your best guess to determine if it is a new feature or a bug fix.
+- Prefix the issue title with `[feat]: <description>` or `[bug]: <description>`.
+- Add the `enhancement` or `bug` label to the issue accordingly using the `--label` flag with the `gh` command.
+
+## Issue Resolution & Testing
+- When addressing or fixing GitHub issues, **always** create corresponding regression tests along with the issue implementations or fixes to prevent future regressions.

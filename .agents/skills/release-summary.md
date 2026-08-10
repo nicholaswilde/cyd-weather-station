@@ -32,7 +32,6 @@ This skill retrieves the git commit logs for a specified range (or defaults to t
      - Use backticks for technical terms (e.g., `TFT_eSPI`, `LVGL`, `ArduinoJson`, `AsyncTCP`, `AsyncMqttClient`, `DNSServer`, `WebServer`, `esptool`).
    - Format restrictions:
      - Do not include line numbers in the output.
-     - Always wrap the final release summary inside a ````markdown ```` code block so it can be easily copied.
      - Omit sections that have no matching changes.
      - Do not include git commit hashes.
      - Maintain a direct, professional, and technical tone.
@@ -41,3 +40,9 @@ This skill retrieves the git commit logs for a specified range (or defaults to t
    - At the bottom of the summary, add a comparison link:
      `**Full Changelog**: https://github.com/nicholaswilde/cyd-weather-station/compare/<url_range>`
      where `<url_range>` is the range with `..` replaced by `...` (e.g., `v0.1.2...v0.1.3` or `HEAD`).
+
+5. **Update Draft Release via GitHub CLI:**
+   - Save the generated markdown summary to a temporary file (e.g., `release_notes.md`).
+   - Run the GitHub CLI to edit the existing draft release using the `LATEST` tag and the generated notes:
+     `rtk gh release edit <LATEST> --draft -F release_notes.md | cat`
+   - Clean up the temporary file and output the URL of the updated draft release to the user.
