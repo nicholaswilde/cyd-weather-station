@@ -90,10 +90,13 @@ The weather station periodically logs weather reports to a microSD card in CSV f
 
 The device supports capturing the current screen as a standard 24-bit BMP image via two methods:
 
-### Remote HTTP API & Screen Capture
+### Remote Settings & API
 
 > [!NOTE]
-> The screenshot server must be enabled in the **Settings tab** (`API Srv` toggle) and Wi-Fi must be connected. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
+> The screenshot API must be enabled in the **Settings tab** (`API Srv` toggle) and Wi-Fi must be connected. However, the Settings Web UI and Configuration API are always available while the device is connected to Wi-Fi. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
+
+**Settings Web UI:**
+Navigate to `http://<DEVICE_IP>/settings` in any browser to access a responsive, Catppuccin-themed form. Here you can dynamically configure all device parameters at runtime (Units, Theme, Brightness, Timezone, API Server, SD Settings, MQTT, etc.) and remotely save them to the device without needing to reflash the firmware.
 
 **Capture Screenshot:**
 ```bash
