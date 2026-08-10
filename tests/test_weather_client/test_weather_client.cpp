@@ -251,6 +251,32 @@ void test_weather_client_parse_owm_json_hourly(void) {
     TEST_ASSERT_EQUAL(80, data.hourly[23].precipitationProbability);
 }
 
+void test_weather_client_parse_owm_json_city_override(void) {
+    settings.setZipCode(""); settings.setLatitude("33.60002"); settings.setLongitude("-117.67200"); WeatherClient client;
+    
+    // Set _cityName via mock fetchIpLocation (sets it to "San Francisco")
+    String latStr, lonStr, city;
+    client.fetchIpLocation(latStr, lonStr, city);
+
+    WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {} };
+    const char* owmJson = "{"
+        "\"list\":["
+            "{"
+                "\"dt_txt\":\"2026-07-11 12:00:00\","
+                "\"main\":{\"temp\":72.5,\"humidity\":50,\"temp_min\":68.0,\"temp_max\":75.0},"
+                "\"wind\":{\"speed\":5.5,\"deg\":180},"
+                "\"weather\":[{\"id\":800,\"description\":\"clear sky\"}]"
+            "}"
+        "],"
+        "\"city\":{\"name\":\"London\"}"
+    "}";
+
+    bool parsed = client.parseOwmJson(owmJson, data);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_TRUE(data.valid);
+    TEST_ASSERT_EQUAL_STRING("London", data.cityName.c_str());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -264,5 +290,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_is_location_empty);
     RUN_TEST(test_weather_client_parse_weather_json_hourly);
     RUN_TEST(test_weather_client_parse_owm_json_hourly);
+    RUN_TEST(test_weather_client_parse_owm_json_city_override);
     return UNITY_END();
 }

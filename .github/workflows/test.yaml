@@ -10,6 +10,12 @@ on:
       - '**.h'
       - '**.ini'
   pull_request:
+    branches:
+      - main
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.ini'
   workflow_dispatch:
 
 jobs:
