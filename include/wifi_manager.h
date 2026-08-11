@@ -31,6 +31,7 @@ public:
 private:
     void startAPMode();
     void handleRoot();
+    void handleLanding();
     void handleSave();
     void handleNotFound();
 

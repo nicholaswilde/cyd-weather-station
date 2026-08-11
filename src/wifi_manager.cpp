@@ -12,6 +12,7 @@
 #include "ui.h"
 #include "ota_html.h"
 #include "settings_html.h"
+#include "landing_html.h"
 #include "version.h"
 #include <ArduinoJson.h>
 #endif
@@ -446,6 +447,7 @@ void WifiManager::startWebServer() {
         stopWebServer();
     }
     _webServer = new WebServer(80);
+    _webServer->on("/", [this]() { handleLanding(); });
     _webServer->on("/screenshot", [this]() { handleScreenshot(); });
     _webServer->on("/settings", HTTP_GET, [this]() { handleSettings(); });
     _webServer->on("/settings/save", HTTP_POST, [this]() { handleSettingsSave(); });
@@ -730,5 +732,12 @@ void WifiManager::handleSettingsSave() {
     _webServer->send(200, "text/html", html);
     delay(2000);
     ESP.restart();
+}
+
+void WifiManager::handleLanding() {
+    String html = landing_html;
+    html.replace("%APP_VERSION%", APP_VERSION);
+    html.replace("%SCREENSHOT_DISABLED%", settings.getScreenshotServerEnabled() ? "" : "disabled");
+    _webServer->send(200, "text/html", html);
 }
 #endif
