@@ -96,7 +96,7 @@ The device supports capturing the current screen as a standard 24-bit BMP image 
 > The screenshot API must be enabled in the **Settings tab** (`API Srv` toggle) and Wi-Fi must be connected. However, the Settings Web UI and Configuration API are always available while the device is connected to Wi-Fi. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
 
 **Settings Web UI:**
-Navigate to `http://<DEVICE_IP>/settings` in any browser to access a responsive, Catppuccin-themed form. Here you can dynamically configure all device parameters at runtime (Units, Theme, Brightness, Timezone, API Server, SD Settings, MQTT, etc.) and remotely save them to the device without needing to reflash the firmware.
+Navigate to `http://<DEVICE_IP>/settings` in any browser to access a responsive, Catppuccin-themed form. Here you can dynamically configure all device parameters at runtime (Units, Theme, Screen & LED Brightness, Timezone, Weather Update Interval, Screensaver Timeout, Static IP, AP Password, API Server, SD Settings, MQTT, etc.) and remotely save them to the device without needing to reflash the firmware.
 
 **Capture Screenshot:**
 ```bash
@@ -186,6 +186,7 @@ Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent com
 
    // (Optional) Secure the configuration AP with a password (at least 8 chars).
    // Leave blank ("") or comment out to run an open Access Point.
+   // This can also be changed at runtime via the Web Settings UI.
    #define AP_PASSWORD ""
 
    // (Optional) Set your API key here to use OpenWeatherMap instead of Open-Meteo.
@@ -211,18 +212,20 @@ Location (Zip Code, City Code, or Coordinates) is configured dynamically via the
 *(Note: If you leave these fields empty in both the code and the Wi-Fi Setup page, the device will automatically detect your location via IP Geolocation).*
 
 **Weather update interval:**
+You can change the update interval dynamically via the Web Settings UI, or set the default fallback here:
 ```cpp
 #define WEATHER_UPDATE_INTERVAL_MINS 15
 ```
 
 **Screensaver:**
+The screensaver timeout can be adjusted dynamically via the Web Settings UI. Defaults are configured here:
 ```cpp
 #define SCREENSAVER_ENABLED     true
 #define SCREENSAVER_TIMEOUT_MS  300000 // 5 minutes (in milliseconds)
 ```
 
 **Static IP:**
-Uncomment the static IP settings block in `config/config.h` to assign a static IP to the device. If kept commented out, the device will default to DHCP:
+Static IP can be configured directly in the Web Settings UI at runtime. Alternatively, you can uncomment the static IP settings block in `config/config.h` to set the default fallback values. If kept blank or commented out, the device will default to DHCP:
 ```cpp
 // #define STATIC_IP          "192.168.1.100"
 // #define STATIC_GATEWAY     "192.168.1.1"
