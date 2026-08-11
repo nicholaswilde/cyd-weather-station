@@ -319,6 +319,7 @@ void WifiManager::handleRoot() {
     html += "select:focus, input:focus { outline: none; border-color: #f5c2e7; }";
     html += "button { width: 100%; padding: 12px; background: #cba6f7; border: none; border-radius: 6px; color: #11111b; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; }";
     html += "button:hover { background: #f5c2e7; }";
+    html += ".section-title { color: #89b4fa; font-size: 18px; margin-top: 20px; margin-bottom: 15px; border-bottom: 1px solid #313244; padding-bottom: 5px; }";
     html += ".net-list { margin-bottom: 20px; max-height: 150px; overflow-y: auto; border: 1px solid #313244; border-radius: 6px; padding: 10px; background: #11111b; }";
     html += ".net-item { display: flex; justify-content: space-between; padding: 8px; cursor: pointer; border-bottom: 1px solid #1e1e2e; }";
     html += ".net-item:last-child { border-bottom: none; }";
@@ -331,6 +332,8 @@ void WifiManager::handleRoot() {
     html += "<div class='card'>";
     html += "<h2>Wi-Fi Configuration</h2>";
     html += "<form method='POST' action='/save'>";
+    
+    html += "<div class='section-title' style='margin-top: 0;'>Wi-Fi Connection</div>";
     
     html += "<div style='display: flex; justify-content: space-between; align-items: center;'>";
     html += "<label style='margin-bottom: 0;'>Select Network</label>";
@@ -348,8 +351,12 @@ void WifiManager::handleRoot() {
     html += "<label for='pass'>Password</label>";
     html += "<input type='password' id='pass' name='pass' placeholder='Password'>";
     
+    html += "<div class='section-title'>Weather Service</div>";
+    
     html += "<label for='owm_api'>OpenWeatherMap API Key</label>";
     html += "<input type='password' id='owm_api' name='owm_api' placeholder='API Key' value='" + settings.getOwmApiKey() + "'>";
+    
+    html += "<div class='section-title'>Location & Time</div>";
     
     html += "<label for='zip'>Zip Code (US Only)</label>";
     html += "<input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='" + settings.getZipCode() + "'>";
