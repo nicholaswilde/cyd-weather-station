@@ -24,6 +24,8 @@ input[type='checkbox'] { width: auto; margin-right: 10px; margin-bottom: 0; tran
 button { width: 100%; padding: 12px; background: #cba6f7; border: none; border-radius: 6px; color: #11111b; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
 button:hover { background: #f5c2e7; }
 .section-title { color: #89b4fa; font-size: 18px; margin-top: 20px; margin-bottom: 15px; border-bottom: 1px solid #313244; padding-bottom: 5px; }
+.btn-back { display: block; margin-top: 15px; color: #a6adc8; text-decoration: none; font-size: 14px; text-align: center; transition: color 0.2s; }
+.btn-back:hover { color: #cdd6f4; }
 </style>
 </head>
 <body>
@@ -170,6 +172,7 @@ button:hover { background: #f5c2e7; }
 
 <button type='submit'>Save Settings & Reboot</button>
 </form>
+<a href="/" class="btn-back">&larr; Back to Dashboard</a>
 </div>
 <script>
 function toggleMqttSettings() {

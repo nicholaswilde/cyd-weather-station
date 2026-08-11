@@ -104,6 +104,18 @@ button:disabled {
 .success-text {
     color: #a6e3a1;
 }
+.btn-back {
+    display: block;
+    margin-top: 15px;
+    color: #a6adc8;
+    text-decoration: none;
+    font-size: 14px;
+    text-align: center;
+    transition: color 0.2s;
+}
+.btn-back:hover {
+    color: #cdd6f4;
+}
 </style>
 </head>
 <body>
@@ -122,6 +134,8 @@ button:disabled {
         </div>
         <div class="status-text" id="status-text">Uploading: 0%</div>
     </div>
+    
+    <a href="/" class="btn-back">&larr; Back to Dashboard</a>
 </div>
 
 <script>
