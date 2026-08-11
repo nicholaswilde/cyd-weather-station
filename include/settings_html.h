@@ -35,8 +35,8 @@ button:hover { background: #f5c2e7; }
 <div class='section-title' style='margin-top: 0;'>Display & UI</div>
 <label for='unit_system'>Unit System</label>
 <select id='unit_system' name='unit_system'>
-    <option value='0' %UNIT_METRIC%>Metric (°C, m/s)</option>
-    <option value='1' %UNIT_IMPERIAL%>Imperial (°F, mph)</option>
+    <option value='1' %UNIT_METRIC%>Metric (Celsius, m/s)</option>
+    <option value='2' %UNIT_IMPERIAL%>Imperial (Fahrenheit, mph)</option>
 </select>
 
 <label for='theme_flavor'>Theme (Catppuccin)</label>

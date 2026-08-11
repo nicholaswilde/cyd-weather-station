@@ -615,8 +615,8 @@ void WifiManager::handleSettings() {
     html.replace("%APP_VERSION%", "unknown");
 #endif
 
-    html.replace("%UNIT_METRIC%", settings.getUnitSystem() == 0 ? "selected" : "");
-    html.replace("%UNIT_IMPERIAL%", settings.getUnitSystem() == 1 ? "selected" : "");
+    html.replace("%UNIT_METRIC%", settings.getUnitSystem() == UNIT_METRIC ? "selected" : "");
+    html.replace("%UNIT_IMPERIAL%", settings.getUnitSystem() == UNIT_IMPERIAL ? "selected" : "");
     
     html.replace("%THEME_MOCHA%", settings.getThemeFlavor() == 0 ? "selected" : "");
     html.replace("%THEME_MACCHIATO%", settings.getThemeFlavor() == 1 ? "selected" : "");
