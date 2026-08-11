@@ -9,6 +9,7 @@ class WeatherLogger {
 public:
     static String formatCsvRow(const struct tm& timeinfo, const WeatherData& data);
     static bool logWeather(const struct tm& timeinfo, const WeatherData& data);
+    static bool clearLogs();
 };
 
 #endif // WEATHER_LOGGER_H

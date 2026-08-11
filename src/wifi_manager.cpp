@@ -15,6 +15,8 @@
 #include "landing_html.h"
 #include "version.h"
 #include <ArduinoJson.h>
+#include "weather_cache.h"
+#include "weather_logger.h"
 #endif
 
 extern SettingsManager settings;
@@ -467,6 +469,54 @@ void WifiManager::startWebServer() {
         delay(1000);
         ESP.restart();
     });
+    _webServer->on("/clear_cache", [this]() {
+        bool success = WeatherCache::clearCache();
+        String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+        html += "<title>Cache Cleared</title>";
+        html += "<style>";
+        html += "body { font-family: 'Inter', system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }";
+        html += ".card { background: #181825; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); border: 1px solid #313244; text-align: center; }";
+        html += "h2 { margin-top: 0; margin-bottom: 20px; }";
+        html += "p { color: #cdd6f4; margin-bottom: 20px; line-height: 1.5; }";
+        html += "</style>";
+        html += "<meta http-equiv=\"refresh\" content=\"3;url=/\">";
+        html += "</head><body>";
+        html += "<div class='card'>";
+        if (success) {
+            html += "<h2 style='color: #a6e3a1;'>Cache Cleared</h2>";
+            html += "<p>The SD card cache has been successfully cleared.</p>";
+        } else {
+            html += "<h2 style='color: #f38ba8;'>Failed to Clear Cache</h2>";
+            html += "<p>An error occurred while clearing the SD card cache.</p>";
+        }
+        html += "<p>Returning to dashboard...</p>";
+        html += "</div></body></html>";
+        _webServer->send(200, "text/html", html);
+    });
+    _webServer->on("/clear_logs", [this]() {
+        bool success = WeatherLogger::clearLogs();
+        String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+        html += "<title>Logs Cleared</title>";
+        html += "<style>";
+        html += "body { font-family: 'Inter', system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }";
+        html += ".card { background: #181825; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); border: 1px solid #313244; text-align: center; }";
+        html += "h2 { margin-top: 0; margin-bottom: 20px; }";
+        html += "p { color: #cdd6f4; margin-bottom: 20px; line-height: 1.5; }";
+        html += "</style>";
+        html += "<meta http-equiv=\"refresh\" content=\"3;url=/\">";
+        html += "</head><body>";
+        html += "<div class='card'>";
+        if (success) {
+            html += "<h2 style='color: #a6e3a1;'>Logs Cleared</h2>";
+            html += "<p>The SD card logs have been successfully cleared.</p>";
+        } else {
+            html += "<h2 style='color: #f38ba8;'>Failed to Clear Logs</h2>";
+            html += "<p>An error occurred while clearing the SD card logs.</p>";
+        }
+        html += "<p>Returning to dashboard...</p>";
+        html += "</div></body></html>";
+        _webServer->send(200, "text/html", html);
+    });
     _webServer->on("/screenshot", [this]() { handleScreenshot(); });
     _webServer->on("/settings", HTTP_GET, [this]() { handleSettings(); });
     _webServer->on("/settings/save", HTTP_POST, [this]() { handleSettingsSave(); });
@@ -740,11 +790,21 @@ void WifiManager::handleSettingsSave() {
     html += ".card { background: #181825; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); border: 1px solid #313244; text-align: center; }";
     html += "h2 { color: #a6e3a1; margin-top: 0; margin-bottom: 20px; }";
     html += "p { color: #cdd6f4; margin-bottom: 20px; line-height: 1.5; }";
-    html += "</style></head><body>";
+    html += "</style>";
+    html += "<script>";
+    html += "setTimeout(() => {";
+    html += "  let checkInterval = setInterval(() => {";
+    html += "    fetch('/').then(response => {";
+    html += "      if (response.ok) { clearInterval(checkInterval); window.location.href = '/'; }";
+    html += "    }).catch(e => {});";
+    html += "  }, 2000);";
+    html += "}, 5000);"; // Wait 5 seconds before starting to poll
+    html += "</script>";
+    html += "</head><body>";
     html += "<div class='card'>";
     html += "<h2>Settings Saved</h2>";
     html += "<p>Your device configuration has been updated.</p>";
-    html += "<p>Rebooting device...</p>";
+    html += "<p>Rebooting device... You will be redirected automatically once it comes back online.</p>";
     html += "</div>";
     html += "</body></html>";
 

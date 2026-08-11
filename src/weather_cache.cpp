@@ -83,3 +83,31 @@ bool WeatherCache::loadCache(WeatherData& data) {
     Serial.println("[WeatherCache] Successfully restored weather data from SD cache.");
     return true;
 }
+
+bool WeatherCache::clearCache() {
+    bool wasMounted = SdCardManager::isMounted();
+    if (!wasMounted) {
+        if (!SdCardManager::begin()) {
+            Serial.println("[WeatherCache] Error: SD card not mounted, cannot clear cache.");
+            return false;
+        }
+    }
+
+    bool success = true;
+    if (SD.exists("/weather_cache.json")) {
+        success = SD.remove("/weather_cache.json");
+        if (success) {
+            Serial.println("[WeatherCache] Successfully cleared weather cache from SD.");
+        } else {
+            Serial.println("[WeatherCache] Error: Failed to remove cache file.");
+        }
+    } else {
+        Serial.println("[WeatherCache] Cache file does not exist, nothing to clear.");
+    }
+
+    if (!wasMounted) {
+        SdCardManager::end();
+    }
+    
+    return success;
+}

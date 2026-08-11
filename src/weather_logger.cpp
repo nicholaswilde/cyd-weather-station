@@ -47,3 +47,31 @@ bool WeatherLogger::logWeather(const struct tm& timeinfo, const WeatherData& dat
     Serial.printf("[WeatherLogger] Successfully logged weather record: %s", row.c_str());
     return true;
 }
+
+bool WeatherLogger::clearLogs() {
+    bool wasMounted = SdCardManager::isMounted();
+    if (!wasMounted) {
+        if (!SdCardManager::begin()) {
+            Serial.println("[WeatherLogger] Error: SD card not mounted, cannot clear logs.");
+            return false;
+        }
+    }
+
+    bool success = true;
+    if (SD.exists("/weather_history.csv")) {
+        success = SD.remove("/weather_history.csv");
+        if (success) {
+            Serial.println("[WeatherLogger] Successfully cleared weather history from SD.");
+        } else {
+            Serial.println("[WeatherLogger] Error: Failed to remove history file.");
+        }
+    } else {
+        Serial.println("[WeatherLogger] History file does not exist, nothing to clear.");
+    }
+
+    if (!wasMounted) {
+        SdCardManager::end();
+    }
+    
+    return success;
+}

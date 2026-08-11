@@ -7,6 +7,7 @@ class WeatherCache {
 public:
     static bool saveCache(const WeatherData& data);
     static bool loadCache(WeatherData& data);
+    static bool clearCache();
 };
 
 #endif // WEATHER_CACHE_H

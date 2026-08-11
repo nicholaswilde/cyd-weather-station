@@ -39,7 +39,8 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
 - **Web Dashboard & Settings Portal**:
   - Access `http://<DEVICE_IP>/` in any browser for a central Catppuccin-themed dashboard.
-  - Includes direct navigation links to Device Settings (`/settings`), Firmware Updates (`/update`), Live Screenshots (`/screenshot`), and Factory Reset (`/reset`).
+  - Includes direct navigation links to Device Settings (`/settings`), Firmware Updates (`/update`), Live Screenshots (`/screenshot`), Clear SD Logs (`/clear_logs`), Clear SD Cache (`/clear_cache`), and Factory Reset (`/reset`).
+  - Settings portal automatically redirects back to the main dashboard after saving settings once the device comes back online.
 - **Wi-Fi AP Captive Portal Fallback**:
   - Automatically hosts an open Soft AP (`cyd-weather-station-<mac_short>`) if connection fails or times out after 30 seconds on boot.
   - Runs a captive portal configuration web server and DNS redirector on `192.168.4.1` for selecting networks, setting Wi-Fi credentials, and configuring your location (Zip Code or Coordinates).
@@ -102,6 +103,8 @@ Navigate to `http://<DEVICE_IP>/` in any browser to access the central Catppucci
 - **⚙️ Device Settings (`/settings`)**: Configure all device parameters at runtime (Units, Theme, Screen & LED Brightness, Timezone, Weather Update Interval, Screensaver Timeout, Static IP, AP Password, API Server, SD Settings, MQTT, etc.) and save them without reflashing.
 - **🔄 Firmware Update (`/update`)**: Flash new firmware binaries wirelessly.
 - **📸 View Screenshot (`/screenshot`)**: Stream a pixel-perfect image of the current screen (if enabled). Includes inline status indicators and help prompts.
+- **🗑️ Clear SD Logs (`/clear_logs`)**: Delete the weather history CSV file (`/weather_history.csv`) stored on the microSD card.
+- **🗑️ Clear SD Cache (`/clear_cache`)**: Delete the weather cache JSON file (`/weather_cache.json`) stored on the microSD card.
 - **⚠️ Factory Reset (`/reset`)**: Completely erase NVS settings and saved Wi-Fi credentials to reboot the device into AP Setup mode.
 
 **Capture Screenshot:**
