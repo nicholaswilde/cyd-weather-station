@@ -55,10 +55,10 @@ button:hover { background: #f5c2e7; }
     <option value='3' %ORIENT_3%>Landscape Inverted (270°)</option>
 </select>
 
-<label for='brightness'>Screen Brightness (1-255)</label>
+<label for='brightness'>Screen Brightness (10-100%)</label>
 <div class='slider-group'>
-    <input type='range' id='brightness_slider' min='1' max='255' value='%BRIGHTNESS%' oninput='document.getElementById("brightness").value = this.value'>
-    <input type='number' id='brightness' name='brightness' min='1' max='255' value='%BRIGHTNESS%' oninput='document.getElementById("brightness_slider").value = this.value'>
+    <input type='range' id='brightness_slider' min='10' max='100' value='%BRIGHTNESS%' oninput='document.getElementById("brightness").value = this.value'>
+    <input type='number' id='brightness' name='brightness' min='10' max='100' value='%BRIGHTNESS%' oninput='document.getElementById("brightness_slider").value = this.value'>
 </div>
 
 <div class='checkbox-group'>
@@ -104,10 +104,10 @@ button:hover { background: #f5c2e7; }
     <label for='led_enabled'>RGB LED Enabled</label>
 </div>
 
-<label for='led_brightness'>LED Brightness (0-255)</label>
+<label for='led_brightness'>LED Brightness (0-100%)</label>
 <div class='slider-group'>
-    <input type='range' id='led_brightness_slider' min='0' max='255' value='%LED_BRIGHTNESS%' oninput='document.getElementById("led_brightness").value = this.value'>
-    <input type='number' id='led_brightness' name='led_brightness' min='0' max='255' value='%LED_BRIGHTNESS%' oninput='document.getElementById("led_brightness_slider").value = this.value'>
+    <input type='range' id='led_brightness_slider' min='0' max='100' value='%LED_BRIGHTNESS%' oninput='document.getElementById("led_brightness").value = this.value'>
+    <input type='number' id='led_brightness' name='led_brightness' min='0' max='100' value='%LED_BRIGHTNESS%' oninput='document.getElementById("led_brightness_slider").value = this.value'>
 </div>
 
 <div class='checkbox-group'>

@@ -465,7 +465,7 @@ void WifiManager::startWebServer() {
         doc["api_server_enabled"] = settings.getApiServerEnabled();
         doc["screen_orientation"] = settings.getScreenOrientation();
         doc["led_enabled"] = settings.getLedEnabled();
-        doc["led_brightness"] = settings.getLedBrightness();
+        doc["led_brightness"] = (settings.getLedBrightness() * 100) / 255;
         doc["mqtt_enabled"] = settings.getMqttEnabled();
         doc["wifi_ssid"] = settings.getWifiSSID();
         doc["sd_cache_enabled"] = settings.getSdCacheEnabled();
@@ -643,7 +643,7 @@ void WifiManager::handleSettings() {
     html.replace("%UPDATE_INTERVAL%", String(settings.getWeatherUpdateInterval()));
     
     html.replace("%LED_ENABLED%", settings.getLedEnabled() ? "checked" : "");
-    html.replace("%LED_BRIGHTNESS%", String(settings.getLedBrightness()));
+    html.replace("%LED_BRIGHTNESS%", String((settings.getLedBrightness() * 100) / 255));
     
     html.replace("%MQTT_ENABLED%", settings.getMqttEnabled() ? "checked" : "");
     html.replace("%MQTT_SERVER%", settings.getMqttServer());
@@ -673,6 +673,10 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("screen_orientation")) settings.setScreenOrientation(_webServer->arg("screen_orientation").toInt());
     
     if (_webServer->hasArg("brightness")) settings.setBrightness(_webServer->arg("brightness").toInt());
+    if (_webServer->hasArg("led_brightness")) {
+        int pct = _webServer->arg("led_brightness").toInt();
+        settings.setLedBrightness((pct * 255) / 100);
+    }
     settings.setAutoBrightness(_webServer->hasArg("auto_brightness"));
     settings.setScreensaverEnabled(_webServer->hasArg("screensaver_enabled"));
     if (_webServer->hasArg("screensaver_timeout")) settings.setScreensaverTimeout(_webServer->arg("screensaver_timeout").toInt() * 60000);
@@ -687,7 +691,7 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("update_interval")) settings.setWeatherUpdateInterval(_webServer->arg("update_interval").toInt());
     
     settings.setLedEnabled(_webServer->hasArg("led_enabled"));
-    if (_webServer->hasArg("led_brightness")) settings.setLedBrightness(_webServer->arg("led_brightness").toInt());
+
     
     settings.setMqttEnabled(_webServer->hasArg("mqtt_enabled"));
     if (_webServer->hasArg("mqtt_server")) settings.setMqttServer(_webServer->arg("mqtt_server"));
