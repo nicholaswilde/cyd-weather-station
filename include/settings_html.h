@@ -51,8 +51,8 @@ button:hover { background: #f5c2e7; }
 <select id='screen_orientation' name='screen_orientation'>
     <option value='0' %ORIENT_0%>Portrait (0°)</option>
     <option value='1' %ORIENT_1%>Landscape (90°)</option>
-    <option value='2' %ORIENT_2%>Portrait Inverted (180°)</option>
-    <option value='3' %ORIENT_3%>Landscape Inverted (270°)</option>
+    <option value='2' %ORIENT_2%>Portrait Rev (180°)</option>
+    <option value='3' %ORIENT_3%>Landscape Rev (270°)</option>
 </select>
 
 <label for='brightness'>Screen Brightness (10-100%)</label>
