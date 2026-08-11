@@ -41,10 +41,10 @@ button:hover { background: #f5c2e7; }
 
 <label for='theme_flavor'>Theme (Catppuccin)</label>
 <select id='theme_flavor' name='theme_flavor'>
-    <option value='0' %THEME_MOCHA%>Mocha</option>
-    <option value='1' %THEME_MACCHIATO%>Macchiato</option>
-    <option value='2' %THEME_FRAPPE%>Frappe</option>
-    <option value='3' %THEME_LATTE%>Latte</option>
+    <option value='1' %THEME_MOCHA%>Mocha</option>
+    <option value='2' %THEME_MACCHIATO%>Macchiato</option>
+    <option value='3' %THEME_FRAPPE%>Frappe</option>
+    <option value='4' %THEME_LATTE%>Latte</option>
 </select>
 
 <label for='screen_orientation'>Screen Orientation</label>

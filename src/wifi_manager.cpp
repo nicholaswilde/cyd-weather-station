@@ -618,10 +618,10 @@ void WifiManager::handleSettings() {
     html.replace("%UNIT_METRIC%", settings.getUnitSystem() == UNIT_METRIC ? "selected" : "");
     html.replace("%UNIT_IMPERIAL%", settings.getUnitSystem() == UNIT_IMPERIAL ? "selected" : "");
     
-    html.replace("%THEME_MOCHA%", settings.getThemeFlavor() == 0 ? "selected" : "");
-    html.replace("%THEME_MACCHIATO%", settings.getThemeFlavor() == 1 ? "selected" : "");
-    html.replace("%THEME_FRAPPE%", settings.getThemeFlavor() == 2 ? "selected" : "");
-    html.replace("%THEME_LATTE%", settings.getThemeFlavor() == 3 ? "selected" : "");
+    html.replace("%THEME_MOCHA%", settings.getThemeFlavor() == CATPPUCCIN_MOCHA ? "selected" : "");
+    html.replace("%THEME_MACCHIATO%", settings.getThemeFlavor() == CATPPUCCIN_MACCHIATO ? "selected" : "");
+    html.replace("%THEME_FRAPPE%", settings.getThemeFlavor() == CATPPUCCIN_FRAPPE ? "selected" : "");
+    html.replace("%THEME_LATTE%", settings.getThemeFlavor() == CATPPUCCIN_LATTE ? "selected" : "");
     
     html.replace("%ORIENT_0%", settings.getScreenOrientation() == 0 ? "selected" : "");
     html.replace("%ORIENT_1%", settings.getScreenOrientation() == 1 ? "selected" : "");
