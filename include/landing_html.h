@@ -26,7 +26,7 @@ p.subtitle { color: #a6adc8; margin-top: 0; margin-bottom: 30px; font-size: 15px
 </head>
 <body>
 <div class='card'>
-<h1>CYD Weather</h1>
+<h1>CYD Weather Station</h1>
 <p class='subtitle'>Version %APP_VERSION%</p>
 
 <a href="/settings" class="btn btn-settings">⚙️ Device Settings</a>
