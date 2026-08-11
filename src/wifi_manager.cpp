@@ -455,6 +455,18 @@ void WifiManager::startWebServer() {
     }
     _webServer = new WebServer(80);
     _webServer->on("/", [this]() { handleLanding(); });
+    _webServer->on("/reset", [this]() {
+        settings.factoryReset();
+        WiFi.disconnect(true, true);
+        String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+        html += "<title>CYD Weather Station</title>";
+        html += "<style>body { font-family: 'Inter', sans-serif; background: #1e1e2e; color: #cdd6f4; text-align: center; padding: 50px; }</style>";
+        html += "<meta http-equiv=\"refresh\" content=\"5;url=/\">";
+        html += "</head><body><h2 style='color: #f5c2e7;'>Factory Reset Complete</h2><p>The device is restarting in AP Setup mode...</p></body></html>";
+        _webServer->send(200, "text/html", html);
+        delay(1000);
+        ESP.restart();
+    });
     _webServer->on("/screenshot", [this]() { handleScreenshot(); });
     _webServer->on("/settings", HTTP_GET, [this]() { handleSettings(); });
     _webServer->on("/settings/save", HTTP_POST, [this]() { handleSettingsSave(); });

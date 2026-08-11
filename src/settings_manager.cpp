@@ -533,3 +533,10 @@ void SettingsManager::setApPassword(const String& password) {
         prefs.putString("ap_pass", _apPassword); prefs.end();
     }
 }
+
+void SettingsManager::factoryReset() {
+    Preferences prefs;
+    prefs.begin("settings", false);
+    prefs.clear();
+    prefs.end();
+}

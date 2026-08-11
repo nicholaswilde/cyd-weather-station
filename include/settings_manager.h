@@ -124,6 +124,8 @@ public:
     const String& getApPassword() const;
     void setApPassword(const String& password);
 
+    void factoryReset();
+
     const String& getZipCode() const;
     void setZipCode(const String& zipCode);
 

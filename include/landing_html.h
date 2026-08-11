@@ -22,6 +22,8 @@ p.subtitle { color: #a6adc8; margin-top: 0; margin-bottom: 30px; font-size: 15px
 .btn-screenshot { background: #f5c2e7; }
 .btn-screenshot:hover { background: #f5e0dc; }
 .btn-screenshot.disabled { background: #45475a; color: #a6adc8; cursor: not-allowed; pointer-events: none; }
+.btn-reset { background: #f38ba8; margin-top: 30px; }
+.btn-reset:hover { background: #eba0ac; }
 </style>
 </head>
 <body>
@@ -33,6 +35,8 @@ p.subtitle { color: #a6adc8; margin-top: 0; margin-bottom: 30px; font-size: 15px
 <a href="/update" class="btn btn-update">🔄 Firmware Update</a>
 <a href="/screenshot" class="btn btn-screenshot %SCREENSHOT_DISABLED%" target="_blank">📸 View Screenshot</a>
 %SCREENSHOT_HELP_TEXT%
+
+<a href="/reset" class="btn btn-reset" onclick="return confirm('Are you sure you want to factory reset this device? All settings and Wi-Fi credentials will be erased and the device will restart in AP Setup mode. This cannot be undone.');">⚠️ Factory Reset</a>
 
 <p style="margin-top: 25px; font-size: 13px; color: #6c7086;">Built for ESP32-2432S028R | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>
 </div>
