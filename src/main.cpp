@@ -35,7 +35,6 @@ unsigned long lastWifiUpdate = 0;
 const unsigned long wifiUpdateInterval = 1000; // 1 second
 
 unsigned long lastWeatherUpdate = 0;
-const unsigned long weatherUpdateInterval = WEATHER_UPDATE_INTERVAL_MINS * 60 * 1000UL;
 bool hasInitialFetch = false;
 bool ntpInitialized = false;
 
@@ -354,7 +353,8 @@ void loop() {
 #endif
 
             // Check for weather updates
-            if (!hasInitialFetch || (currentMillis - lastWeatherUpdate >= weatherUpdateInterval)) {
+            unsigned long currentUpdateInterval = settings.getWeatherUpdateInterval() * 60 * 1000UL;
+            if (!hasInitialFetch || (currentMillis - lastWeatherUpdate >= currentUpdateInterval)) {
                 if (weather.isLocationEmpty()) {
                     Serial.println("[System] Location settings empty/default. Querying IP location fallback...");
                     String latStr, lonStr, city;

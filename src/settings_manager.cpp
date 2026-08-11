@@ -39,6 +39,7 @@ SettingsManager::SettingsManager() {
     _longitude = WEATHER_API_LONGITUDE;
     _owmApiKey = OPENWEATHERMAP_API_KEY;
     _ntpServer = NTP_SERVER;
+    _weatherUpdateInterval = WEATHER_UPDATE_INTERVAL_MINS;
 }
 
 void SettingsManager::begin() {
@@ -70,6 +71,7 @@ void SettingsManager::begin() {
     _longitude = prefs.getString("lon", WEATHER_API_LONGITUDE);
     _owmApiKey = prefs.getString("owm_api", OPENWEATHERMAP_API_KEY);
     _ntpServer = prefs.getString("ntp_srv", NTP_SERVER);
+    _weatherUpdateInterval = prefs.getInt("upd_int", WEATHER_UPDATE_INTERVAL_MINS);
     
     prefs.end();
 }
@@ -413,5 +415,20 @@ void SettingsManager::setMqttPassword(const String& password) {
         _mqttPassword = password;
         Preferences prefs; prefs.begin("settings", false);
         prefs.putString("mqtt_pwd", _mqttPassword); prefs.end();
+    }
+}
+
+int SettingsManager::getWeatherUpdateInterval() const {
+    return _weatherUpdateInterval;
+}
+
+void SettingsManager::setWeatherUpdateInterval(int interval) {
+    if (interval < 1) interval = 1;
+    if (_weatherUpdateInterval != interval) {
+        _weatherUpdateInterval = interval;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putInt("upd_int", _weatherUpdateInterval);
+        prefs.end();
     }
 }

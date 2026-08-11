@@ -34,6 +34,7 @@ private:
     String _longitude;
     String _owmApiKey;
     String _ntpServer;
+    int _weatherUpdateInterval;
 
 public:
     SettingsManager();
@@ -112,6 +113,9 @@ public:
 
     const String& getNtpServer() const;
     void setNtpServer(const String& ntpServer);
+
+    int getWeatherUpdateInterval() const;
+    void setWeatherUpdateInterval(int interval);
 };
 
 #endif // SETTINGS_MANAGER_H

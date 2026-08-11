@@ -469,6 +469,7 @@ void WifiManager::startWebServer() {
         doc["wifi_ssid"] = settings.getWifiSSID();
         doc["sd_cache_enabled"] = settings.getSdCacheEnabled();
         doc["screensaver_enabled"] = settings.getScreensaverEnabled();
+        doc["weather_update_interval"] = settings.getWeatherUpdateInterval();
 
         String response;
         serializeJson(doc, response);
@@ -622,6 +623,7 @@ void WifiManager::handleSettings() {
     html.replace("%LON%", settings.getLongitude());
     html.replace("%TZ%", settings.getTimezone());
     html.replace("%NTP_SERVER%", settings.getNtpServer());
+    html.replace("%UPDATE_INTERVAL%", String(settings.getWeatherUpdateInterval()));
     
     html.replace("%LED_ENABLED%", settings.getLedEnabled() ? "checked" : "");
     html.replace("%LED_BRIGHTNESS%", String(settings.getLedBrightness()));
@@ -655,6 +657,7 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("lon")) settings.setLongitude(_webServer->arg("lon"));
     if (_webServer->hasArg("tz")) settings.setTimezone(_webServer->arg("tz"));
     if (_webServer->hasArg("ntp_server")) settings.setNtpServer(_webServer->arg("ntp_server"));
+    if (_webServer->hasArg("update_interval")) settings.setWeatherUpdateInterval(_webServer->arg("update_interval").toInt());
     
     settings.setLedEnabled(_webServer->hasArg("led_enabled"));
     if (_webServer->hasArg("led_brightness")) settings.setLedBrightness(_webServer->arg("led_brightness").toInt());

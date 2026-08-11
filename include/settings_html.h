@@ -92,6 +92,9 @@ button:hover { background: #f5c2e7; }
 <label for='ntp_server'>NTP Server</label>
 <input type='text' id='ntp_server' name='ntp_server' value='%NTP_SERVER%'>
 
+<label for='update_interval'>Weather Update Interval (Minutes)</label>
+<input type='number' id='update_interval' name='update_interval' min='1' max='60' value='%UPDATE_INTERVAL%'>
+
 <div class='section-title'>System Features</div>
 <div class='checkbox-group'>
     <input type='checkbox' id='led_enabled' name='led_enabled' value='1' %LED_ENABLED%>
