@@ -25,6 +25,7 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL(USE_SD_CACHE, settings.getSdCacheEnabled());
     TEST_ASSERT_EQUAL(SCREENSAVER_ENABLED, settings.getScreensaverEnabled());
     TEST_ASSERT_EQUAL(WEATHER_UPDATE_INTERVAL_MINS, settings.getWeatherUpdateInterval());
+    TEST_ASSERT_EQUAL(API_SERVER_ENABLED, settings.getApiServerEnabled());
 }
 
 void test_settings_save_and_load(void) {
@@ -43,6 +44,7 @@ void test_settings_save_and_load(void) {
     settings.setSdCacheEnabled(false);
     settings.setScreensaverEnabled(!SCREENSAVER_ENABLED);
     settings.setWeatherUpdateInterval(15);
+    settings.setApiServerEnabled(!API_SERVER_ENABLED);
     
     // Create new instance to simulate re-reading from preferences
     SettingsManager settings_new;
@@ -59,6 +61,7 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL(false, settings_new.getSdCacheEnabled());
     TEST_ASSERT_EQUAL(!SCREENSAVER_ENABLED, settings_new.getScreensaverEnabled());
     TEST_ASSERT_EQUAL(15, settings_new.getWeatherUpdateInterval());
+    TEST_ASSERT_EQUAL(!API_SERVER_ENABLED, settings_new.getApiServerEnabled());
 }
 
 void test_settings_wifi_credentials(void) {

@@ -20,7 +20,8 @@ SettingsManager::SettingsManager() {
     _timezone = TIMEZONE_DEFAULT;
     _themeFlavor = CATPPUCCIN_MOCHA;
     _sdLoggingEnabled = USE_SD_LOGGING;
-    _screenshotServerEnabled = API_SERVER_ENABLED;
+    _screenshotServerEnabled = false; // Default to false
+    _apiServerEnabled = API_SERVER_ENABLED;
     _screenOrientation = 1;
     _ledEnabled = LED_ENABLED;
     _ledBrightness = LED_BRIGHTNESS;
@@ -52,7 +53,8 @@ void SettingsManager::begin() {
     _timezone = prefs.getString("tz", TIMEZONE_DEFAULT);
     _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
     _sdLoggingEnabled = prefs.getBool("sd_log", USE_SD_LOGGING);
-    _screenshotServerEnabled = prefs.getBool("scr_srv", API_SERVER_ENABLED);
+    _screenshotServerEnabled = prefs.getBool("scr_srv", false);
+    _apiServerEnabled = prefs.getBool("api_srv", API_SERVER_ENABLED);
     _screenOrientation = prefs.getInt("screen_rot", 1);
     _ledEnabled = prefs.getBool("led_en", LED_ENABLED);
     _ledBrightness = prefs.getInt("led_bright", LED_BRIGHTNESS);
@@ -204,6 +206,20 @@ void SettingsManager::setScreenshotServerEnabled(bool enabled) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putBool("scr_srv", _screenshotServerEnabled);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getApiServerEnabled() const {
+    return _apiServerEnabled;
+}
+
+void SettingsManager::setApiServerEnabled(bool enabled) {
+    if (_apiServerEnabled != enabled) {
+        _apiServerEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("api_srv", _apiServerEnabled);
         prefs.end();
     }
 }

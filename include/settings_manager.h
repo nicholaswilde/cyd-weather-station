@@ -16,6 +16,7 @@ private:
     int _themeFlavor;
     bool _sdLoggingEnabled;
     bool _screenshotServerEnabled;
+    bool _apiServerEnabled;
     int _screenOrientation;
     bool _ledEnabled;
     int _ledBrightness;
@@ -59,6 +60,9 @@ public:
 
     bool getScreenshotServerEnabled() const;
     void setScreenshotServerEnabled(bool enabled);
+
+    bool getApiServerEnabled() const;
+    void setApiServerEnabled(bool enabled);
 
     int getScreenOrientation() const;
     void setScreenOrientation(int orientation);

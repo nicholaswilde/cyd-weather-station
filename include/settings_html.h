@@ -132,6 +132,11 @@ button:hover { background: #f5c2e7; }
 </div>
 
 <div class='checkbox-group'>
+    <input type='checkbox' id='api_server_enabled' name='api_server_enabled' value='1' %API_SERVER_ENABLED%>
+    <label for='api_server_enabled'>API Server</label>
+</div>
+
+<div class='checkbox-group'>
     <input type='checkbox' id='sd_logging_enabled' name='sd_logging_enabled' value='1' %SD_LOGGING%>
     <label for='sd_logging_enabled'>SD Card Logging</label>
 </div>

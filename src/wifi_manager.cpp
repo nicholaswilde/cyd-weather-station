@@ -454,6 +454,10 @@ void WifiManager::startWebServer() {
     _webServer->on("/settings", HTTP_GET, [this]() { handleSettings(); });
     _webServer->on("/settings/save", HTTP_POST, [this]() { handleSettingsSave(); });
     _webServer->on("/api/config", [this]() {
+        if (!settings.getApiServerEnabled()) {
+            _webServer->send(403, "text/plain", "Forbidden: API server disabled in settings");
+            return;
+        }
         StaticJsonDocument<512> doc;
         doc["unit_system"] = settings.getUnitSystem();
         doc["brightness"] = settings.getBrightness();
@@ -462,6 +466,7 @@ void WifiManager::startWebServer() {
         doc["theme_flavor"] = settings.getThemeFlavor();
         doc["sd_logging_enabled"] = settings.getSdLoggingEnabled();
         doc["screenshot_server_enabled"] = settings.getScreenshotServerEnabled();
+        doc["api_server_enabled"] = settings.getApiServerEnabled();
         doc["screen_orientation"] = settings.getScreenOrientation();
         doc["led_enabled"] = settings.getLedEnabled();
         doc["led_brightness"] = settings.getLedBrightness();
@@ -476,6 +481,10 @@ void WifiManager::startWebServer() {
         _webServer->send(200, "application/json", response);
     });
     _webServer->on("/api/tab", [this]() {
+        if (!settings.getApiServerEnabled()) {
+            _webServer->send(403, "text/plain", "Forbidden: API server disabled in settings");
+            return;
+        }
         if (_webServer->hasArg("index")) {
             int idx = _webServer->arg("index").toInt();
             setUIActiveTab(idx);
@@ -485,6 +494,10 @@ void WifiManager::startWebServer() {
         }
     });
     _webServer->on("/api/orientation", [this]() {
+        if (!settings.getApiServerEnabled()) {
+            _webServer->send(403, "text/plain", "Forbidden: API server disabled in settings");
+            return;
+        }
         if (_webServer->hasArg("val")) {
             int val = _webServer->arg("val").toInt();
             setUIOrientation(val);
@@ -635,6 +648,7 @@ void WifiManager::handleSettings() {
     html.replace("%MQTT_PASSWORD%", settings.getMqttPassword());
     
     html.replace("%SCREENSHOT_ENABLED%", settings.getScreenshotServerEnabled() ? "checked" : "");
+    html.replace("%API_SERVER_ENABLED%", settings.getApiServerEnabled() ? "checked" : "");
     html.replace("%SD_LOGGING%", settings.getSdLoggingEnabled() ? "checked" : "");
     html.replace("%SD_CACHE%", settings.getSdCacheEnabled() ? "checked" : "");
     
@@ -669,6 +683,7 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("mqtt_password")) settings.setMqttPassword(_webServer->arg("mqtt_password"));
     
     settings.setScreenshotServerEnabled(_webServer->hasArg("screenshot_server_enabled"));
+    settings.setApiServerEnabled(_webServer->hasArg("api_server_enabled"));
     settings.setSdLoggingEnabled(_webServer->hasArg("sd_logging_enabled"));
     settings.setSdCacheEnabled(_webServer->hasArg("sd_cache_enabled"));
 
