@@ -18,6 +18,11 @@ private:
     bool _screenshotServerEnabled;
     bool _apiServerEnabled;
     int _screensaverTimeout;
+    bool _staticIpEnabled;
+    String _staticIp;
+    String _staticGateway;
+    String _staticSubnet;
+    String _staticDns;
     int _screenOrientation;
     bool _ledEnabled;
     int _ledBrightness;
@@ -103,6 +108,17 @@ public:
 
     int getScreensaverTimeout() const;
     void setScreensaverTimeout(int timeout);
+
+    bool getStaticIpEnabled() const;
+    void setStaticIpEnabled(bool enabled);
+    const String& getStaticIp() const;
+    void setStaticIp(const String& ip);
+    const String& getStaticGateway() const;
+    void setStaticGateway(const String& gateway);
+    const String& getStaticSubnet() const;
+    void setStaticSubnet(const String& subnet);
+    const String& getStaticDns() const;
+    void setStaticDns(const String& dns);
 
     const String& getZipCode() const;
     void setZipCode(const String& zipCode);

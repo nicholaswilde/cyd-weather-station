@@ -27,6 +27,11 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL(SCREENSAVER_TIMEOUT_MS, settings.getScreensaverTimeout());
     TEST_ASSERT_EQUAL(WEATHER_UPDATE_INTERVAL_MINS, settings.getWeatherUpdateInterval());
     TEST_ASSERT_EQUAL(API_SERVER_ENABLED, settings.getApiServerEnabled());
+    TEST_ASSERT_EQUAL(false, settings.getStaticIpEnabled());
+    TEST_ASSERT_EQUAL_STRING("", settings.getStaticIp().c_str());
+    TEST_ASSERT_EQUAL_STRING("", settings.getStaticGateway().c_str());
+    TEST_ASSERT_EQUAL_STRING("255.255.255.0", settings.getStaticSubnet().c_str());
+    TEST_ASSERT_EQUAL_STRING("1.1.1.1", settings.getStaticDns().c_str());
 }
 
 void test_settings_save_and_load(void) {
@@ -47,6 +52,11 @@ void test_settings_save_and_load(void) {
     settings.setScreensaverTimeout(600000);
     settings.setWeatherUpdateInterval(15);
     settings.setApiServerEnabled(!API_SERVER_ENABLED);
+    settings.setStaticIpEnabled(true);
+    settings.setStaticIp("192.168.1.100");
+    settings.setStaticGateway("192.168.1.1");
+    settings.setStaticSubnet("255.255.0.0");
+    settings.setStaticDns("8.8.8.8");
     
     // Create new instance to simulate re-reading from preferences
     SettingsManager settings_new;
@@ -65,6 +75,11 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL(600000, settings_new.getScreensaverTimeout());
     TEST_ASSERT_EQUAL(15, settings_new.getWeatherUpdateInterval());
     TEST_ASSERT_EQUAL(!API_SERVER_ENABLED, settings_new.getApiServerEnabled());
+    TEST_ASSERT_EQUAL(true, settings_new.getStaticIpEnabled());
+    TEST_ASSERT_EQUAL_STRING("192.168.1.100", settings_new.getStaticIp().c_str());
+    TEST_ASSERT_EQUAL_STRING("192.168.1.1", settings_new.getStaticGateway().c_str());
+    TEST_ASSERT_EQUAL_STRING("255.255.0.0", settings_new.getStaticSubnet().c_str());
+    TEST_ASSERT_EQUAL_STRING("8.8.8.8", settings_new.getStaticDns().c_str());
 }
 
 void test_settings_wifi_credentials(void) {

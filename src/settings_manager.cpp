@@ -35,6 +35,11 @@ SettingsManager::SettingsManager() {
     _sdCacheEnabled = USE_SD_CACHE;
     _screensaverEnabled = SCREENSAVER_ENABLED;
     _screensaverTimeout = SCREENSAVER_TIMEOUT_MS;
+    _staticIpEnabled = false;
+    _staticIp = "";
+    _staticGateway = "";
+    _staticSubnet = "255.255.255.0";
+    _staticDns = "1.1.1.1";
     _zipCode = WEATHER_ZIP_CODE;
     _cityCode = WEATHER_CITY_CODE;
     _latitude = WEATHER_API_LATITUDE;
@@ -69,6 +74,11 @@ void SettingsManager::begin() {
     _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
     _screensaverEnabled = prefs.getBool("scr_enabled", SCREENSAVER_ENABLED);
     _screensaverTimeout = prefs.getInt("scr_timeout", SCREENSAVER_TIMEOUT_MS);
+    _staticIpEnabled = prefs.getBool("static_en", false);
+    _staticIp = prefs.getString("static_ip", "");
+    _staticGateway = prefs.getString("static_gw", "");
+    _staticSubnet = prefs.getString("static_sn", "255.255.255.0");
+    _staticDns = prefs.getString("static_dns", "1.1.1.1");
     _zipCode = prefs.getString("zip", WEATHER_ZIP_CODE);
     _cityCode = prefs.getString("city", WEATHER_CITY_CODE);
     _latitude = prefs.getString("lat", WEATHER_API_LATITUDE);
@@ -462,5 +472,46 @@ void SettingsManager::setWeatherUpdateInterval(int interval) {
         prefs.begin("settings", false);
         prefs.putInt("upd_int", _weatherUpdateInterval);
         prefs.end();
+    }
+}
+
+bool SettingsManager::getStaticIpEnabled() const { return _staticIpEnabled; }
+void SettingsManager::setStaticIpEnabled(bool enabled) {
+    if (_staticIpEnabled != enabled) {
+        _staticIpEnabled = enabled;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putBool("static_en", _staticIpEnabled); prefs.end();
+    }
+}
+const String& SettingsManager::getStaticIp() const { return _staticIp; }
+void SettingsManager::setStaticIp(const String& ip) {
+    if (_staticIp != ip) {
+        _staticIp = ip;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("static_ip", _staticIp); prefs.end();
+    }
+}
+const String& SettingsManager::getStaticGateway() const { return _staticGateway; }
+void SettingsManager::setStaticGateway(const String& gateway) {
+    if (_staticGateway != gateway) {
+        _staticGateway = gateway;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("static_gw", _staticGateway); prefs.end();
+    }
+}
+const String& SettingsManager::getStaticSubnet() const { return _staticSubnet; }
+void SettingsManager::setStaticSubnet(const String& subnet) {
+    if (_staticSubnet != subnet) {
+        _staticSubnet = subnet;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("static_sn", _staticSubnet); prefs.end();
+    }
+}
+const String& SettingsManager::getStaticDns() const { return _staticDns; }
+void SettingsManager::setStaticDns(const String& dns) {
+    if (_staticDns != dns) {
+        _staticDns = dns;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("static_dns", _staticDns); prefs.end();
     }
 }

@@ -20,30 +20,26 @@ extern SettingsManager settings;
 
 static void configureStaticIP() {
 #ifndef NATIVE_TEST
-#ifdef STATIC_IP
-    IPAddress local_ip;
-    if (local_ip.fromString(STATIC_IP)) {
-        IPAddress gateway_ip;
-        IPAddress subnet_ip;
-        IPAddress dns_ip;
+    if (!settings.getStaticIpEnabled()) return;
+    String staticIpStr = settings.getStaticIp();
+    if (staticIpStr.length() > 0) {
+        IPAddress local_ip;
+        if (local_ip.fromString(staticIpStr)) {
+            IPAddress gateway_ip;
+            IPAddress subnet_ip;
+            IPAddress dns_ip;
+            
+            if (settings.getStaticGateway().length() > 0) gateway_ip.fromString(settings.getStaticGateway());
+            if (settings.getStaticSubnet().length() > 0) subnet_ip.fromString(settings.getStaticSubnet());
+            if (settings.getStaticDns().length() > 0) dns_ip.fromString(settings.getStaticDns());
 
-        #ifdef STATIC_GATEWAY
-        gateway_ip.fromString(STATIC_GATEWAY);
-        #endif
-        #ifdef STATIC_SUBNET
-        subnet_ip.fromString(STATIC_SUBNET);
-        #endif
-        #ifdef STATIC_DNS
-        dns_ip.fromString(STATIC_DNS);
-        #endif
-
-        if (WiFi.config(local_ip, gateway_ip, subnet_ip, dns_ip)) {
-            Serial.println("[WiFi] Static IP configured successfully.");
-        } else {
-            Serial.println("[WiFi] Failed to configure Static IP.");
+            if (WiFi.config(local_ip, gateway_ip, subnet_ip, dns_ip)) {
+                Serial.println("[WiFi] Static IP configured successfully.");
+            } else {
+                Serial.println("[WiFi] Failed to configure Static IP.");
+            }
         }
     }
-#endif
 #endif
 }
 
@@ -476,6 +472,11 @@ void WifiManager::startWebServer() {
         doc["screensaver_enabled"] = settings.getScreensaverEnabled();
         doc["screensaver_timeout"] = settings.getScreensaverTimeout();
         doc["weather_update_interval"] = settings.getWeatherUpdateInterval();
+        doc["static_ip_enabled"] = settings.getStaticIpEnabled();
+        doc["static_ip"] = settings.getStaticIp();
+        doc["static_gateway"] = settings.getStaticGateway();
+        doc["static_subnet"] = settings.getStaticSubnet();
+        doc["static_dns"] = settings.getStaticDns();
 
         String response;
         serializeJson(doc, response);
@@ -649,6 +650,12 @@ void WifiManager::handleSettings() {
     html.replace("%MQTT_USER%", settings.getMqttUser());
     html.replace("%MQTT_PASSWORD%", settings.getMqttPassword());
     
+    html.replace("%STATIC_IP_ENABLED%", settings.getStaticIpEnabled() ? "checked" : "");
+    html.replace("%STATIC_IP%", settings.getStaticIp());
+    html.replace("%STATIC_GW%", settings.getStaticGateway());
+    html.replace("%STATIC_SN%", settings.getStaticSubnet());
+    html.replace("%STATIC_DNS%", settings.getStaticDns());
+    
     html.replace("%SCREENSHOT_ENABLED%", settings.getScreenshotServerEnabled() ? "checked" : "");
     html.replace("%API_SERVER_ENABLED%", settings.getApiServerEnabled() ? "checked" : "");
     html.replace("%SD_LOGGING%", settings.getSdLoggingEnabled() ? "checked" : "");
@@ -684,6 +691,12 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("mqtt_port")) settings.setMqttPort(_webServer->arg("mqtt_port").toInt());
     if (_webServer->hasArg("mqtt_user")) settings.setMqttUser(_webServer->arg("mqtt_user"));
     if (_webServer->hasArg("mqtt_password")) settings.setMqttPassword(_webServer->arg("mqtt_password"));
+    
+    settings.setStaticIpEnabled(_webServer->hasArg("static_ip_enabled"));
+    if (_webServer->hasArg("static_ip")) settings.setStaticIp(_webServer->arg("static_ip"));
+    if (_webServer->hasArg("static_gw")) settings.setStaticGateway(_webServer->arg("static_gw"));
+    if (_webServer->hasArg("static_sn")) settings.setStaticSubnet(_webServer->arg("static_sn"));
+    if (_webServer->hasArg("static_dns")) settings.setStaticDns(_webServer->arg("static_dns"));
     
     settings.setScreenshotServerEnabled(_webServer->hasArg("screenshot_server_enabled"));
     settings.setApiServerEnabled(_webServer->hasArg("api_server_enabled"));

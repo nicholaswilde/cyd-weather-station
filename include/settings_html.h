@@ -140,6 +140,22 @@ button:hover { background: #f5c2e7; }
 </div>
 
 <div class='checkbox-group'>
+    <input type='checkbox' id='static_ip_enabled' name='static_ip_enabled' value='1' %STATIC_IP_ENABLED% onchange='toggleStaticIpSettings()'>
+    <label for='static_ip_enabled'>Static IP Enabled</label>
+</div>
+
+<div id='static_ip_settings' style='display: none; margin-left: 20px; border-left: 2px solid #313244; padding-left: 15px; margin-bottom: 20px;'>
+    <label for='static_ip'>IP Address</label>
+    <input type='text' id='static_ip' name='static_ip' value='%STATIC_IP%'>
+    <label for='static_gw'>Gateway</label>
+    <input type='text' id='static_gw' name='static_gw' value='%STATIC_GW%'>
+    <label for='static_sn'>Subnet Mask</label>
+    <input type='text' id='static_sn' name='static_sn' value='%STATIC_SN%'>
+    <label for='static_dns'>DNS Server</label>
+    <input type='text' id='static_dns' name='static_dns' value='%STATIC_DNS%'>
+</div>
+
+<div class='checkbox-group'>
     <input type='checkbox' id='sd_logging_enabled' name='sd_logging_enabled' value='1' %SD_LOGGING%>
     <label for='sd_logging_enabled'>SD Card Logging</label>
 </div>
@@ -160,8 +176,16 @@ function toggleMqttSettings() {
         div.style.display = cb.checked ? 'block' : 'none';
     }
 }
+function toggleStaticIpSettings() {
+    var cb = document.getElementById('static_ip_enabled');
+    var div = document.getElementById('static_ip_settings');
+    if (cb && div) {
+        div.style.display = cb.checked ? 'block' : 'none';
+    }
+}
 window.onload = function() {
     toggleMqttSettings();
+    toggleStaticIpSettings();
 };
 </script>
 </body>
