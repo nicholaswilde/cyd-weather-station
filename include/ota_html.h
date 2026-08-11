@@ -136,6 +136,7 @@ button:disabled {
     </div>
     
     <a href="/" class="btn-back">&larr; Back to Dashboard</a>
+    <p style="margin-top: 25px; margin-bottom: 0; font-size: 13px; color: #6c7086; text-align: center;">Built for ESP32-2432S028R | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>
 </div>
 
 <script>
