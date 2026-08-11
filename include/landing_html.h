@@ -32,6 +32,7 @@ p.subtitle { color: #a6adc8; margin-top: 0; margin-bottom: 30px; font-size: 15px
 <a href="/settings" class="btn btn-settings">⚙️ Device Settings</a>
 <a href="/update" class="btn btn-update">🔄 Firmware Update</a>
 <a href="/screenshot" class="btn btn-screenshot %SCREENSHOT_DISABLED%" target="_blank">📸 View Screenshot</a>
+%SCREENSHOT_HELP_TEXT%
 
 <p style="margin-top: 25px; font-size: 13px; color: #6c7086;">Built for ESP32-2432S028R | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>
 </div>

@@ -738,6 +738,7 @@ void WifiManager::handleLanding() {
     String html = landing_html;
     html.replace("%APP_VERSION%", APP_VERSION);
     html.replace("%SCREENSHOT_DISABLED%", settings.getScreenshotServerEnabled() ? "" : "disabled");
+    html.replace("%SCREENSHOT_HELP_TEXT%", settings.getScreenshotServerEnabled() ? "" : "<p style='font-size: 13px; color: #a6adc8; margin-top: -5px; margin-bottom: 15px;'>Screenshots must be enabled in device settings.</p>");
     _webServer->send(200, "text/html", html);
 }
 #endif
