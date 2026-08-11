@@ -23,6 +23,7 @@ private:
     String _staticGateway;
     String _staticSubnet;
     String _staticDns;
+    String _apPassword;
     int _screenOrientation;
     bool _ledEnabled;
     int _ledBrightness;
@@ -119,6 +120,9 @@ public:
     void setStaticSubnet(const String& subnet);
     const String& getStaticDns() const;
     void setStaticDns(const String& dns);
+
+    const String& getApPassword() const;
+    void setApPassword(const String& password);
 
     const String& getZipCode() const;
     void setZipCode(const String& zipCode);

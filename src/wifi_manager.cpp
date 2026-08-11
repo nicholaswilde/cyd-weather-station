@@ -241,11 +241,11 @@ void WifiManager::startAPMode() {
     delay(100);
     
     const char* apPass = nullptr;
-#ifdef AP_PASSWORD
-    if (strlen(AP_PASSWORD) >= 8) {
-        apPass = AP_PASSWORD;
+    String apPasswordStr = settings.getApPassword();
+    if (apPasswordStr.length() >= 8) {
+        apPass = apPasswordStr.c_str();
     }
-#endif
+    
     WiFi.softAP(apSSID.c_str(), apPass);
     delay(200);
 
@@ -477,6 +477,7 @@ void WifiManager::startWebServer() {
         doc["static_gateway"] = settings.getStaticGateway();
         doc["static_subnet"] = settings.getStaticSubnet();
         doc["static_dns"] = settings.getStaticDns();
+        doc["ap_password"] = settings.getApPassword();
 
         String response;
         serializeJson(doc, response);
@@ -656,6 +657,8 @@ void WifiManager::handleSettings() {
     html.replace("%STATIC_SN%", settings.getStaticSubnet());
     html.replace("%STATIC_DNS%", settings.getStaticDns());
     
+    html.replace("%AP_PASSWORD%", settings.getApPassword());
+    
     html.replace("%SCREENSHOT_ENABLED%", settings.getScreenshotServerEnabled() ? "checked" : "");
     html.replace("%API_SERVER_ENABLED%", settings.getApiServerEnabled() ? "checked" : "");
     html.replace("%SD_LOGGING%", settings.getSdLoggingEnabled() ? "checked" : "");
@@ -697,6 +700,8 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("static_gw")) settings.setStaticGateway(_webServer->arg("static_gw"));
     if (_webServer->hasArg("static_sn")) settings.setStaticSubnet(_webServer->arg("static_sn"));
     if (_webServer->hasArg("static_dns")) settings.setStaticDns(_webServer->arg("static_dns"));
+    
+    if (_webServer->hasArg("ap_password")) settings.setApPassword(_webServer->arg("ap_password"));
     
     settings.setScreenshotServerEnabled(_webServer->hasArg("screenshot_server_enabled"));
     settings.setApiServerEnabled(_webServer->hasArg("api_server_enabled"));

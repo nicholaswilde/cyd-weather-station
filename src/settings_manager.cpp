@@ -40,6 +40,11 @@ SettingsManager::SettingsManager() {
     _staticGateway = "";
     _staticSubnet = "255.255.255.0";
     _staticDns = "1.1.1.1";
+#ifdef AP_PASSWORD
+    _apPassword = AP_PASSWORD;
+#else
+    _apPassword = "";
+#endif
     _zipCode = WEATHER_ZIP_CODE;
     _cityCode = WEATHER_CITY_CODE;
     _latitude = WEATHER_API_LATITUDE;
@@ -79,6 +84,11 @@ void SettingsManager::begin() {
     _staticGateway = prefs.getString("static_gw", "");
     _staticSubnet = prefs.getString("static_sn", "255.255.255.0");
     _staticDns = prefs.getString("static_dns", "1.1.1.1");
+#ifdef AP_PASSWORD
+    _apPassword = prefs.getString("ap_pass", AP_PASSWORD);
+#else
+    _apPassword = prefs.getString("ap_pass", "");
+#endif
     _zipCode = prefs.getString("zip", WEATHER_ZIP_CODE);
     _cityCode = prefs.getString("city", WEATHER_CITY_CODE);
     _latitude = prefs.getString("lat", WEATHER_API_LATITUDE);
@@ -513,5 +523,13 @@ void SettingsManager::setStaticDns(const String& dns) {
         _staticDns = dns;
         Preferences prefs; prefs.begin("settings", false);
         prefs.putString("static_dns", _staticDns); prefs.end();
+    }
+}
+const String& SettingsManager::getApPassword() const { return _apPassword; }
+void SettingsManager::setApPassword(const String& password) {
+    if (_apPassword != password) {
+        _apPassword = password;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("ap_pass", _apPassword); prefs.end();
     }
 }

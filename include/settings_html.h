@@ -155,6 +155,9 @@ button:hover { background: #f5c2e7; }
     <input type='text' id='static_dns' name='static_dns' value='%STATIC_DNS%'>
 </div>
 
+<label for='ap_password'>Configuration AP Password (min 8 chars)</label>
+<input type='password' id='ap_password' name='ap_password' value='%AP_PASSWORD%'>
+
 <div class='checkbox-group'>
     <input type='checkbox' id='sd_logging_enabled' name='sd_logging_enabled' value='1' %SD_LOGGING%>
     <label for='sd_logging_enabled'>SD Card Logging</label>

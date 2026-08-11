@@ -32,6 +32,11 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL_STRING("", settings.getStaticGateway().c_str());
     TEST_ASSERT_EQUAL_STRING("255.255.255.0", settings.getStaticSubnet().c_str());
     TEST_ASSERT_EQUAL_STRING("1.1.1.1", settings.getStaticDns().c_str());
+#ifdef AP_PASSWORD
+    TEST_ASSERT_EQUAL_STRING(AP_PASSWORD, settings.getApPassword().c_str());
+#else
+    TEST_ASSERT_EQUAL_STRING("", settings.getApPassword().c_str());
+#endif
 }
 
 void test_settings_save_and_load(void) {
@@ -57,6 +62,7 @@ void test_settings_save_and_load(void) {
     settings.setStaticGateway("192.168.1.1");
     settings.setStaticSubnet("255.255.0.0");
     settings.setStaticDns("8.8.8.8");
+    settings.setApPassword("new_ap_pass");
     
     // Create new instance to simulate re-reading from preferences
     SettingsManager settings_new;
@@ -80,6 +86,7 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL_STRING("192.168.1.1", settings_new.getStaticGateway().c_str());
     TEST_ASSERT_EQUAL_STRING("255.255.0.0", settings_new.getStaticSubnet().c_str());
     TEST_ASSERT_EQUAL_STRING("8.8.8.8", settings_new.getStaticDns().c_str());
+    TEST_ASSERT_EQUAL_STRING("new_ap_pass", settings_new.getApPassword().c_str());
 }
 
 void test_settings_wifi_credentials(void) {
