@@ -34,6 +34,7 @@ SettingsManager::SettingsManager() {
     _wifiPassword = WIFI_PASSWORD;
     _sdCacheEnabled = USE_SD_CACHE;
     _screensaverEnabled = SCREENSAVER_ENABLED;
+    _screensaverTimeout = SCREENSAVER_TIMEOUT_MS;
     _zipCode = WEATHER_ZIP_CODE;
     _cityCode = WEATHER_CITY_CODE;
     _latitude = WEATHER_API_LATITUDE;
@@ -67,6 +68,7 @@ void SettingsManager::begin() {
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
     _screensaverEnabled = prefs.getBool("scr_enabled", SCREENSAVER_ENABLED);
+    _screensaverTimeout = prefs.getInt("scr_timeout", SCREENSAVER_TIMEOUT_MS);
     _zipCode = prefs.getString("zip", WEATHER_ZIP_CODE);
     _cityCode = prefs.getString("city", WEATHER_CITY_CODE);
     _latitude = prefs.getString("lat", WEATHER_API_LATITUDE);
@@ -310,6 +312,20 @@ void SettingsManager::setScreensaverEnabled(bool enabled) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putBool("scr_enabled", _screensaverEnabled);
+        prefs.end();
+    }
+}
+
+int SettingsManager::getScreensaverTimeout() const {
+    return _screensaverTimeout;
+}
+
+void SettingsManager::setScreensaverTimeout(int timeout) {
+    if (_screensaverTimeout != timeout) {
+        _screensaverTimeout = timeout;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putInt("scr_timeout", _screensaverTimeout);
         prefs.end();
     }
 }

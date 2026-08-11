@@ -474,6 +474,7 @@ void WifiManager::startWebServer() {
         doc["wifi_ssid"] = settings.getWifiSSID();
         doc["sd_cache_enabled"] = settings.getSdCacheEnabled();
         doc["screensaver_enabled"] = settings.getScreensaverEnabled();
+        doc["screensaver_timeout"] = settings.getScreensaverTimeout();
         doc["weather_update_interval"] = settings.getWeatherUpdateInterval();
 
         String response;
@@ -628,6 +629,7 @@ void WifiManager::handleSettings() {
     html.replace("%BRIGHTNESS%", String(settings.getBrightness()));
     html.replace("%AUTO_BRIGHTNESS%", settings.getAutoBrightness() ? "checked" : "");
     html.replace("%SCREENSAVER_ENABLED%", settings.getScreensaverEnabled() ? "checked" : "");
+    html.replace("%SCREENSAVER_TIMEOUT%", String(settings.getScreensaverTimeout() / 60000));
     
     html.replace("%OWM_API%", settings.getOwmApiKey());
     html.replace("%ZIP%", settings.getZipCode());
@@ -663,6 +665,7 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("brightness")) settings.setBrightness(_webServer->arg("brightness").toInt());
     settings.setAutoBrightness(_webServer->hasArg("auto_brightness"));
     settings.setScreensaverEnabled(_webServer->hasArg("screensaver_enabled"));
+    if (_webServer->hasArg("screensaver_timeout")) settings.setScreensaverTimeout(_webServer->arg("screensaver_timeout").toInt() * 60000);
     
     if (_webServer->hasArg("owm_api")) settings.setOwmApiKey(_webServer->arg("owm_api"));
     if (_webServer->hasArg("zip")) settings.setZipCode(_webServer->arg("zip"));

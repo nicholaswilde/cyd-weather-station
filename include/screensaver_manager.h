@@ -16,9 +16,10 @@ public:
     // Call this periodically in loop() to check timeout and transition state
     void update(uint32_t currentMillis);
 
-    // Explicitly wake or sleep
     void wake(uint8_t targetBrightness = 80);
     void sleep();
+
+    void setTimeoutMs(uint32_t timeoutMs) { _timeoutMs = timeoutMs; }
 
     // Getters
     bool isActive() const { return _active; }

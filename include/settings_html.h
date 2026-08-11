@@ -71,6 +71,9 @@ button:hover { background: #f5c2e7; }
     <label for='screensaver_enabled'>Enable Screensaver</label>
 </div>
 
+<label for='screensaver_timeout'>Screensaver Timeout (Minutes)</label>
+<input type='number' id='screensaver_timeout' name='screensaver_timeout' min='1' max='60' value='%SCREENSAVER_TIMEOUT%'>
+
 <div class='section-title'>Location & Weather</div>
 <label for='owm_api'>OpenWeatherMap API Key</label>
 <input type='password' id='owm_api' name='owm_api' value='%OWM_API%'>

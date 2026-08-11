@@ -24,6 +24,7 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL(MQTT_ENABLED, settings.getMqttEnabled());
     TEST_ASSERT_EQUAL(USE_SD_CACHE, settings.getSdCacheEnabled());
     TEST_ASSERT_EQUAL(SCREENSAVER_ENABLED, settings.getScreensaverEnabled());
+    TEST_ASSERT_EQUAL(SCREENSAVER_TIMEOUT_MS, settings.getScreensaverTimeout());
     TEST_ASSERT_EQUAL(WEATHER_UPDATE_INTERVAL_MINS, settings.getWeatherUpdateInterval());
     TEST_ASSERT_EQUAL(API_SERVER_ENABLED, settings.getApiServerEnabled());
 }
@@ -43,6 +44,7 @@ void test_settings_save_and_load(void) {
     settings.setMqttEnabled(false);
     settings.setSdCacheEnabled(false);
     settings.setScreensaverEnabled(!SCREENSAVER_ENABLED);
+    settings.setScreensaverTimeout(600000);
     settings.setWeatherUpdateInterval(15);
     settings.setApiServerEnabled(!API_SERVER_ENABLED);
     
@@ -60,6 +62,7 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL(false, settings_new.getMqttEnabled());
     TEST_ASSERT_EQUAL(false, settings_new.getSdCacheEnabled());
     TEST_ASSERT_EQUAL(!SCREENSAVER_ENABLED, settings_new.getScreensaverEnabled());
+    TEST_ASSERT_EQUAL(600000, settings_new.getScreensaverTimeout());
     TEST_ASSERT_EQUAL(15, settings_new.getWeatherUpdateInterval());
     TEST_ASSERT_EQUAL(!API_SERVER_ENABLED, settings_new.getApiServerEnabled());
 }

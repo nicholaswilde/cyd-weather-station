@@ -17,6 +17,7 @@ private:
     bool _sdLoggingEnabled;
     bool _screenshotServerEnabled;
     bool _apiServerEnabled;
+    int _screensaverTimeout;
     int _screenOrientation;
     bool _ledEnabled;
     int _ledBrightness;
@@ -99,6 +100,9 @@ public:
 
     bool getScreensaverEnabled() const;
     void setScreensaverEnabled(bool enabled);
+
+    int getScreensaverTimeout() const;
+    void setScreensaverTimeout(int timeout);
 
     const String& getZipCode() const;
     void setZipCode(const String& zipCode);

@@ -59,6 +59,7 @@ void setup() {
 
     // Load saved preferences
     settings.begin();
+    screensaver.setTimeoutMs(settings.getScreensaverTimeout());
 
     // Check if SD card is present by attempting a begin/mount
     bool sdPresent = SdCardManager::begin();
