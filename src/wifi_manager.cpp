@@ -454,9 +454,6 @@ void WifiManager::handleSave() {
     html += "</div>";
     html += "</body></html>";
 
-    _webServer->send(200, "text/html", html);
-    delay(2000);
-
     settings.setWifiSSID(ssid);
     settings.setWifiPassword(pass);
     settings.setZipCode(zip);
@@ -466,6 +463,9 @@ void WifiManager::handleSave() {
     if (tz.length() > 0) settings.setTimezone(tz);
     if (owmApi.length() > 0) settings.setOwmApiKey(owmApi);
     if (ntpServer.length() > 0) settings.setNtpServer(ntpServer);
+
+    _webServer->send(200, "text/html", html);
+    delay(1000);
 
     ESP.restart();
 #endif

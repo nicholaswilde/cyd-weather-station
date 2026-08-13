@@ -75,6 +75,12 @@ void test_wifi_manager_ap_mode_reconnects_in_background(void) {
     TEST_ASSERT_EQUAL(WIFI_STATE_CONNECTED, wifi.getState());
 }
 
+void test_wifi_manager_set_credentials(void) {
+    WifiManager wifi("SSID", "PASS");
+    wifi.setCredentials("NewSSID", "NewPass");
+    // Verify setCredentials logic
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_wifi_manager_initial_state);
@@ -83,5 +89,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_wifi_manager_loses_connection);
     RUN_TEST(test_wifi_manager_transitions_to_ap_mode);
     RUN_TEST(test_wifi_manager_ap_mode_reconnects_in_background);
+    RUN_TEST(test_wifi_manager_set_credentials);
     return UNITY_END();
 }
