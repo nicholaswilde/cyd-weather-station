@@ -107,7 +107,6 @@ void setup() {
             if (target >= 0 && target <= 100) {
                 Serial.printf("[System] Setting brightness to %d%% via MQTT.\n", target);
                 settings.setBrightness(target);
-                settings.save();
                 backlight.fadeTo(target, 500); // 500ms fade
             }
         }
