@@ -53,6 +53,15 @@ public:
     String(std::string s) : std::string(s) {}
     String() : std::string() {}
     const char* c_str() const { return std::string::c_str(); }
+    void replace(const char* findStr, const char* replaceStr) {
+        size_t pos = 0;
+        std::string f(findStr);
+        std::string r(replaceStr);
+        while ((pos = this->find(f, pos)) != std::string::npos) {
+            std::string::replace(pos, f.length(), r);
+            pos += r.length();
+        }
+    }
 };
 
 class IPAddress {

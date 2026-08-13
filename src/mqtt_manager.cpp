@@ -23,6 +23,10 @@ void MqttManager::begin() {
     _mqttClient.setServer(_server.c_str(), _port);
     _mqttClient.setCredentials(_user.c_str(), _password.c_str());
 
+    // 2.5 Configure unique Client ID
+    static String clientId = "CYD-Weather-" + WiFi.macAddress();
+    _mqttClient.setClientId(clientId.c_str());
+
     // 3. Register the asynchronous callbacks using C++ lambdas
     _mqttClient.onConnect([this](bool sessionPresent) {
         this->onMqttConnect(sessionPresent);

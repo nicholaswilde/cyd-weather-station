@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <cstdint>
+#include <string>
 
 // Define the reason enum so the mock understands it
 enum AsyncMqttClientDisconnectReason {
@@ -15,6 +16,7 @@ public:
 
     void setServer(const char* host, uint16_t port) {}
     void setCredentials(const char* user, const char* pass) {}
+    void setClientId(const char* clientId) { mockClientId = clientId; }
     void connect() {
         _connected = true;
         if (_onConnectCallback) {
@@ -44,6 +46,9 @@ private:
     bool _connected;
     std::function<void(bool)> _onConnectCallback;
     std::function<void(AsyncMqttClientDisconnectReason)> _onDisconnectCallback;
+
+public:
+    std::string mockClientId;
 };
 
 #endif
