@@ -1,7 +1,7 @@
 #include "mqtt_manager.h"
 
 MqttManager::MqttManager(const String& server, uint16_t port, const String& user, const String& password)
-    : _server(server), _port(port), _user(user), _password(password), _reconnectTimer(nullptr) {}
+    : _server(server), _port(port), _user(user), _password(password), _reconnectTimer(nullptr), _messageCallback(nullptr) {}
 
 void MqttManager::updateConfig(const String& server, uint16_t port, const String& user, const String& password) {
     _server = server;
@@ -40,6 +40,10 @@ void MqttManager::begin() {
     _mqttClient.onPublish([](uint16_t packetId) {
         Serial.printf("[MQTT] Broker acknowledged publish (Packet ID: %d)\n", packetId);
     });
+
+    _mqttClient.onMessage([this](char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+        this->onMqttMessage(topic, payload, properties, len, index, total);
+    });
 }
 
 void MqttManager::connectToMqtt() {
@@ -67,6 +71,10 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     
     // Publish HA Discovery configuration
     publishHADiscovery();
+
+    // Subscribe to commands
+    subscribe("cyd/command/brightness", 0);
+    subscribe("cyd/command/reboot", 0);
 }
 
 void MqttManager::publishHADiscovery() {
@@ -111,6 +119,16 @@ void MqttManager::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
     }
 }
 
+void MqttManager::onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total) {
+    if (_messageCallback) {
+        String payloadStr;
+        for (size_t i = 0; i < len; i++) {
+            payloadStr += (char)payload[i];
+        }
+        _messageCallback(String(topic), payloadStr);
+    }
+}
+
 bool MqttManager::isConnected() {
     return _mqttClient.connected();
 }
@@ -126,6 +144,19 @@ void MqttManager::publish(const char* topic, const char* payload) {
     } else {
         Serial.printf("[MQTT] WARN: Cannot publish to '%s' - Not connected to broker.\n", topic);
     }
+}
+
+void MqttManager::subscribe(const char* topic, uint8_t qos) {
+    if (isConnected()) {
+        _mqttClient.subscribe(topic, qos);
+        Serial.printf("[MQTT] Subscribed to topic: %s\n", topic);
+    } else {
+        Serial.printf("[MQTT] WARN: Cannot subscribe to '%s' - Not connected to broker.\n", topic);
+    }
+}
+
+void MqttManager::onMessage(MqttMessageCallback cb) {
+    _messageCallback = cb;
 }
 
 void MqttManager::disconnect() {

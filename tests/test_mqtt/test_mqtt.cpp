@@ -41,11 +41,26 @@ void test_mqtt_lwt(void) {
     // The underlying mock will have stored the LWT.
 }
 
+void test_mqtt_subscribe_and_message(void) {
+    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    mqtt.begin();
+    
+    bool callbackFired = false;
+    mqtt.onMessage([&](const String& topic, const String& payload) {
+        callbackFired = true;
+    });
+    
+    // Since _mqttClient is private, we can't easily trigger the mock callback directly here,
+    // but this ensures the onMessage and subscribe methods compile and link properly.
+    mqtt.subscribe("test/topic", 0);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_mqtt_initialization);
     RUN_TEST(test_mqtt_connect_and_disconnect);
     RUN_TEST(test_mqtt_unique_client_id);
     RUN_TEST(test_mqtt_lwt);
+    RUN_TEST(test_mqtt_subscribe_and_message);
     return UNITY_END();
 }

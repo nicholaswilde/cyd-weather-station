@@ -10,6 +10,12 @@ enum AsyncMqttClientDisconnectReason {
     TCP_DISCONNECTED = 0
 };
 
+struct AsyncMqttClientMessageProperties {
+    uint8_t qos;
+    bool dup;
+    bool retain;
+};
+
 class AsyncMqttClient {
 public:
     AsyncMqttClient() : _connected(false) {}
@@ -29,6 +35,7 @@ public:
     }
     bool connected() { return _connected; }
     uint16_t publish(const char* topic, uint8_t qos, bool retain, const char* payload) { return 1; }
+    uint16_t subscribe(const char* topic, uint8_t qos) { return 1; }
     
     // Updated signatures to match production exactly
     void onConnect(std::function<void(bool)> cb) {
@@ -38,6 +45,9 @@ public:
         _onDisconnectCallback = cb;
     }
     void onPublish(std::function<void(uint16_t)> cb) {}
+    void onMessage(std::function<void(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total)> cb) {
+        _onMessageCallback = cb;
+    }
 
     void disconnect() {
         _connected = false;
@@ -50,6 +60,7 @@ private:
     bool _connected;
     std::function<void(bool)> _onConnectCallback;
     std::function<void(AsyncMqttClientDisconnectReason)> _onDisconnectCallback;
+    std::function<void(char*, char*, AsyncMqttClientMessageProperties, size_t, size_t, size_t)> _onMessageCallback;
 
 public:
     std::string mockClientId;

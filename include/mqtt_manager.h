@@ -9,6 +9,9 @@
 #endif
 #include <Arduino.h>
 #include <WiFi.h>
+#include <functional>
+
+typedef std::function<void(const String& topic, const String& payload)> MqttMessageCallback;
 
 class MqttManager {
 public:
@@ -49,16 +52,28 @@ public:
     void publish(const char* topic, const char* payload);
 
     /**
+     * @brief Subscribes to an MQTT topic.
+     */
+    void subscribe(const char* topic, uint8_t qos = 0);
+
+    /**
+     * @brief Registers a callback for incoming MQTT messages.
+     */
+    void onMessage(MqttMessageCallback cb);
+
+    /**
      * @brief Disconnects from the MQTT broker.
      */
     void disconnect();
 
 private:
     void connectToMqtt();
+    void publishHADiscovery();
     
     // Member callbacks for AsyncMqttClient events
     void onMqttConnect(bool sessionPresent);
     void onMqttDisconnect(AsyncMqttClientDisconnectReason reason);
+    void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total);
     
     // FreeRTOS timer callback must be static
     static void onMqttReconnectTimer(TimerHandle_t xTimer);
@@ -70,6 +85,8 @@ private:
     uint16_t _port;
     String _user;
     String _password;
+    
+    MqttMessageCallback _messageCallback;
 };
 
 #endif // MQTT_MANAGER_H

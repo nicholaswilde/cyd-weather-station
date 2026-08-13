@@ -96,6 +96,23 @@ void setup() {
     mqtt.updateConfig(settings.getMqttServer(), settings.getMqttPort(), settings.getMqttUser(), settings.getMqttPassword());
     mqtt.begin();
 
+    mqtt.onMessage([](const String& topic, const String& payload) {
+        if (topic.endsWith("command/reboot")) {
+            if (payload == "1" || payload == "true" || payload == "ON") {
+                Serial.println("[System] Reboot command received from MQTT.");
+                ESP.restart();
+            }
+        } else if (topic.endsWith("command/brightness")) {
+            int target = payload.toInt();
+            if (target >= 0 && target <= 100) {
+                Serial.printf("[System] Setting brightness to %d%% via MQTT.\n", target);
+                settings.setBrightness(target);
+                settings.save();
+                backlight.fadeTo(target, 500); // 500ms fade
+            }
+        }
+    });
+
     // Register the Wi-Fi events so MQTT knows when the network drops/connects
     WiFi.onEvent(onWiFiGotIP, ARDUINO_EVENT_WIFI_STA_GOT_IP);
     WiFi.onEvent(onWiFiDisconnect, ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
