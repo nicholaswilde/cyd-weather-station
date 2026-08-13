@@ -334,20 +334,41 @@ void WifiManager::handleRoot() {
     html += ".net-item { display: flex; justify-content: space-between; padding: 8px; cursor: pointer; border-bottom: 1px solid #1e1e2e; }";
     html += ".net-item:last-child { border-bottom: none; }";
     html += ".net-item:hover { background: #313244; color: #f5c2e7; }";
+    html += ".password-wrapper { position: relative; display: block; margin-bottom: 20px; }";
+    html += ".password-wrapper input[type='password'], .password-wrapper input[type='text'] { padding-right: 40px; margin-bottom: 0; }";
+    html += ".password-wrapper .toggle-password { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #a6adc8; user-select: none; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; transition: color 0.2s; }";
+    html += ".password-wrapper .toggle-password:hover { color: #cdd6f4; }";
     html += "</style>";
     html += "<script>";
     html += "function selectSSID(ssid) { document.getElementById('ssid').value = ssid; }";
+    html += "function togglePwd(id, el) {";
+    html += "    var eyeSvg = '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>';";
+    html += "    var eyeOffSvg = '<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24\"></path><line x1=\"1\" y1=\"1\" x2=\"23\" y2=\"23\"></line></svg>';";
+    html += "    var input = document.getElementById(id);";
+    html += "    if (input.type === \"password\") {";
+    html += "        input.type = \"text\";";
+    html += "        el.innerHTML = eyeOffSvg;";
+    html += "    } else {";
+    html += "        input.type = \"password\";";
+    html += "        el.innerHTML = eyeSvg;";
+    html += "    }";
+    html += "}";
     html += "</script>";
     html += "</head><body>";
     html += "<div class='card'>";
-    html += "<h2>Wi-Fi Configuration</h2>";
+    html += "<h2 style=\"margin-bottom: 5px;\">CYD Weather Station</h2>";
+#ifdef APP_VERSION
+    html += "<p style=\"text-align: center; color: #a6adc8; margin-top: 0; margin-bottom: 20px; font-size: 14px;\">Version " + String(APP_VERSION) + "</p>";
+#else
+    html += "<p style=\"text-align: center; color: #a6adc8; margin-top: 0; margin-bottom: 20px; font-size: 14px;\">Version unknown</p>";
+#endif
     html += "<form method='POST' action='/save'>";
     
     html += "<div class='section-title' style='margin-top: 0;'>Wi-Fi Connection</div>";
     
     html += "<div style='display: flex; justify-content: space-between; align-items: center;'>";
     html += "<label style='margin-bottom: 0;'>Select Network</label>";
-    html += "<a href='/scan' style='color: #cba6f7; font-size: 12px; text-decoration: none;'>🔄 Refresh List</a>";
+    html += "<a href='/scan' style='color: #cba6f7; font-size: 12px; text-decoration: none;'>&#x21bb; Refresh List</a>";
     html += "</div>";
     html += "<div style='height: 8px;'></div>";
     
@@ -359,12 +380,18 @@ void WifiManager::handleRoot() {
     html += "<input type='text' id='ssid' name='ssid' placeholder='SSID name' required>";
     
     html += "<label for='pass'>Password</label>";
+    html += "<div class='password-wrapper'>";
     html += "<input type='password' id='pass' name='pass' placeholder='Password'>";
+    html += "<span class='toggle-password' onclick='togglePwd(\"pass\", this)'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg></span>";
+    html += "</div>";
     
     html += "<div class='section-title'>Weather Service</div>";
     
     html += "<label for='owm_api'>OpenWeatherMap API Key</label>";
+    html += "<div class='password-wrapper'>";
     html += "<input type='password' id='owm_api' name='owm_api' placeholder='API Key' value='" + settings.getOwmApiKey() + "'>";
+    html += "<span class='toggle-password' onclick='togglePwd(\"owm_api\", this)'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg></span>";
+    html += "</div>";
     
     html += "<div class='section-title'>Location & Time</div>";
     
@@ -390,6 +417,7 @@ void WifiManager::handleRoot() {
     
     html += "<button type='submit'>Save & Connect</button>";
     html += "</form>";
+    html += "<p style=\"margin-top: 25px; margin-bottom: 0; font-size: 13px; color: #6c7086; text-align: center;\">Built for " + String(DEVICE_NAME) + " | <a href=\"https://github.com/nicholaswilde/cyd-weather-station\" target=\"_blank\" style=\"color: #89b4fa; text-decoration: none;\">GitHub</a></p>";
     html += "</div>";
     html += "</body></html>";
 
