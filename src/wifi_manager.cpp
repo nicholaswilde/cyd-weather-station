@@ -21,6 +21,14 @@
 
 extern SettingsManager settings;
 
+#if defined(ST7796_DRIVER)
+    #define DEVICE_NAME "ESP32-3248S035C"
+#elif defined(ILI9341_DRIVER)
+    #define DEVICE_NAME "ESP32-2432S028R"
+#else
+    #define DEVICE_NAME "Unknown CYD Device"
+#endif
+
 static void configureStaticIP() {
 #ifndef NATIVE_TEST
     if (!settings.getStaticIpEnabled()) return;
@@ -639,7 +647,9 @@ void WifiManager::registerOTARoutes() {
     if (!_webServer) return;
 
     _webServer->on("/update", HTTP_GET, [this]() {
-        _webServer->send_P(200, "text/html", ota_html);
+        String html = String(ota_html);
+        html.replace("%DEVICE_NAME%", DEVICE_NAME);
+        _webServer->send(200, "text/html", html);
     });
 
     _webServer->on("/settings", HTTP_GET, [this]() {
@@ -685,6 +695,7 @@ void WifiManager::handleSettings() {
 #else
     html.replace("%APP_VERSION%", "unknown");
 #endif
+    html.replace("%DEVICE_NAME%", DEVICE_NAME);
 
     html.replace("%UNIT_METRIC%", settings.getUnitSystem() == UNIT_METRIC ? "selected" : "");
     html.replace("%UNIT_IMPERIAL%", settings.getUnitSystem() == UNIT_IMPERIAL ? "selected" : "");
@@ -723,10 +734,22 @@ void WifiManager::handleSettings() {
     html.replace("%MQTT_PASSWORD%", settings.getMqttPassword());
     
     html.replace("%STATIC_IP_ENABLED%", settings.getStaticIpEnabled() ? "checked" : "");
-    html.replace("%STATIC_IP%", settings.getStaticIp());
-    html.replace("%STATIC_GW%", settings.getStaticGateway());
-    html.replace("%STATIC_SN%", settings.getStaticSubnet());
-    html.replace("%STATIC_DNS%", settings.getStaticDns());
+    
+    String staticIp = settings.getStaticIp();
+    if (staticIp.isEmpty() && WiFi.status() == WL_CONNECTED) staticIp = WiFi.localIP().toString();
+    html.replace("%STATIC_IP%", staticIp);
+    
+    String staticGw = settings.getStaticGateway();
+    if (staticGw.isEmpty() && WiFi.status() == WL_CONNECTED) staticGw = WiFi.gatewayIP().toString();
+    html.replace("%STATIC_GW%", staticGw);
+    
+    String staticSn = settings.getStaticSubnet();
+    if (staticSn.isEmpty() && WiFi.status() == WL_CONNECTED) staticSn = WiFi.subnetMask().toString();
+    html.replace("%STATIC_SN%", staticSn);
+    
+    String staticDns = settings.getStaticDns();
+    if (staticDns.isEmpty() && WiFi.status() == WL_CONNECTED) staticDns = WiFi.dnsIP().toString();
+    html.replace("%STATIC_DNS%", staticDns);
     
     html.replace("%AP_PASSWORD%", settings.getApPassword());
     
@@ -816,6 +839,7 @@ void WifiManager::handleSettingsSave() {
 void WifiManager::handleLanding() {
     String html = landing_html;
     html.replace("%APP_VERSION%", APP_VERSION);
+    html.replace("%DEVICE_NAME%", DEVICE_NAME);
     html.replace("%SCREENSHOT_DISABLED%", settings.getScreenshotServerEnabled() ? "" : "disabled");
     html.replace("%SCREENSHOT_HELP_TEXT%", settings.getScreenshotServerEnabled() ? "" : "<p style='font-size: 13px; color: #a6adc8; margin-top: -5px; margin-bottom: 15px;'>Screenshots must be enabled in device settings.</p>");
     _webServer->send(200, "text/html", html);

@@ -26,6 +26,10 @@ button:hover { background: #f5c2e7; }
 .section-title { color: #89b4fa; font-size: 18px; margin-top: 20px; margin-bottom: 15px; border-bottom: 1px solid #313244; padding-bottom: 5px; }
 .btn-back { display: block; margin-top: 15px; color: #a6adc8; text-decoration: none; font-size: 14px; text-align: center; transition: color 0.2s; }
 .btn-back:hover { color: #cdd6f4; }
+.password-wrapper { position: relative; display: block; margin-bottom: 20px; }
+.password-wrapper input[type='password'], .password-wrapper input[type='text'] { padding-right: 40px; margin-bottom: 0; }
+.password-wrapper .toggle-password { position: absolute; right: 12px; top: 12px; cursor: pointer; color: #a6adc8; user-select: none; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; transition: color 0.2s; }
+.password-wrapper .toggle-password:hover { color: #cdd6f4; }
 </style>
 </head>
 <body>
@@ -35,13 +39,13 @@ button:hover { background: #f5c2e7; }
 <form method='POST' action='/settings/save'>
 
 <div class='section-title' style='margin-top: 0;'>Display & UI</div>
-<label for='unit_system'>Unit System</label>
+<label for='unit_system' title='Select the measurement units for weather data'>Unit System</label>
 <select id='unit_system' name='unit_system'>
     <option value='1' %UNIT_METRIC%>Metric (Celsius, m/s)</option>
     <option value='2' %UNIT_IMPERIAL%>Imperial (Fahrenheit, mph)</option>
 </select>
 
-<label for='theme_flavor'>Theme (Catppuccin)</label>
+<label for='theme_flavor' title='Select the color palette for the user interface'>Theme (Catppuccin)</label>
 <select id='theme_flavor' name='theme_flavor'>
     <option value='1' %THEME_MOCHA%>Mocha</option>
     <option value='2' %THEME_MACCHIATO%>Macchiato</option>
@@ -49,7 +53,7 @@ button:hover { background: #f5c2e7; }
     <option value='4' %THEME_LATTE%>Latte</option>
 </select>
 
-<label for='screen_orientation'>Screen Orientation</label>
+<label for='screen_orientation' title='Set the rotation of the screen'>Screen Orientation</label>
 <select id='screen_orientation' name='screen_orientation'>
     <option value='0' %ORIENT_0%>Portrait (0°)</option>
     <option value='1' %ORIENT_1%>Landscape (90°)</option>
@@ -57,7 +61,7 @@ button:hover { background: #f5c2e7; }
     <option value='3' %ORIENT_3%>Landscape Rev (270°)</option>
 </select>
 
-<label for='brightness'>Screen Brightness (10-100%)</label>
+<label for='brightness' title='Adjust the display backlight brightness'>Screen Brightness (10-100%)</label>
 <div class='slider-group'>
     <input type='range' id='brightness_slider' min='10' max='100' value='%BRIGHTNESS%' oninput='document.getElementById("brightness").value = this.value'>
     <input type='number' id='brightness' name='brightness' min='10' max='100' value='%BRIGHTNESS%' oninput='document.getElementById("brightness_slider").value = this.value'>
@@ -65,48 +69,51 @@ button:hover { background: #f5c2e7; }
 
 <div class='checkbox-group'>
     <input type='checkbox' id='auto_brightness' name='auto_brightness' value='1' %AUTO_BRIGHTNESS%>
-    <label for='auto_brightness'>Auto Brightness</label>
+    <label for='auto_brightness' title='Automatically adjust brightness based on time of day'>Auto Brightness</label>
 </div>
 
 <div class='checkbox-group'>
     <input type='checkbox' id='screensaver_enabled' name='screensaver_enabled' value='1' %SCREENSAVER_ENABLED%>
-    <label for='screensaver_enabled'>Enable Screensaver</label>
+    <label for='screensaver_enabled' title='Enable a screensaver after a period of inactivity'>Enable Screensaver</label>
 </div>
 
-<label for='screensaver_timeout'>Screensaver Timeout (Minutes)</label>
+<label for='screensaver_timeout' title='Time in minutes before the screensaver activates'>Screensaver Timeout (Minutes)</label>
 <input type='number' id='screensaver_timeout' name='screensaver_timeout' min='1' max='60' value='%SCREENSAVER_TIMEOUT%'>
 
 <div class='section-title'>Location & Weather</div>
-<label for='owm_api'>OpenWeatherMap API Key</label>
-<input type='password' id='owm_api' name='owm_api' value='%OWM_API%'>
-<label for='zip'>Zip Code (US Only)</label>
+<label for='owm_api' title='Your OpenWeatherMap API key'>OpenWeatherMap API Key (<a href='https://home.openweathermap.org/api_keys' target='_blank' style='color: #89b4fa; text-decoration: none;'>Get Key</a>)</label>
+<div class='password-wrapper'>
+    <input type='password' id='owm_api' name='owm_api' value='%OWM_API%'>
+    <span class='toggle-password' onclick='togglePwd("owm_api", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+</div>
+<label for='zip' title='Your US zip code for weather data'>Zip Code (US Only)</label>
 <input type='text' id='zip' name='zip' value='%ZIP%'>
 
-<label for='city'>City ID (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OpenWeatherMap</a>)</label>
+<label for='city' title='OpenWeatherMap City ID for accurate location'>City ID (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OpenWeatherMap</a>)</label>
 <input type='text' id='city' name='city' value='%CITY%'>
 
-<label for='lat'>Latitude</label>
+<label for='lat' title='Latitude for weather location'>Latitude</label>
 <input type='text' id='lat' name='lat' value='%LAT%'>
 
-<label for='lon'>Longitude</label>
+<label for='lon' title='Longitude for weather location'>Longitude</label>
 <input type='text' id='lon' name='lon' value='%LON%'>
 
-<label for='tz'>Timezone (<a href='https://gist.github.com/alwynallan/24d96091655391107939' target='_blank' style='color: #89b4fa; text-decoration: none;'>POSIX format</a>)</label>
+<label for='tz' title='POSIX timezone string for accurate local time'>Timezone (<a href='https://gist.github.com/alwynallan/24d96091655391107939' target='_blank' style='color: #89b4fa; text-decoration: none;'>POSIX format</a>)</label>
 <input type='text' id='tz' name='tz' value='%TZ%'>
 
-<label for='ntp_server'>NTP Server</label>
+<label for='ntp_server' title='Network Time Protocol server for time synchronization'>NTP Server</label>
 <input type='text' id='ntp_server' name='ntp_server' value='%NTP_SERVER%'>
 
-<label for='update_interval'>Weather Update Interval (Minutes)</label>
+<label for='update_interval' title='How often to fetch new weather data'>Weather Update Interval (Minutes)</label>
 <input type='number' id='update_interval' name='update_interval' min='1' max='60' value='%UPDATE_INTERVAL%'>
 
 <div class='section-title'>System Features</div>
 <div class='checkbox-group'>
     <input type='checkbox' id='led_enabled' name='led_enabled' value='1' %LED_ENABLED%>
-    <label for='led_enabled'>RGB LED Enabled</label>
+    <label for='led_enabled' title='Enable or disable the onboard RGB LED'>RGB LED Enabled</label>
 </div>
 
-<label for='led_brightness'>LED Brightness (0-100%)</label>
+<label for='led_brightness' title='Adjust the brightness of the RGB LED'>LED Brightness (0-100%)</label>
 <div class='slider-group'>
     <input type='range' id='led_brightness_slider' min='0' max='100' value='%LED_BRIGHTNESS%' oninput='document.getElementById("led_brightness").value = this.value'>
     <input type='number' id='led_brightness' name='led_brightness' min='0' max='100' value='%LED_BRIGHTNESS%' oninput='document.getElementById("led_brightness_slider").value = this.value'>
@@ -114,66 +121,72 @@ button:hover { background: #f5c2e7; }
 
 <div class='checkbox-group'>
     <input type='checkbox' id='mqtt_enabled' name='mqtt_enabled' value='1' %MQTT_ENABLED% onchange='toggleMqttSettings()'>
-    <label for='mqtt_enabled'>MQTT Enabled</label>
+    <label for='mqtt_enabled' title='Enable MQTT to publish device state and receive commands'>MQTT Enabled</label>
 </div>
 
 <div id='mqtt_settings' style='display: none; margin-left: 20px; border-left: 2px solid #313244; padding-left: 15px; margin-bottom: 20px;'>
-    <label for='mqtt_server'>MQTT Server</label>
+    <label for='mqtt_server' title='Hostname or IP address of the MQTT broker'>MQTT Server</label>
     <input type='text' id='mqtt_server' name='mqtt_server' value='%MQTT_SERVER%'>
     
-    <label for='mqtt_port'>MQTT Port</label>
+    <label for='mqtt_port' title='Port number for the MQTT broker (default: 1883)'>MQTT Port</label>
     <input type='number' id='mqtt_port' name='mqtt_port' value='%MQTT_PORT%'>
     
-    <label for='mqtt_user'>MQTT Username</label>
+    <label for='mqtt_user' title='Username for MQTT authentication (leave blank if none)'>MQTT Username</label>
     <input type='text' id='mqtt_user' name='mqtt_user' value='%MQTT_USER%'>
     
-    <label for='mqtt_password'>MQTT Password</label>
-    <input type='password' id='mqtt_password' name='mqtt_password' value='%MQTT_PASSWORD%'>
+    <label for='mqtt_password' title='Password for MQTT authentication (leave blank if none)'>MQTT Password</label>
+    <div class='password-wrapper'>
+        <input type='password' id='mqtt_password' name='mqtt_password' value='%MQTT_PASSWORD%'>
+        <span class='toggle-password' onclick='togglePwd("mqtt_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+    </div>
 </div>
 
 <div class='checkbox-group'>
     <input type='checkbox' id='screenshot_server_enabled' name='screenshot_server_enabled' value='1' %SCREENSHOT_ENABLED%>
-    <label for='screenshot_server_enabled'>Screenshot Server</label>
+    <label for='screenshot_server_enabled' title='Enable the screenshot server for remote viewing'>Screenshot Server</label>
 </div>
 
 <div class='checkbox-group'>
     <input type='checkbox' id='api_server_enabled' name='api_server_enabled' value='1' %API_SERVER_ENABLED%>
-    <label for='api_server_enabled'>API Server</label>
+    <label for='api_server_enabled' title='Enable the REST API server'>API Server</label>
 </div>
 
 <div class='checkbox-group'>
     <input type='checkbox' id='static_ip_enabled' name='static_ip_enabled' value='1' %STATIC_IP_ENABLED% onchange='toggleStaticIpSettings()'>
-    <label for='static_ip_enabled'>Static IP Enabled</label>
+    <label for='static_ip_enabled' title='Use a static IP address instead of DHCP'>Static IP Enabled</label>
 </div>
 
 <div id='static_ip_settings' style='display: none; margin-left: 20px; border-left: 2px solid #313244; padding-left: 15px; margin-bottom: 20px;'>
-    <label for='static_ip'>IP Address</label>
+    <label for='static_ip' title='Static IP address (e.g. 192.168.1.100)'>IP Address</label>
     <input type='text' id='static_ip' name='static_ip' value='%STATIC_IP%'>
-    <label for='static_gw'>Gateway</label>
+    <label for='static_gw' title='Gateway IP address (e.g. 192.168.1.1)'>Gateway</label>
     <input type='text' id='static_gw' name='static_gw' value='%STATIC_GW%'>
-    <label for='static_sn'>Subnet Mask</label>
+    <label for='static_sn' title='Subnet mask (e.g. 255.255.255.0)'>Subnet Mask</label>
     <input type='text' id='static_sn' name='static_sn' value='%STATIC_SN%'>
-    <label for='static_dns'>DNS Server</label>
+    <label for='static_dns' title='DNS server IP address (e.g. 8.8.8.8)'>DNS Server</label>
     <input type='text' id='static_dns' name='static_dns' value='%STATIC_DNS%'>
 </div>
 
-<label for='ap_password'>Configuration AP Password (min 8 chars)</label>
-<input type='password' id='ap_password' name='ap_password' value='%AP_PASSWORD%'>
+<label for='ap_password' title='Password for the device&#39;s configuration Access Point'>Configuration AP Password (min 8 chars)</label>
+<div class='password-wrapper'>
+    <input type='password' id='ap_password' name='ap_password' value='%AP_PASSWORD%'>
+    <span class='toggle-password' onclick='togglePwd("ap_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+</div>
 
 <div class='checkbox-group'>
     <input type='checkbox' id='sd_logging_enabled' name='sd_logging_enabled' value='1' %SD_LOGGING%>
-    <label for='sd_logging_enabled'>SD Card Logging</label>
+    <label for='sd_logging_enabled' title='Enable logging to the SD card'>SD Card Logging</label>
 </div>
 
 <div class='checkbox-group'>
     <input type='checkbox' id='sd_cache_enabled' name='sd_cache_enabled' value='1' %SD_CACHE%>
-    <label for='sd_cache_enabled'>SD Card Cache</label>
+    <label for='sd_cache_enabled' title='Enable caching resources on the SD card'>SD Card Cache</label>
 </div>
 
 <button type='submit'>Save Settings & Reboot</button>
 </form>
 <a href="/" class="btn-back">&larr; Back to Dashboard</a>
-<p style="margin-top: 25px; margin-bottom: 0; font-size: 13px; color: #6c7086; text-align: center;">Built for ESP32-2432S028R | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>
+<p style="margin-top: 25px; margin-bottom: 0; font-size: 13px; color: #6c7086; text-align: center;">Built for %DEVICE_NAME% | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>
 </div>
 <script>
 function toggleMqttSettings() {
@@ -188,6 +201,18 @@ function toggleStaticIpSettings() {
     var div = document.getElementById('static_ip_settings');
     if (cb && div) {
         div.style.display = cb.checked ? 'block' : 'none';
+    }
+}
+function togglePwd(id, el) {
+    var eyeSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+    var eyeOffSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+    var input = document.getElementById(id);
+    if (input.type === "password") {
+        input.type = "text";
+        el.innerHTML = eyeOffSvg;
+    } else {
+        input.type = "password";
+        el.innerHTML = eyeSvg;
     }
 }
 window.onload = function() {
