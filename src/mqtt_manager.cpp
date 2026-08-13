@@ -22,6 +22,7 @@ void MqttManager::begin() {
     // 2. Configure broker details
     _mqttClient.setServer(_server.c_str(), _port);
     _mqttClient.setCredentials(_user.c_str(), _password.c_str());
+    _mqttClient.setWill("cyd/status", 1, true, "offline");
 
     // 2.5 Configure unique Client ID
     static String clientId = "CYD-Weather-" + WiFi.macAddress();
@@ -63,6 +64,36 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     
     // Publish a boot message
     _mqttClient.publish("cyd/status", 0, true, "online");
+    
+    // Publish HA Discovery configuration
+    publishHADiscovery();
+}
+
+void MqttManager::publishHADiscovery() {
+    String mac = WiFi.macAddress();
+    mac.replace(":", "");
+    String deviceId = "cyd_weather_" + mac;
+    String deviceJson = "\"device\":{\"identifiers\":[\"" + deviceId + "\"],\"name\":\"CYD Weather Station\",\"manufacturer\":\"Nicholas Wilde\",\"model\":\"CYD-28R/35C\"}";
+
+    // Temperature
+    String tempPayload = "{\"name\":\"Temperature\",\"state_topic\":\"cyd/weather/temperature\",\"unit_of_measurement\":\"°F\",\"device_class\":\"temperature\",\"unique_id\":\"" + deviceId + "_temp\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/temperature/config").c_str(), 0, true, tempPayload.c_str());
+
+    // Humidity
+    String humPayload = "{\"name\":\"Humidity\",\"state_topic\":\"cyd/weather/humidity\",\"unit_of_measurement\":\"%\",\"device_class\":\"humidity\",\"unique_id\":\"" + deviceId + "_hum\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/humidity/config").c_str(), 0, true, humPayload.c_str());
+
+    // Wind Speed
+    String windPayload = "{\"name\":\"Wind Speed\",\"state_topic\":\"cyd/weather/wind_speed\",\"unit_of_measurement\":\"mph\",\"device_class\":\"wind_speed\",\"unique_id\":\"" + deviceId + "_wind\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/wind_speed/config").c_str(), 0, true, windPayload.c_str());
+
+    // Weather Condition/Status
+    String statusPayload = "{\"name\":\"Weather Condition\",\"state_topic\":\"cyd/weather/status\",\"unique_id\":\"" + deviceId + "_cond\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/condition/config").c_str(), 0, true, statusPayload.c_str());
+
+    // Connection Status
+    String connPayload = "{\"name\":\"Connection Status\",\"state_topic\":\"cyd/status\",\"payload_on\":\"online\",\"payload_off\":\"offline\",\"device_class\":\"connectivity\",\"unique_id\":\"" + deviceId + "_conn\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/binary_sensor/" + deviceId + "/connection/config").c_str(), 0, true, connPayload.c_str());
 }
 
 void MqttManager::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {

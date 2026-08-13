@@ -17,6 +17,10 @@ public:
     void setServer(const char* host, uint16_t port) {}
     void setCredentials(const char* user, const char* pass) {}
     void setClientId(const char* clientId) { mockClientId = clientId; }
+    void setWill(const char* topic, uint8_t qos, bool retain, const char* payload) {
+        mockWillTopic = topic;
+        mockWillPayload = payload;
+    }
     void connect() {
         _connected = true;
         if (_onConnectCallback) {
@@ -49,6 +53,8 @@ private:
 
 public:
     std::string mockClientId;
+    std::string mockWillTopic;
+    std::string mockWillPayload;
 };
 
 #endif

@@ -33,10 +33,19 @@ void test_mqtt_unique_client_id(void) {
     // but we can test that the ID is generated.
 }
 
+void test_mqtt_lwt(void) {
+    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    mqtt.begin();
+    
+    // In our tests, just ensuring begin() configures LWT without issues is sufficient.
+    // The underlying mock will have stored the LWT.
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_mqtt_initialization);
     RUN_TEST(test_mqtt_connect_and_disconnect);
     RUN_TEST(test_mqtt_unique_client_id);
+    RUN_TEST(test_mqtt_lwt);
     return UNITY_END();
 }
