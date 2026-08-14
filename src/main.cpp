@@ -535,6 +535,7 @@ void loop() {
         mqtt.publish("system/wifi_rssi", String(WiFi.RSSI()).c_str(), true);
         mqtt.publish("system/ip", wifi.getIPAddress().c_str(), true);
         mqtt.publish("system/version", "v0.1.21", true);
+        mqtt.publish("system/mac", WiFi.macAddress().c_str(), true);
         
         mqtt.publish("settings/auto_brightness", settings.getAutoBrightness() ? "ON" : "OFF", true);
         mqtt.publish("settings/screensaver", settings.getScreensaverEnabled() ? "ON" : "OFF", true);

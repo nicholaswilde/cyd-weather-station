@@ -27,3 +27,11 @@
 
 ## Issue Resolution & Testing
 - When addressing or fixing GitHub issues, **always** create corresponding regression tests along with the issue implementations or fixes to prevent future regressions.
+
+## Adding Settings Checklist
+- Whenever adding a new setting or configuration option to the application, ensure it is consistently added across all integration points:
+  1. **Default Config / Secrets**: Add default definitions to `include/config.h` or `include/secrets.h.example`.
+  2. **Settings Web Page**: Add the input field, label, and form submission handler in `src/web_server.cpp` (or web settings page).
+  3. **On-Device Settings UI**: Add the UI control (toggle, slider, dropdown) in `src/ui.cpp` and support bi-directional synchronization in `ui_sync_toggles()`.
+  4. **MQTT Integration**: Add Home Assistant auto-discovery entity payload, state topic publishing, and command subscription/handling in `src/mqtt_manager.cpp` and `src/main.cpp`.
+

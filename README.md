@@ -34,9 +34,9 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **MQTT**: Toggle publishing weather variables to MQTT topics with a configurable base topic (default `cyd/`).
   - **MQTT Integration & Remote Control**:
     - **Configurable Base Topic**: Customize the base topic (e.g. `home/living_room/weather/`) via the web settings portal.
-    - **Home Assistant Auto-Discovery**: Automatically exposes entities for weather sensors (temperature, humidity, wind speed, condition), connectivity status, brightness control (number slider), and device restart (button).
-    - **Remote Commands**: Control screen brightness (`<base_topic>command/brightness`) or trigger a remote reboot (`<base_topic>command/reboot`) via MQTT.
-    - **LWT & Robust Reconnection**: Reports online/offline availability via Last Will and Testament (LWT) on `<base_topic>status` with MAC-based unique client IDs and exponential reconnection backoff (5s to 2min).
+    - **Home Assistant Auto-Discovery**: Automatically exposes entities for weather sensors (temp, humidity, wind speed/direction, condition, city), device diagnostics (uptime, heap, RSSI, IP, version, MAC), configuration controls (screen & LED brightness, auto brightness, theme flavor, units, orientation, update interval, screensaver timeout, status LED, SD log/cache), and device restart button.
+    - **Bidirectional Remote Control**: Change any setting or command via MQTT topics with immediate on-screen and Home Assistant state synchronization.
+    - **LWT & Robust Reconnection**: Reports online/offline availability via Last Will and Testament (LWT) on `<base_topic>status` with MAC-based unique client IDs, paced discovery message queueing, and exponential reconnection backoff (5s to 2min).
   - **Screensaver**: Enable/disable screensaver mode (dims backlight and displays clock after inactivity).
   - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks, header height dynamically increases to 60px in portrait to fit a wrapped two-line title without overlaps, and touch coordinates update instantly.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
@@ -325,7 +325,7 @@ The device UI Settings tab allows cycling through the following common presets:
 
 ### :satellite: MQTT Topics & Home Assistant Integration
 
-When MQTT is enabled in settings, the CYD Weather Station connects to your configured MQTT broker and provides state telemetry, Home Assistant auto-discovery, and remote control commands.
+When MQTT is enabled in settings, the CYD Weather Station connects to your configured MQTT broker and provides state telemetry, Home Assistant auto-discovery, system diagnostics, and bidirectional remote control commands.
 
 > [!NOTE]
 > All telemetry, state, and command topics are prefixed with your configurable **MQTT Base Topic** (default: `cyd/`). Home Assistant auto-discovery topics always use the standard `homeassistant/` root prefix.
@@ -341,23 +341,54 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>weather/wind_direction` | Current wind direction | `NW` |
 | `<base_topic>weather/status` | Current weather condition | `Partly Cloudy` |
 | `<base_topic>weather/city` | Resolved city name | `Seattle` |
+| `<base_topic>system/uptime` | Device uptime (seconds) | `3600` |
+| `<base_topic>system/free_heap` | Free heap memory (bytes) | `184320` |
+| `<base_topic>system/wifi_rssi` | Wi-Fi signal strength (dBm) | `-58` |
+| `<base_topic>system/ip` | Device IP address | `192.168.1.150` |
+| `<base_topic>system/version` | Firmware version string | `v0.1.21` |
+| `<base_topic>system/mac` | Device MAC address | `B0:CB:D8:DA:77:5C` |
+| `<base_topic>settings/brightness` | Screen brightness percentage | `0`–`100` |
+| `<base_topic>settings/led_brightness` | Status LED brightness percentage | `0`–`100` |
+| `<base_topic>settings/auto_brightness` | Auto brightness switch state | `ON` / `OFF` |
+| `<base_topic>settings/screensaver` | Screensaver switch state | `ON` / `OFF` |
+| `<base_topic>settings/theme` | Catppuccin theme flavor | `Mocha` / `Macchiato` / `Frappe` / `Latte` |
+| `<base_topic>settings/units` | Unit system | `Imperial` / `Metric` |
+| `<base_topic>settings/screen_orientation`| Display orientation | `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` |
+| `<base_topic>settings/update_interval` | Weather update interval (mins) | `15` |
+| `<base_topic>settings/screensaver_timeout`| Screensaver timeout (mins) | `5` |
+| `<base_topic>settings/led` | Status LED enabled switch state | `ON` / `OFF` |
+| `<base_topic>settings/sd_log` | SD logging enabled switch state | `ON` / `OFF` |
+| `<base_topic>settings/sd_cache` | SD caching enabled switch state | `ON` / `OFF` |
 
 #### Remote Control Topics
 
 | Topic | Payload | Action |
 | :--- | :--- | :--- |
-| `<base_topic>command/brightness` | `0`–`100` | Smoothly fades the screen backlight to the specified brightness percentage and saves setting. |
-| `<base_topic>command/reboot` | `1` / `true` / `ON` | Reboots the ESP32 weather station. |
+| `<base_topic>command/brightness` | `0`–`100` | Adjusts the screen backlight brightness percentage and saves setting. |
+| `<base_topic>command/led_brightness` | `0`–`100` | Adjusts the status LED brightness percentage (0-100% mapped to hardware 0-255). |
+| `<base_topic>command/auto_brightness`| `ON` / `OFF` / `1` / `0` | Enables or disables ambient light-based automatic brightness. |
+| `<base_topic>command/screensaver` | `ON` / `OFF` / `1` / `0` | Enables or disables the screensaver. |
+| `<base_topic>command/theme` | `Mocha` / `Macchiato` / `Frappe` / `Latte` | Changes the active Catppuccin theme flavor. |
+| `<base_topic>command/units` | `Imperial` / `Metric` | Changes the temperature and wind speed unit system. |
+| `<base_topic>command/screen_orientation`| `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` | Changes display orientation dynamically. |
+| `<base_topic>command/update_interval` | `1`–`120` | Sets the weather fetch update interval in minutes. |
+| `<base_topic>command/screensaver_timeout`| `1`–`60` | Sets screensaver activation inactivity timeout in minutes. |
+| `<base_topic>command/led` | `ON` / `OFF` / `1` / `0` | Enables or disables the onboard status RGB LED. |
+| `<base_topic>command/sd_log` | `ON` / `OFF` / `1` / `0` | Enables or disables SD card weather history logging. |
+| `<base_topic>command/sd_cache` | `ON` / `OFF` / `1` / `0` | Enables or disables SD card weather caching. |
+| `<base_topic>command/reboot` | `REBOOT` / `1` / `true` / `ON` | Reboots the ESP32 weather station. |
 
 #### Home Assistant MQTT Discovery
-On connection, the device automatically publishes discovery configurations to Home Assistant:
-- **Weather Sensors** (`homeassistant/sensor/cyd_weather_<mac>/...`): Temperature, Humidity, Wind Speed, Weather Condition
-- **Connection Status** (`homeassistant/binary_sensor/cyd_weather_<mac>/...`): Online/Offline connectivity
-- **Brightness Control** (`homeassistant/number/cyd_weather_<mac>/...`): Number slider entity to adjust screen brightness
-- **Reboot Button** (`homeassistant/button/cyd_weather_<mac>/...`): Restart button entity
+On connection, the device automatically registers itself as `CYD Weather Station <short_mac>` with full device hierarchy and exposes the following entities to Home Assistant:
+- **Weather Sensors**: Temperature (°F/°C), Humidity (%), Wind Speed (mph/m/s), Wind Direction, Weather Condition, City Name.
+- **Diagnostics Sensors**: Connection Status (binary sensor), Uptime (s), Free Memory (B), Wi-Fi Signal (dBm), IP Address, Firmware Version, MAC Address.
+- **Controls & Sliders (Numbers)**: Screen Brightness (0–100%), LED Brightness (0–100%), Weather Update Interval (1–120 min), Screensaver Timeout (1–60 min).
+- **Configuration Switches**: Auto Brightness, Screensaver, Status LED, SD Log, SD Cache.
+- **Dropdown Selectors**: Theme Flavor, Unit System, Screen Orientation.
+- **Buttons**: Device Reboot.
 
 #### Connection Management & Reconnect Backoff
-If the MQTT broker goes offline or becomes unreachable, the weather station will automatically attempt to reconnect using an **exponential backoff** strategy (doubling the reconnect delay from 5s up to a maximum of 2 minutes) to prevent network congestion. Reconnect intervals reset back to 5s upon a successful connection.
+If the MQTT broker goes offline or becomes unreachable, the weather station will automatically attempt to reconnect using an **exponential backoff** strategy (doubling the reconnect delay from 5s up to a maximum of 2 minutes) to prevent network congestion. Reconnect intervals reset back to 5s upon a successful connection. Auto-discovery payloads are throttled with asynchronous FreeRTOS pacing to ensure reliable network transmission without packet loss.
 
 ---
 

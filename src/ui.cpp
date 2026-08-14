@@ -36,6 +36,10 @@ static lv_obj_t *wifi_info_dialog = nullptr;
 static lv_obj_t *ui_auto_bright_sw = nullptr;
 static lv_obj_t *ui_screensaver_sw = nullptr;
 static lv_obj_t *ui_led_sw = nullptr;
+static lv_obj_t *ui_sd_log_sw = nullptr;
+static lv_obj_t *ui_sd_cache_sw = nullptr;
+static lv_obj_t *ui_brightness_slider = nullptr;
+static lv_obj_t *ui_led_brightness_slider = nullptr;
 
 static void close_wifi_info_cb(lv_event_t * e) {
     if (wifi_info_dialog != nullptr) {
@@ -863,18 +867,18 @@ void initUI() {
     lv_obj_set_style_text_color(sd_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
     lv_obj_set_style_text_font(sd_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
-    lv_obj_t * sd_sw = lv_switch_create(sd_row);
-    lv_obj_set_size(sd_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(sd_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    ui_sd_log_sw = lv_switch_create(sd_row);
+    lv_obj_set_size(ui_sd_log_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_sd_log_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sd_log_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_sd_log_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (SdCardManager::isCardPresent()) {
         if (settings.getSdLoggingEnabled()) {
-            lv_obj_add_state(sd_sw, LV_STATE_CHECKED);
+            lv_obj_add_state(ui_sd_log_sw, LV_STATE_CHECKED);
         }
-        lv_obj_add_event_cb(sd_sw, sd_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+        lv_obj_add_event_cb(ui_sd_log_sw, sd_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     } else {
-        lv_obj_add_state(sd_sw, LV_STATE_DISABLED);
+        lv_obj_add_state(ui_sd_log_sw, LV_STATE_DISABLED);
     }
 
     // SD Cache row
@@ -893,18 +897,18 @@ void initUI() {
     lv_obj_set_style_text_color(sd_cache_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
     lv_obj_set_style_text_font(sd_cache_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
-    lv_obj_t * sd_cache_sw = lv_switch_create(sd_cache_row);
-    lv_obj_set_size(sd_cache_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(sd_cache_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    ui_sd_cache_sw = lv_switch_create(sd_cache_row);
+    lv_obj_set_size(ui_sd_cache_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_sd_cache_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sd_cache_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_sd_cache_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (SdCardManager::isCardPresent()) {
         if (settings.getSdCacheEnabled()) {
-            lv_obj_add_state(sd_cache_sw, LV_STATE_CHECKED);
+            lv_obj_add_state(ui_sd_cache_sw, LV_STATE_CHECKED);
         }
-        lv_obj_add_event_cb(sd_cache_sw, sd_cache_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+        lv_obj_add_event_cb(ui_sd_cache_sw, sd_cache_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     } else {
-        lv_obj_add_state(sd_cache_sw, LV_STATE_DISABLED);
+        lv_obj_add_state(ui_sd_cache_sw, LV_STATE_DISABLED);
     }
 
     // Screenshot Server row
@@ -996,21 +1000,21 @@ void initUI() {
     lv_obj_set_style_text_font(slider_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     // Brightness slider — suppress thumb padding so it doesn't bloat height
-    lv_obj_t * brightness_slider = lv_slider_create(right_col);
-    lv_obj_set_size(brightness_slider, lv_pct(92), 14);
-    lv_obj_set_style_pad_top(brightness_slider, 4, LV_PART_KNOB);
-    lv_obj_set_style_pad_bottom(brightness_slider, 4, LV_PART_KNOB);
+    ui_brightness_slider = lv_slider_create(right_col);
+    lv_obj_set_size(ui_brightness_slider, lv_pct(92), 14);
+    lv_obj_set_style_pad_top(ui_brightness_slider, 4, LV_PART_KNOB);
+    lv_obj_set_style_pad_bottom(ui_brightness_slider, 4, LV_PART_KNOB);
     // Slider track (unfilled)
-    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
     // Slider filled indicator
-    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_brightness_slider, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     // Slider knob
-    lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(COLOR_TEXT), LV_PART_KNOB | LV_STATE_DEFAULT);
-    lv_slider_set_range(brightness_slider, 10, 100);
-    lv_slider_set_value(brightness_slider, settings.getBrightness(), LV_ANIM_OFF);
-    lv_obj_add_event_cb(brightness_slider, brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, slider_label);
+    lv_obj_set_style_bg_color(ui_brightness_slider, lv_color_hex(COLOR_TEXT), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_slider_set_range(ui_brightness_slider, 10, 100);
+    lv_slider_set_value(ui_brightness_slider, settings.getBrightness(), LV_ANIM_OFF);
+    lv_obj_add_event_cb(ui_brightness_slider, brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, slider_label);
     if (settings.getAutoBrightness()) {
-        lv_obj_add_state(brightness_slider, LV_STATE_DISABLED);
+        lv_obj_add_state(ui_brightness_slider, LV_STATE_DISABLED);
     }
 
     // LED row
@@ -1038,18 +1042,18 @@ void initUI() {
     lv_obj_set_style_text_color(led_slider_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
     lv_obj_set_style_text_font(led_slider_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
-    lv_obj_t * led_brightness_slider = lv_slider_create(right_col);
-    lv_obj_set_size(led_brightness_slider, lv_pct(92), 14);
-    lv_obj_set_style_pad_top(led_brightness_slider, 4, LV_PART_KNOB);
-    lv_obj_set_style_pad_bottom(led_brightness_slider, 4, LV_PART_KNOB);
-    lv_obj_set_style_bg_color(led_brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(led_brightness_slider, lv_color_hex(COLOR_MAUVE), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(led_brightness_slider, lv_color_hex(COLOR_TEXT), LV_PART_KNOB | LV_STATE_DEFAULT);
-    lv_slider_set_range(led_brightness_slider, 0, 255);
-    lv_slider_set_value(led_brightness_slider, settings.getLedBrightness(), LV_ANIM_OFF);
-    lv_obj_add_event_cb(led_brightness_slider, led_brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, led_slider_label);
+    ui_led_brightness_slider = lv_slider_create(right_col);
+    lv_obj_set_size(ui_led_brightness_slider, lv_pct(92), 14);
+    lv_obj_set_style_pad_top(ui_led_brightness_slider, 4, LV_PART_KNOB);
+    lv_obj_set_style_pad_bottom(ui_led_brightness_slider, 4, LV_PART_KNOB);
+    lv_obj_set_style_bg_color(ui_led_brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_led_brightness_slider, lv_color_hex(COLOR_MAUVE), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_led_brightness_slider, lv_color_hex(COLOR_TEXT), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_slider_set_range(ui_led_brightness_slider, 0, 255);
+    lv_slider_set_value(ui_led_brightness_slider, settings.getLedBrightness(), LV_ANIM_OFF);
+    lv_obj_add_event_cb(ui_led_brightness_slider, led_brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, led_slider_label);
     if (!settings.getLedEnabled()) {
-        lv_obj_add_state(led_brightness_slider, LV_STATE_DISABLED);
+        lv_obj_add_state(ui_led_brightness_slider, LV_STATE_DISABLED);
     }
 
     // --- LED enable switch (created after slider so slider can be passed as user_data) ---
@@ -1061,7 +1065,7 @@ void initUI() {
     if (settings.getLedEnabled()) {
         lv_obj_add_state(ui_led_sw, LV_STATE_CHECKED);
     }
-    lv_obj_add_event_cb(ui_led_sw, led_sw_event_cb, LV_EVENT_VALUE_CHANGED, led_brightness_slider);
+    lv_obj_add_event_cb(ui_led_sw, led_sw_event_cb, LV_EVENT_VALUE_CHANGED, ui_led_brightness_slider);
 
     // Auto switch (created after slider so we can pass slider as user_data)
     ui_auto_bright_sw = lv_switch_create(auto_row);
@@ -1072,7 +1076,7 @@ void initUI() {
     if (settings.getAutoBrightness()) {
         lv_obj_add_state(ui_auto_bright_sw, LV_STATE_CHECKED);
     }
-    lv_obj_add_event_cb(ui_auto_bright_sw, auto_sw_event_cb, LV_EVENT_VALUE_CHANGED, brightness_slider);
+    lv_obj_add_event_cb(ui_auto_bright_sw, auto_sw_event_cb, LV_EVENT_VALUE_CHANGED, ui_brightness_slider);
 
     // Timezone label
     lv_obj_t * tz_label = lv_label_create(right_col);
@@ -1632,6 +1636,40 @@ void ui_sync_toggles() {
             lv_obj_add_state(ui_led_sw, LV_STATE_CHECKED);
         } else {
             lv_obj_clear_state(ui_led_sw, LV_STATE_CHECKED);
+        }
+    }
+    
+    if (ui_sd_log_sw != nullptr) {
+        if (settings.getSdLoggingEnabled()) {
+            lv_obj_add_state(ui_sd_log_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_sd_log_sw, LV_STATE_CHECKED);
+        }
+    }
+    
+    if (ui_sd_cache_sw != nullptr) {
+        if (settings.getSdCacheEnabled()) {
+            lv_obj_add_state(ui_sd_cache_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_sd_cache_sw, LV_STATE_CHECKED);
+        }
+    }
+    
+    if (ui_brightness_slider != nullptr) {
+        lv_slider_set_value(ui_brightness_slider, settings.getBrightness(), LV_ANIM_OFF);
+        if (settings.getAutoBrightness()) {
+            lv_obj_add_state(ui_brightness_slider, LV_STATE_DISABLED);
+        } else {
+            lv_obj_clear_state(ui_brightness_slider, LV_STATE_DISABLED);
+        }
+    }
+    
+    if (ui_led_brightness_slider != nullptr) {
+        lv_slider_set_value(ui_led_brightness_slider, settings.getLedBrightness(), LV_ANIM_OFF);
+        if (settings.getLedEnabled()) {
+            lv_obj_clear_state(ui_led_brightness_slider, LV_STATE_DISABLED);
+        } else {
+            lv_obj_add_state(ui_led_brightness_slider, LV_STATE_DISABLED);
         }
     }
 }

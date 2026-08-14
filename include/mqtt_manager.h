@@ -65,6 +65,7 @@ public:
      * @brief Disconnects from the MQTT broker.
      */
     void disconnect();
+    void publishHADiscovery();
 
 #ifdef NATIVE_TEST
 public:
@@ -72,7 +73,6 @@ public:
 private:
 #endif
     void connectToMqtt();
-    void publishHADiscovery();
     
     // Member callbacks for AsyncMqttClient events
     void onMqttConnect(bool sessionPresent);

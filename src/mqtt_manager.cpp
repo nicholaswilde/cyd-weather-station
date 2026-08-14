@@ -69,6 +69,13 @@ void MqttManager::onNetworkDisconnected() {
     }
 }
 
+
+static void publishTask(void* pvParameters) {
+    MqttManager* mqtt = static_cast<MqttManager*>(pvParameters);
+    mqtt->publishHADiscovery();
+    vTaskDelete(NULL);
+}
+
 void MqttManager::onMqttConnect(bool sessionPresent) {
     Serial.println("[MQTT] Connected to broker!");
     
@@ -79,7 +86,7 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     _mqttClient.publish((_baseTopic + "status").c_str(), 0, true, "online");
     
     // Publish HA Discovery configuration
-    publishHADiscovery();
+    xTaskCreate(publishTask, "pubTask", 4096, this, 1, NULL);
 
     // Subscribe to commands
     subscribe("command/brightness", 0);
@@ -96,7 +103,7 @@ void MqttManager::publishHADiscovery() {
     String mac = WiFi.macAddress();
     mac.replace(":", "");
     String deviceId = "cyd_weather_" + mac;
-    String deviceJson = "\"device\":{\"identifiers\":[\"" + deviceId + "\"],\"name\":\"CYD Weather Station\",\"manufacturer\":\"Nicholas Wilde\",\"model\":\"CYD-28R/35C\"}";
+    String deviceJson = "\"device\":{\"identifiers\":[\"" + deviceId + "\"],\"name\":\"CYD Weather Station " + mac.substring(mac.length() - 4) + "\",\"manufacturer\":\"Nicholas Wilde\",\"model\":\"CYD-28R/35C\"}";
 
     // Temperature
     String tempPayload = "{\"name\":\"Temperature\",\"state_topic\":\"" + _baseTopic + "weather/temperature\",\"unit_of_measurement\":\"°F\",\"device_class\":\"temperature\",\"unique_id\":\"" + deviceId + "_temp\"," + deviceJson + "}";
@@ -109,18 +116,36 @@ void MqttManager::publishHADiscovery() {
     // Wind Speed
     String windPayload = "{\"name\":\"Wind Speed\",\"state_topic\":\"" + _baseTopic + "weather/wind_speed\",\"unit_of_measurement\":\"mph\",\"device_class\":\"wind_speed\",\"unique_id\":\"" + deviceId + "_wind\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/wind_speed/config").c_str(), 0, true, windPayload.c_str());
+    vTaskDelay(pdMS_TO_TICKS(50));
+
+    // Wind Direction
+    String windDirPayload = "{\"name\":\"Wind Direction\",\"state_topic\":\"" + _baseTopic + "weather/wind_direction\",\"unique_id\":\"" + deviceId + "_winddir\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/wind_direction/config").c_str(), 0, true, windDirPayload.c_str());
+    vTaskDelay(pdMS_TO_TICKS(50));
 
     // Weather Condition/Status
     String statusPayload = "{\"name\":\"Weather Condition\",\"state_topic\":\"" + _baseTopic + "weather/status\",\"unique_id\":\"" + deviceId + "_cond\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/condition/config").c_str(), 0, true, statusPayload.c_str());
+    vTaskDelay(pdMS_TO_TICKS(50));
+
+    // City Name
+    String cityPayload = "{\"name\":\"City Name\",\"state_topic\":\"" + _baseTopic + "weather/city\",\"unique_id\":\"" + deviceId + "_city\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/city/config").c_str(), 0, true, cityPayload.c_str());
+    vTaskDelay(pdMS_TO_TICKS(50));
 
     // Connection Status
     String connPayload = "{\"name\":\"Connection Status\",\"state_topic\":\"" + _baseTopic + "status\",\"payload_on\":\"online\",\"payload_off\":\"offline\",\"device_class\":\"connectivity\",\"unique_id\":\"" + deviceId + "_conn\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/binary_sensor/" + deviceId + "/connection/config").c_str(), 0, true, connPayload.c_str());
 
     // Brightness Control (Number)
-    String brightPayload = "{\"name\":\"Brightness\",\"command_topic\":\"" + _baseTopic + "command/brightness\",\"min\":1,\"max\":255,\"unique_id\":\"" + deviceId + "_bright\"," + deviceJson + "}";
+    String brightPayload = "{\"name\":\"Brightness\",\"state_topic\":\"" + _baseTopic + "settings/brightness\",\"command_topic\":\"" + _baseTopic + "command/brightness\",\"min\":0,\"max\":100,\"unit_of_measurement\":\"%\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_bright\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/number/" + deviceId + "/brightness/config").c_str(), 0, true, brightPayload.c_str());
+    vTaskDelay(pdMS_TO_TICKS(50));
+    
+    // LED Brightness (Number)
+    String ledBrightPayload = "{\"name\":\"LED Brightness\",\"state_topic\":\"" + _baseTopic + "settings/led_brightness\",\"command_topic\":\"" + _baseTopic + "command/led_brightness\",\"min\":0,\"max\":100,\"unit_of_measurement\":\"%\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_ledbright\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/number/" + deviceId + "/led_brightness/config").c_str(), 0, true, ledBrightPayload.c_str());
+    vTaskDelay(pdMS_TO_TICKS(50));
 
     // Reboot Control (Button)
     String rebootPayload = "{\"name\":\"Reboot\",\"command_topic\":\"" + _baseTopic + "command/reboot\",\"payload_press\":\"REBOOT\",\"device_class\":\"restart\",\"unique_id\":\"" + deviceId + "_reboot\"," + deviceJson + "}";
@@ -142,6 +167,9 @@ void MqttManager::publishHADiscovery() {
     // Firmware Version
     String verPayload = "{\"name\":\"Firmware Version\",\"state_topic\":\"" + _baseTopic + "system/version\",\"entity_category\":\"diagnostic\",\"unique_id\":\"" + deviceId + "_version\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/version/config").c_str(), 0, true, verPayload.c_str());
+    vTaskDelay(pdMS_TO_TICKS(50));
+    String macPayload = "{\"name\":\"MAC Address\",\"state_topic\":\"" + _baseTopic + "system/mac\",\"entity_category\":\"diagnostic\",\"unique_id\":\"" + deviceId + "_mac\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/mac/config").c_str(), 0, true, macPayload.c_str());
 
     // --- Operational Settings ---
     // Auto Brightness (Switch)
