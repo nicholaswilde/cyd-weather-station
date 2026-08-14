@@ -345,7 +345,7 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>system/free_heap` | Free heap memory (bytes) | `184320` |
 | `<base_topic>system/wifi_rssi` | Wi-Fi signal strength (dBm) | `-58` |
 | `<base_topic>system/ip` | Device IP address | `192.168.1.150` |
-| `<base_topic>system/version` | Firmware version string | `v0.1.21` |
+| `<base_topic>system/version` | Firmware version string | `v0.1.22` |
 | `<base_topic>system/mac` | Device MAC address | `B0:CB:D8:DA:77:5C` |
 | `<base_topic>settings/brightness` | Screen brightness percentage | `0`–`100` |
 | `<base_topic>settings/led_brightness` | Status LED brightness percentage | `0`–`100` |

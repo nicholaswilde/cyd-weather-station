@@ -11,6 +11,8 @@
 #define FREERTOS_MOCKS_H
 typedef void* TimerHandle_t;
 typedef void (*TimerCallbackFunction_t)(TimerHandle_t xTimer);
+typedef void* TaskHandle_t;
+typedef void (*TaskFunction_t)(void*);
 
 #define pdFALSE (0)
 #define pdTRUE (1)
@@ -20,6 +22,12 @@ inline void xTimerStart(void* timer, int ticks) {}
 inline void xTimerStop(void* timer, int ticks) {}
 inline void xTimerChangePeriod(void* timer, int period, int ticks) {}
 inline void* pvTimerGetTimerID(void* timer) { return nullptr; }
+inline int xTaskCreate(TaskFunction_t pxTaskCode, const char* pcName, uint32_t usStackDepth, void* pvParameters, uint32_t uxPriority, TaskHandle_t* pxCreatedTask) {
+    if (pxTaskCode) pxTaskCode(pvParameters);
+    return 1;
+}
+inline void vTaskDelete(TaskHandle_t xTask) {}
+inline void vTaskDelay(int ticks) {}
 #define pdMS_TO_TICKS(x) (x)
 #endif // FREERTOS_MOCKS_H
 
@@ -66,6 +74,13 @@ public:
     bool startsWith(const char* prefix) const {
         std::string p(prefix);
         return this->rfind(p, 0) == 0;
+    }
+    String substring(size_t from, size_t to = std::string::npos) const {
+        if (from >= this->length()) return String("");
+        if (to == std::string::npos || to > this->length()) {
+            return String(this->substr(from));
+        }
+        return String(this->substr(from, to - from));
     }
 };
 
