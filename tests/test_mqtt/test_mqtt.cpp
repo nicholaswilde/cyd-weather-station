@@ -45,14 +45,42 @@ void test_mqtt_subscribe_and_message(void) {
     MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
     mqtt.begin();
     
+    // Simulate Wi-Fi and MQTT connection
+    WiFi._status = WL_CONNECTED;
+    mqtt.onNetworkAvailable();
+    mqtt.onMqttConnect(true);
+    
     bool callbackFired = false;
+    String receivedTopic = "";
+    String receivedPayload = "";
+    
     mqtt.onMessage([&](const String& topic, const String& payload) {
         callbackFired = true;
+        receivedTopic = topic;
+        receivedPayload = payload;
     });
     
-    // Since _mqttClient is private, we can't easily trigger the mock callback directly here,
-    // but this ensures the onMessage and subscribe methods compile and link properly.
+    // Simulate incoming message
+    char testTopic[] = "cyd/weather/test";
+    char testPayload[] = "12.3";
+    AsyncMqttClientMessageProperties props = {0, false, false};
+    mqtt.onMqttMessage(testTopic, testPayload, props, strlen(testPayload), 0, strlen(testPayload));
+    
+    TEST_ASSERT_TRUE(callbackFired);
+    TEST_ASSERT_EQUAL_STRING("cyd/weather/test", receivedTopic.c_str());
+    TEST_ASSERT_EQUAL_STRING("12.3", receivedPayload.c_str());
+    
+    // Test that subscribe with no HA prefix prepends base topic
     mqtt.subscribe("test/topic", 0);
+    TEST_ASSERT_EQUAL_STRING("cyd/test/topic", mqtt._mqttClient.mockLastSubscribeTopic.c_str());
+    
+    // Test that publish with no HA prefix prepends base topic
+    mqtt.publish("weather/temp", "72");
+    TEST_ASSERT_EQUAL_STRING("cyd/weather/temp", mqtt._mqttClient.mockLastPublishTopic.c_str());
+    
+    // Test that publish with HA prefix doesn't prepend base topic
+    mqtt.publish("homeassistant/sensor/foo", "bar");
+    TEST_ASSERT_EQUAL_STRING("homeassistant/sensor/foo", mqtt._mqttClient.mockLastPublishTopic.c_str());
 }
 
 void test_mqtt_exponential_backoff(void) {

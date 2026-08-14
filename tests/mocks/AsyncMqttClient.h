@@ -34,8 +34,14 @@ public:
         }
     }
     bool connected() { return _connected; }
-    uint16_t publish(const char* topic, uint8_t qos, bool retain, const char* payload) { return 1; }
-    uint16_t subscribe(const char* topic, uint8_t qos) { return 1; }
+    uint16_t publish(const char* topic, uint8_t qos, bool retain, const char* payload) {
+        mockLastPublishTopic = topic;
+        return 1;
+    }
+    uint16_t subscribe(const char* topic, uint8_t qos) {
+        mockLastSubscribeTopic = topic;
+        return 1;
+    }
     
     // Updated signatures to match production exactly
     void onConnect(std::function<void(bool)> cb) {
@@ -66,6 +72,8 @@ public:
     std::string mockClientId;
     std::string mockWillTopic;
     std::string mockWillPayload;
+    std::string mockLastPublishTopic;
+    std::string mockLastSubscribeTopic;
 };
 
 #endif
