@@ -32,6 +32,7 @@ private:
     int _mqttPort;
     String _mqttUser;
     String _mqttPassword;
+    String _mqttBaseTopic;
     String _wifiSSID;
     String _wifiPassword;
     bool _sdCacheEnabled;
@@ -87,13 +88,13 @@ public:
     void setMqttServer(const String& server);
 
     int getMqttPort() const;
-    void setMqttPort(int port);
-
+    void setMqttPort(int mqttPort);
     const String& getMqttUser() const;
-    void setMqttUser(const String& user);
-
+    void setMqttUser(const String& mqttUser);
     const String& getMqttPassword() const;
-    void setMqttPassword(const String& password);
+    void setMqttPassword(const String& mqttPassword);
+    const String& getMqttBaseTopic() const;
+    void setMqttBaseTopic(const String& mqttBaseTopic);
 
     const String& getWifiSSID() const;
     void setWifiSSID(const String& ssid);

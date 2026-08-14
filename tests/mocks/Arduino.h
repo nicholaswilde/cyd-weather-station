@@ -63,6 +63,10 @@ public:
             pos += r.length();
         }
     }
+    bool startsWith(const char* prefix) const {
+        std::string p(prefix);
+        return this->rfind(p, 0) == 0;
+    }
 };
 
 class IPAddress {

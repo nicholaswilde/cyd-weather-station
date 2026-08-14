@@ -23,7 +23,7 @@ const unsigned long backlightUpdateInterval = 1000; // 1 second
 SettingsManager settings;
 
 WifiManager wifi(WIFI_SSID, WIFI_PASSWORD);
-MqttManager mqtt("", 1883, "", "");
+MqttManager mqtt("", 1883, "", "", "");
 WeatherClient weather;
 
 #if USE_RGB_LED_STATUS
@@ -93,7 +93,7 @@ void setup() {
         updateFooterUI("--:-- (Cached)", cachedData.cityName.c_str());
     }
 
-    mqtt.updateConfig(settings.getMqttServer(), settings.getMqttPort(), settings.getMqttUser(), settings.getMqttPassword());
+    mqtt.updateConfig(settings.getMqttServer(), settings.getMqttPort(), settings.getMqttUser(), settings.getMqttPassword(), settings.getMqttBaseTopic());
     mqtt.begin();
 
     mqtt.onMessage([](const String& topic, const String& payload) {
@@ -249,7 +249,7 @@ void loop() {
         bool enabled = settings.getMqttEnabled();
         Serial.printf("[System] MQTT %s.\n", enabled ? "enabled" : "disabled");
         if (enabled) {
-            mqtt.updateConfig(settings.getMqttServer(), settings.getMqttPort(), settings.getMqttUser(), settings.getMqttPassword());
+            mqtt.updateConfig(settings.getMqttServer(), settings.getMqttPort(), settings.getMqttUser(), settings.getMqttPassword(), settings.getMqttBaseTopic());
             if (wifi.getState() == WIFI_STATE_CONNECTED) {
                 Serial.println("[System] Wi-Fi connected, connecting to MQTT...");
                 mqtt.onNetworkAvailable();
@@ -401,12 +401,12 @@ void loop() {
                         // Get the Cardinal direction using the newly exposed UI function
                         const char* cardinalDirection = getCardinalDirection(data.windDirection);
                                                 
-                        mqtt.publish("cyd/weather/temperature", tempPayload.c_str());
-                        mqtt.publish("cyd/weather/status", data.status.c_str());
-                        mqtt.publish("cyd/weather/humidity", humPayload.c_str());
-                        mqtt.publish("cyd/weather/wind_speed", windSpeedPayload.c_str());
-                        mqtt.publish("cyd/weather/wind_direction", cardinalDirection);
-                        mqtt.publish("cyd/weather/city", data.cityName.c_str());
+                        mqtt.publish("weather/temperature", tempPayload.c_str());
+                        mqtt.publish("weather/status", data.status.c_str());
+                        mqtt.publish("weather/humidity", humPayload.c_str());
+                        mqtt.publish("weather/wind_speed", windSpeedPayload.c_str());
+                        mqtt.publish("weather/wind_direction", cardinalDirection);
+                        mqtt.publish("weather/city", data.cityName.c_str());
                     }
                     // ----------------------------
 #ifndef NATIVE_TEST

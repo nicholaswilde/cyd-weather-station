@@ -4,13 +4,13 @@
 #include "../../src/mqtt_manager.cpp"
 
 void test_mqtt_initialization(void) {
-    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
     mqtt.begin();
     TEST_ASSERT_FALSE(mqtt.isConnected()); // Initially disconnected
 }
 
 void test_mqtt_connect_and_disconnect(void) {
-    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
     mqtt.begin();
     TEST_ASSERT_FALSE(mqtt.isConnected());
     
@@ -22,7 +22,7 @@ void test_mqtt_connect_and_disconnect(void) {
 }
 
 void test_mqtt_unique_client_id(void) {
-    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
     mqtt.begin();
     
     // We can't access _mqttClient normally since it's private. 
@@ -34,7 +34,7 @@ void test_mqtt_unique_client_id(void) {
 }
 
 void test_mqtt_lwt(void) {
-    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
     mqtt.begin();
     
     // In our tests, just ensuring begin() configures LWT without issues is sufficient.
@@ -42,7 +42,7 @@ void test_mqtt_lwt(void) {
 }
 
 void test_mqtt_subscribe_and_message(void) {
-    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
     mqtt.begin();
     
     bool callbackFired = false;
@@ -56,7 +56,7 @@ void test_mqtt_subscribe_and_message(void) {
 }
 
 void test_mqtt_exponential_backoff(void) {
-    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
     mqtt.begin();
     
     // Initial backoff is 5000ms

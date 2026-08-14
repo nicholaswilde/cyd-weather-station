@@ -1,13 +1,14 @@
 #include "mqtt_manager.h"
 
-MqttManager::MqttManager(const String& server, uint16_t port, const String& user, const String& password)
-    : _server(server), _port(port), _user(user), _password(password), _reconnectTimer(nullptr), _reconnectBackoffMs(5000), _messageCallback(nullptr) {}
+MqttManager::MqttManager(const String& server, uint16_t port, const String& user, const String& password, const String& baseTopic)
+    : _server(server), _port(port), _user(user), _password(password), _baseTopic(baseTopic), _reconnectTimer(nullptr), _reconnectBackoffMs(5000), _messageCallback(nullptr) {}
 
-void MqttManager::updateConfig(const String& server, uint16_t port, const String& user, const String& password) {
+void MqttManager::updateConfig(const String& server, uint16_t port, const String& user, const String& password, const String& baseTopic) {
     _server = server;
     _port = port;
     _user = user;
     _password = password;
+    _baseTopic = baseTopic;
     
     // If we're already connected, we should disconnect and let it reconnect with new settings, 
     // or just apply credentials for the next reconnect.
@@ -22,7 +23,7 @@ void MqttManager::begin() {
     // 2. Configure broker details
     _mqttClient.setServer(_server.c_str(), _port);
     _mqttClient.setCredentials(_user.c_str(), _password.c_str());
-    _mqttClient.setWill("cyd/status", 1, true, "offline");
+    _mqttClient.setWill((_baseTopic + "status").c_str(), 1, true, "offline");
 
     // 2.5 Configure unique Client ID
     static String clientId = "CYD-Weather-" + WiFi.macAddress();
@@ -70,14 +71,14 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     _reconnectBackoffMs = 5000;
     
     // Publish a boot message
-    _mqttClient.publish("cyd/status", 0, true, "online");
+    _mqttClient.publish((_baseTopic + "status").c_str(), 0, true, "online");
     
     // Publish HA Discovery configuration
     publishHADiscovery();
 
     // Subscribe to commands
-    subscribe("cyd/command/brightness", 0);
-    subscribe("cyd/command/reboot", 0);
+    subscribe("command/brightness", 0);
+    subscribe("command/reboot", 0);
 }
 
 void MqttManager::publishHADiscovery() {
@@ -87,31 +88,31 @@ void MqttManager::publishHADiscovery() {
     String deviceJson = "\"device\":{\"identifiers\":[\"" + deviceId + "\"],\"name\":\"CYD Weather Station\",\"manufacturer\":\"Nicholas Wilde\",\"model\":\"CYD-28R/35C\"}";
 
     // Temperature
-    String tempPayload = "{\"name\":\"Temperature\",\"state_topic\":\"cyd/weather/temperature\",\"unit_of_measurement\":\"°F\",\"device_class\":\"temperature\",\"unique_id\":\"" + deviceId + "_temp\"," + deviceJson + "}";
+    String tempPayload = "{\"name\":\"Temperature\",\"state_topic\":\"" + _baseTopic + "weather/temperature\",\"unit_of_measurement\":\"°F\",\"device_class\":\"temperature\",\"unique_id\":\"" + deviceId + "_temp\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/temperature/config").c_str(), 0, true, tempPayload.c_str());
 
     // Humidity
-    String humPayload = "{\"name\":\"Humidity\",\"state_topic\":\"cyd/weather/humidity\",\"unit_of_measurement\":\"%\",\"device_class\":\"humidity\",\"unique_id\":\"" + deviceId + "_hum\"," + deviceJson + "}";
+    String humPayload = "{\"name\":\"Humidity\",\"state_topic\":\"" + _baseTopic + "weather/humidity\",\"unit_of_measurement\":\"%\",\"device_class\":\"humidity\",\"unique_id\":\"" + deviceId + "_hum\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/humidity/config").c_str(), 0, true, humPayload.c_str());
 
     // Wind Speed
-    String windPayload = "{\"name\":\"Wind Speed\",\"state_topic\":\"cyd/weather/wind_speed\",\"unit_of_measurement\":\"mph\",\"device_class\":\"wind_speed\",\"unique_id\":\"" + deviceId + "_wind\"," + deviceJson + "}";
+    String windPayload = "{\"name\":\"Wind Speed\",\"state_topic\":\"" + _baseTopic + "weather/wind_speed\",\"unit_of_measurement\":\"mph\",\"device_class\":\"wind_speed\",\"unique_id\":\"" + deviceId + "_wind\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/wind_speed/config").c_str(), 0, true, windPayload.c_str());
 
     // Weather Condition/Status
-    String statusPayload = "{\"name\":\"Weather Condition\",\"state_topic\":\"cyd/weather/status\",\"unique_id\":\"" + deviceId + "_cond\"," + deviceJson + "}";
+    String statusPayload = "{\"name\":\"Weather Condition\",\"state_topic\":\"" + _baseTopic + "weather/status\",\"unique_id\":\"" + deviceId + "_cond\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/condition/config").c_str(), 0, true, statusPayload.c_str());
 
     // Connection Status
-    String connPayload = "{\"name\":\"Connection Status\",\"state_topic\":\"cyd/status\",\"payload_on\":\"online\",\"payload_off\":\"offline\",\"device_class\":\"connectivity\",\"unique_id\":\"" + deviceId + "_conn\"," + deviceJson + "}";
+    String connPayload = "{\"name\":\"Connection Status\",\"state_topic\":\"" + _baseTopic + "status\",\"payload_on\":\"online\",\"payload_off\":\"offline\",\"device_class\":\"connectivity\",\"unique_id\":\"" + deviceId + "_conn\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/binary_sensor/" + deviceId + "/connection/config").c_str(), 0, true, connPayload.c_str());
 
     // Brightness Control (Number)
-    String brightPayload = "{\"name\":\"Brightness\",\"command_topic\":\"cyd/command/brightness\",\"min\":1,\"max\":255,\"unique_id\":\"" + deviceId + "_bright\"," + deviceJson + "}";
+    String brightPayload = "{\"name\":\"Brightness\",\"command_topic\":\"" + _baseTopic + "command/brightness\",\"min\":1,\"max\":255,\"unique_id\":\"" + deviceId + "_bright\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/number/" + deviceId + "/brightness/config").c_str(), 0, true, brightPayload.c_str());
 
     // Reboot Control (Button)
-    String rebootPayload = "{\"name\":\"Reboot\",\"command_topic\":\"cyd/command/reboot\",\"payload_press\":\"REBOOT\",\"device_class\":\"restart\",\"unique_id\":\"" + deviceId + "_reboot\"," + deviceJson + "}";
+    String rebootPayload = "{\"name\":\"Reboot\",\"command_topic\":\"" + _baseTopic + "command/reboot\",\"payload_press\":\"REBOOT\",\"device_class\":\"restart\",\"unique_id\":\"" + deviceId + "_reboot\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/button/" + deviceId + "/reboot/config").c_str(), 0, true, rebootPayload.c_str());
 }
 
@@ -153,8 +154,12 @@ bool MqttManager::isConnected() {
 
 void MqttManager::publish(const char* topic, const char* payload) {
     if (isConnected()) {
-        Serial.printf("[MQTT] Publishing -> Topic: '%s' | Payload: '%s'\n", topic, payload);
-        uint16_t packetId = _mqttClient.publish(topic, 0, false, payload);
+        String fullTopic = String(topic);
+        if (!fullTopic.startsWith("homeassistant/")) {
+            fullTopic = _baseTopic + fullTopic;
+        }
+        Serial.printf("[MQTT] Publishing -> Topic: '%s' | Payload: '%s'\n", fullTopic.c_str(), payload);
+        uint16_t packetId = _mqttClient.publish(fullTopic.c_str(), 0, false, payload);
         
         if (packetId == 0) {
             Serial.println("[MQTT] ERROR: Publish failed (buffer might be full)");
@@ -166,8 +171,12 @@ void MqttManager::publish(const char* topic, const char* payload) {
 
 void MqttManager::subscribe(const char* topic, uint8_t qos) {
     if (isConnected()) {
-        _mqttClient.subscribe(topic, qos);
-        Serial.printf("[MQTT] Subscribed to topic: %s\n", topic);
+        String fullTopic = String(topic);
+        if (!fullTopic.startsWith("homeassistant/")) {
+            fullTopic = _baseTopic + fullTopic;
+        }
+        _mqttClient.subscribe(fullTopic.c_str(), qos);
+        Serial.printf("[MQTT] Subscribed to topic: %s\n", fullTopic.c_str());
     } else {
         Serial.printf("[MQTT] WARN: Cannot subscribe to '%s' - Not connected to broker.\n", topic);
     }

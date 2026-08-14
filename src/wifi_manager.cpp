@@ -760,6 +760,7 @@ void WifiManager::handleSettings() {
     html.replace("%MQTT_PORT%", String(settings.getMqttPort()));
     html.replace("%MQTT_USER%", settings.getMqttUser());
     html.replace("%MQTT_PASSWORD%", settings.getMqttPassword());
+    html.replace("%MQTT_BASE%", settings.getMqttBaseTopic());
     
     html.replace("%STATIC_IP_ENABLED%", settings.getStaticIpEnabled() ? "checked" : "");
     
@@ -820,6 +821,7 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("mqtt_port")) settings.setMqttPort(_webServer->arg("mqtt_port").toInt());
     if (_webServer->hasArg("mqtt_user")) settings.setMqttUser(_webServer->arg("mqtt_user"));
     if (_webServer->hasArg("mqtt_password")) settings.setMqttPassword(_webServer->arg("mqtt_password"));
+    if (_webServer->hasArg("mqtt_base")) settings.setMqttBaseTopic(_webServer->arg("mqtt_base"));
     
     settings.setStaticIpEnabled(_webServer->hasArg("static_ip_enabled"));
     if (_webServer->hasArg("static_ip")) settings.setStaticIp(_webServer->arg("static_ip"));

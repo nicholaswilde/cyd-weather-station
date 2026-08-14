@@ -22,9 +22,9 @@ public:
      * @param user MQTT username
      * @param password MQTT password
      */
-    MqttManager(const String& server, uint16_t port, const String& user, const String& password);
+    MqttManager(const String& server, uint16_t port, const String& user, const String& password, const String& baseTopic);
 
-    void updateConfig(const String& server, uint16_t port, const String& user, const String& password);
+    void updateConfig(const String& server, uint16_t port, const String& user, const String& password, const String& baseTopic);
 
     /**
      * @brief Initializes the FreeRTOS timers and MQTT client callbacks.
@@ -90,6 +90,7 @@ private:
     uint16_t _port;
     String _user;
     String _password;
+    String _baseTopic;
     
     MqttMessageCallback _messageCallback;
 };

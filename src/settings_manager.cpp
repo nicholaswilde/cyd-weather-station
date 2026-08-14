@@ -30,6 +30,7 @@ SettingsManager::SettingsManager() {
     _mqttPort = MQTT_PORT;
     _mqttUser = MQTT_USER;
     _mqttPassword = MQTT_PASSWORD;
+    _mqttBaseTopic = "cyd/";
     _wifiSSID = WIFI_SSID;
     _wifiPassword = WIFI_PASSWORD;
     _sdCacheEnabled = USE_SD_CACHE;
@@ -74,6 +75,7 @@ void SettingsManager::begin() {
     _mqttPort = prefs.getInt("mqtt_prt", MQTT_PORT);
     _mqttUser = prefs.getString("mqtt_usr", MQTT_USER);
     _mqttPassword = prefs.getString("mqtt_pwd", MQTT_PASSWORD);
+    _mqttBaseTopic = prefs.getString("mqtt_base", "cyd/");
     _wifiSSID = prefs.getString("wifi_ssid", WIFI_SSID);
     _wifiPassword = prefs.getString("wifi_pass", WIFI_PASSWORD);
     _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
@@ -467,6 +469,18 @@ void SettingsManager::setMqttPassword(const String& password) {
         _mqttPassword = password;
         Preferences prefs; prefs.begin("settings", false);
         prefs.putString("mqtt_pwd", _mqttPassword); prefs.end();
+    }
+}
+
+const String& SettingsManager::getMqttBaseTopic() const {
+    return _mqttBaseTopic;
+}
+
+void SettingsManager::setMqttBaseTopic(const String& baseTopic) {
+    if (_mqttBaseTopic != baseTopic) {
+        _mqttBaseTopic = baseTopic;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("mqtt_base", _mqttBaseTopic); prefs.end();
     }
 }
 
