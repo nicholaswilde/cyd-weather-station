@@ -49,7 +49,7 @@ public:
     /**
      * @brief Publishes a message to a specific topic (QoS 0).
      */
-    void publish(const char* topic, const char* payload);
+    void publish(const char* topic, const char* payload, bool retain = false);
 
     /**
      * @brief Subscribes to an MQTT topic.
@@ -91,6 +91,8 @@ private:
     String _user;
     String _password;
     String _baseTopic;
+    String _clientId;
+    String _willTopic;
     
     MqttMessageCallback _messageCallback;
 };

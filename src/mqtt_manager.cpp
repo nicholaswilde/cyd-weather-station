@@ -9,11 +9,13 @@ void MqttManager::updateConfig(const String& server, uint16_t port, const String
     _user = user;
     _password = password;
     _baseTopic = baseTopic;
+    _willTopic = _baseTopic + "status";
     
     // If we're already connected, we should disconnect and let it reconnect with new settings, 
     // or just apply credentials for the next reconnect.
     _mqttClient.setServer(_server.c_str(), _port);
     _mqttClient.setCredentials(_user.c_str(), _password.c_str());
+    _mqttClient.setWill(_willTopic.c_str(), 1, true, "offline");
 }
 
 void MqttManager::begin() {
@@ -21,13 +23,16 @@ void MqttManager::begin() {
     _reconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(5000), pdFALSE, (void*)this, onMqttReconnectTimer);
 
     // 2. Configure broker details
+    _willTopic = _baseTopic + "status";
     _mqttClient.setServer(_server.c_str(), _port);
     _mqttClient.setCredentials(_user.c_str(), _password.c_str());
-    _mqttClient.setWill((_baseTopic + "status").c_str(), 1, true, "offline");
+    _mqttClient.setWill(_willTopic.c_str(), 1, true, "offline");
 
     // 2.5 Configure unique Client ID
-    static String clientId = "CYD-Weather-" + WiFi.macAddress();
-    _mqttClient.setClientId(clientId.c_str());
+    String mac = WiFi.macAddress();
+    mac.replace(":", "");
+    _clientId = "CYD-Weather-" + mac;
+    _mqttClient.setClientId(_clientId.c_str());
 
     // 3. Register the asynchronous callbacks using C++ lambdas
     _mqttClient.onConnect([this](bool sessionPresent) {
@@ -79,6 +84,12 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     // Subscribe to commands
     subscribe("command/brightness", 0);
     subscribe("command/reboot", 0);
+    subscribe("command/auto_brightness", 0);
+    subscribe("command/screensaver", 0);
+    subscribe("command/theme", 0);
+    subscribe("command/units", 0);
+    subscribe("command/screen_orientation", 0);
+    subscribe("command/update_interval", 0);
 }
 
 void MqttManager::publishHADiscovery() {
@@ -114,6 +125,43 @@ void MqttManager::publishHADiscovery() {
     // Reboot Control (Button)
     String rebootPayload = "{\"name\":\"Reboot\",\"command_topic\":\"" + _baseTopic + "command/reboot\",\"payload_press\":\"REBOOT\",\"device_class\":\"restart\",\"unique_id\":\"" + deviceId + "_reboot\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/button/" + deviceId + "/reboot/config").c_str(), 0, true, rebootPayload.c_str());
+
+    // --- System Diagnostics ---
+    // Uptime
+    String uptimePayload = "{\"name\":\"Uptime\",\"state_topic\":\"" + _baseTopic + "system/uptime\",\"unit_of_measurement\":\"s\",\"device_class\":\"duration\",\"entity_category\":\"diagnostic\",\"unique_id\":\"" + deviceId + "_uptime\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/uptime/config").c_str(), 0, true, uptimePayload.c_str());
+    // Free Heap
+    String heapPayload = "{\"name\":\"Free Memory\",\"state_topic\":\"" + _baseTopic + "system/free_heap\",\"unit_of_measurement\":\"B\",\"device_class\":\"data_size\",\"entity_category\":\"diagnostic\",\"unique_id\":\"" + deviceId + "_heap\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/free_heap/config").c_str(), 0, true, heapPayload.c_str());
+    // Wi-Fi RSSI
+    String rssiPayload = "{\"name\":\"Wi-Fi Signal\",\"state_topic\":\"" + _baseTopic + "system/wifi_rssi\",\"unit_of_measurement\":\"dBm\",\"device_class\":\"signal_strength\",\"entity_category\":\"diagnostic\",\"unique_id\":\"" + deviceId + "_rssi\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/wifi_rssi/config").c_str(), 0, true, rssiPayload.c_str());
+    // IP Address
+    String ipPayload = "{\"name\":\"IP Address\",\"state_topic\":\"" + _baseTopic + "system/ip\",\"entity_category\":\"diagnostic\",\"unique_id\":\"" + deviceId + "_ip\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/ip/config").c_str(), 0, true, ipPayload.c_str());
+    // Firmware Version
+    String verPayload = "{\"name\":\"Firmware Version\",\"state_topic\":\"" + _baseTopic + "system/version\",\"entity_category\":\"diagnostic\",\"unique_id\":\"" + deviceId + "_version\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/version/config").c_str(), 0, true, verPayload.c_str());
+
+    // --- Operational Settings ---
+    // Auto Brightness (Switch)
+    String autoBrPayload = "{\"name\":\"Auto Brightness\",\"state_topic\":\"" + _baseTopic + "settings/auto_brightness\",\"command_topic\":\"" + _baseTopic + "command/auto_brightness\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_autobright\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/switch/" + deviceId + "/auto_brightness/config").c_str(), 0, true, autoBrPayload.c_str());
+    // Screensaver (Switch)
+    String ssPayload = "{\"name\":\"Screensaver\",\"state_topic\":\"" + _baseTopic + "settings/screensaver\",\"command_topic\":\"" + _baseTopic + "command/screensaver\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_screensaver\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/switch/" + deviceId + "/screensaver/config").c_str(), 0, true, ssPayload.c_str());
+    // Theme (Select)
+    String themePayload = "{\"name\":\"Theme Flavor\",\"state_topic\":\"" + _baseTopic + "settings/theme\",\"command_topic\":\"" + _baseTopic + "command/theme\",\"options\":[\"Mocha\",\"Macchiato\",\"Frappe\",\"Latte\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_theme\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/theme/config").c_str(), 0, true, themePayload.c_str());
+    // Unit System (Select)
+    String unitsPayload = "{\"name\":\"Unit System\",\"state_topic\":\"" + _baseTopic + "settings/units\",\"command_topic\":\"" + _baseTopic + "command/units\",\"options\":[\"Imperial\",\"Metric\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_units\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/units/config").c_str(), 0, true, unitsPayload.c_str());
+    // Screen Orientation (Select)
+    String orientPayload = "{\"name\":\"Screen Orientation\",\"state_topic\":\"" + _baseTopic + "settings/screen_orientation\",\"command_topic\":\"" + _baseTopic + "command/screen_orientation\",\"options\":[\"Landscape\",\"Portrait\",\"Portrait Rev\",\"Landscape Rev\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_orientation\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/orientation/config").c_str(), 0, true, orientPayload.c_str());
+    // Update Interval (Number)
+    String updPayload = "{\"name\":\"Update Interval\",\"state_topic\":\"" + _baseTopic + "settings/update_interval\",\"command_topic\":\"" + _baseTopic + "command/update_interval\",\"min\":1,\"max\":120,\"unit_of_measurement\":\"min\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_updint\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/number/" + deviceId + "/update_interval/config").c_str(), 0, true, updPayload.c_str());
 }
 
 void MqttManager::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
@@ -152,14 +200,14 @@ bool MqttManager::isConnected() {
     return _mqttClient.connected();
 }
 
-void MqttManager::publish(const char* topic, const char* payload) {
+void MqttManager::publish(const char* topic, const char* payload, bool retain) {
     if (isConnected()) {
         String fullTopic = String(topic);
         if (!fullTopic.startsWith("homeassistant/")) {
             fullTopic = _baseTopic + fullTopic;
         }
-        Serial.printf("[MQTT] Publishing -> Topic: '%s' | Payload: '%s'\n", fullTopic.c_str(), payload);
-        uint16_t packetId = _mqttClient.publish(fullTopic.c_str(), 0, false, payload);
+        Serial.printf("[MQTT] Publishing -> Topic: '%s' | Retain: %d | Payload: '%s'\n", fullTopic.c_str(), retain, payload);
+        uint16_t packetId = _mqttClient.publish(fullTopic.c_str(), 0, retain, payload);
         
         if (packetId == 0) {
             Serial.println("[MQTT] ERROR: Publish failed (buffer might be full)");

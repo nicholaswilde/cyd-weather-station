@@ -108,6 +108,20 @@ void test_mqtt_exponential_backoff(void) {
     TEST_ASSERT_EQUAL(5000, mqtt._reconnectBackoffMs);
 }
 
+void test_mqtt_publish_retain(void) {
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
+    mqtt.begin();
+    
+    // Simulate Wi-Fi and MQTT connection
+    WiFi._status = WL_CONNECTED;
+    mqtt.onNetworkAvailable();
+    mqtt.onMqttConnect(true);
+    
+    mqtt.publish("system/uptime", "123", true);
+    TEST_ASSERT_EQUAL_STRING("cyd/system/uptime", mqtt._mqttClient.mockLastPublishTopic.c_str());
+    TEST_ASSERT_TRUE(mqtt._mqttClient.mockLastPublishRetain);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_mqtt_initialization);
@@ -116,5 +130,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_mqtt_lwt);
     RUN_TEST(test_mqtt_subscribe_and_message);
     RUN_TEST(test_mqtt_exponential_backoff);
+    RUN_TEST(test_mqtt_publish_retain);
     return UNITY_END();
 }

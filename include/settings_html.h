@@ -73,12 +73,14 @@ button:hover { background: #f5c2e7; }
 </div>
 
 <div class='checkbox-group'>
-    <input type='checkbox' id='screensaver_enabled' name='screensaver_enabled' value='1' %SCREENSAVER_ENABLED%>
+    <input type='checkbox' id='screensaver_enabled' name='screensaver_enabled' value='1' %SCREENSAVER_ENABLED% onchange='toggleScreensaverSettings()'>
     <label for='screensaver_enabled' title='Enable a screensaver after a period of inactivity'>Enable Screensaver</label>
 </div>
 
-<label for='screensaver_timeout' title='Time in minutes before the screensaver activates'>Screensaver Timeout (Minutes)</label>
-<input type='number' id='screensaver_timeout' name='screensaver_timeout' min='1' max='60' value='%SCREENSAVER_TIMEOUT%'>
+<div id='screensaver_settings' style='display: none; margin-left: 20px; border-left: 2px solid #313244; padding-left: 15px; margin-bottom: 20px;'>
+    <label for='screensaver_timeout' title='Time in minutes before the screensaver activates'>Screensaver Timeout (Minutes)</label>
+    <input type='number' id='screensaver_timeout' name='screensaver_timeout' min='1' max='60' value='%SCREENSAVER_TIMEOUT%'>
+</div>
 
 <div class='section-title'>Location & Weather</div>
 <label for='owm_api' title='Your OpenWeatherMap API key'>OpenWeatherMap API Key (<a href='https://home.openweathermap.org/api_keys' target='_blank' style='color: #89b4fa; text-decoration: none;'>Get Key</a>)</label>
@@ -199,6 +201,13 @@ function toggleMqttSettings() {
         div.style.display = cb.checked ? 'block' : 'none';
     }
 }
+function toggleScreensaverSettings() {
+    var cb = document.getElementById('screensaver_enabled');
+    var div = document.getElementById('screensaver_settings');
+    if (cb && div) {
+        div.style.display = cb.checked ? 'block' : 'none';
+    }
+}
 function toggleStaticIpSettings() {
     var cb = document.getElementById('static_ip_enabled');
     var div = document.getElementById('static_ip_settings');
@@ -220,6 +229,7 @@ function togglePwd(id, el) {
 }
 window.onload = function() {
     toggleMqttSettings();
+    toggleScreensaverSettings();
     toggleStaticIpSettings();
 };
 </script>

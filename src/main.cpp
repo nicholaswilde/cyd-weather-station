@@ -37,6 +37,9 @@ const unsigned long wifiUpdateInterval = 1000; // 1 second
 unsigned long lastWeatherUpdate = 0;
 bool hasInitialFetch = false;
 bool ntpInitialized = false;
+unsigned long lastAutoBrightnessCheck = 0;
+bool force_mqtt_publish = false;
+bool pending_ui_sync = false;
 
 // --- Wi-Fi Event Handlers ---
 void onWiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -98,7 +101,7 @@ void setup() {
 
     mqtt.onMessage([](const String& topic, const String& payload) {
         if (topic.endsWith("command/reboot")) {
-            if (payload == "1" || payload == "true" || payload == "ON") {
+            if (payload == "1" || payload == "true" || payload == "ON" || payload == "REBOOT") {
                 Serial.println("[System] Reboot command received from MQTT.");
                 ESP.restart();
             }
@@ -109,7 +112,44 @@ void setup() {
                 settings.setBrightness(target);
                 backlight.fadeTo(target, 500); // 500ms fade
             }
+        } else if (topic.endsWith("command/auto_brightness")) {
+            bool en = (payload == "ON" || payload == "1" || payload == "true");
+            settings.setAutoBrightness(en);
+            settings_brightness_changed = true;
+        } else if (topic.endsWith("command/screensaver")) {
+            bool en = (payload == "ON" || payload == "1" || payload == "true");
+            settings.setScreensaverEnabled(en);
+            // No explicit flag for screensaver, it will be handled implicitly
+            // when it timeouts. We can just update it.
+            if (!en) screensaver.wake(settings.getBrightness());
+        } else if (topic.endsWith("command/theme")) {
+            int theme = 1; // Default Mocha
+            if (payload == "Macchiato") theme = 2;
+            else if (payload == "Frappe") theme = 3;
+            else if (payload == "Latte") theme = 4;
+            settings.setThemeFlavor(theme);
+            settings_theme_changed = true;
+        } else if (topic.endsWith("command/units")) {
+            int units = 2; // Default Imperial
+            if (payload == "Metric") units = 1;
+            settings.setUnitSystem(units);
+            settings_unit_changed = true;
+        } else if (topic.endsWith("command/screen_orientation")) {
+            int orient = 1; // Default Landscape
+            if (payload == "Portrait") orient = 0;
+            else if (payload == "Portrait Rev") orient = 2;
+            else if (payload == "Landscape Rev") orient = 3;
+            settings.setScreenOrientation(orient);
+            settings_orientation_changed = true;
+        } else if (topic.endsWith("command/update_interval")) {
+            int interval = payload.toInt();
+            if (interval >= 1 && interval <= 120) {
+                settings.setWeatherUpdateInterval(interval);
+            }
         }
+        
+        force_mqtt_publish = true;
+        pending_ui_sync = true;
     });
 
     // Register the Wi-Fi events so MQTT knows when the network drops/connects
@@ -131,6 +171,11 @@ void setup() {
 }
 
 void loop() {
+    if (pending_ui_sync) {
+        pending_ui_sync = false;
+        ui_sync_toggles();
+    }
+
     // Periodically call LVGL task handler
     lv_timer_handler();
 
@@ -477,5 +522,40 @@ void loop() {
                 }
             }
         }
+    }
+
+    // Publish MQTT Diagnostics and Settings periodically
+    static unsigned long lastMqttDiagMillis = 0;
+    if (mqtt.isConnected() && (force_mqtt_publish || currentMillis - lastMqttDiagMillis >= 60000 || lastMqttDiagMillis == 0)) {
+        force_mqtt_publish = false;
+        lastMqttDiagMillis = currentMillis;
+        
+        mqtt.publish("system/uptime", String(currentMillis / 1000).c_str(), true);
+        mqtt.publish("system/free_heap", String(ESP.getFreeHeap()).c_str(), true);
+        mqtt.publish("system/wifi_rssi", String(WiFi.RSSI()).c_str(), true);
+        mqtt.publish("system/ip", wifi.getIPAddress().c_str(), true);
+        mqtt.publish("system/version", "v0.1.21", true);
+        
+        mqtt.publish("settings/auto_brightness", settings.getAutoBrightness() ? "ON" : "OFF", true);
+        mqtt.publish("settings/screensaver", settings.getScreensaverEnabled() ? "ON" : "OFF", true);
+        
+        String themeStr = "Mocha";
+        switch (settings.getThemeFlavor()) {
+            case 2: themeStr = "Macchiato"; break;
+            case 3: themeStr = "Frappe"; break;
+            case 4: themeStr = "Latte"; break;
+        }
+        mqtt.publish("settings/theme", themeStr.c_str(), true);
+        
+        mqtt.publish("settings/units", settings.getUnitSystem() == 1 ? "Metric" : "Imperial", true);
+        
+        String orientStr = "Landscape";
+        switch (settings.getScreenOrientation()) {
+            case 0: orientStr = "Portrait"; break;
+            case 2: orientStr = "Portrait Rev"; break;
+            case 3: orientStr = "Landscape Rev"; break;
+        }
+        mqtt.publish("settings/screen_orientation", orientStr.c_str(), true);
+        mqtt.publish("settings/update_interval", String(settings.getWeatherUpdateInterval()).c_str(), true);
     }
 }

@@ -15,6 +15,7 @@ extern volatile bool settings_led_changed;
 extern volatile bool settings_mqtt_changed;
 
 void initUI();
+void ui_sync_toggles();
 void updateWifiStatus(bool connected);
 void updateWifiAPMode(const char* apSSID);
 void updateOfflineIndicator(bool isOffline);

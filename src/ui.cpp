@@ -33,6 +33,10 @@ static bool is_offline_mode = false;
 
 static lv_obj_t *wifi_info_dialog = nullptr;
 
+static lv_obj_t *ui_auto_bright_sw = nullptr;
+static lv_obj_t *ui_screensaver_sw = nullptr;
+static lv_obj_t *ui_led_sw = nullptr;
+
 static void close_wifi_info_cb(lv_event_t * e) {
     if (wifi_info_dialog != nullptr) {
         lv_obj_del(wifi_info_dialog);
@@ -945,15 +949,15 @@ void initUI() {
     lv_obj_set_style_text_color(saver_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
     lv_obj_set_style_text_font(saver_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
-    lv_obj_t * saver_sw = lv_switch_create(saver_row);
-    lv_obj_set_size(saver_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(saver_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    ui_screensaver_sw = lv_switch_create(saver_row);
+    lv_obj_set_size(ui_screensaver_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_screensaver_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_screensaver_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_screensaver_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getScreensaverEnabled()) {
-        lv_obj_add_state(saver_sw, LV_STATE_CHECKED);
+        lv_obj_add_state(ui_screensaver_sw, LV_STATE_CHECKED);
     }
-    lv_obj_add_event_cb(saver_sw, screensaver_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_add_event_cb(ui_screensaver_sw, screensaver_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // MQTT row
     lv_obj_t * mqtt_row = lv_obj_create(left_col);
@@ -1049,26 +1053,26 @@ void initUI() {
     }
 
     // --- LED enable switch (created after slider so slider can be passed as user_data) ---
-    lv_obj_t * led_sw = lv_switch_create(led_row);
-    lv_obj_set_size(led_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(led_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    ui_led_sw = lv_switch_create(led_row);
+    lv_obj_set_size(ui_led_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_led_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_led_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_led_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getLedEnabled()) {
-        lv_obj_add_state(led_sw, LV_STATE_CHECKED);
+        lv_obj_add_state(ui_led_sw, LV_STATE_CHECKED);
     }
-    lv_obj_add_event_cb(led_sw, led_sw_event_cb, LV_EVENT_VALUE_CHANGED, led_brightness_slider);
+    lv_obj_add_event_cb(ui_led_sw, led_sw_event_cb, LV_EVENT_VALUE_CHANGED, led_brightness_slider);
 
     // Auto switch (created after slider so we can pass slider as user_data)
-    lv_obj_t * auto_sw = lv_switch_create(auto_row);
-    lv_obj_set_size(auto_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(auto_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    ui_auto_bright_sw = lv_switch_create(auto_row);
+    lv_obj_set_size(ui_auto_bright_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_auto_bright_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_auto_bright_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_auto_bright_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getAutoBrightness()) {
-        lv_obj_add_state(auto_sw, LV_STATE_CHECKED);
+        lv_obj_add_state(ui_auto_bright_sw, LV_STATE_CHECKED);
     }
-    lv_obj_add_event_cb(auto_sw, auto_sw_event_cb, LV_EVENT_VALUE_CHANGED, brightness_slider);
+    lv_obj_add_event_cb(ui_auto_bright_sw, auto_sw_event_cb, LV_EVENT_VALUE_CHANGED, brightness_slider);
 
     // Timezone label
     lv_obj_t * tz_label = lv_label_create(right_col);
@@ -1604,5 +1608,31 @@ void updateHourlyUI(const WeatherData& data) {
     }
 
     lv_chart_refresh(hourly_chart);
+}
+
+void ui_sync_toggles() {
+    if (ui_auto_bright_sw != nullptr) {
+        if (settings.getAutoBrightness()) {
+            lv_obj_add_state(ui_auto_bright_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_auto_bright_sw, LV_STATE_CHECKED);
+        }
+    }
+    
+    if (ui_screensaver_sw != nullptr) {
+        if (settings.getScreensaverEnabled()) {
+            lv_obj_add_state(ui_screensaver_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_screensaver_sw, LV_STATE_CHECKED);
+        }
+    }
+    
+    if (ui_led_sw != nullptr) {
+        if (settings.getLedEnabled()) {
+            lv_obj_add_state(ui_led_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_led_sw, LV_STATE_CHECKED);
+        }
+    }
 }
 
