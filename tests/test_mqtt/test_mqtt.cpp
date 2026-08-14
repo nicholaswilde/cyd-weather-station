@@ -55,6 +55,31 @@ void test_mqtt_subscribe_and_message(void) {
     mqtt.subscribe("test/topic", 0);
 }
 
+void test_mqtt_exponential_backoff(void) {
+    MqttManager mqtt("broker.local", 1883, "user", "pass");
+    mqtt.begin();
+    
+    // Initial backoff is 5000ms
+    TEST_ASSERT_EQUAL(5000, mqtt._reconnectBackoffMs);
+    
+    // Simulate Wi-Fi connected so backoff logic triggers
+    WiFi._status = WL_CONNECTED;
+    
+    // Simulate first disconnect
+    mqtt.onMqttDisconnect(TCP_DISCONNECTED);
+    // Backoff should increase to 10000ms
+    TEST_ASSERT_EQUAL(10000, mqtt._reconnectBackoffMs);
+    
+    // Simulate second disconnect
+    mqtt.onMqttDisconnect(TCP_DISCONNECTED);
+    // Backoff should increase to 20000ms
+    TEST_ASSERT_EQUAL(20000, mqtt._reconnectBackoffMs);
+    
+    // Force connect to see if backoff resets
+    mqtt.onMqttConnect(true);
+    TEST_ASSERT_EQUAL(5000, mqtt._reconnectBackoffMs);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_mqtt_initialization);
@@ -62,5 +87,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_mqtt_unique_client_id);
     RUN_TEST(test_mqtt_lwt);
     RUN_TEST(test_mqtt_subscribe_and_message);
+    RUN_TEST(test_mqtt_exponential_backoff);
     return UNITY_END();
 }

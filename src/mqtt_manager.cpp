@@ -1,7 +1,7 @@
 #include "mqtt_manager.h"
 
 MqttManager::MqttManager(const String& server, uint16_t port, const String& user, const String& password)
-    : _server(server), _port(port), _user(user), _password(password), _reconnectTimer(nullptr), _messageCallback(nullptr) {}
+    : _server(server), _port(port), _user(user), _password(password), _reconnectTimer(nullptr), _reconnectBackoffMs(5000), _messageCallback(nullptr) {}
 
 void MqttManager::updateConfig(const String& server, uint16_t port, const String& user, const String& password) {
     _server = server;
@@ -66,6 +66,9 @@ void MqttManager::onNetworkDisconnected() {
 void MqttManager::onMqttConnect(bool sessionPresent) {
     Serial.println("[MQTT] Connected to broker!");
     
+    // Reset backoff on successful connection
+    _reconnectBackoffMs = 5000;
+    
     // Publish a boot message
     _mqttClient.publish("cyd/status", 0, true, "online");
     
@@ -111,11 +114,18 @@ void MqttManager::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
         Serial.println("[MQTT] Hint: Reason 4 usually means Bad Username or Password.");
     }
 
-    Serial.println("[MQTT] Reconnecting in 5 seconds...");
+    Serial.printf("[MQTT] Reconnecting in %lu seconds...\n", _reconnectBackoffMs / 1000);
     
     // Only start the reconnect timer if Wi-Fi is still connected
     if (WiFi.status() == WL_CONNECTED && _reconnectTimer) {
+        xTimerChangePeriod(_reconnectTimer, pdMS_TO_TICKS(_reconnectBackoffMs), 0);
         xTimerStart(_reconnectTimer, 0);
+        
+        // Increase backoff for next time, capped at max limit (e.g., 2 minutes / 120000ms)
+        _reconnectBackoffMs *= 2;
+        if (_reconnectBackoffMs > 120000) {
+            _reconnectBackoffMs = 120000;
+        }
     }
 }
 

@@ -66,7 +66,11 @@ public:
      */
     void disconnect();
 
+#ifdef NATIVE_TEST
+public:
+#else
 private:
+#endif
     void connectToMqtt();
     void publishHADiscovery();
     
@@ -80,6 +84,7 @@ private:
 
     AsyncMqttClient _mqttClient;
     TimerHandle_t _reconnectTimer;
+    uint32_t _reconnectBackoffMs;
 
     String _server;
     uint16_t _port;

@@ -18,7 +18,6 @@ typedef void (*TimerCallbackFunction_t)(TimerHandle_t xTimer);
 inline void* xTimerCreate(const char* name, int period, int autoReload, void* id, TimerCallbackFunction_t callback) { return (void*)1; }
 inline void xTimerStart(void* timer, int ticks) {}
 inline void xTimerStop(void* timer, int ticks) {}
-inline void xTimerChangePeriod(void* timer, int period, int ticks) {}
 inline void* pvTimerGetTimerID(void* timer) { return nullptr; }
 #define pdMS_TO_TICKS(x) (x)
 #endif // FREERTOS_MOCKS_H
