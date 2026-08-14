@@ -105,6 +105,14 @@ void MqttManager::publishHADiscovery() {
     // Connection Status
     String connPayload = "{\"name\":\"Connection Status\",\"state_topic\":\"cyd/status\",\"payload_on\":\"online\",\"payload_off\":\"offline\",\"device_class\":\"connectivity\",\"unique_id\":\"" + deviceId + "_conn\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/binary_sensor/" + deviceId + "/connection/config").c_str(), 0, true, connPayload.c_str());
+
+    // Brightness Control (Number)
+    String brightPayload = "{\"name\":\"Brightness\",\"command_topic\":\"cyd/command/brightness\",\"min\":1,\"max\":255,\"unique_id\":\"" + deviceId + "_bright\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/number/" + deviceId + "/brightness/config").c_str(), 0, true, brightPayload.c_str());
+
+    // Reboot Control (Button)
+    String rebootPayload = "{\"name\":\"Reboot\",\"command_topic\":\"cyd/command/reboot\",\"payload_press\":\"REBOOT\",\"device_class\":\"restart\",\"unique_id\":\"" + deviceId + "_reboot\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/button/" + deviceId + "/reboot/config").c_str(), 0, true, rebootPayload.c_str());
 }
 
 void MqttManager::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {
