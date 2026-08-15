@@ -35,3 +35,7 @@
   3. **On-Device Settings UI**: Add the UI control (toggle, slider, dropdown) in `src/ui.cpp` and support bi-directional synchronization in `ui_sync_toggles()`.
   4. **MQTT Integration**: Add Home Assistant auto-discovery entity payload, state topic publishing, and command subscription/handling in `src/mqtt_manager.cpp` and `src/main.cpp`.
 
+## Home Assistant MQTT Discovery Rules
+- **Component Strictness**: Home Assistant is extremely strict with MQTT auto-discovery payloads. For example, if you define a `number` component without a `device_class`, it will fail silently if you provide an incompatible `unit_of_measurement` (such as `%`).
+- **Validation Guidelines**: When making changes to MQTT Discovery payloads, be sure to omit `unit_of_measurement` unless it is explicitly paired with a documented HA `device_class` that requires it.
+- **Testing**: Use the `.agents/skills/mqtt-testing/test_mqtt.sh` script to capture and validate that the discovery payloads successfully publish and do not violate Home Assistant constraints.

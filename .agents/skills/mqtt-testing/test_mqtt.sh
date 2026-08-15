@@ -104,6 +104,34 @@ else
     exit 1
 fi
 
+echo -e "\n⏳ [3/3] Validating Home Assistant Discovery Payloads..."
+# Trigger a device reconnect to force discovery payload publish
+echo "Triggering MQTT reconnect to capture discovery payloads..."
+curl -s -X POST -H "Content-Type: application/json" -d '{"mqtt_enabled": false}' "http://$DEVICE_IP/api/config" > /dev/null
+sleep 1
+curl -s -X POST -H "Content-Type: application/json" -d '{"mqtt_enabled": true}' "http://$DEVICE_IP/api/config" > /dev/null
+
+rm -f /tmp/mqtt_discovery.txt
+mosquitto_sub -v -h "$MQTT_SERVER" -p "$MQTT_PORT" $AUTH_ARGS -t "homeassistant/#" -W 5 > /tmp/mqtt_discovery.txt &
+SUB_PID=$!
+wait $SUB_PID || true
+
+DISCOVERY_COUNT=$(grep -c "name" /tmp/mqtt_discovery.txt || true)
+if [ "$DISCOVERY_COUNT" -gt 0 ]; then
+    echo "✅ Success! Captured $DISCOVERY_COUNT discovery payloads."
+    
+    # Linting: Check for "unit_of_measurement" combined with "number" config without "device_class"
+    # This is a basic grep check. If 'unit_of_measurement' and 'number' are in the same line without 'device_class'.
+    if grep "homeassistant/number" /tmp/mqtt_discovery.txt | grep -q "unit_of_measurement"; then
+        echo "⚠️ WARNING: Found 'unit_of_measurement' in a 'number' component payload. This may cause Home Assistant to reject the entity if a valid 'device_class' isn't also set."
+    else
+        echo "✅ Discovery payloads passed basic linting constraints."
+    fi
+else
+    echo "❌ Failed to capture any Home Assistant discovery payloads."
+    exit 1
+fi
+
 echo -e "\n========================================================"
 echo "🎉 SUCCESS: MQTT Integration Tests Passed!"
 echo "========================================================"
