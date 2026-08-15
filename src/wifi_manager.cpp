@@ -584,6 +584,9 @@ void WifiManager::startWebServer() {
         doc["sd_cache_enabled"] = settings.getSdCacheEnabled();
         doc["screensaver_enabled"] = settings.getScreensaverEnabled();
         doc["screensaver_timeout"] = settings.getScreensaverTimeout();
+        doc["sleep_schedule_enabled"] = settings.getSleepScheduleEnabled();
+        doc["sleep_start_time"] = settings.getSleepStartTime();
+        doc["sleep_end_time"] = settings.getSleepEndTime();
         doc["weather_update_interval"] = settings.getWeatherUpdateInterval();
         doc["static_ip_enabled"] = settings.getStaticIpEnabled();
         doc["static_ip"] = settings.getStaticIp();
@@ -650,6 +653,9 @@ void WifiManager::startWebServer() {
         if (doc.containsKey("sd_cache_enabled")) settings.setSdCacheEnabled(doc["sd_cache_enabled"]);
         if (doc.containsKey("screensaver_enabled")) settings.setScreensaverEnabled(doc["screensaver_enabled"]);
         if (doc.containsKey("screensaver_timeout")) settings.setScreensaverTimeout(doc["screensaver_timeout"]);
+        if (doc.containsKey("sleep_schedule_enabled")) settings.setSleepScheduleEnabled(doc["sleep_schedule_enabled"]);
+        if (doc.containsKey("sleep_start_time")) settings.setSleepStartTime(doc["sleep_start_time"].as<String>());
+        if (doc.containsKey("sleep_end_time")) settings.setSleepEndTime(doc["sleep_end_time"].as<String>());
         if (doc.containsKey("weather_update_interval")) settings.setWeatherUpdateInterval(doc["weather_update_interval"]);
         if (doc.containsKey("static_ip_enabled")) settings.setStaticIpEnabled(doc["static_ip_enabled"]);
         if (doc.containsKey("static_ip")) settings.setStaticIp(doc["static_ip"].as<String>());
@@ -822,6 +828,9 @@ void WifiManager::handleSettings() {
     html.replace("%BRIGHTNESS%", String(settings.getBrightness()));
     html.replace("%AUTO_BRIGHTNESS%", settings.getAutoBrightness() ? "checked" : "");
     html.replace("%SCREENSAVER_ENABLED%", settings.getScreensaverEnabled() ? "checked" : "");
+    html.replace("%SLEEP_SCHEDULE_ENABLED%", settings.getSleepScheduleEnabled() ? "checked" : "");
+    html.replace("%SLEEP_START_TIME%", settings.getSleepStartTime());
+    html.replace("%SLEEP_END_TIME%", settings.getSleepEndTime());
     html.replace("%SCREENSAVER_TIMEOUT%", String(settings.getScreensaverTimeout() / 60000));
     
     html.replace("%OWM_API%", settings.getOwmApiKey());
@@ -892,6 +901,9 @@ void WifiManager::handleSettingsSave() {
     settings.setAutoBrightness(_webServer->hasArg("auto_brightness"));
     settings.setScreensaverEnabled(_webServer->hasArg("screensaver_enabled"));
     if (_webServer->hasArg("screensaver_timeout")) settings.setScreensaverTimeout(_webServer->arg("screensaver_timeout").toInt() * 60000);
+    settings.setSleepScheduleEnabled(_webServer->hasArg("sleep_schedule_enabled"));
+    if (_webServer->hasArg("sleep_start_time")) settings.setSleepStartTime(_webServer->arg("sleep_start_time"));
+    if (_webServer->hasArg("sleep_end_time")) settings.setSleepEndTime(_webServer->arg("sleep_end_time"));
     
     if (_webServer->hasArg("owm_api")) settings.setOwmApiKey(_webServer->arg("owm_api"));
     if (_webServer->hasArg("zip")) settings.setZipCode(_webServer->arg("zip"));

@@ -97,6 +97,9 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     subscribe("command/reboot", 0);
     subscribe("command/auto_brightness", 0);
     subscribe("command/screensaver", 0);
+    subscribe("command/sleep_schedule", 0);
+    subscribe("command/sleep_start", 0);
+    subscribe("command/sleep_end", 0);
     subscribe("command/theme", 0);
     subscribe("command/units", 0);
     subscribe("command/screen_orientation", 0);
@@ -187,6 +190,16 @@ void MqttManager::publishHADiscovery() {
     // Screensaver (Switch)
     String ssPayload = "{\"name\":\"Screensaver\",\"state_topic\":\"" + _baseTopic + "settings/screensaver\",\"command_topic\":\"" + _baseTopic + "command/screensaver\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_screensaver\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/switch/" + deviceId + "/screensaver/config").c_str(), 0, true, ssPayload.c_str());
+
+    String sleepPayload = "{\"name\":\"Sleep Schedule\",\"state_topic\":\"" + _baseTopic + "settings/sleep_schedule\",\"command_topic\":\"" + _baseTopic + "command/sleep_schedule\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_sleep_schedule\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/switch/" + deviceId + "/sleep_schedule/config").c_str(), 0, true, sleepPayload.c_str());
+
+    String sleepStartPayload = "{\"name\":\"Sleep Start Time\",\"state_topic\":\"" + _baseTopic + "settings/sleep_start\",\"command_topic\":\"" + _baseTopic + "command/sleep_start\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_sleep_start\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/text/" + deviceId + "/sleep_start/config").c_str(), 0, true, sleepStartPayload.c_str());
+
+    String sleepEndPayload = "{\"name\":\"Sleep End Time\",\"state_topic\":\"" + _baseTopic + "settings/sleep_end\",\"command_topic\":\"" + _baseTopic + "command/sleep_end\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_sleep_end\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/text/" + deviceId + "/sleep_end/config").c_str(), 0, true, sleepEndPayload.c_str());
+
     // Theme (Select)
     String themePayload = "{\"name\":\"Theme Flavor\",\"state_topic\":\"" + _baseTopic + "settings/theme\",\"command_topic\":\"" + _baseTopic + "command/theme\",\"options\":[\"Mocha\",\"Macchiato\",\"Frappe\",\"Latte\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_theme\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/select/" + deviceId + "/theme/config").c_str(), 0, true, themePayload.c_str());

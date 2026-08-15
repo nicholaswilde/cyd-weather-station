@@ -36,6 +36,7 @@ static lv_obj_t *wifi_info_dialog = nullptr;
 
 static lv_obj_t *ui_auto_bright_sw = nullptr;
 static lv_obj_t *ui_screensaver_sw = nullptr;
+static lv_obj_t *ui_sleep_sw = nullptr;
 static lv_obj_t *ui_led_sw = nullptr;
 static lv_obj_t *ui_sd_log_sw = nullptr;
 static lv_obj_t *ui_sd_cache_sw = nullptr;
@@ -214,6 +215,13 @@ static void hum_offset_slider_event_cb(lv_event_t * e) {
     float value = (float)lv_slider_get_value(slider);
     settings.setLocalSensorHumOffset(value);
     settings_local_sensor_changed = true;
+}
+
+
+static void sleep_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * obj = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(obj, LV_STATE_CHECKED);
+    settings.setSleepScheduleEnabled(is_checked);
 }
 
 static void screensaver_sw_event_cb(lv_event_t * e) {
@@ -1062,6 +1070,33 @@ void initUI() {
     }
     lv_obj_add_event_cb(ui_screensaver_sw, screensaver_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
+    // Sleep Schedule Row
+    lv_obj_t *sleep_row = lv_obj_create(settings_container);
+    lv_obj_set_width(sleep_row, LV_PCT(100));
+    lv_obj_set_height(sleep_row, LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_opa(sleep_row, LV_OPA_TRANSP, 0);
+    lv_obj_set_style_border_width(sleep_row, 0, 0);
+    lv_obj_set_style_pad_all(sleep_row, 0, 0);
+    lv_obj_clear_flag(sleep_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t *sleep_label = lv_label_create(sleep_row);
+    lv_label_set_text(sleep_label, "Sleep Schedule");
+    lv_obj_set_style_text_color(sleep_label, lv_color_hex(COLOR_TEXT), 0);
+    lv_obj_set_style_text_font(sleep_label, isLargeScreen ? &lv_font_montserrat_24 : &lv_font_montserrat_16, 0);
+    lv_obj_align(sleep_label, LV_ALIGN_LEFT_MID, 0, 0);
+
+    ui_sleep_sw = lv_switch_create(sleep_row);
+    lv_obj_set_size(ui_sleep_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_align(ui_sleep_sw, LV_ALIGN_RIGHT_MID, 0, 0);
+    if (settings.getSleepScheduleEnabled()) {
+        lv_obj_add_state(ui_sleep_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(ui_sleep_sw, sleep_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+
     // MQTT row
     lv_obj_t * mqtt_row = lv_obj_create(left_col);
     lv_obj_clear_flag(mqtt_row, LV_OBJ_FLAG_CLICKABLE);
@@ -1796,6 +1831,14 @@ void ui_sync_toggles() {
         }
     }
     
+    if (ui_sleep_sw != nullptr) {
+        if (settings.getSleepScheduleEnabled()) {
+            lv_obj_add_state(ui_sleep_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_sleep_sw, LV_STATE_CHECKED);
+        }
+    }
+
     if (ui_screensaver_sw != nullptr) {
         if (settings.getScreensaverEnabled()) {
             lv_obj_add_state(ui_screensaver_sw, LV_STATE_CHECKED);

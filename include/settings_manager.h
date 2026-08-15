@@ -37,6 +37,9 @@ private:
     String _wifiPassword;
     bool _sdCacheEnabled;
     bool _screensaverEnabled;
+    bool _sleepScheduleEnabled;
+    String _sleepStartTime;
+    String _sleepEndTime;
     String _zipCode;
     String _cityCode;
     String _latitude;
@@ -115,6 +118,13 @@ public:
 
     int getScreensaverTimeout() const;
     void setScreensaverTimeout(int timeout);
+
+    bool getSleepScheduleEnabled() const;
+    void setSleepScheduleEnabled(bool enabled);
+    const String& getSleepStartTime() const;
+    void setSleepStartTime(const String& startTime);
+    const String& getSleepEndTime() const;
+    void setSleepEndTime(const String& endTime);
 
     bool getStaticIpEnabled() const;
     void setStaticIpEnabled(bool enabled);

@@ -635,3 +635,11 @@ void SettingsManager::setLocalSensorHumOffset(float offset) {
         prefs.end();
     }
 }
+
+
+bool SettingsManager::getSleepScheduleEnabled() const { return _sleepScheduleEnabled; }
+void SettingsManager::setSleepScheduleEnabled(bool enabled) { _sleepScheduleEnabled = enabled; }
+const String& SettingsManager::getSleepStartTime() const { return _sleepStartTime; }
+void SettingsManager::setSleepStartTime(const String& startTime) { _sleepStartTime = startTime; }
+const String& SettingsManager::getSleepEndTime() const { return _sleepEndTime; }
+void SettingsManager::setSleepEndTime(const String& endTime) { _sleepEndTime = endTime; }

@@ -263,6 +263,7 @@ window.onload = function() {
     toggleLocalSensorSettings();
     toggleMqttSettings();
     toggleScreensaverSettings();
+  toggleSleepSettings();
     toggleStaticIpSettings();
 };
 </script>

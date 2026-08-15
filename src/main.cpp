@@ -224,6 +224,45 @@ void loop() {
 
     unsigned long currentMillis = millis();
 
+    // Sleep Schedule Logic
+    static unsigned long lastSleepCheck = 0;
+    if (currentMillis - lastSleepCheck >= 60000) {
+        lastSleepCheck = currentMillis;
+        if (settings.getSleepScheduleEnabled()) {
+            struct tm timeinfo;
+            if (getLocalTime(&timeinfo)) {
+                int currentMins = timeinfo.tm_hour * 60 + timeinfo.tm_min;
+                
+                String startTime = settings.getSleepStartTime();
+                String endTime = settings.getSleepEndTime();
+                
+                int startHour = startTime.substring(0, 2).toInt();
+                int startMin = startTime.substring(3, 5).toInt();
+                int endHour = endTime.substring(0, 2).toInt();
+                int endMin = endTime.substring(3, 5).toInt();
+                
+                int startMins = startHour * 60 + startMin;
+                int endMins = endHour * 60 + endMin;
+                
+                bool shouldSleep = false;
+                if (startMins < endMins) {
+                    shouldSleep = (currentMins >= startMins && currentMins < endMins);
+                } else {
+                    shouldSleep = (currentMins >= startMins || currentMins < endMins);
+                }
+                
+                static bool scheduledSleepActive = false;
+                if (shouldSleep && !scheduledSleepActive) {
+                    screensaver.sleep();
+                    scheduledSleepActive = true;
+                } else if (!shouldSleep && scheduledSleepActive) {
+                    screensaver.wake(settings.getBrightness());
+                    scheduledSleepActive = false;
+                }
+            }
+        }
+    }
+
 #if USE_RGB_LED_STATUS
     led.update(currentMillis);
 #endif
