@@ -55,7 +55,7 @@ echo "✅ Device is reachable!"
 
 echo -e "\n⏳ [3/3] Uploading firmware to http://$DEVICE_IP/update..."
 # The ESP32 WebServer Update library expects a multipart/form-data upload.
-UPLOAD_RESULT=$(curl -s -w "%{http_code}" -X POST -F "update=@$FIRMWARE_BIN" "http://$DEVICE_IP/update")
+UPLOAD_RESULT=$(curl -s -w "\n%{http_code}" -X POST -F "update=@$FIRMWARE_BIN" "http://$DEVICE_IP/update")
 
 HTTP_CODE=$(echo "$UPLOAD_RESULT" | tail -n 1)
 RESPONSE_BODY=$(echo "$UPLOAD_RESULT" | sed '$d')
