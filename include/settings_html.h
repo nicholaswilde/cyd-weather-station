@@ -82,6 +82,18 @@ button:hover { background: #f5c2e7; }
     <input type='number' id='screensaver_timeout' name='screensaver_timeout' min='1' max='60' value='%SCREENSAVER_TIMEOUT%'>
 </div>
 
+<div class='checkbox-group'>
+    <input type='checkbox' id='sleep_schedule_enabled' name='sleep_schedule_enabled' value='1' %SLEEP_SCHEDULE_ENABLED% onchange='toggleSleepSettings()'>
+    <label for='sleep_schedule_enabled' title='Enable a schedule to automatically sleep the screen'>Enable Sleep Schedule</label>
+</div>
+
+<div id='sleep_settings' style='display: none; margin-left: 20px; border-left: 2px solid #313244; padding-left: 15px; margin-bottom: 20px;'>
+    <label for='sleep_start_time' title='Time the screen will go to sleep'>Sleep Start Time</label>
+    <input type='time' id='sleep_start_time' name='sleep_start_time' value='%SLEEP_START_TIME%'>
+    <label for='sleep_end_time' title='Time the screen will wake up'>Sleep End Time</label>
+    <input type='time' id='sleep_end_time' name='sleep_end_time' value='%SLEEP_END_TIME%'>
+</div>
+
 <div class='section-title'>Location & Weather</div>
 <label for='owm_api' title='Your OpenWeatherMap API key'>OpenWeatherMap API Key (<a href='https://home.openweathermap.org/api_keys' target='_blank' style='color: #89b4fa; text-decoration: none;'>Get Key</a>)</label>
 <div class='password-wrapper'>
@@ -236,6 +248,13 @@ function toggleMqttSettings() {
 function toggleScreensaverSettings() {
     var cb = document.getElementById('screensaver_enabled');
     var div = document.getElementById('screensaver_settings');
+    if (cb && div) {
+        div.style.display = cb.checked ? 'block' : 'none';
+    }
+}
+function toggleSleepSettings() {
+    var cb = document.getElementById('sleep_schedule_enabled');
+    var div = document.getElementById('sleep_settings');
     if (cb && div) {
         div.style.display = cb.checked ? 'block' : 'none';
     }
