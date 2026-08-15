@@ -38,6 +38,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
     - **Bidirectional Remote Control**: Change any setting or command via MQTT topics with immediate on-screen and Home Assistant state synchronization.
     - **LWT & Robust Reconnection**: Reports online/offline availability via Last Will and Testament (LWT) on `<base_topic>status` with MAC-based unique client IDs, paced discovery message queueing, and exponential reconnection backoff (5s to 2min).
   - **Screensaver**: Enable/disable screensaver mode (dims backlight and displays clock after inactivity).
+  - **Sleep Schedule**: Enable/disable automatic screen sleep during a configured time frame (e.g. 22:00 to 07:00).
   - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks, header height dynamically increases to 60px in portrait to fit a wrapped two-line title without overlaps, and touch coordinates update instantly.
 - **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured POSIX timezone.
@@ -321,6 +322,14 @@ The screensaver timeout can be adjusted dynamically via the Web Settings UI. Def
 #define SCREENSAVER_TIMEOUT_MS  300000 // 5 minutes (in milliseconds)
 ```
 
+**Sleep Schedule:**
+The sleep schedule can be configured dynamically via the Web Settings UI or MQTT. Defaults are configured in `config/config.h`:
+```cpp
+#define DEFAULT_SLEEP_SCHEDULE_ENABLED false
+#define DEFAULT_SLEEP_START_TIME       "22:00"
+#define DEFAULT_SLEEP_END_TIME         "07:00"
+```
+
 **Static IP:**
 Static IP can be configured directly in the Web Settings UI at runtime. Alternatively, you can uncomment the static IP settings block in `config/config.h` to set the default fallback values. If kept blank or commented out, the device will default to DHCP:
 ```cpp
@@ -372,6 +381,7 @@ All settings below are configured by touch on the device and saved to flash:
 | **SD Cache** | Toggle SD card weather caching. |
 | **API Srv** | Toggle the remote screenshot & configuration HTTP API server on/off. |
 | **Scr Saver** | Toggle the screensaver on/off. |
+| **Sleep Sched** | Toggle the sleep schedule on/off. |
 | **MQTT** | Toggle publishing weather variables to MQTT topics. |
 
 ---
@@ -439,6 +449,9 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>settings/screen_orientation`| Display orientation | `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` |
 | `<base_topic>settings/update_interval` | Weather update interval (mins) | `15` |
 | `<base_topic>settings/screensaver_timeout`| Screensaver timeout (mins) | `5` |
+| `<base_topic>settings/sleep_schedule` | Sleep schedule switch state | `ON` / `OFF` |
+| `<base_topic>settings/sleep_start` | Sleep schedule start time | `22:00` |
+| `<base_topic>settings/sleep_end` | Sleep schedule end time | `07:00` |
 | `<base_topic>settings/led` | Status LED enabled switch state | `ON` / `OFF` |
 | `<base_topic>settings/sd_log` | SD logging enabled switch state | `ON` / `OFF` |
 | `<base_topic>settings/sd_cache` | SD caching enabled switch state | `ON` / `OFF` |
@@ -451,6 +464,9 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>command/led_brightness` | `0`–`100` | Adjusts the status LED brightness percentage (0-100% mapped to hardware 0-255). |
 | `<base_topic>command/auto_brightness`| `ON` / `OFF` / `1` / `0` | Enables or disables ambient light-based automatic brightness. |
 | `<base_topic>command/screensaver` | `ON` / `OFF` / `1` / `0` | Enables or disables the screensaver. |
+| `<base_topic>command/sleep_schedule` | `ON` / `OFF` / `1` / `0` | Enables or disables the sleep schedule. |
+| `<base_topic>command/sleep_start` | `HH:MM` | Sets the sleep schedule start time (24-hour format). |
+| `<base_topic>command/sleep_end` | `HH:MM` | Sets the sleep schedule end time (24-hour format). |
 | `<base_topic>command/theme` | `Mocha` / `Macchiato` / `Frappe` / `Latte` | Changes the active Catppuccin theme flavor. |
 | `<base_topic>command/units` | `Imperial` / `Metric` | Changes the temperature and wind speed unit system. |
 | `<base_topic>command/screen_orientation`| `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` | Changes display orientation dynamically. |
@@ -466,7 +482,8 @@ On connection, the device automatically registers itself as `CYD Weather Station
 - **Weather Sensors**: Temperature (°F/°C), Humidity (%), Wind Speed (mph/m/s), Wind Direction, Weather Condition, City Name.
 - **Diagnostics Sensors**: Connection Status (binary sensor), Uptime (s), Free Memory (B), Wi-Fi Signal (dBm), IP Address, Firmware Version, MAC Address.
 - **Controls & Sliders (Numbers)**: Screen Brightness (0–100%), LED Brightness (0–100%), Weather Update Interval (1–120 min), Screensaver Timeout (1–60 min).
-- **Configuration Switches**: Auto Brightness, Screensaver, Status LED, SD Log, SD Cache.
+- **Configuration Switches**: Auto Brightness, Screensaver, Sleep Schedule, Status LED, SD Log, SD Cache.
+- **Text Controls**: Sleep Start Time, Sleep End Time.
 - **Dropdown Selectors**: Theme Flavor, Unit System, Screen Orientation.
 - **Buttons**: Device Reboot.
 
