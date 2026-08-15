@@ -25,6 +25,7 @@ volatile bool settings_screenshot_server_changed = false;
 volatile bool settings_orientation_changed = false;
 volatile bool settings_led_changed = false;
 volatile bool settings_mqtt_changed = false;
+volatile bool settings_local_sensor_changed = false;
 
 static lv_obj_t *wifi_label;
 static lv_obj_t *offline_indicator = nullptr;
@@ -40,6 +41,9 @@ static lv_obj_t *ui_sd_log_sw = nullptr;
 static lv_obj_t *ui_sd_cache_sw = nullptr;
 static lv_obj_t *ui_brightness_slider = nullptr;
 static lv_obj_t *ui_led_brightness_slider = nullptr;
+static lv_obj_t *ui_sw_local_sensor = nullptr;
+static lv_obj_t *ui_dd_local_sensor_type = nullptr;
+static lv_obj_t *ui_slider_local_sensor_update_interval = nullptr;
 
 static void close_wifi_info_cb(lv_event_t * e) {
     if (wifi_info_dialog != nullptr) {
@@ -170,6 +174,28 @@ static void screenshot_sw_event_cb(lv_event_t * e) {
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
     settings.setScreenshotServerEnabled(is_checked);
     settings_screenshot_server_changed = true;
+}
+
+static void local_sensor_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setLocalSensorEnabled(is_checked);
+    settings_local_sensor_changed = true;
+}
+
+static void local_sensor_type_dropdown_event_cb(lv_event_t * e) {
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    int selected = lv_dropdown_get_selected(dropdown);
+    int type = selected + 1;
+    settings.setLocalSensorType(type);
+    settings_local_sensor_changed = true;
+}
+
+static void local_sensor_interval_slider_event_cb(lv_event_t * e) {
+    lv_obj_t * slider = lv_event_get_target(e);
+    int value = lv_slider_get_value(slider);
+    settings.setLocalSensorUpdateInterval(value);
+    settings_local_sensor_changed = true;
 }
 
 static void screensaver_sw_event_cb(lv_event_t * e) {
@@ -937,6 +963,32 @@ void initUI() {
     }
     lv_obj_add_event_cb(scr_sw, screenshot_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
+    // Local Sensor row
+    lv_obj_t * loc_sens_row = lv_obj_create(left_col);
+    lv_obj_clear_flag(loc_sens_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(loc_sens_row, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(loc_sens_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(loc_sens_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(loc_sens_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(loc_sens_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(loc_sens_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(loc_sens_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * loc_sens_label = lv_label_create(loc_sens_row);
+    lv_label_set_text(loc_sens_label, "Local Sensor");
+    lv_obj_set_style_text_color(loc_sens_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(loc_sens_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_sw_local_sensor = lv_switch_create(loc_sens_row);
+    lv_obj_set_size(ui_sw_local_sensor, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_sw_local_sensor, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sw_local_sensor, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_sw_local_sensor, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.getLocalSensorEnabled()) {
+        lv_obj_add_state(ui_sw_local_sensor, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(ui_sw_local_sensor, local_sensor_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
     // Screensaver row
     lv_obj_t * saver_row = lv_obj_create(left_col);
     lv_obj_clear_flag(saver_row, LV_OBJ_FLAG_CLICKABLE);
@@ -1168,6 +1220,38 @@ void initUI() {
     lv_obj_set_style_border_color(orient_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
     lv_obj_set_style_bg_color(orient_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
     lv_obj_set_style_text_color(orient_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
+
+    // Local Sensor Type Dropdown
+    ui_dd_local_sensor_type = lv_dropdown_create(right_col);
+    lv_obj_set_size(ui_dd_local_sensor_type, lv_pct(92), 26);
+    lv_dropdown_set_options(ui_dd_local_sensor_type, "DHT22\nSHT40\nDHT11");
+    lv_dropdown_set_selected(ui_dd_local_sensor_type, settings.getLocalSensorType() - 1);
+    lv_obj_add_event_cb(ui_dd_local_sensor_type, local_sensor_type_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_dd_local_sensor_type, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_dd_local_sensor_type, lv_color_hex(COLOR_TEXT), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_dd_local_sensor_type, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_dd_local_sensor_type, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t * loc_type_list = lv_dropdown_get_list(ui_dd_local_sensor_type);
+    lv_obj_set_style_bg_color(loc_type_list, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
+    lv_obj_set_style_text_color(loc_type_list, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_border_color(loc_type_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(loc_type_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(loc_type_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
+
+    // Local Sensor Update Interval Slider
+    lv_obj_t * loc_sens_slider_lbl = lv_label_create(right_col);
+    lv_label_set_text(loc_sens_slider_lbl, "Sensor Update Interval (s)");
+    lv_obj_set_style_text_color(loc_sens_slider_lbl, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(loc_sens_slider_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_slider_local_sensor_update_interval = lv_slider_create(right_col);
+    lv_slider_set_range(ui_slider_local_sensor_update_interval, 1, 120);
+    lv_slider_set_value(ui_slider_local_sensor_update_interval, settings.getLocalSensorUpdateInterval(), LV_ANIM_OFF);
+    lv_obj_set_size(ui_slider_local_sensor_update_interval, lv_pct(92), isLargeScreen ? 20 : 10);
+    lv_obj_add_event_cb(ui_slider_local_sensor_update_interval, local_sensor_interval_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, lv_color_hex(COLOR_CRUST), LV_PART_KNOB);
 
     // Re-apply offline indicator state if active
     if (is_offline_mode) {
@@ -1653,6 +1737,22 @@ void ui_sync_toggles() {
         } else {
             lv_obj_clear_state(ui_sd_cache_sw, LV_STATE_CHECKED);
         }
+    }
+    
+    if (ui_sw_local_sensor != nullptr) {
+        if (settings.getLocalSensorEnabled()) {
+            lv_obj_add_state(ui_sw_local_sensor, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_sw_local_sensor, LV_STATE_CHECKED);
+        }
+    }
+
+    if (ui_dd_local_sensor_type != nullptr) {
+        lv_dropdown_set_selected(ui_dd_local_sensor_type, settings.getLocalSensorType() - 1);
+    }
+    
+    if (ui_slider_local_sensor_update_interval != nullptr) {
+        lv_slider_set_value(ui_slider_local_sensor_update_interval, settings.getLocalSensorUpdateInterval(), LV_ANIM_OFF);
     }
     
     if (ui_brightness_slider != nullptr) {

@@ -21,8 +21,6 @@
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
 unsigned long lastDhtRead = 0;
-const unsigned long dhtReadInterval = 5000; // 5 seconds
-
 BacklightManager backlight(TFT_BL, 0, 10.0f);
 ScreenSaverManager screensaver(backlight, SCREENSAVER_TIMEOUT_MS);
 ButtonManager buttonManager(BOOT_BUTTON_PIN);
@@ -157,6 +155,22 @@ void setup() {
             if (interval >= 1 && interval <= 120) {
                 settings.setWeatherUpdateInterval(interval);
             }
+        } else if (topic.endsWith("command/local_sensor")) {
+            settings.setLocalSensorEnabled(payload == "ON");
+            settings_local_sensor_changed = true;
+        } else if (topic.endsWith("command/local_sensor_type")) {
+            int type = 1;
+            if (payload == "DHT22") type = 1;
+            else if (payload == "SHT40") type = 2;
+            else if (payload == "DHT11") type = 3;
+            settings.setLocalSensorType(type);
+            settings_local_sensor_changed = true;
+        } else if (topic.endsWith("command/local_sensor_update_interval")) {
+            int interval = payload.toInt();
+            if (interval >= 1 && interval <= 120) {
+                settings.setLocalSensorUpdateInterval(interval);
+                settings_local_sensor_changed = true;
+            }
         }
         
         force_mqtt_publish = true;
@@ -202,17 +216,27 @@ void loop() {
     led.update(currentMillis);
 #endif
 
-    // Periodically read DHT22 sensor
-    if (currentMillis - lastDhtRead >= dhtReadInterval) {
-        lastDhtRead = currentMillis;
-        
-        float h = dht.readHumidity();
-        float t = dht.readTemperature();
-        
-        if (isnan(h) || isnan(t)) {
-            Serial.println("[Sensor] Failed to read from DHT sensor!");
-        } else {
-            Serial.printf("[Sensor] Humidity: %.1f%%  Temperature: %.1f°C\n", h, t);
+    // Periodically read Local Sensor if enabled
+    if (settings.getLocalSensorEnabled()) {
+        unsigned long currentUpdateIntervalMs = settings.getLocalSensorUpdateInterval() * 1000UL;
+        if (currentMillis - lastDhtRead >= currentUpdateIntervalMs) {
+            lastDhtRead = currentMillis;
+            
+            if (settings.getLocalSensorType() == 1) { // DHT22
+                float h = dht.readHumidity();
+                float t = dht.readTemperature();
+                
+                if (isnan(h) || isnan(t)) {
+                    Serial.println("[Sensor] Failed to read from DHT22 sensor!");
+                } else {
+                    Serial.printf("[Sensor] DHT22 -> Humidity: %.1f%%  Temperature: %.1f°C\n", h, t);
+                    // Next phase: Update UI or MQTT with local readings
+                }
+            } else if (settings.getLocalSensorType() == 2) { // SHT40
+                // Placeholder for next phase
+            } else if (settings.getLocalSensorType() == 3) { // DHT11
+                // Placeholder for next phase
+            }
         }
     }
 
@@ -583,5 +607,15 @@ void loop() {
         }
         mqtt.publish("settings/screen_orientation", orientStr.c_str(), true);
         mqtt.publish("settings/update_interval", String(settings.getWeatherUpdateInterval()).c_str(), true);
+        
+        mqtt.publish("settings/local_sensor", settings.getLocalSensorEnabled() ? "ON" : "OFF", true);
+        String sensTypeStr = "DHT22";
+        switch (settings.getLocalSensorType()) {
+            case 1: sensTypeStr = "DHT22"; break;
+            case 2: sensTypeStr = "SHT40"; break;
+            case 3: sensTypeStr = "DHT11"; break;
+        }
+        mqtt.publish("settings/local_sensor_type", sensTypeStr.c_str(), true);
+        mqtt.publish("settings/local_sensor_update_interval", String(settings.getLocalSensorUpdateInterval()).c_str(), true);
     }
 }

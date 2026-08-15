@@ -53,6 +53,9 @@ SettingsManager::SettingsManager() {
     _owmApiKey = OPENWEATHERMAP_API_KEY;
     _ntpServer = NTP_SERVER;
     _weatherUpdateInterval = WEATHER_UPDATE_INTERVAL_MINS;
+    _localSensorEnabled = LOCAL_SENSOR_ENABLED;
+    _localSensorType = LOCAL_SENSOR_TYPE;
+    _localSensorUpdateInterval = LOCAL_SENSOR_UPDATE_INTERVAL;
 }
 
 void SettingsManager::begin() {
@@ -98,6 +101,9 @@ void SettingsManager::begin() {
     _owmApiKey = prefs.getString("owm_api", OPENWEATHERMAP_API_KEY);
     _ntpServer = prefs.getString("ntp_srv", NTP_SERVER);
     _weatherUpdateInterval = prefs.getInt("upd_int", WEATHER_UPDATE_INTERVAL_MINS);
+    _localSensorEnabled = prefs.getBool("loc_sens_en", LOCAL_SENSOR_ENABLED);
+    _localSensorType = prefs.getInt("loc_sens_typ", LOCAL_SENSOR_TYPE);
+    _localSensorUpdateInterval = prefs.getInt("loc_sens_upd", LOCAL_SENSOR_UPDATE_INTERVAL);
     
     prefs.end();
 }
@@ -553,4 +559,47 @@ void SettingsManager::factoryReset() {
     prefs.begin("settings", false);
     prefs.clear();
     prefs.end();
+}
+
+bool SettingsManager::getLocalSensorEnabled() const {
+    return _localSensorEnabled;
+}
+
+void SettingsManager::setLocalSensorEnabled(bool enabled) {
+    if (_localSensorEnabled != enabled) {
+        _localSensorEnabled = enabled;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("loc_sens_en", _localSensorEnabled);
+        prefs.end();
+    }
+}
+
+int SettingsManager::getLocalSensorType() const {
+    return _localSensorType;
+}
+
+void SettingsManager::setLocalSensorType(int type) {
+    if (_localSensorType != type) {
+        _localSensorType = type;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putInt("loc_sens_typ", _localSensorType);
+        prefs.end();
+    }
+}
+
+int SettingsManager::getLocalSensorUpdateInterval() const {
+    return _localSensorUpdateInterval;
+}
+
+void SettingsManager::setLocalSensorUpdateInterval(int interval) {
+    if (interval < 1) interval = 1;
+    if (_localSensorUpdateInterval != interval) {
+        _localSensorUpdateInterval = interval;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putInt("loc_sens_upd", _localSensorUpdateInterval);
+        prefs.end();
+    }
 }

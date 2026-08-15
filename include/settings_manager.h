@@ -44,6 +44,9 @@ private:
     String _owmApiKey;
     String _ntpServer;
     int _weatherUpdateInterval;
+    bool _localSensorEnabled;
+    int _localSensorType;
+    int _localSensorUpdateInterval;
 
 public:
     SettingsManager();
@@ -147,6 +150,15 @@ public:
 
     int getWeatherUpdateInterval() const;
     void setWeatherUpdateInterval(int interval);
+
+    bool getLocalSensorEnabled() const;
+    void setLocalSensorEnabled(bool enabled);
+
+    int getLocalSensorType() const;
+    void setLocalSensorType(int type);
+
+    int getLocalSensorUpdateInterval() const;
+    void setLocalSensorUpdateInterval(int interval);
 };
 
 #endif // SETTINGS_MANAGER_H

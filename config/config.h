@@ -136,4 +136,9 @@ extern int getCurrentThemeFlavor();
 // #define STATIC_SUBNET      "255.255.255.0"
 // #define STATIC_DNS         "1.1.1.1"
 
+// Local Sensor Settings
+#define LOCAL_SENSOR_ENABLED false
+#define LOCAL_SENSOR_TYPE 1 // 1=DHT22, 2=SHT40, 3=DHT11
+#define LOCAL_SENSOR_UPDATE_INTERVAL 10 // seconds
+
 #endif // CONFIG_H

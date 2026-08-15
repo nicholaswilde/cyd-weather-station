@@ -13,6 +13,7 @@ extern volatile bool settings_screenshot_server_changed;
 extern volatile bool settings_orientation_changed;
 extern volatile bool settings_led_changed;
 extern volatile bool settings_mqtt_changed;
+extern volatile bool settings_local_sensor_changed;
 
 void initUI();
 void ui_sync_toggles();

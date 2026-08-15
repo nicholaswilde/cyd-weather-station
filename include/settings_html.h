@@ -109,6 +109,25 @@ button:hover { background: #f5c2e7; }
 <label for='update_interval' title='How often to fetch new weather data'>Weather Update Interval (Minutes)</label>
 <input type='number' id='update_interval' name='update_interval' min='1' max='60' value='%UPDATE_INTERVAL%'>
 
+<hr>
+<h3>Local Sensor Settings</h3>
+<div class='checkbox-group'>
+    <input type='checkbox' id='local_sensor_enabled' name='local_sensor_enabled' value='1' %LOCAL_SENSOR_ENABLED_CHECKED% onchange='toggleLocalSensorSettings()'>
+    <label for='local_sensor_enabled' title='Enable the local temperature and humidity sensor'>Local Sensor Enabled</label>
+</div>
+
+<div id='local_sensor_settings' style='display: none; margin-left: 20px; border-left: 2px solid #313244; padding-left: 15px; margin-bottom: 20px;'>
+    <label for='local_sensor_type' title='Type of local sensor'>Local Sensor Type</label>
+    <select id='local_sensor_type' name='local_sensor_type'>
+    <option value='1' %LOCAL_SENSOR_TYPE_1_SELECTED%>DHT22</option>
+    <option value='2' %LOCAL_SENSOR_TYPE_2_SELECTED%>SHT40</option>
+    <option value='3' %LOCAL_SENSOR_TYPE_3_SELECTED%>DHT11</option>
+    </select>
+
+    <label for='local_sensor_update_interval' title='How often to read the local sensor'>Local Sensor Update Interval (Seconds)</label>
+    <input type='number' id='local_sensor_update_interval' name='local_sensor_update_interval' min='1' max='120' value='%LOCAL_SENSOR_UPDATE_INTERVAL%'>
+</div>
+
 <div class='section-title'>System Features</div>
 <div class='checkbox-group'>
     <input type='checkbox' id='led_enabled' name='led_enabled' value='1' %LED_ENABLED%>
@@ -194,6 +213,13 @@ button:hover { background: #f5c2e7; }
 <p style="margin-top: 25px; margin-bottom: 0; font-size: 13px; color: #6c7086; text-align: center;">Built for %DEVICE_NAME% | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>
 </div>
 <script>
+function toggleLocalSensorSettings() {
+    var cb = document.getElementById('local_sensor_enabled');
+    var div = document.getElementById('local_sensor_settings');
+    if (cb && div) {
+        div.style.display = cb.checked ? 'block' : 'none';
+    }
+}
 function toggleMqttSettings() {
     var cb = document.getElementById('mqtt_enabled');
     var div = document.getElementById('mqtt_settings');
@@ -228,6 +254,7 @@ function togglePwd(id, el) {
     }
 }
 window.onload = function() {
+    toggleLocalSensorSettings();
     toggleMqttSettings();
     toggleScreensaverSettings();
     toggleStaticIpSettings();

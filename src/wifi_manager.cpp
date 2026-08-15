@@ -751,6 +751,12 @@ void WifiManager::handleSettings() {
     html.replace("%TZ%", settings.getTimezone());
     html.replace("%NTP_SERVER%", settings.getNtpServer());
     html.replace("%UPDATE_INTERVAL%", String(settings.getWeatherUpdateInterval()));
+
+    html.replace("%LOCAL_SENSOR_ENABLED_CHECKED%", settings.getLocalSensorEnabled() ? "checked" : "");
+    html.replace("%LOCAL_SENSOR_TYPE_1_SELECTED%", settings.getLocalSensorType() == 1 ? "selected" : "");
+    html.replace("%LOCAL_SENSOR_TYPE_2_SELECTED%", settings.getLocalSensorType() == 2 ? "selected" : "");
+    html.replace("%LOCAL_SENSOR_TYPE_3_SELECTED%", settings.getLocalSensorType() == 3 ? "selected" : "");
+    html.replace("%LOCAL_SENSOR_UPDATE_INTERVAL%", String(settings.getLocalSensorUpdateInterval()));
     
     html.replace("%LED_ENABLED%", settings.getLedEnabled() ? "checked" : "");
     html.replace("%LED_BRIGHTNESS%", String((settings.getLedBrightness() * 100) / 255));
@@ -812,6 +818,10 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("tz")) settings.setTimezone(_webServer->arg("tz"));
     if (_webServer->hasArg("ntp_server")) settings.setNtpServer(_webServer->arg("ntp_server"));
     if (_webServer->hasArg("update_interval")) settings.setWeatherUpdateInterval(_webServer->arg("update_interval").toInt());
+    
+    settings.setLocalSensorEnabled(_webServer->hasArg("local_sensor_enabled"));
+    if (_webServer->hasArg("local_sensor_type")) settings.setLocalSensorType(_webServer->arg("local_sensor_type").toInt());
+    if (_webServer->hasArg("local_sensor_update_interval")) settings.setLocalSensorUpdateInterval(_webServer->arg("local_sensor_update_interval").toInt());
     
     settings.setLedEnabled(_webServer->hasArg("led_enabled"));
 
