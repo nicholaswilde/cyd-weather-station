@@ -131,6 +131,13 @@ void setup() {
             // No explicit flag for screensaver, it will be handled implicitly
             // when it timeouts. We can just update it.
             if (!en) screensaver.wake(settings.getBrightness());
+        } else if (topic.endsWith("command/sleep_schedule")) {
+            bool en = (payload == "ON" || payload == "1" || payload == "true");
+            settings.setSleepScheduleEnabled(en);
+        } else if (topic.endsWith("command/sleep_start")) {
+            settings.setSleepStartTime(payload);
+        } else if (topic.endsWith("command/sleep_end")) {
+            settings.setSleepEndTime(payload);
         } else if (topic.endsWith("command/theme")) {
             int theme = 1; // Default Mocha
             if (payload == "Macchiato") theme = 2;
@@ -656,6 +663,9 @@ void loop() {
         
         mqtt.publish("settings/auto_brightness", settings.getAutoBrightness() ? "ON" : "OFF", true);
         mqtt.publish("settings/screensaver", settings.getScreensaverEnabled() ? "ON" : "OFF", true);
+        mqtt.publish("settings/sleep_schedule", settings.getSleepScheduleEnabled() ? "ON" : "OFF", true);
+        mqtt.publish("settings/sleep_start", settings.getSleepStartTime().c_str(), true);
+        mqtt.publish("settings/sleep_end", settings.getSleepEndTime().c_str(), true);
         
         String themeStr = "Mocha";
         switch (settings.getThemeFlavor()) {
