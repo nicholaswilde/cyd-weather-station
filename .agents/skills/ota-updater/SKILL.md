@@ -36,4 +36,5 @@ bash .agents/skills/ota-updater/ota_update.sh cyd_35c
 ## Agent Guidelines
 
 - When prompted to update the device, flash the firmware, or perform an OTA update, execute this script using `ctx_execute` or `run_command`.
-- Ensure you pass the correct environment argument if the user requests the `cyd_35c` version.
+- **CRITICAL:** Before running the OTA updater, you MUST read the `.env` file to determine which device environment is currently being tested (look for the `PIO_ENV` variable, e.g., `PIO_ENV=cyd_35c` or `PIO_ENV=cyd_28r`).
+- Always pass this environment variable as the argument to the `ota_update.sh` script (e.g., `bash .agents/skills/ota-updater/ota_update.sh cyd_35c`).
