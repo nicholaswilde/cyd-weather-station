@@ -1,4 +1,8 @@
 #include "mqtt_manager.h"
+#include "settings_manager.h"
+#include "config/config.h"
+
+extern SettingsManager settings;
 
 MqttManager::MqttManager(const String& server, uint16_t port, const String& user, const String& password, const String& baseTopic)
     : _server(server), _port(port), _user(user), _password(password), _baseTopic(baseTopic), _reconnectTimer(nullptr), _reconnectBackoffMs(5000), _messageCallback(nullptr) {}
@@ -205,6 +209,15 @@ void MqttManager::publishHADiscovery() {
     // Local Sensor Update Interval (Number)
     String locSensUpdPayload = "{\"name\":\"Local Sensor Update Interval\",\"state_topic\":\"" + _baseTopic + "settings/local_sensor_update_interval\",\"command_topic\":\"" + _baseTopic + "command/local_sensor_update_interval\",\"min\":1,\"max\":120,\"mode\":\"box\",\"unique_id\":\"" + deviceId + "_loc_sens_upd\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/number/" + deviceId + "/local_sensor_update_interval/config").c_str(), 0, true, locSensUpdPayload.c_str());
+
+    // Local Temperature
+    String tempUnit = settings.getUnitSystem() == UNIT_IMPERIAL ? "°F" : "°C";
+    String locTempPayload = "{\"name\":\"Local Temperature\",\"state_topic\":\"" + _baseTopic + "sensor/local_temperature\",\"unit_of_measurement\":\"" + tempUnit + "\",\"device_class\":\"temperature\",\"state_class\":\"measurement\",\"unique_id\":\"" + deviceId + "_loc_temp\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/local_temperature/config").c_str(), 0, true, locTempPayload.c_str());
+
+    // Local Humidity
+    String locHumPayload = "{\"name\":\"Local Humidity\",\"state_topic\":\"" + _baseTopic + "sensor/local_humidity\",\"unit_of_measurement\":\"%\",\"device_class\":\"humidity\",\"state_class\":\"measurement\",\"unique_id\":\"" + deviceId + "_loc_hum\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/local_humidity/config").c_str(), 0, true, locHumPayload.c_str());
 }
 
 void MqttManager::onMqttDisconnect(AsyncMqttClientDisconnectReason reason) {

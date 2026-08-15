@@ -232,6 +232,15 @@ void loop() {
                 } else {
                     Serial.printf("[Sensor] DHT22 -> Humidity: %.1f%%  Temperature: %.1f%s\n", h, t, isFahrenheit ? "°F" : "°C");
                     updateLocalSensorUI(t, h);
+                    
+                    if (mqtt.isConnected()) {
+                        char tempPayload[16];
+                        char humPayload[16];
+                        snprintf(tempPayload, sizeof(tempPayload), "%.1f", t);
+                        snprintf(humPayload, sizeof(humPayload), "%.1f", h);
+                        mqtt.publish("sensor/local_temperature", tempPayload);
+                        mqtt.publish("sensor/local_humidity", humPayload);
+                    }
                 }
             } else if (settings.getLocalSensorType() == 2) { // SHT40
                 // Placeholder for next phase
