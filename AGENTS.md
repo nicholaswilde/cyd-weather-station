@@ -34,6 +34,7 @@
   2. **Settings Web Page**: Add the input field, label, and form submission handler in `src/web_server.cpp` (or web settings page).
   3. **On-Device Settings UI**: Add the UI control (toggle, slider, dropdown) in `src/ui.cpp` and support bi-directional synchronization in `ui_sync_toggles()`.
   4. **MQTT Integration**: Add Home Assistant auto-discovery entity payload, state topic publishing, and command subscription/handling in `src/mqtt_manager.cpp` and `src/main.cpp`.
+  5. **REST API Endpoint & Docs**: Add reading and updating logic for the new setting in `/api/config` GET/POST handlers (in `src/wifi_manager.cpp`) and update the example JSON response in `README.md`.
 
 ## Home Assistant MQTT Discovery Rules
 - **Component Strictness**: Home Assistant is extremely strict with MQTT auto-discovery payloads. For example, if you define a `number` component without a `device_class`, it will fail silently if you provide an incompatible `unit_of_measurement` (such as `%`).
