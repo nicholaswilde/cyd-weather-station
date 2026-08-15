@@ -1071,26 +1071,27 @@ void initUI() {
     lv_obj_add_event_cb(ui_screensaver_sw, screensaver_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Sleep Schedule Row
-    lv_obj_t *sleep_row = lv_obj_create(settings_container);
+    lv_obj_t *sleep_row = lv_obj_create(left_col);
+    lv_obj_clear_flag(sleep_row, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_width(sleep_row, LV_PCT(100));
     lv_obj_set_height(sleep_row, LV_SIZE_CONTENT);
-    lv_obj_set_style_bg_opa(sleep_row, LV_OPA_TRANSP, 0);
-    lv_obj_set_style_border_width(sleep_row, 0, 0);
-    lv_obj_set_style_pad_all(sleep_row, 0, 0);
+    lv_obj_set_flex_flow(sleep_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(sleep_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(sleep_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(sleep_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(sleep_row, 0, LV_PART_MAIN);
     lv_obj_clear_flag(sleep_row, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t *sleep_label = lv_label_create(sleep_row);
     lv_label_set_text(sleep_label, "Sleep Schedule");
-    lv_obj_set_style_text_color(sleep_label, lv_color_hex(COLOR_TEXT), 0);
-    lv_obj_set_style_text_font(sleep_label, isLargeScreen ? &lv_font_montserrat_24 : &lv_font_montserrat_16, 0);
-    lv_obj_align(sleep_label, LV_ALIGN_LEFT_MID, 0, 0);
+    lv_obj_set_style_text_color(sleep_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(sleep_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_sleep_sw = lv_switch_create(sleep_row);
     lv_obj_set_size(ui_sleep_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
-    lv_obj_align(ui_sleep_sw, LV_ALIGN_RIGHT_MID, 0, 0);
     if (settings.getSleepScheduleEnabled()) {
         lv_obj_add_state(ui_sleep_sw, LV_STATE_CHECKED);
     }
