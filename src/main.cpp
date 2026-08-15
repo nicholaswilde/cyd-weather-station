@@ -224,13 +224,14 @@ void loop() {
             
             if (settings.getLocalSensorType() == 1) { // DHT22
                 float h = dht.readHumidity();
-                float t = dht.readTemperature();
+                bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
+                float t = dht.readTemperature(isFahrenheit);
                 
                 if (isnan(h) || isnan(t)) {
                     Serial.println("[Sensor] Failed to read from DHT22 sensor!");
                 } else {
-                    Serial.printf("[Sensor] DHT22 -> Humidity: %.1f%%  Temperature: %.1f°C\n", h, t);
-                    // Next phase: Update UI or MQTT with local readings
+                    Serial.printf("[Sensor] DHT22 -> Humidity: %.1f%%  Temperature: %.1f%s\n", h, t, isFahrenheit ? "°F" : "°C");
+                    updateLocalSensorUI(t, h);
                 }
             } else if (settings.getLocalSensorType() == 2) { // SHT40
                 // Placeholder for next phase
@@ -351,6 +352,11 @@ void loop() {
         } else {
             mqtt.disconnect();
         }
+    }
+
+    if (settings_local_sensor_changed) {
+        settings_local_sensor_changed = false;
+        pending_ui_sync = true;
     }
 
 #if USE_RGB_LED_STATUS

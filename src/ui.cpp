@@ -124,13 +124,15 @@ static void wifi_icon_click_cb(lv_event_t * e) {
 }
 static lv_obj_t *temp_label;
 static lv_obj_t *hum_label;
+static lv_obj_t *wind_label;
 static lv_obj_t *status_lbl;
 static lv_obj_t *status_icon_lbl;
 static lv_obj_t *time_label;
 static lv_obj_t *icon_lbl;
-static lv_obj_t *wind_label;
 static lv_obj_t *tz_val_label;
 static lv_obj_t *footer_label;
+static lv_obj_t *local_sensor_cnt = nullptr;
+static lv_obj_t *local_sensor_lbl = nullptr;
 static lv_obj_t *tabview_obj = nullptr;
 
 // Forecast widgets
@@ -538,11 +540,11 @@ void initUI() {
     lv_obj_clear_flag(icon_cnt, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
 
     if (isLandscape) {
-        lv_obj_set_size(icon_cnt, lv_pct(40), lv_pct(100));
-        lv_obj_align(icon_cnt, LV_ALIGN_LEFT_MID, 0, 0);
+        lv_obj_set_size(icon_cnt, lv_pct(40), lv_pct(85));
+        lv_obj_align(icon_cnt, LV_ALIGN_TOP_LEFT, 0, 0);
     } else {
         lv_obj_set_size(icon_cnt, lv_pct(100), lv_pct(30));
-        lv_obj_align(icon_cnt, LV_ALIGN_TOP_MID, 0, 10);
+        lv_obj_align(icon_cnt, LV_ALIGN_TOP_MID, 0, -10);
     }
 
     // Weather Placeholders inside icon_cnt
@@ -560,11 +562,11 @@ void initUI() {
     lv_obj_t * details_cnt = lv_obj_create(tab_curr);
     lv_obj_clear_flag(details_cnt, LV_OBJ_FLAG_CLICKABLE);
     if (isLandscape) {
-        lv_obj_set_size(details_cnt, lv_pct(60), lv_pct(100));
-        lv_obj_align(details_cnt, LV_ALIGN_RIGHT_MID, 0, 0);
+        lv_obj_set_size(details_cnt, lv_pct(60), lv_pct(85));
+        lv_obj_align(details_cnt, LV_ALIGN_TOP_RIGHT, 0, 0);
     } else {
-        lv_obj_set_size(details_cnt, lv_pct(100), lv_pct(70));
-        lv_obj_align(details_cnt, LV_ALIGN_BOTTOM_MID, 0, 0);
+        lv_obj_set_size(details_cnt, lv_pct(100), lv_pct(55));
+        lv_obj_align(details_cnt, LV_ALIGN_BOTTOM_MID, 0, -20);
     }
     
     lv_obj_set_flex_flow(details_cnt, LV_FLEX_FLOW_COLUMN);
@@ -679,6 +681,35 @@ void initUI() {
     lv_obj_set_style_text_font(status_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(status_lbl, "Updating...");
     lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
+
+    // --- Local Sensor row (wi-thermometer + text) ---
+    local_sensor_cnt = lv_obj_create(details_cnt);
+    lv_obj_clear_flag(local_sensor_cnt, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(local_sensor_cnt, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(local_sensor_cnt, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(local_sensor_cnt, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(local_sensor_cnt, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(local_sensor_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(local_sensor_cnt, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_top(local_sensor_cnt, 4, LV_PART_MAIN);
+    lv_obj_set_style_pad_column(local_sensor_cnt, 4, LV_PART_MAIN);
+    lv_obj_clear_flag(local_sensor_cnt, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * loc_icon_lbl = lv_label_create(local_sensor_cnt);
+    lv_obj_set_style_text_font(loc_icon_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_label_set_text(loc_icon_lbl, LV_SYMBOL_HOME);
+    lv_obj_set_style_text_color(loc_icon_lbl, lv_color_hex(COLOR_GREEN), LV_PART_MAIN);
+    lv_obj_set_width(loc_icon_lbl, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_text_align(loc_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+
+    local_sensor_lbl = lv_label_create(local_sensor_cnt);
+    lv_obj_set_style_text_font(local_sensor_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_label_set_text(local_sensor_lbl, "Local: --.-° / --%");
+    lv_obj_set_style_text_color(local_sensor_lbl, lv_color_hex(COLOR_GREEN), LV_PART_MAIN);
+    
+    if (!settings.getLocalSensorEnabled()) {
+        lv_obj_add_flag(local_sensor_cnt, LV_OBJ_FLAG_HIDDEN);
+    }
 
     // Footer bar: "Last Update: HH:MM | City Name"
     footer_label = lv_label_create(tab_curr);
@@ -1368,6 +1399,18 @@ const char* getCardinalDirection(int degrees) {
     return directions[index];
 }
 
+void updateLocalSensorUI(float temperature, float humidity) {
+    if (local_sensor_lbl != nullptr) {
+        char local_str[64];
+        if (settings.getUnitSystem() == UNIT_IMPERIAL) {
+            snprintf(local_str, sizeof(local_str), "Local: %.1f °F / %.0f%%", temperature, humidity);
+        } else {
+            snprintf(local_str, sizeof(local_str), "Local: %.1f °C / %.0f%%", temperature, humidity);
+        }
+        lv_label_set_text(local_sensor_lbl, local_str);
+    }
+}
+
 void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed, int windDirection) {
     char temp_str[32];
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
@@ -1770,6 +1813,14 @@ void ui_sync_toggles() {
             lv_obj_clear_state(ui_led_brightness_slider, LV_STATE_DISABLED);
         } else {
             lv_obj_add_state(ui_led_brightness_slider, LV_STATE_DISABLED);
+        }
+    }
+
+    if (local_sensor_cnt != nullptr) {
+        if (settings.getLocalSensorEnabled()) {
+            lv_obj_clear_flag(local_sensor_cnt, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(local_sensor_cnt, LV_OBJ_FLAG_HIDDEN);
         }
     }
 }
