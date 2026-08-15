@@ -1,3 +1,7 @@
+---
+name: release-summary
+description: Generates a clean, professional GitHub release summary based on git logs.
+---
 # /release-summary [range]
 
 Generates a clean, professional GitHub release summary based on git logs.

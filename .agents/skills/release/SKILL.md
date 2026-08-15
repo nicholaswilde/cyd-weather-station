@@ -1,3 +1,7 @@
+---
+name: release
+description: Automates the versioning, tagging, and deployment process for the project.
+---
 # /release
 
 Automates the versioning, tagging, and deployment process for the project.

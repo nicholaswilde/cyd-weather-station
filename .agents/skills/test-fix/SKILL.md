@@ -1,3 +1,7 @@
+---
+name: test-fix
+description: Runs the full validation suite (static analysis and unit tests) and autonomously fixes failures.
+---
 # /test-fix
 
 Runs the full validation suite (static analysis and unit tests) and autonomously fixes failures.
