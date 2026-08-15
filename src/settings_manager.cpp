@@ -58,6 +58,9 @@ SettingsManager::SettingsManager() {
     _localSensorUpdateInterval = LOCAL_SENSOR_UPDATE_INTERVAL;
     _localSensorTempOffset = LOCAL_SENSOR_TEMP_OFFSET;
     _localSensorHumOffset = LOCAL_SENSOR_HUM_OFFSET;
+    _sleepScheduleEnabled = DEFAULT_SLEEP_SCHEDULE_ENABLED;
+    _sleepStartTime = DEFAULT_SLEEP_START_TIME;
+    _sleepEndTime = DEFAULT_SLEEP_END_TIME;
 }
 
 void SettingsManager::begin() {
@@ -108,6 +111,9 @@ void SettingsManager::begin() {
     _localSensorUpdateInterval = prefs.getInt("loc_sens_upd", LOCAL_SENSOR_UPDATE_INTERVAL);
     _localSensorTempOffset = prefs.getFloat("loc_sens_toff", LOCAL_SENSOR_TEMP_OFFSET);
     _localSensorHumOffset = prefs.getFloat("loc_sens_hoff", LOCAL_SENSOR_HUM_OFFSET);
+    _sleepScheduleEnabled = prefs.getBool("sleep_sched", DEFAULT_SLEEP_SCHEDULE_ENABLED);
+    _sleepStartTime = prefs.getString("sleep_start", DEFAULT_SLEEP_START_TIME);
+    _sleepEndTime = prefs.getString("sleep_end", DEFAULT_SLEEP_END_TIME);
     
     prefs.end();
 }
@@ -638,8 +644,34 @@ void SettingsManager::setLocalSensorHumOffset(float offset) {
 
 
 bool SettingsManager::getSleepScheduleEnabled() const { return _sleepScheduleEnabled; }
-void SettingsManager::setSleepScheduleEnabled(bool enabled) { _sleepScheduleEnabled = enabled; }
+void SettingsManager::setSleepScheduleEnabled(bool enabled) { 
+    if (_sleepScheduleEnabled != enabled) {
+        _sleepScheduleEnabled = enabled; 
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("sleep_sched", _sleepScheduleEnabled);
+        prefs.end();
+    }
+}
+
 const String& SettingsManager::getSleepStartTime() const { return _sleepStartTime; }
-void SettingsManager::setSleepStartTime(const String& startTime) { _sleepStartTime = startTime; }
+void SettingsManager::setSleepStartTime(const String& startTime) { 
+    if (_sleepStartTime != startTime) {
+        _sleepStartTime = startTime; 
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("sleep_start", _sleepStartTime);
+        prefs.end();
+    }
+}
+
 const String& SettingsManager::getSleepEndTime() const { return _sleepEndTime; }
-void SettingsManager::setSleepEndTime(const String& endTime) { _sleepEndTime = endTime; }
+void SettingsManager::setSleepEndTime(const String& endTime) { 
+    if (_sleepEndTime != endTime) {
+        _sleepEndTime = endTime; 
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putString("sleep_end", _sleepEndTime);
+        prefs.end();
+    }
+}

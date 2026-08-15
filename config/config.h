@@ -85,7 +85,12 @@ extern int getCurrentThemeFlavor();
 #define MQTT_ENABLED false
 
 // API Server default status setting
-#define API_SERVER_ENABLED false
+#define API_SERVER_ENABLED true
+
+// Sleep Schedule Defaults
+#define DEFAULT_SLEEP_SCHEDULE_ENABLED false
+#define DEFAULT_SLEEP_START_TIME "22:00"
+#define DEFAULT_SLEEP_END_TIME "07:00"
 
 // SD Card Weather Logging Settings
 #define USE_SD_LOGGING false
