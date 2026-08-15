@@ -556,12 +556,12 @@ void WifiManager::startWebServer() {
     _webServer->on("/screenshot", [this]() { handleScreenshot(); });
     _webServer->on("/settings", HTTP_GET, [this]() { handleSettings(); });
     _webServer->on("/settings/save", HTTP_POST, [this]() { handleSettingsSave(); });
-    _webServer->on("/api/config", [this]() {
+    _webServer->on("/api/config", HTTP_GET, [this]() {
         if (!settings.getApiServerEnabled()) {
             _webServer->send(403, "text/plain", "Forbidden: API server disabled in settings");
             return;
         }
-        StaticJsonDocument<512> doc;
+        DynamicJsonDocument doc(2048);
         doc["unit_system"] = settings.getUnitSystem();
         doc["brightness"] = settings.getBrightness();
         doc["auto_brightness"] = settings.getAutoBrightness();
@@ -574,7 +574,13 @@ void WifiManager::startWebServer() {
         doc["led_enabled"] = settings.getLedEnabled();
         doc["led_brightness"] = (settings.getLedBrightness() * 100) / 255;
         doc["mqtt_enabled"] = settings.getMqttEnabled();
+        doc["mqtt_server"] = settings.getMqttServer();
+        doc["mqtt_port"] = settings.getMqttPort();
+        doc["mqtt_user"] = settings.getMqttUser();
+        doc["mqtt_password"] = settings.getMqttPassword();
+        doc["mqtt_base_topic"] = settings.getMqttBaseTopic();
         doc["wifi_ssid"] = settings.getWifiSSID();
+        doc["wifi_password"] = settings.getWifiPassword();
         doc["sd_cache_enabled"] = settings.getSdCacheEnabled();
         doc["screensaver_enabled"] = settings.getScreensaverEnabled();
         doc["screensaver_timeout"] = settings.getScreensaverTimeout();
@@ -585,10 +591,85 @@ void WifiManager::startWebServer() {
         doc["static_subnet"] = settings.getStaticSubnet();
         doc["static_dns"] = settings.getStaticDns();
         doc["ap_password"] = settings.getApPassword();
+        doc["zip_code"] = settings.getZipCode();
+        doc["city_code"] = settings.getCityCode();
+        doc["latitude"] = settings.getLatitude();
+        doc["longitude"] = settings.getLongitude();
+        doc["owm_api_key"] = settings.getOwmApiKey();
+        doc["ntp_server"] = settings.getNtpServer();
+        doc["local_sensor_enabled"] = settings.getLocalSensorEnabled();
+        doc["local_sensor_type"] = settings.getLocalSensorType();
+        doc["local_sensor_update_interval"] = settings.getLocalSensorUpdateInterval();
+        doc["local_sensor_temp_offset"] = settings.getLocalSensorTempOffset();
+        doc["local_sensor_hum_offset"] = settings.getLocalSensorHumOffset();
 
         String response;
         serializeJson(doc, response);
         _webServer->send(200, "application/json", response);
+    });
+
+    _webServer->on("/api/config", HTTP_POST, [this]() {
+        if (!settings.getApiServerEnabled()) {
+            _webServer->send(403, "text/plain", "Forbidden: API server disabled in settings");
+            return;
+        }
+        if (!_webServer->hasArg("plain")) {
+            _webServer->send(400, "text/plain", "Body not received");
+            return;
+        }
+        
+        DynamicJsonDocument doc(2048);
+        DeserializationError error = deserializeJson(doc, _webServer->arg("plain"));
+        if (error) {
+            _webServer->send(400, "text/plain", "Invalid JSON");
+            return;
+        }
+        
+        if (doc.containsKey("unit_system")) settings.setUnitSystem(doc["unit_system"]);
+        if (doc.containsKey("brightness")) settings.setBrightness(doc["brightness"]);
+        if (doc.containsKey("auto_brightness")) settings.setAutoBrightness(doc["auto_brightness"]);
+        if (doc.containsKey("timezone")) settings.setTimezone(doc["timezone"].as<String>());
+        if (doc.containsKey("theme_flavor")) settings.setThemeFlavor(doc["theme_flavor"]);
+        if (doc.containsKey("sd_logging_enabled")) settings.setSdLoggingEnabled(doc["sd_logging_enabled"]);
+        if (doc.containsKey("screenshot_server_enabled")) settings.setScreenshotServerEnabled(doc["screenshot_server_enabled"]);
+        if (doc.containsKey("api_server_enabled")) settings.setApiServerEnabled(doc["api_server_enabled"]);
+        if (doc.containsKey("screen_orientation")) settings.setScreenOrientation(doc["screen_orientation"]);
+        if (doc.containsKey("led_enabled")) settings.setLedEnabled(doc["led_enabled"]);
+        if (doc.containsKey("led_brightness")) {
+            int pct = doc["led_brightness"];
+            settings.setLedBrightness((pct * 255) / 100);
+        }
+        if (doc.containsKey("mqtt_enabled")) settings.setMqttEnabled(doc["mqtt_enabled"]);
+        if (doc.containsKey("mqtt_server")) settings.setMqttServer(doc["mqtt_server"].as<String>());
+        if (doc.containsKey("mqtt_port")) settings.setMqttPort(doc["mqtt_port"]);
+        if (doc.containsKey("mqtt_user")) settings.setMqttUser(doc["mqtt_user"].as<String>());
+        if (doc.containsKey("mqtt_password")) settings.setMqttPassword(doc["mqtt_password"].as<String>());
+        if (doc.containsKey("mqtt_base_topic")) settings.setMqttBaseTopic(doc["mqtt_base_topic"].as<String>());
+        if (doc.containsKey("wifi_ssid")) settings.setWifiSSID(doc["wifi_ssid"].as<String>());
+        if (doc.containsKey("wifi_password")) settings.setWifiPassword(doc["wifi_password"].as<String>());
+        if (doc.containsKey("sd_cache_enabled")) settings.setSdCacheEnabled(doc["sd_cache_enabled"]);
+        if (doc.containsKey("screensaver_enabled")) settings.setScreensaverEnabled(doc["screensaver_enabled"]);
+        if (doc.containsKey("screensaver_timeout")) settings.setScreensaverTimeout(doc["screensaver_timeout"]);
+        if (doc.containsKey("weather_update_interval")) settings.setWeatherUpdateInterval(doc["weather_update_interval"]);
+        if (doc.containsKey("static_ip_enabled")) settings.setStaticIpEnabled(doc["static_ip_enabled"]);
+        if (doc.containsKey("static_ip")) settings.setStaticIp(doc["static_ip"].as<String>());
+        if (doc.containsKey("static_gateway")) settings.setStaticGateway(doc["static_gateway"].as<String>());
+        if (doc.containsKey("static_subnet")) settings.setStaticSubnet(doc["static_subnet"].as<String>());
+        if (doc.containsKey("static_dns")) settings.setStaticDns(doc["static_dns"].as<String>());
+        if (doc.containsKey("ap_password")) settings.setApPassword(doc["ap_password"].as<String>());
+        if (doc.containsKey("zip_code")) settings.setZipCode(doc["zip_code"].as<String>());
+        if (doc.containsKey("city_code")) settings.setCityCode(doc["city_code"].as<String>());
+        if (doc.containsKey("latitude")) settings.setLatitude(doc["latitude"].as<String>());
+        if (doc.containsKey("longitude")) settings.setLongitude(doc["longitude"].as<String>());
+        if (doc.containsKey("owm_api_key")) settings.setOwmApiKey(doc["owm_api_key"].as<String>());
+        if (doc.containsKey("ntp_server")) settings.setNtpServer(doc["ntp_server"].as<String>());
+        if (doc.containsKey("local_sensor_enabled")) settings.setLocalSensorEnabled(doc["local_sensor_enabled"]);
+        if (doc.containsKey("local_sensor_type")) settings.setLocalSensorType(doc["local_sensor_type"]);
+        if (doc.containsKey("local_sensor_update_interval")) settings.setLocalSensorUpdateInterval(doc["local_sensor_update_interval"]);
+        if (doc.containsKey("local_sensor_temp_offset")) settings.setLocalSensorTempOffset(doc["local_sensor_temp_offset"]);
+        if (doc.containsKey("local_sensor_hum_offset")) settings.setLocalSensorHumOffset(doc["local_sensor_hum_offset"]);
+        
+        _webServer->send(200, "application/json", "{\"status\":\"ok\"}");
     });
     _webServer->on("/api/tab", [this]() {
         if (!settings.getApiServerEnabled()) {

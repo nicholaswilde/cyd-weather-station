@@ -253,6 +253,47 @@ tasks:
       - npm run font:generate:24
       - npm run font:generate:72
 
+  test:api:
+    desc: Run API endpoint integration tests
+    dotenv: ['.env']
+    preconditions:
+      - sh: 'test -n "$CYD_DEVICE_IP"'
+        msg: "CYD_DEVICE_IP is not set in .env"
+    cmds:
+      - bash .agents/skills/test-api-config/test_api.sh
+
+  test:web:
+    desc: Run web server health and UI validation checks
+    dotenv: ['.env']
+    preconditions:
+      - sh: 'test -n "$CYD_DEVICE_IP"'
+        msg: "CYD_DEVICE_IP is not set in .env"
+    cmds:
+      - bash .agents/skills/web-health-check/web_health.sh
+
+  test:mqtt:
+    desc: Run MQTT integration tests
+    dotenv: ['.env']
+    preconditions:
+      - sh: 'test -n "$CYD_DEVICE_IP"'
+        msg: "CYD_DEVICE_IP is not set in .env"
+    cmds:
+      - bash .agents/skills/mqtt-testing/test_mqtt.sh
+
+  test:preflight:
+    desc: Run local CI pre-flight build and native tests
+    cmds:
+      - bash .agents/skills/ci-preflight/preflight.sh
+
+  update:ota:
+    desc: Build and perform Over-The-Air (OTA) firmware update
+    dotenv: ['.env']
+    preconditions:
+      - sh: 'test -n "$CYD_DEVICE_IP"'
+        msg: "CYD_DEVICE_IP is not set in .env"
+    cmds:
+      - bash .agents/skills/ota-updater/ota_update.sh {{.PIO_ENV}}
+
   default:
     cmds:
       - task -l

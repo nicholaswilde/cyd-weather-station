@@ -172,20 +172,59 @@ Example JSON response:
 ```json
 {
   "unit_system": 2,
-  "brightness": 255,
+  "brightness": 75,
   "auto_brightness": false,
-  "timezone": "PST8PDT,M3.2.0,M11.1.0",
-  "theme_flavor": 0,
-  "sd_logging_enabled": false,
-  "screenshot_server_enabled": true,
+  "timezone": "UTC0",
+  "theme_flavor": 1,
+  "sd_logging_enabled": true,
+  "screenshot_server_enabled": false,
+  "api_server_enabled": true,
   "screen_orientation": 1,
   "led_enabled": true,
-  "led_brightness": 255,
-  "mqtt_enabled": false,
+  "led_brightness": 60,
+  "mqtt_enabled": true,
+  "mqtt_server": "192.168.1.88",
+  "mqtt_port": 1883,
+  "mqtt_user": "user",
+  "mqtt_password": "password",
+  "mqtt_base_topic": "cyd/",
   "wifi_ssid": "Your_SSID",
-  "sd_cache_enabled": false,
-  "screensaver_enabled": true
+  "wifi_password": "Your_Password",
+  "sd_cache_enabled": true,
+  "screensaver_enabled": false,
+  "screensaver_timeout": 300000,
+  "weather_update_interval": 15,
+  "static_ip_enabled": false,
+  "static_ip": "192.168.1.8",
+  "static_gateway": "192.168.1.1",
+  "static_subnet": "255.255.255.0",
+  "static_dns": "1.1.1.1",
+  "ap_password": "",
+  "zip_code": "90210",
+  "city_code": "",
+  "latitude": "",
+  "longitude": "",
+  "owm_api_key": "",
+  "ntp_server": "pool.ntp.org",
+  "local_sensor_enabled": true,
+  "local_sensor_type": 1,
+  "local_sensor_update_interval": 60,
+  "local_sensor_temp_offset": 0.0,
+  "local_sensor_hum_offset": 0.0
 }
+```
+
+**Update Configuration Settings:**
+Update any subset of device settings dynamically by posting a JSON payload:
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"brightness": 80, "theme_flavor": 2}' \
+  http://<DEVICE_IP>/api/config
+```
+
+Response:
+```json
+{"status":"ok"}
 ```
 
 ### Physical BOOT button capture
@@ -459,6 +498,11 @@ Weather icons use Erik Flowers' Weather Icons font converted to LVGL C source vi
 | **Upload** | `task upload` | `pio run --target upload` | Flashes firmware to the CYD board. |
 | **Monitor** | `task monitor` | `pio device monitor` | Opens the serial monitor at 115200 baud. |
 | **Native Tests** | `task test` | `pio test -e native` | Runs mock unit tests on the host. |
+| **Pre-Flight Check** | `task test:preflight` | — | Builds all environments and runs unit tests. |
+| **API Tests** | `task test:api` | — | Runs live JSON API integration tests against the device. |
+| **Web Health Check** | `task test:web` | — | Verifies all HTTP endpoints respond and do not crash. |
+| **MQTT Tests** | `task test:mqtt` | — | Verifies MQTT broker connectivity and command handling. |
+| **OTA Update** | `task update:ota` | — | Compiles and flashes firmware wirelessly over the network. |
 | **Lint Check** | `task check` | `pio check` | Runs `cppcheck` static analysis. |
 | **Setup Node** | `task setup:node` | `npm install` | Installs `lv_font_conv` for font conversion. |
 | **Generate Font** | `task font:generate` | `npm run font:generate` | Rebuilds the weather icons C source from TTF. |
