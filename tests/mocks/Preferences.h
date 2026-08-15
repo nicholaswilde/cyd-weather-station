@@ -72,6 +72,25 @@ public:
         return val;
     }
 
+    size_t putFloat(const char* key, float value) {
+        if (_readOnly || !_opened) return 0;
+        std::stringstream ss;
+        ss << value;
+        getStorage()[key] = ss.str();
+        return sizeof(float);
+    }
+
+    float getFloat(const char* key, float defaultValue = 0.0f) {
+        if (!_opened) return defaultValue;
+        auto& storage = getStorage();
+        auto it = storage.find(key);
+        if (it == storage.end()) return defaultValue;
+        std::stringstream ss(it->second);
+        float val;
+        ss >> val;
+        return val;
+    }
+
     size_t putString(const char* key, const char* value) {
         if (_readOnly || !_opened) return 0;
         getStorage()[key] = value;

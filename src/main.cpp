@@ -171,6 +171,18 @@ void setup() {
                 settings.setLocalSensorUpdateInterval(interval);
                 settings_local_sensor_changed = true;
             }
+        } else if (topic.endsWith("command/local_sensor_temp_offset")) {
+            float offset = payload.toFloat();
+            if (offset >= -10.0f && offset <= 10.0f) {
+                settings.setLocalSensorTempOffset(offset);
+                settings_local_sensor_changed = true;
+            }
+        } else if (topic.endsWith("command/local_sensor_hum_offset")) {
+            float offset = payload.toFloat();
+            if (offset >= -20.0f && offset <= 20.0f) {
+                settings.setLocalSensorHumOffset(offset);
+                settings_local_sensor_changed = true;
+            }
         }
         
         force_mqtt_publish = true;
@@ -230,6 +242,8 @@ void loop() {
                 if (isnan(h) || isnan(t)) {
                     Serial.println("[Sensor] Failed to read from DHT22 sensor!");
                 } else {
+                    h += settings.getLocalSensorHumOffset();
+                    t += settings.getLocalSensorTempOffset();
                     Serial.printf("[Sensor] DHT22 -> Humidity: %.1f%%  Temperature: %.1f%s\n", h, t, isFahrenheit ? "°F" : "°C");
                     updateLocalSensorUI(t, h);
                     
@@ -632,5 +646,7 @@ void loop() {
         }
         mqtt.publish("settings/local_sensor_type", sensTypeStr.c_str(), true);
         mqtt.publish("settings/local_sensor_update_interval", String(settings.getLocalSensorUpdateInterval()).c_str(), true);
+        mqtt.publish("settings/local_sensor_temp_offset", String(settings.getLocalSensorTempOffset(), 1).c_str(), true);
+        mqtt.publish("settings/local_sensor_hum_offset", String(settings.getLocalSensorHumOffset(), 1).c_str(), true);
     }
 }

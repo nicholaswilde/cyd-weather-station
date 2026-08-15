@@ -78,7 +78,10 @@ A beautiful, configurable real-time weather station and desk clock built for the
 
 ## :electric_plug: Hardware Setup / Sensor Wiring
 
-To read local temperature and humidity, you can wire a DHT22 sensor directly to the CYD board.
+To read local temperature and humidity, you can wire a sensor directly to the CYD board. 
+
+> [!NOTE]
+> Currently, only the **DHT22 (AM2302)** sensor is supported. Additional sensors (such as SHT40 and DHT11) are planned for future releases (see [#12](https://github.com/nicholaswilde/cyd-weather-station/issues/12)).
 
 ### CYD 35c (3.5" Capacitive)
 Connect the DHT22 to the **CN1** breakout port:
@@ -91,6 +94,28 @@ Connect the DHT22 to the **CN1** breakout port:
 - **VCC**: 3V3 (Pin 4)
 - **GND**: GND (Pin 1)
 - **Data/Signal**: IO22 (Pin 2)
+
+### Local Sensor Calibration
+
+Sensors mounted near the CYD board often pick up residual heat radiated by the ESP32 chip and LCD backlight (self-heating), resulting in temperature readings that are slightly high and relative humidity readings that are slightly low. You can calibrate both values using single-point linear offsets via the on-device Settings screen, the Web Settings UI, or MQTT/Home Assistant.
+
+#### 1. Temperature Calibration (Known Accurate Secondary Device)
+1. Place a trusted, known-accurate digital thermometer right beside the CYD's local sensor.
+2. Allow both devices to stabilize in the room for at least 30–60 minutes away from direct drafts, sunlight, or airflow.
+3. Compare the readings:
+   $$\text{Temperature Offset} = T_{\text{reference}} - T_{\text{CYD}}$$
+   *Example:* If your reference thermometer reads $72.0^\circ\text{F}$ and the CYD reads $74.5^\circ\text{F}$, set the **Temperature Offset** to `-2.5`.
+4. Enter this offset in the **Settings** screen (or Web UI / MQTT).
+
+#### 2. Humidity Calibration (Saturated Salt Test Method)
+For accurate relative humidity calibration, the standard and recommended method is the **Saturated Salt (NaCl) Slurry Test** (see [wikiHow: How to Test a Hygrometer](https://www.wikihow.com/Test-a-Hygrometer) for a detailed visual guide), which creates an exact **75% Relative Humidity** sealed environment at room temperature:
+1. In a small, shallow container (like a bottle cap or small cup), mix ordinary table salt with a few drops of water until it forms a thick, wet slush or slurry (all salt should be wet, but with no free-standing liquid water on top).
+2. Place the salt container along with the sensor (or entire board if wired directly) inside an airtight container or zip-top freezer bag. *Ensure no salt water directly touches the sensor.*
+3. Seal the bag completely and let it sit at room temperature for at least 6–8 hours to reach equilibrium.
+4. Check the humidity reading without unsealing the bag:
+   $$\text{Humidity Offset} = 75\% - H_{\text{CYD}}$$
+   *Example:* If the CYD reads $79\%$ inside the sealed 75% RH salt container, set the **Humidity Offset** to `-4.0%`.
+5. Enter this offset in the **Settings** screen (or Web UI / MQTT).
 
 ## :floppy_disk: MicroSD Card Logging & Auto-Formatting
 

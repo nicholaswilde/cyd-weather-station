@@ -126,6 +126,12 @@ button:hover { background: #f5c2e7; }
 
     <label for='local_sensor_update_interval' title='How often to read the local sensor'>Local Sensor Update Interval (Seconds)</label>
     <input type='number' id='local_sensor_update_interval' name='local_sensor_update_interval' min='1' max='120' value='%LOCAL_SENSOR_UPDATE_INTERVAL%'>
+
+    <label for='local_sensor_temp_offset' title='Offset to apply to the local temperature sensor'>Temperature Offset</label>
+    <input type='number' id='local_sensor_temp_offset' name='local_sensor_temp_offset' step='0.1' value='%LOCAL_SENSOR_TEMP_OFFSET%'>
+
+    <label for='local_sensor_hum_offset' title='Offset to apply to the local humidity sensor'>Humidity Offset (%)</label>
+    <input type='number' id='local_sensor_hum_offset' name='local_sensor_hum_offset' step='0.1' value='%LOCAL_SENSOR_HUM_OFFSET%'>
 </div>
 
 <div class='section-title'>System Features</div>

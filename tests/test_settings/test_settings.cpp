@@ -37,6 +37,8 @@ void test_settings_default_values(void) {
 #else
     TEST_ASSERT_EQUAL_STRING("", settings.getApPassword().c_str());
 #endif
+    TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_TEMP_OFFSET, settings.getLocalSensorTempOffset());
+    TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_HUM_OFFSET, settings.getLocalSensorHumOffset());
 }
 
 void test_settings_save_and_load(void) {
@@ -63,6 +65,8 @@ void test_settings_save_and_load(void) {
     settings.setStaticSubnet("255.255.0.0");
     settings.setStaticDns("8.8.8.8");
     settings.setApPassword("new_ap_pass");
+    settings.setLocalSensorTempOffset(-1.5f);
+    settings.setLocalSensorHumOffset(3.0f);
     
     // Create new instance to simulate re-reading from preferences
     SettingsManager settings_new;
@@ -87,6 +91,8 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL_STRING("255.255.0.0", settings_new.getStaticSubnet().c_str());
     TEST_ASSERT_EQUAL_STRING("8.8.8.8", settings_new.getStaticDns().c_str());
     TEST_ASSERT_EQUAL_STRING("new_ap_pass", settings_new.getApPassword().c_str());
+    TEST_ASSERT_EQUAL_FLOAT(-1.5f, settings_new.getLocalSensorTempOffset());
+    TEST_ASSERT_EQUAL_FLOAT(3.0f, settings_new.getLocalSensorHumOffset());
 }
 
 void test_settings_wifi_credentials(void) {

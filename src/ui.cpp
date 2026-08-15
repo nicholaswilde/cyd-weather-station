@@ -44,6 +44,8 @@ static lv_obj_t *ui_led_brightness_slider = nullptr;
 static lv_obj_t *ui_sw_local_sensor = nullptr;
 static lv_obj_t *ui_dd_local_sensor_type = nullptr;
 static lv_obj_t *ui_slider_local_sensor_update_interval = nullptr;
+static lv_obj_t *ui_slider_temp_offset = nullptr;
+static lv_obj_t *ui_slider_hum_offset = nullptr;
 
 static void close_wifi_info_cb(lv_event_t * e) {
     if (wifi_info_dialog != nullptr) {
@@ -197,6 +199,20 @@ static void local_sensor_interval_slider_event_cb(lv_event_t * e) {
     lv_obj_t * slider = lv_event_get_target(e);
     int value = lv_slider_get_value(slider);
     settings.setLocalSensorUpdateInterval(value);
+    settings_local_sensor_changed = true;
+}
+
+static void temp_offset_slider_event_cb(lv_event_t * e) {
+    lv_obj_t * slider = lv_event_get_target(e);
+    float value = (float)lv_slider_get_value(slider) / 10.0f;
+    settings.setLocalSensorTempOffset(value);
+    settings_local_sensor_changed = true;
+}
+
+static void hum_offset_slider_event_cb(lv_event_t * e) {
+    lv_obj_t * slider = lv_event_get_target(e);
+    float value = (float)lv_slider_get_value(slider);
+    settings.setLocalSensorHumOffset(value);
     settings_local_sensor_changed = true;
 }
 
@@ -1284,6 +1300,36 @@ void initUI() {
     lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR);
     lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, lv_color_hex(COLOR_CRUST), LV_PART_KNOB);
 
+    // Temperature Offset Slider
+    lv_obj_t * temp_offset_lbl = lv_label_create(right_col);
+    lv_label_set_text(temp_offset_lbl, "Temperature Offset");
+    lv_obj_set_style_text_color(temp_offset_lbl, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(temp_offset_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_slider_temp_offset = lv_slider_create(right_col);
+    lv_slider_set_range(ui_slider_temp_offset, -100, 100); // -10.0 to 10.0
+    lv_slider_set_value(ui_slider_temp_offset, (int)(settings.getLocalSensorTempOffset() * 10), LV_ANIM_OFF);
+    lv_obj_set_size(ui_slider_temp_offset, lv_pct(92), isLargeScreen ? 20 : 10);
+    lv_obj_add_event_cb(ui_slider_temp_offset, temp_offset_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_slider_temp_offset, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_slider_temp_offset, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(ui_slider_temp_offset, lv_color_hex(COLOR_CRUST), LV_PART_KNOB);
+
+    // Humidity Offset Slider
+    lv_obj_t * hum_offset_lbl = lv_label_create(right_col);
+    lv_label_set_text(hum_offset_lbl, "Humidity Offset");
+    lv_obj_set_style_text_color(hum_offset_lbl, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(hum_offset_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_slider_hum_offset = lv_slider_create(right_col);
+    lv_slider_set_range(ui_slider_hum_offset, -20, 20); // -20 to 20
+    lv_slider_set_value(ui_slider_hum_offset, (int)settings.getLocalSensorHumOffset(), LV_ANIM_OFF);
+    lv_obj_set_size(ui_slider_hum_offset, lv_pct(92), isLargeScreen ? 20 : 10);
+    lv_obj_add_event_cb(ui_slider_hum_offset, hum_offset_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_slider_hum_offset, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_slider_hum_offset, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(ui_slider_hum_offset, lv_color_hex(COLOR_CRUST), LV_PART_KNOB);
+
     // Re-apply offline indicator state if active
     if (is_offline_mode) {
         updateOfflineIndicator(true);
@@ -1796,6 +1842,14 @@ void ui_sync_toggles() {
     
     if (ui_slider_local_sensor_update_interval != nullptr) {
         lv_slider_set_value(ui_slider_local_sensor_update_interval, settings.getLocalSensorUpdateInterval(), LV_ANIM_OFF);
+    }
+
+    if (ui_slider_temp_offset != nullptr) {
+        lv_slider_set_value(ui_slider_temp_offset, (int)(settings.getLocalSensorTempOffset() * 10), LV_ANIM_OFF);
+    }
+
+    if (ui_slider_hum_offset != nullptr) {
+        lv_slider_set_value(ui_slider_hum_offset, (int)settings.getLocalSensorHumOffset(), LV_ANIM_OFF);
     }
     
     if (ui_brightness_slider != nullptr) {

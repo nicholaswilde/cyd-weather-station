@@ -757,6 +757,8 @@ void WifiManager::handleSettings() {
     html.replace("%LOCAL_SENSOR_TYPE_2_SELECTED%", settings.getLocalSensorType() == 2 ? "selected" : "");
     html.replace("%LOCAL_SENSOR_TYPE_3_SELECTED%", settings.getLocalSensorType() == 3 ? "selected" : "");
     html.replace("%LOCAL_SENSOR_UPDATE_INTERVAL%", String(settings.getLocalSensorUpdateInterval()));
+    html.replace("%LOCAL_SENSOR_TEMP_OFFSET%", String(settings.getLocalSensorTempOffset(), 1));
+    html.replace("%LOCAL_SENSOR_HUM_OFFSET%", String(settings.getLocalSensorHumOffset(), 1));
     
     html.replace("%LED_ENABLED%", settings.getLedEnabled() ? "checked" : "");
     html.replace("%LED_BRIGHTNESS%", String((settings.getLedBrightness() * 100) / 255));
@@ -822,6 +824,8 @@ void WifiManager::handleSettingsSave() {
     settings.setLocalSensorEnabled(_webServer->hasArg("local_sensor_enabled"));
     if (_webServer->hasArg("local_sensor_type")) settings.setLocalSensorType(_webServer->arg("local_sensor_type").toInt());
     if (_webServer->hasArg("local_sensor_update_interval")) settings.setLocalSensorUpdateInterval(_webServer->arg("local_sensor_update_interval").toInt());
+    if (_webServer->hasArg("local_sensor_temp_offset")) settings.setLocalSensorTempOffset(_webServer->arg("local_sensor_temp_offset").toFloat());
+    if (_webServer->hasArg("local_sensor_hum_offset")) settings.setLocalSensorHumOffset(_webServer->arg("local_sensor_hum_offset").toFloat());
     
     settings.setLedEnabled(_webServer->hasArg("led_enabled"));
 

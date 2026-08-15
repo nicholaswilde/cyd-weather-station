@@ -56,6 +56,8 @@ SettingsManager::SettingsManager() {
     _localSensorEnabled = LOCAL_SENSOR_ENABLED;
     _localSensorType = LOCAL_SENSOR_TYPE;
     _localSensorUpdateInterval = LOCAL_SENSOR_UPDATE_INTERVAL;
+    _localSensorTempOffset = LOCAL_SENSOR_TEMP_OFFSET;
+    _localSensorHumOffset = LOCAL_SENSOR_HUM_OFFSET;
 }
 
 void SettingsManager::begin() {
@@ -104,6 +106,8 @@ void SettingsManager::begin() {
     _localSensorEnabled = prefs.getBool("loc_sens_en", LOCAL_SENSOR_ENABLED);
     _localSensorType = prefs.getInt("loc_sens_typ", LOCAL_SENSOR_TYPE);
     _localSensorUpdateInterval = prefs.getInt("loc_sens_upd", LOCAL_SENSOR_UPDATE_INTERVAL);
+    _localSensorTempOffset = prefs.getFloat("loc_sens_toff", LOCAL_SENSOR_TEMP_OFFSET);
+    _localSensorHumOffset = prefs.getFloat("loc_sens_hoff", LOCAL_SENSOR_HUM_OFFSET);
     
     prefs.end();
 }
@@ -600,6 +604,34 @@ void SettingsManager::setLocalSensorUpdateInterval(int interval) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putInt("loc_sens_upd", _localSensorUpdateInterval);
+        prefs.end();
+    }
+}
+
+float SettingsManager::getLocalSensorTempOffset() const {
+    return _localSensorTempOffset;
+}
+
+void SettingsManager::setLocalSensorTempOffset(float offset) {
+    if (_localSensorTempOffset != offset) {
+        _localSensorTempOffset = offset;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putFloat("loc_sens_toff", _localSensorTempOffset);
+        prefs.end();
+    }
+}
+
+float SettingsManager::getLocalSensorHumOffset() const {
+    return _localSensorHumOffset;
+}
+
+void SettingsManager::setLocalSensorHumOffset(float offset) {
+    if (_localSensorHumOffset != offset) {
+        _localSensorHumOffset = offset;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putFloat("loc_sens_hoff", _localSensorHumOffset);
         prefs.end();
     }
 }
