@@ -15,6 +15,14 @@
 #include "settings_manager.h"
 #include "screensaver_manager.h"
 #include "button_manager.h"
+#include <DHT.h>
+
+#define DHTPIN 22
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+unsigned long lastDhtRead = 0;
+const unsigned long dhtReadInterval = 5000; // 5 seconds
+
 BacklightManager backlight(TFT_BL, 0, 10.0f);
 ScreenSaverManager screensaver(backlight, SCREENSAVER_TIMEOUT_MS);
 ButtonManager buttonManager(BOOT_BUTTON_PIN);
@@ -59,6 +67,9 @@ void onWiFiDisconnect(WiFiEvent_t event, WiFiEventInfo_t info) {
 void setup() {
     Serial.begin(115200);
     Serial.println("[System] Booting ESP32 CYD Weather Station...");
+
+    dht.begin();
+    Serial.println("[Sensor] DHT22 sensor initialized on GPIO 22");
 
     // Load saved preferences
     settings.begin();
@@ -190,6 +201,20 @@ void loop() {
 #if USE_RGB_LED_STATUS
     led.update(currentMillis);
 #endif
+
+    // Periodically read DHT22 sensor
+    if (currentMillis - lastDhtRead >= dhtReadInterval) {
+        lastDhtRead = currentMillis;
+        
+        float h = dht.readHumidity();
+        float t = dht.readTemperature();
+        
+        if (isnan(h) || isnan(t)) {
+            Serial.println("[Sensor] Failed to read from DHT sensor!");
+        } else {
+            Serial.printf("[Sensor] Humidity: %.1f%%  Temperature: %.1f°C\n", h, t);
+        }
+    }
 
     // Handle physical BOOT button events
     static bool ignoreButtonAction = false;

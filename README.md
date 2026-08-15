@@ -76,6 +76,22 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **Storage**: MicroSD card slot (compatible with standard FAT32 formatted cards).
 - Micro-USB cable for power and programming.
 
+## :electric_plug: Hardware Setup / Sensor Wiring
+
+To read local temperature and humidity, you can wire a DHT22 sensor directly to the CYD board.
+
+### CYD 35c (3.5" Capacitive)
+Connect the DHT22 to the **CN1** breakout port:
+- **VCC**: 3V3
+- **GND**: GND
+- **Data/Signal**: IO22
+
+### CYD 28r (2.8" Resistive)
+Connect the DHT22 to the **CN1** breakout port:
+- **VCC**: 3V3 (Pin 4)
+- **GND**: GND (Pin 1)
+- **Data/Signal**: IO22 (Pin 2)
+
 ## :floppy_disk: MicroSD Card Logging & Auto-Formatting
 
 The weather station periodically logs weather reports to a microSD card in CSV format.
