@@ -198,6 +198,8 @@ void MqttManager::publishHADiscovery() {
     String updPayload = "{\"name\":\"Update Interval\",\"state_topic\":\"" + _baseTopic + "settings/update_interval\",\"command_topic\":\"" + _baseTopic + "command/update_interval\",\"min\":1,\"max\":120,\"unit_of_measurement\":\"min\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_updint\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/number/" + deviceId + "/update_interval/config").c_str(), 0, true, updPayload.c_str());
 
+    vTaskDelay(pdMS_TO_TICKS(50));
+
     // Local Sensor Enabled (Switch)
     String locSensPayload = "{\"name\":\"Local Sensor\",\"state_topic\":\"" + _baseTopic + "settings/local_sensor\",\"command_topic\":\"" + _baseTopic + "command/local_sensor\",\"unique_id\":\"" + deviceId + "_loc_sens\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/switch/" + deviceId + "/local_sensor/config").c_str(), 0, true, locSensPayload.c_str());
@@ -209,6 +211,8 @@ void MqttManager::publishHADiscovery() {
     // Local Sensor Update Interval (Number)
     String locSensUpdPayload = "{\"name\":\"Local Sensor Update Interval\",\"state_topic\":\"" + _baseTopic + "settings/local_sensor_update_interval\",\"command_topic\":\"" + _baseTopic + "command/local_sensor_update_interval\",\"min\":1,\"max\":120,\"mode\":\"box\",\"unique_id\":\"" + deviceId + "_loc_sens_upd\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/number/" + deviceId + "/local_sensor_update_interval/config").c_str(), 0, true, locSensUpdPayload.c_str());
+
+    vTaskDelay(pdMS_TO_TICKS(50));
 
     // Local Temperature
     String tempUnit = settings.getUnitSystem() == UNIT_IMPERIAL ? "°F" : "°C";
