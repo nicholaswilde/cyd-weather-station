@@ -42,6 +42,8 @@ const unsigned long wifiUpdateInterval = 1000; // 1 second
 
 unsigned long lastWeatherUpdate = 0;
 bool hasInitialFetch = false;
+bool footerNeedsTimeUpdate = false;
+String lastCityName = "";
 bool ntpInitialized = false;
 unsigned long lastAutoBrightnessCheck = 0;
 bool force_mqtt_publish = false;
@@ -277,7 +279,7 @@ void loop() {
     // Periodically read Local Sensor if enabled
     if (settings.getLocalSensorEnabled()) {
         unsigned long currentUpdateIntervalMs = settings.getLocalSensorUpdateInterval() * 1000UL;
-        if (currentMillis - lastDhtRead >= currentUpdateIntervalMs) {
+        if (lastDhtRead == 0 || (currentMillis - lastDhtRead >= currentUpdateIntervalMs)) {
             lastDhtRead = currentMillis;
             
             if (settings.getLocalSensorType() == 1) { // DHT22
@@ -533,6 +535,11 @@ void loop() {
                 char timeStr[16];
                 strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
                 updateTimeUI(timeStr);
+                
+                if (footerNeedsTimeUpdate) {
+                    updateFooterUI(timeStr, lastCityName.c_str());
+                    footerNeedsTimeUpdate = false;
+                }
             }
 #else
             updateTimeUI("12:00");
@@ -585,6 +592,7 @@ void loop() {
                         char timeStr[16];
                         strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
                         updateFooterUI(timeStr, data.cityName.c_str());
+                        footerNeedsTimeUpdate = false;
 
                         // Log weather data to SD card if enabled and card is present
                         if (settings.getSdLoggingEnabled() && SdCardManager::isCardPresent()) {
@@ -592,6 +600,8 @@ void loop() {
                         }
                     } else {
                         updateFooterUI("--:--", data.cityName.c_str());
+                        lastCityName = data.cityName.c_str();
+                        footerNeedsTimeUpdate = true;
                     }
 #else
                     updateFooterUI("12:00", data.cityName.c_str());
