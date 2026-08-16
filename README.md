@@ -380,6 +380,12 @@ All settings below are configured by touch on the device and saved to flash:
 | **SD Log** | Toggle SD card weather logging. Disabled automatically if no card is inserted. |
 | **SD Cache** | Toggle SD card weather caching. |
 | **API Srv** | Toggle the remote screenshot & configuration HTTP API server on/off. |
+| **Local Sensor** | Toggle reading local temperature/humidity sensor on/off. |
+| **Sensor Interval** | Slider adjusting local sensor read interval (seconds) with live preview. |
+| **Temp Offset** | Numerical input with themed on-screen numeric keypad to set temperature offset (supports decimals). |
+| **Hum Offset** | Numerical input with themed on-screen numeric keypad to set humidity offset (supports decimals). |
+| **Status LED** | Toggle RGB status LED feedback on/off. |
+| **LED Brightness** | Manual RGB status LED brightness level slider. |
 | **Scr Saver** | Toggle the screensaver on/off. |
 | **Sleep Sched** | Toggle the sleep schedule on/off. |
 | **MQTT** | Toggle publishing weather variables to MQTT topics. |
