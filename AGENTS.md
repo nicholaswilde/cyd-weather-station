@@ -2,6 +2,8 @@
 
 ## Codebase Lookup Preference
 - Before performing any internet/web search for display, touchscreen, or hardware solutions for this ESP32 Cheap Yellow Display (CYD) project, **always search the local photo frame repository first** at `/home/nicholas/git/nicholaswilde/cyd-photo-frame/` for working reference code.
+- Additionally, reference the local repository at `/home/nicholas/git/witnessmenow/ESP32-Cheap-Yellow-Display` for other features specific to the CYD.
+- Reference `/home/nicholas/git/BruceDevices/firmware` for pinouts and hardware configurations for other CYD displays (such as `CYD-2432S028`, `CYD-2USB`, `CYD-2432W328C`, `CYD-2432W328R`/`S024R`, `CYD-3248S035R`/`C`, and `nm-cyd-c5`, excluding Elecrow devices).
 
 ## Build and Test Commands
 - Build firmware: `pio run -e cyd_28r` or `pio run -e cyd_35c`

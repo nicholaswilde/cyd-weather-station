@@ -23,6 +23,12 @@ extern SettingsManager settings;
 
 #if defined(ST7796_DRIVER)
     #define DEVICE_NAME "ESP32-3248S035C"
+#elif defined(ST7789_DRIVER)
+    #if defined(HAS_CAPACITIVE_TOUCH)
+        #define DEVICE_NAME "ESP32-2432W328C"
+    #else
+        #define DEVICE_NAME "Unknown ST7789 CYD"
+    #endif
 #elif defined(ILI9341_DRIVER)
     #define DEVICE_NAME "ESP32-2432S028R"
 #else

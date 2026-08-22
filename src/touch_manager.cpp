@@ -17,7 +17,7 @@ void setMockTouch(bool touched, int x, int y) {
     mockX = x;
     mockY = y;
 }
-#elif defined(ILI9341_DRIVER)
+#elif defined(ILI9341_DRIVER) && !defined(HAS_CAPACITIVE_TOUCH)
 #include <Arduino.h>
 #include <SPI.h>
 #include <XPT2046_Touchscreen.h>
@@ -68,7 +68,7 @@ bool TouchManager::getTouchPoint(int& x, int& y) {
     y = s_lastY;
     return s_lastTouched;
 }
-#elif defined(ST7796_DRIVER)
+#elif defined(HAS_CAPACITIVE_TOUCH)
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -219,7 +219,7 @@ bool TouchManager::getTouchPoint(int& x, int& y) {
 #endif
 
 bool TouchManager::isCapacitive() {
-#if defined(ST7796_DRIVER)
+#if defined(HAS_CAPACITIVE_TOUCH)
     return true;
 #else
     return false;
