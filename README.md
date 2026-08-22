@@ -541,15 +541,30 @@ Weather icons use Erik Flowers' Weather Icons font converted to LVGL C source vi
 If you encounter any issues with your screen or the software, please review the solutions below or [create an issue](https://github.com/nicholaswilde/cyd-weather-station/issues) on GitHub if you are still stuck.
 
 ### Inverted Colors
-If the colors on your display appear inverted, this is a common issue with some batches of the CYD TFT screens. You can easily resolve it by:
-- Flashing the pre-compiled `_inv` releases (e.g. `cyd-weather-station-v0.1.7-cyd_28r_inv.zip` or `cyd_35c_inv.zip`).
-- Or, if building from source, using the `cyd_28r_inv` or `cyd_35c_inv` PlatformIO environments. These environments automatically enable the `TFT_INVERSION_ON=1` build flag.
+If the colors on your display appear inverted (for example, dark themes like `Mocha`, `Macchiato`, or `Frappe` display with bright white backgrounds while the light `Latte` theme appears dark), this is due to hardware display controller differences between CYD batches. You can easily resolve it by:
+- Flashing the alternative inversion release for your board (e.g., `cyd_28r` vs `cyd_28r_inv`, `cyd_28c` vs `cyd_28c_inv`, or `cyd_35c` vs `cyd_35c_inv`).
+- Or, if building from source, switching to the corresponding `_inv` environment in PlatformIO or toggling the `-D TFT_INVERSION_ON=1` build flag.
+
+### Garbled or Scrambled Screen
+If the UI renders distorted, noisy, or with stretched fonts across the display, ensure you flashed the firmware matching your exact display size and controller:
+- **2.8" Resistive (ILI9341)**: `cyd_28r` / `cyd_28r_inv` (240x320)
+- **2.8" Capacitive (ESP32-2432W328C)**: `cyd_28c` / `cyd_28c_inv` (240x320)
+- **3.5" Capacitive (ST7796)**: `cyd_35c` / `cyd_35c_inv` (320x480)
+
+Flashing a 3.5" image onto a 2.8" display (or vice versa) will result in garbled screens due to framebuffer and resolution mismatches.
+
+### Flashing, Erasing Flash & Boot Reset
+- **Erasing Flash**: Running a full `erase_flash` wipes all non-volatile storage (NVS), which erases previously saved Wi-Fi credentials and configuration. The device will reboot into Access Point (`192.168.4.1`) setup mode. Reflashing without erasing preserves your Wi-Fi credentials and saved runtime settings.
+- **Bootloader Mode**: If flashing manually via serial (`esptool.py`), the ESP32 might remain in bootloader mode after writing. Press the physical **RESET / EN** button (or power cycle the unit) to boot into the application.
+
+### Local Temperature & Humidity Shows Empty / Blank
+Standard CYD boards (including `ESP32-2432W328C` and `CYD-2432S028`) do **not** come with an onboard ambient temperature/humidity sensor. If no external DHT sensor is wired to the expansion header, the local sensor readings will remain empty. You can disable the local sensor tile in Settings (`/settings`) or connect a supported sensor (such as a DHT11 or DHT22).
 
 ### RGB / BGR Swap
 If your screen has red and blue colors swapped, it means the display expects a BGR color order instead of RGB. A dedicated release is not currently provided for this variation, but you can fix it by building from source: simply append `-D TFT_RGB_ORDER=TFT_BGR` to your environment's `build_flags` in `platformio.ini`.
 
 ### Touch Calibration (Resistive Screens)
-The 2.8" version (`cyd_28r`) uses a resistive touch layer which can sometimes be misaligned or mapped to inverted coordinates depending on the batch. If touches are registering in the wrong place, you may need to run a touch calibration sketch to determine the correct offsets for your specific screen.
+The 2.8" resistive version (`cyd_28r`) uses a resistive touch layer which can sometimes be misaligned or mapped to inverted coordinates depending on the batch. If touches are registering in the wrong place, you may need to run a touch calibration sketch to determine the correct offsets for your specific screen. Capacitive variants (`cyd_28c`, `cyd_35c`) do not require calibration.
 
 ### Backlight Pin and Polarity Differences
 If your screen is completely black but the board seems to be running, it might be a backlight pin mapping issue. While most boards use GPIO 21 or 27 for the backlight (`TFT_BL`), some obscure batches might map it differently. Furthermore, some boards require `TFT_BACKLIGHT_ON=LOW` instead of `HIGH`. 
