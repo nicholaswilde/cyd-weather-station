@@ -26,6 +26,8 @@ jobs:
         env:
           - cyd_28r
           - cyd_35c
+          - cyd_28c
+          - cyd_28c_inv
     steps:
       - uses: actions/checkout@v4
         with:

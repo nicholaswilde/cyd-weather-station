@@ -74,6 +74,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
 
 - **ESP32 Cheap Yellow Device (CYD)**:
   - **CYD 2.8" (Resistive)**: ESP32-2432S028R — 2.8″ 320×240 ILI9341 LCD with XPT2046 resistive touch.
+  - **CYD 2.8" (Capacitive)**: ESP32-JC2432W328C — 2.8″ 320×240 ST7789 LCD with CST816 capacitive touch.
   - **CYD 3.5" (Capacitive)**: ESP32-3248S035C — 3.5″ 480×320 ST7796 LCD with GT911/CST820 capacitive touch.
 - **Onboard Sensors**: LDR photoresistor (GPIO 34), Backlight PWM (GPIO 21), RGB LED (GPIO 4/16/17), BOOT button (GPIO 0).
 - **Storage**: MicroSD card slot (compatible with standard FAT32 formatted cards).
