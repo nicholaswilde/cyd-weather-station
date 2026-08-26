@@ -85,6 +85,35 @@ void test_wifi_manager_set_credentials(void) {
     TEST_ASSERT_EQUAL(WIFI_STATE_DISCONNECTED, wifi.getState());
 }
 
+void test_wifi_manager_getters_and_helpers(void) {
+    WifiManager wifi("SSID", "PASS");
+    
+    // Disconnected IP and RSSI
+    TEST_ASSERT_EQUAL_STRING("0.0.0.0", wifi.getIPAddress().c_str());
+    TEST_ASSERT_EQUAL(-100, wifi.getRSSI());
+
+    // AP SSID generation
+    String apSsid = wifi.getAPSSID();
+    TEST_ASSERT_TRUE(apSsid.startsWith("cyd-weather-station-"));
+
+    // Connected RSSI
+    wifi.begin();
+    WiFi._status = WL_CONNECTED;
+    wifi.update();
+    TEST_ASSERT_EQUAL(-55, wifi.getRSSI());
+
+    // Apply screenshot server setting
+    wifi.applyScreenshotServerSetting(true);
+    wifi.applyScreenshotServerSetting(false);
+}
+
+void test_wifi_manager_empty_ssid_starts_ap_mode(void) {
+    WifiManager wifi("", "");
+    wifi.begin();
+    TEST_ASSERT_EQUAL(WIFI_STATE_AP_MODE, wifi.getState());
+    TEST_ASSERT_EQUAL_STRING("192.168.4.1", wifi.getIPAddress().c_str());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_wifi_manager_initial_state);
@@ -94,5 +123,7 @@ int main(int argc, char **argv) {
     RUN_TEST(test_wifi_manager_transitions_to_ap_mode);
     RUN_TEST(test_wifi_manager_ap_mode_reconnects_in_background);
     RUN_TEST(test_wifi_manager_set_credentials);
+    RUN_TEST(test_wifi_manager_getters_and_helpers);
+    RUN_TEST(test_wifi_manager_empty_ssid_starts_ap_mode);
     return UNITY_END();
 }

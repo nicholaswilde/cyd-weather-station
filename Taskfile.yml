@@ -24,8 +24,10 @@ tasks:
     cmds:
       - task: test
         ignore_error: true
+      - lcov --capture --base-directory . --directory .pio/build/native/ --output-file lcov_raw.info --rc branch_coverage=1 --ignore-errors "gcov,source"
+      - lcov --remove lcov_raw.info '*/.pio/*' '*/tests/*' '*/tests/mocks/*' '/usr/*' -o lcov.info --rc branch_coverage=1 --ignore-errors source
       - lcov --list lcov.info
-      - defer: rm lcov.info
+      - defer: rm -f lcov_raw.info lcov.info
       
   coverage:upload:
     desc: Generate and upload coverage report to Coveralls.io

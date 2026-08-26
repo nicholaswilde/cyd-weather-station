@@ -122,6 +122,36 @@ void test_mqtt_publish_retain(void) {
     TEST_ASSERT_TRUE(mqtt._mqttClient.mockLastPublishRetain);
 }
 
+void test_mqtt_update_config_and_network_events(void) {
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
+    mqtt.begin();
+
+    mqtt.updateConfig("newbroker.local", 1884, "newuser", "newpass", "custom/");
+    TEST_ASSERT_EQUAL_STRING("custom/", mqtt._baseTopic.c_str());
+
+    // Disconnected network halts timer
+    mqtt.onNetworkDisconnected();
+
+    // Try publishing and subscribing while disconnected
+    mqtt.publish("status", "hello");
+    mqtt.subscribe("command/test", 0);
+}
+
+void test_mqtt_backoff_max_cap_and_reason(void) {
+    MqttManager mqtt("broker.local", 1883, "user", "pass", "cyd/");
+    mqtt.begin();
+    WiFi._status = WL_CONNECTED;
+
+    // Simulate reason 4 (bad credentials)
+    mqtt.onMqttDisconnect((AsyncMqttClientDisconnectReason)4);
+
+    // Call disconnect multiple times to test backoff capping at 120000ms
+    for (int i = 0; i < 10; ++i) {
+        mqtt.onMqttDisconnect(TCP_DISCONNECTED);
+    }
+    TEST_ASSERT_EQUAL(120000, mqtt._reconnectBackoffMs);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_mqtt_initialization);
@@ -131,5 +161,7 @@ int main(int argc, char **argv) {
     RUN_TEST(test_mqtt_subscribe_and_message);
     RUN_TEST(test_mqtt_exponential_backoff);
     RUN_TEST(test_mqtt_publish_retain);
+    RUN_TEST(test_mqtt_update_config_and_network_events);
+    RUN_TEST(test_mqtt_backoff_max_cap_and_reason);
     return UNITY_END();
 }

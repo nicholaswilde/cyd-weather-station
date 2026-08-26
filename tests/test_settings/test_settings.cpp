@@ -138,11 +138,105 @@ void test_settings_location_data(void) {
     TEST_ASSERT_EQUAL_STRING("-118.410", settings_new.getLongitude().c_str());
 }
 
+void test_settings_clamping(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    // Brightness clamping (10 - 100)
+    settings.setBrightness(0);
+    TEST_ASSERT_EQUAL(10, settings.getBrightness());
+    settings.setBrightness(150);
+    TEST_ASSERT_EQUAL(100, settings.getBrightness());
+
+    // Theme flavor clamping (1 - 4)
+    settings.setThemeFlavor(0);
+    TEST_ASSERT_EQUAL(1, settings.getThemeFlavor());
+    settings.setThemeFlavor(10);
+    TEST_ASSERT_EQUAL(4, settings.getThemeFlavor());
+
+    // Screen orientation clamping (0 - 3)
+    settings.setScreenOrientation(-5);
+    TEST_ASSERT_EQUAL(0, settings.getScreenOrientation());
+    settings.setScreenOrientation(10);
+    TEST_ASSERT_EQUAL(3, settings.getScreenOrientation());
+
+    // LED brightness clamping (0 - 255)
+    settings.setLedBrightness(-10);
+    TEST_ASSERT_EQUAL(0, settings.getLedBrightness());
+    settings.setLedBrightness(300);
+    TEST_ASSERT_EQUAL(255, settings.getLedBrightness());
+
+    // Weather update interval clamping (min 1)
+    settings.setWeatherUpdateInterval(0);
+    TEST_ASSERT_EQUAL(1, settings.getWeatherUpdateInterval());
+
+    // Local sensor update interval clamping (min 1)
+    settings.setLocalSensorUpdateInterval(0);
+    TEST_ASSERT_EQUAL(1, settings.getLocalSensorUpdateInterval());
+}
+
+void test_settings_all_fields_and_factory_reset(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    // Test Theme Flavor
+    settings.setThemeFlavor(3);
+    TEST_ASSERT_EQUAL(3, settings.getThemeFlavor());
+
+    // Test LED Settings
+    settings.setLedEnabled(true);
+    TEST_ASSERT_TRUE(settings.getLedEnabled());
+    settings.setLedBrightness(120);
+    TEST_ASSERT_EQUAL(120, settings.getLedBrightness());
+
+    // Test Local Sensor Settings
+    settings.setLocalSensorEnabled(true);
+    TEST_ASSERT_TRUE(settings.getLocalSensorEnabled());
+    settings.setLocalSensorType(3);
+    TEST_ASSERT_EQUAL(3, settings.getLocalSensorType());
+    settings.setLocalSensorUpdateInterval(30);
+    TEST_ASSERT_EQUAL(30, settings.getLocalSensorUpdateInterval());
+
+    // Test MQTT Settings
+    settings.setMqttServer("192.168.1.50");
+    TEST_ASSERT_EQUAL_STRING("192.168.1.50", settings.getMqttServer().c_str());
+    settings.setMqttPort(1884);
+    TEST_ASSERT_EQUAL(1884, settings.getMqttPort());
+    settings.setMqttUser("mqtt_user");
+    TEST_ASSERT_EQUAL_STRING("mqtt_user", settings.getMqttUser().c_str());
+    settings.setMqttPassword("mqtt_pass");
+    TEST_ASSERT_EQUAL_STRING("mqtt_pass", settings.getMqttPassword().c_str());
+    settings.setMqttBaseTopic("home/weather/");
+    TEST_ASSERT_EQUAL_STRING("home/weather/", settings.getMqttBaseTopic().c_str());
+
+    // Test OWM API Key & NTP Server
+    settings.setOwmApiKey("my_api_key_12345");
+    TEST_ASSERT_EQUAL_STRING("my_api_key_12345", settings.getOwmApiKey().c_str());
+    settings.setNtpServer("time.google.com");
+    TEST_ASSERT_EQUAL_STRING("time.google.com", settings.getNtpServer().c_str());
+
+    // Test Sleep Schedule Settings
+    settings.setSleepScheduleEnabled(true);
+    TEST_ASSERT_TRUE(settings.getSleepScheduleEnabled());
+    settings.setSleepStartTime("23:30");
+    TEST_ASSERT_EQUAL_STRING("23:30", settings.getSleepStartTime().c_str());
+    settings.setSleepEndTime("06:30");
+    TEST_ASSERT_EQUAL_STRING("06:30", settings.getSleepEndTime().c_str());
+
+    // Test Factory Reset
+    settings.factoryReset();
+    SettingsManager freshSettings;
+    freshSettings.begin();
+    TEST_ASSERT_EQUAL_STRING("cyd/", freshSettings.getMqttBaseTopic().c_str());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_settings_default_values);
     RUN_TEST(test_settings_save_and_load);
     RUN_TEST(test_settings_wifi_credentials);
     RUN_TEST(test_settings_location_data);
+    RUN_TEST(test_settings_clamping);
+    RUN_TEST(test_settings_all_fields_and_factory_reset);
     return UNITY_END();
 }

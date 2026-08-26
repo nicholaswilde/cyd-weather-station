@@ -171,6 +171,65 @@ void test_led_manager_ap_mode(void) {
     TEST_ASSERT_EQUAL(HIGH, mock_pin_states[17]);
 }
 
+void test_led_manager_pulse_blue_and_white(void) {
+    LedManager led(4, 16, 17);
+    led.begin();
+
+    // Pulse Blue
+    led.setState(LedManager::STATE_PULSE_BLUE);
+    led.update(0);
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[4]);
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[16]);
+    TEST_ASSERT_EQUAL(LOW, mock_pin_states[17]);
+
+    led.update(1000);
+    TEST_ASSERT_EQUAL(LedManager::STATE_OFF, led.getState());
+
+    // Pulse White
+    led.setState(LedManager::STATE_PULSE_WHITE);
+    led.update(1500);
+    TEST_ASSERT_EQUAL(LOW, mock_pin_states[4]);
+    TEST_ASSERT_EQUAL(LOW, mock_pin_states[16]);
+    TEST_ASSERT_EQUAL(LOW, mock_pin_states[17]);
+
+    led.update(2500);
+    TEST_ASSERT_EQUAL(LedManager::STATE_OFF, led.getState());
+}
+
+void test_led_manager_alert_red_and_off(void) {
+    LedManager led(4, 16, 17);
+    led.begin();
+
+    // Alert Red (500ms blink)
+    led.setState(LedManager::STATE_ALERT_RED);
+    led.update(0);
+    TEST_ASSERT_EQUAL(LOW, mock_pin_states[4]);
+
+    led.update(500);
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[4]);
+
+    // Explicit State Off
+    led.setState(LedManager::STATE_OFF);
+    led.update(600);
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[4]);
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[16]);
+    TEST_ASSERT_EQUAL(HIGH, mock_pin_states[17]);
+}
+
+void test_led_manager_brightness_clamping(void) {
+    LedManager led(4, 16, 17);
+    led.begin();
+
+    led.setBrightness(-50);
+    TEST_ASSERT_EQUAL(0, led.getBrightness());
+
+    led.setBrightness(300);
+    TEST_ASSERT_EQUAL(255, led.getBrightness());
+
+    led.setBrightness(128);
+    TEST_ASSERT_EQUAL(128, led.getBrightness());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_led_manager_initialization);
@@ -180,5 +239,8 @@ int main(int argc, char **argv) {
     RUN_TEST(test_led_manager_weather_pulse_yellow);
     RUN_TEST(test_led_manager_disabled_mode);
     RUN_TEST(test_led_manager_ap_mode);
+    RUN_TEST(test_led_manager_pulse_blue_and_white);
+    RUN_TEST(test_led_manager_alert_red_and_off);
+    RUN_TEST(test_led_manager_brightness_clamping);
     return UNITY_END();
 }

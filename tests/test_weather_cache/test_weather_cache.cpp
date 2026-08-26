@@ -104,9 +104,47 @@ void test_weather_cache_sd_save_and_load(void) {
     TEST_ASSERT_EQUAL(original.hourly[0].precipitationProbability, recovered.hourly[0].precipitationProbability);
 }
 
+void test_weather_cache_clear_and_missing(void) {
+    // 1. Clear cache when no file exists
+    TEST_ASSERT_TRUE(WeatherCache::clearCache());
+
+    // 2. Load cache when no file exists
+    WeatherData data;
+    TEST_ASSERT_FALSE(WeatherCache::loadCache(data));
+
+    // 3. Save a file, then clear it
+    WeatherData original;
+    original.temperature = 20.0f;
+    original.humidity = 50;
+    TEST_ASSERT_TRUE(WeatherCache::saveCache(original));
+    TEST_ASSERT_TRUE(mock_files.find("/weather_cache.json") != mock_files.end());
+
+    TEST_ASSERT_TRUE(WeatherCache::clearCache());
+    TEST_ASSERT_TRUE(mock_files.find("/weather_cache.json") == mock_files.end());
+}
+
+void test_weather_cache_corrupted_json(void) {
+    mock_files["/weather_cache.json"] = "{ invalid json string ";
+    WeatherData data;
+    TEST_ASSERT_FALSE(WeatherCache::loadCache(data));
+}
+
+void test_weather_cache_no_sd_card(void) {
+    mock_sd_card_present = false;
+    mock_sd_card_mounted = false;
+
+    WeatherData data;
+    TEST_ASSERT_FALSE(WeatherCache::saveCache(data));
+    TEST_ASSERT_FALSE(WeatherCache::loadCache(data));
+    TEST_ASSERT_FALSE(WeatherCache::clearCache());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_cache_serialization_deserialization);
     RUN_TEST(test_weather_cache_sd_save_and_load);
+    RUN_TEST(test_weather_cache_clear_and_missing);
+    RUN_TEST(test_weather_cache_corrupted_json);
+    RUN_TEST(test_weather_cache_no_sd_card);
     return UNITY_END();
 }

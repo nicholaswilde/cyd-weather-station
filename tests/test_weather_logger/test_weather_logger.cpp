@@ -116,11 +116,26 @@ void test_log_weather_fails_if_no_sd(void) {
     TEST_ASSERT_FALSE(mock_files.count("/weather_history.csv") > 0);
 }
 
+void test_clear_logs(void) {
+    // 1. Clear when no file exists
+    TEST_ASSERT_TRUE(WeatherLogger::clearLogs());
+
+    // 2. Create file, clear it
+    mock_files["/weather_history.csv"] = "header\ndata\n";
+    TEST_ASSERT_TRUE(WeatherLogger::clearLogs());
+    TEST_ASSERT_FALSE(mock_files.count("/weather_history.csv") > 0);
+
+    // 3. Clear when SD card missing
+    mock_sd_card_present = false;
+    TEST_ASSERT_FALSE(WeatherLogger::clearLogs());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_format_csv_row);
     RUN_TEST(test_log_weather_creates_file_with_header);
     RUN_TEST(test_log_weather_appends_without_header_if_exists);
     RUN_TEST(test_log_weather_fails_if_no_sd);
+    RUN_TEST(test_clear_logs);
     return UNITY_END();
 }

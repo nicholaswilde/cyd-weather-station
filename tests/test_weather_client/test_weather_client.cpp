@@ -277,6 +277,66 @@ void test_weather_client_parse_owm_json_city_override(void) {
     TEST_ASSERT_EQUAL_STRING("London", data.cityName.c_str());
 }
 
+void test_weather_client_all_desc_codes(void) {
+    TEST_ASSERT_EQUAL_STRING("Depositing rime fog", WeatherClient::getWeatherDesc(48).c_str());
+    TEST_ASSERT_EQUAL_STRING("Light drizzle", WeatherClient::getWeatherDesc(51).c_str());
+    TEST_ASSERT_EQUAL_STRING("Moderate drizzle", WeatherClient::getWeatherDesc(53).c_str());
+    TEST_ASSERT_EQUAL_STRING("Dense drizzle", WeatherClient::getWeatherDesc(55).c_str());
+    TEST_ASSERT_EQUAL_STRING("Light freezing drizzle", WeatherClient::getWeatherDesc(56).c_str());
+    TEST_ASSERT_EQUAL_STRING("Dense freezing drizzle", WeatherClient::getWeatherDesc(57).c_str());
+    TEST_ASSERT_EQUAL_STRING("Slight rain", WeatherClient::getWeatherDesc(61).c_str());
+    TEST_ASSERT_EQUAL_STRING("Moderate rain", WeatherClient::getWeatherDesc(63).c_str());
+    TEST_ASSERT_EQUAL_STRING("Heavy rain", WeatherClient::getWeatherDesc(65).c_str());
+    TEST_ASSERT_EQUAL_STRING("Light freezing rain", WeatherClient::getWeatherDesc(66).c_str());
+    TEST_ASSERT_EQUAL_STRING("Heavy freezing rain", WeatherClient::getWeatherDesc(67).c_str());
+    TEST_ASSERT_EQUAL_STRING("Slight snow fall", WeatherClient::getWeatherDesc(71).c_str());
+    TEST_ASSERT_EQUAL_STRING("Moderate snow fall", WeatherClient::getWeatherDesc(73).c_str());
+    TEST_ASSERT_EQUAL_STRING("Heavy snow fall", WeatherClient::getWeatherDesc(75).c_str());
+    TEST_ASSERT_EQUAL_STRING("Snow grains", WeatherClient::getWeatherDesc(77).c_str());
+    TEST_ASSERT_EQUAL_STRING("Slight rain showers", WeatherClient::getWeatherDesc(80).c_str());
+    TEST_ASSERT_EQUAL_STRING("Moderate rain showers", WeatherClient::getWeatherDesc(81).c_str());
+    TEST_ASSERT_EQUAL_STRING("Violent rain showers", WeatherClient::getWeatherDesc(82).c_str());
+    TEST_ASSERT_EQUAL_STRING("Slight snow showers", WeatherClient::getWeatherDesc(85).c_str());
+    TEST_ASSERT_EQUAL_STRING("Heavy snow showers", WeatherClient::getWeatherDesc(86).c_str());
+    TEST_ASSERT_EQUAL_STRING("Thunderstorm", WeatherClient::getWeatherDesc(95).c_str());
+    TEST_ASSERT_EQUAL_STRING("Thunderstorm with slight hail", WeatherClient::getWeatherDesc(96).c_str());
+    TEST_ASSERT_EQUAL_STRING("Thunderstorm with heavy hail", WeatherClient::getWeatherDesc(99).c_str());
+}
+
+void test_weather_client_owm_to_wmo_code_via_json(void) {
+    WeatherClient client;
+    WeatherData data;
+
+    int testOwmCodes[] = { 205, 310, 511, 500, 600, 741, 800, 801, 802, 804, 999 };
+    int expectedWmo[] = { 95, 51, 66, 61, 71, 45, 0, 1, 2, 3, -1 };
+
+    for (size_t i = 0; i < sizeof(testOwmCodes) / sizeof(testOwmCodes[0]); i++) {
+        String json = "{\"list\":[{\"dt_txt\":\"2026-07-11 12:00:00\",\"main\":{\"temp\":70.0,\"humidity\":50},\"wind\":{\"speed\":5.0,\"deg\":180},\"weather\":[{\"id\":" + std::to_string(testOwmCodes[i]) + ",\"description\":\"test\"}]}],\"city\":{\"name\":\"TestCity\"}}";
+        TEST_ASSERT_TRUE(client.parseOwmJson(json.c_str(), data));
+        TEST_ASSERT_EQUAL(expectedWmo[i], data.weatherCode);
+    }
+}
+
+void test_weather_client_parsing_errors(void) {
+    WeatherData data;
+    // 1. Invalid JSON
+    TEST_ASSERT_FALSE(WeatherClient::parseWeatherJson("{ invalid", data));
+    
+    // 2. Invalid OWM JSON
+    WeatherClient client;
+    TEST_ASSERT_FALSE(client.parseOwmJson("{ invalid", data));
+    TEST_ASSERT_FALSE(client.parseOwmJson("{\"list\":[]}", data));
+
+    // 3. Deserialization error
+    TEST_ASSERT_FALSE(WeatherClient::deserializeWeatherData("", data));
+    TEST_ASSERT_FALSE(WeatherClient::deserializeWeatherData("{ invalid", data));
+
+    // 4. IP location invalid JSON
+    float lat, lon;
+    String city;
+    TEST_ASSERT_FALSE(WeatherClient::parseIpLocationJson("{ invalid", lat, lon, city));
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -291,5 +351,8 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_parse_weather_json_hourly);
     RUN_TEST(test_weather_client_parse_owm_json_hourly);
     RUN_TEST(test_weather_client_parse_owm_json_city_override);
+    RUN_TEST(test_weather_client_all_desc_codes);
+    RUN_TEST(test_weather_client_owm_to_wmo_code_via_json);
+    RUN_TEST(test_weather_client_parsing_errors);
     return UNITY_END();
 }
