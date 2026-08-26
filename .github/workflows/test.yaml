@@ -25,7 +25,9 @@ jobs:
       matrix:
         env:
           - cyd_28r
+          - cyd_28r_inv
           - cyd_35c
+          - cyd_35c_inv
           - cyd_28c
           - cyd_28c_inv
     steps:
@@ -72,11 +74,12 @@ jobs:
         run: "sed -i 's|// #|#|' config/secrets.h"
 
       - name: Test PlatformIO Project
-        run: task check
+        run: pio check -e ${{ matrix.env }}
 
       - name: Build PlatformIO Project
-        run: task test || true
-        # run: pio run --environment ${{ matrix.env }}
+        run: |
+          task test || true
+          pio run --environment ${{ matrix.env }}
 
       # 6. Generate and clean the lcov.info report (with compatible LCOV 1.x flags)
       - name: Generate Coverage Report
