@@ -4,13 +4,8 @@
 #include "backlight_manager.h"
 #include "../../src/backlight_manager.cpp"
 
-void setUp(void) {
-    // any setup needed
-}
-
-void tearDown(void) {
-    // any cleanup needed
-}
+void setUp(void) {}
+void tearDown(void) {}
 
 void test_backlight_initial_state(void) {
     BacklightManager bm(21, 0, 10.0f);
@@ -41,18 +36,19 @@ void test_backlight_smoothing(void) {
     // Subsequent reading: 4095.
     // Since alpha is 0.1, the new filtered light should be:
     // filtered = 0.1 * 4095 + 0.9 * 0 = 409.5
-    // 409.5 is 10% of 4095. So the mapped duty cycle should be:
-    // minDuty + 0.1 * (255 - minDuty) = 26 + 0.1 * 229 = 26 + 22.9 = 48.9 -> 49
+    // 409.5 is 10% of 4095, so lightPercent is 10.
+    // Because percentToDuty clamps at minBrightnessPercent (10),
+    // duty should be the minimum duty cycle (26).
     bm.update(4095);
-    
-    TEST_ASSERT_EQUAL(49, bm.getDutyCycle());
+    TEST_ASSERT_EQUAL(26, bm.getDutyCycle());
 }
 
 void test_backlight_manual_brightness(void) {
     BacklightManager bm(21, 0, 10.0f);
     
     bm.setManualBrightness(50); // 50%
-    TEST_ASSERT_EQUAL(128, bm.getDutyCycle()); // 50% of 255 = 127.5 -> 128
+    // 50% with min 10% -> normalized 40/90 = 0.444. gamma=0.168. duty=26+0.168*229 = 64
+    TEST_ASSERT_EQUAL(64, bm.getDutyCycle());
     
     bm.setManualBrightness(100); // 100%
     TEST_ASSERT_EQUAL(255, bm.getDutyCycle());
@@ -66,8 +62,8 @@ void test_backlight_fade_to(void) {
     bm.setManualBrightness(10); // Start at 10%
     TEST_ASSERT_EQUAL(26, bm.getDutyCycle());
     
-    bm.fadeTo(50, 50); // Fade to 50%
-    TEST_ASSERT_EQUAL(128, bm.getDutyCycle());
+    bm.fadeTo(50, 50); // Fade to 50% (should be 64 duty cycle)
+    TEST_ASSERT_EQUAL(64, bm.getDutyCycle());
 }
 
 int main(int argc, char **argv) {

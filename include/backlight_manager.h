@@ -37,6 +37,9 @@ private:
     uint8_t _currentDuty;
     float _filteredLight;
     bool _isFirstReading;
+
+    uint8_t percentToDuty(float percent);
+    float dutyToPercent(uint8_t duty);
 };
 
 #endif // BACKLIGHT_MANAGER_H

@@ -21,7 +21,8 @@ void test_screensaver_initial_state(void) {
 void test_screensaver_trigger_on_timeout(void) {
     BacklightManager bm(21, 0, 10.0f);
     bm.setManualBrightness(80);
-    TEST_ASSERT_EQUAL(204, bm.getDutyCycle());
+    // 80% with min 10% -> 158 duty cycle
+    TEST_ASSERT_EQUAL(158, bm.getDutyCycle());
 
     ScreenSaverManager ss(bm, 300000);
     ss.begin();
@@ -29,12 +30,12 @@ void test_screensaver_trigger_on_timeout(void) {
     // 100 seconds elapsed: should not trigger
     ss.update(100000);
     TEST_ASSERT_FALSE(ss.isActive());
-    TEST_ASSERT_EQUAL(204, bm.getDutyCycle());
+    TEST_ASSERT_EQUAL(158, bm.getDutyCycle());
 
     // 301 seconds elapsed: should trigger screensaver
     ss.update(301000);
     TEST_ASSERT_TRUE(ss.isActive());
-    // Backlight should dim to 5% (min is 10% -> 26)
+    // Backlight should dim to min (10% -> 26)
     TEST_ASSERT_EQUAL(26, bm.getDutyCycle());
 }
 
@@ -49,10 +50,10 @@ void test_screensaver_wake_on_activity(void) {
     ss.update(301000);
     TEST_ASSERT_TRUE(ss.isActive());
 
-    // Wake up
+    // Wake up (restores to 80%)
     ss.wake(80);
     TEST_ASSERT_FALSE(ss.isActive());
-    TEST_ASSERT_EQUAL(204, bm.getDutyCycle());
+    TEST_ASSERT_EQUAL(158, bm.getDutyCycle());
 }
 
 int main(int argc, char **argv) {

@@ -26,6 +26,31 @@ void BacklightManager::begin() {
 #endif
 }
 
+uint8_t BacklightManager::percentToDuty(float percent) {
+    if (percent < _minBrightnessPercent) percent = _minBrightnessPercent;
+    if (percent > 100.0f) percent = 100.0f;
+
+    float normalizedPercent = (percent - _minBrightnessPercent) / (100.0f - _minBrightnessPercent);
+    if (normalizedPercent < 0.0f) normalizedPercent = 0.0f;
+    
+    uint8_t minDuty = (uint8_t)((_minBrightnessPercent / 100.0f) * 255.0f + 0.5f);
+    float gammaFactor = pow(normalizedPercent, 2.2f);
+    
+    float duty = minDuty + gammaFactor * (255.0f - minDuty);
+    return (uint8_t)(duty + 0.5f);
+}
+
+float BacklightManager::dutyToPercent(uint8_t duty) {
+    uint8_t minDuty = (uint8_t)((_minBrightnessPercent / 100.0f) * 255.0f + 0.5f);
+    if (duty <= minDuty) return _minBrightnessPercent;
+    if (duty >= 255) return 100.0f;
+    
+    float gammaFactor = (float)(duty - minDuty) / (255.0f - minDuty);
+    float normalizedPercent = pow(gammaFactor, 1.0f / 2.2f);
+    
+    return _minBrightnessPercent + normalizedPercent * (100.0f - _minBrightnessPercent);
+}
+
 uint8_t BacklightManager::update(uint16_t rawAdcValue) {
     // 1. Apply EMA Filter
     if (_isFirstReading) {
@@ -36,14 +61,9 @@ uint8_t BacklightManager::update(uint16_t rawAdcValue) {
         _filteredLight = (alpha * rawAdcValue) + ((1.0f - alpha) * _filteredLight);
     }
 
-    // 2. Map Filtered Light to Duty Cycle (minDuty to 255)
-    uint8_t minDuty = (uint8_t)(_minBrightnessPercent / 100.0f * 255.0f + 0.5f);
-    float duty = minDuty + (_filteredLight / 4095.0f) * (255 - minDuty);
-    _currentDuty = (uint8_t)(duty + 0.5f);
-
-    // Constrain duty cycle boundaries
-    if (_currentDuty < minDuty) _currentDuty = minDuty;
-    if (_currentDuty > 255) _currentDuty = 255;
+    // 2. Map Filtered Light to Duty Cycle
+    float lightPercent = (_filteredLight / 4095.0f) * 100.0f;
+    _currentDuty = percentToDuty(lightPercent);
 
 #ifndef NATIVE_TEST
     // Write duty cycle to hardware
@@ -58,15 +78,7 @@ uint8_t BacklightManager::update(uint16_t rawAdcValue) {
 }
 
 void BacklightManager::setManualBrightness(uint8_t percent) {
-    // Constrain percent to valid range
-    float minPercent = _minBrightnessPercent;
-    float finalPercent = (float)percent;
-    if (finalPercent < minPercent) finalPercent = minPercent;
-    if (finalPercent > 100.0f) finalPercent = 100.0f;
-
-    // Convert percent (minPercent to 100) to duty cycle (0 to 255)
-    float duty = (finalPercent / 100.0f) * 255.0f;
-    _currentDuty = (uint8_t)(duty + 0.5f);
+    _currentDuty = percentToDuty((float)percent);
 
 #ifndef NATIVE_TEST
     #if defined(ESP_ARDUINO_VERSION) && ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
@@ -78,17 +90,18 @@ void BacklightManager::setManualBrightness(uint8_t percent) {
 }
 
 void BacklightManager::fadeTo(uint8_t targetPercent, uint16_t durationMs) {
-    float minPercent = _minBrightnessPercent;
-    float finalPercent = (float)targetPercent;
-    if (finalPercent < minPercent) finalPercent = minPercent;
-    if (finalPercent > 100.0f) finalPercent = 100.0f;
+    float startPercent = dutyToPercent(_currentDuty);
+    float endPercent = (float)targetPercent;
+    
+    if (endPercent < _minBrightnessPercent) endPercent = _minBrightnessPercent;
+    if (endPercent > 100.0f) endPercent = 100.0f;
 
-    float targetDutyFloat = (finalPercent / 100.0f) * 255.0f;
-    uint8_t targetDuty = (uint8_t)(targetDutyFloat + 0.5f);
-
-    int16_t startDuty = _currentDuty;
-    int16_t diff = (int16_t)targetDuty - startDuty;
-    if (diff == 0) return;
+    float diff = endPercent - startPercent;
+    // Handle floating point precision and small differences
+    if (fabs(diff) < 0.5f) {
+        setManualBrightness(targetPercent);
+        return;
+    }
 
     int steps = 15;
     uint32_t stepDelay = durationMs / steps;
@@ -96,8 +109,8 @@ void BacklightManager::fadeTo(uint8_t targetPercent, uint16_t durationMs) {
 
     for (int i = 1; i <= steps; ++i) {
         float progress = (float)i / steps;
-        uint8_t stepDuty = startDuty + (progress * diff);
-        _currentDuty = stepDuty;
+        float currentStepPercent = startPercent + (progress * diff);
+        _currentDuty = percentToDuty(currentStepPercent);
 #ifndef NATIVE_TEST
         #if defined(ESP_ARDUINO_VERSION) && ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
             ledcWrite(_pin, _currentDuty);
