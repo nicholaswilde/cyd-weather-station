@@ -88,3 +88,7 @@ lcov_raw.info
 .codegraph/
 include/version.h
 dist/
+
+# Scratch test files
+test.cpp
+test
