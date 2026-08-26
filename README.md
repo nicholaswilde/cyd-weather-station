@@ -4,7 +4,7 @@
 [![test](https://img.shields.io/github/actions/workflow/status/nicholaswilde/cyd-weather-station/test.yaml?label=test&style=for-the-badge&branch=main&logo=github-actions)](https://github.com/nicholaswilde/cyd-weather-station/actions/workflows/test.yaml)
 [![ci](https://img.shields.io/github/actions/workflow/status/nicholaswilde/cyd-weather-station/ci.yaml?label=ci&style=for-the-badge&logo=github-actions)](https://github.com/nicholaswilde/cyd-weather-station/actions/workflows/ci.yaml)
 
-A beautiful, configurable real-time weather station and desk clock built for the **ESP32 Cheap Yellow Device (CYD)** (board model ESP32-2432S028R) utilizing the **LVGL v8** graphics library, **Open-Meteo / OpenWeatherMap APIs**, and the **Catppuccin Color Theme**.
+A beautiful, configurable real-time weather station and desk clock built for the **ESP32 Cheap Yellow Device (CYD)** family (such as the 2.8" Resistive **ESP32-2432S028R**, 2.8" Capacitive **ESP32-2432W328C**, and 3.5" Capacitive **ESP32-3248S035C**) utilizing the **LVGL v8** graphics library, **Open-Meteo / OpenWeatherMap APIs**, and the **Catppuccin Color Theme**.
 
 > [!WARNING]
 > This project is currently in a `v0.X.X` development stage. Features and configurations are subject to change, and breaking changes may be introduced at any time.
@@ -25,8 +25,8 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **Interactive Settings Tab**: Touch-configurable settings persisted to flash across reboots:
   - **Temperature Unit**: Toggle between Celsius (°C) and Fahrenheit (°F).
   - **Catppuccin Theme Flavor**: Choose between Mocha, Macchiato, Frappé, or Latte — the full UI redraws instantly in the selected palette.
-  - **Auto Brightness**: Toggle automatic backlight dimming/brightening driven by the onboard LDR light sensor (GPIO 34).
-  - **Manual Brightness**: Slider to set a fixed screen brightness level (when Auto is off).
+  - **Auto Brightness**: Toggle automatic backlight dimming/brightening driven by the onboard LDR light sensor (GPIO 34) with smooth non-linear perceptual scaling.
+  - **Manual Brightness**: Slider to set a fixed screen brightness level with natural $\gamma = 2.2$ gamma correction.
   - **Timezone**: `–` / `+` buttons to cycle through common POSIX timezone presets for automatic DST handling.
   - **SD Log**: Enable/disable weather logging to a microSD card.
   - **SD Cache**: Enable/disable weather caching to a microSD card (restores UI offline).
@@ -37,12 +37,12 @@ A beautiful, configurable real-time weather station and desk clock built for the
     - **Home Assistant Auto-Discovery**: Automatically exposes entities for weather sensors (temp, humidity, wind speed/direction, condition, city), device diagnostics (uptime, heap, RSSI, IP, version, MAC), configuration controls (screen & LED brightness, auto brightness, theme flavor, units, orientation, update interval, screensaver timeout, status LED, SD log/cache), and device restart button.
     - **Bidirectional Remote Control**: Change any setting or command via MQTT topics with immediate on-screen and Home Assistant state synchronization.
     - **LWT & Robust Reconnection**: Reports online/offline availability via Last Will and Testament (LWT) on `<base_topic>status` with MAC-based unique client IDs, paced discovery message queueing, and exponential reconnection backoff (5s to 2min).
-  - **Screensaver**: Enable/disable screensaver mode (dims backlight and displays clock after inactivity).
+  - **Screensaver**: Enable/disable screensaver mode (smoothly fades backlight using gamma interpolation and displays clock after inactivity).
   - **Sleep Schedule**: Enable/disable automatic screen sleep during a configured time frame (e.g. 22:00 to 07:00).
   - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks, header height dynamically increases to 60px in portrait to fit a wrapped two-line title without overlaps, and touch coordinates update instantly.
-- **Auto-Brightness Control**: Uses the LDR photoresistor (GPIO 34) with an EMA filter feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
+- **Auto-Brightness & Gamma Scaling**: Uses the LDR photoresistor (GPIO 34) with an EMA filter and a perceptual $\gamma = 2.2$ gamma curve feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured POSIX timezone.
-- **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
+- **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) with gamma-corrected brightness provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
 - **Web Dashboard & Settings Portal**:
   - Access `http://<DEVICE_IP>/` in any browser for a central Catppuccin-themed dashboard.
   - Includes direct navigation links to Device Settings (`/settings`), Firmware Updates (`/update`), Live Screenshots (`/screenshot`), Clear SD Logs (`/clear_logs`), Clear SD Cache (`/clear_cache`), and Factory Reset (`/reset`).
@@ -85,16 +85,16 @@ A beautiful, configurable real-time weather station and desk clock built for the
 To read local temperature and humidity, you can wire a sensor directly to the CYD board. 
 
 > [!NOTE]
-> Currently, only the **DHT22 (AM2302)** sensor is supported. Additional sensors (such as SHT40 and DHT11) are planned for future releases (see [#12](https://github.com/nicholaswilde/cyd-weather-station/issues/12)).
+> Currently, the **DHT22 (AM2302)** and **DHT11** temperature and humidity sensors are supported. Additional sensors (such as SHT40) are planned for future releases (see [#12](https://github.com/nicholaswilde/cyd-weather-station/issues/12)).
 
 ### CYD 35c (3.5" Capacitive)
-Connect the DHT22 to the **CN1** breakout port:
+Connect the DHT sensor to the **CN1** breakout port:
 - **VCC**: 3V3
 - **GND**: GND
 - **Data/Signal**: IO22
 
-### CYD 28r (2.8" Resistive)
-Connect the DHT22 to the **CN1** breakout port:
+### CYD 28r / CYD 28c (2.8" Resistive / Capacitive)
+Connect the DHT sensor to the **CN1** breakout port:
 - **VCC**: 3V3 (Pin 4)
 - **GND**: GND (Pin 1)
 - **Data/Signal**: IO22 (Pin 2)
@@ -258,10 +258,13 @@ You can easily flash the pre-compiled firmware directly from your browser using 
 Alternatively, you can flash the device directly from your terminal using the provided flash script. Replace `/dev/ttyUSB0` with your actual serial port. By default, it flashes the `cyd_28r` version, but you can specify the device as the first argument.
 
 ```bash
-# Flash the default cyd_28r (320x240 screen)
+# Flash the default cyd_28r (2.8" resistive 320x240 screen)
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ cyd_28r /dev/ttyUSB0
 
-# Or flash the cyd_35c version (480x320 screen)
+# Or flash the cyd_28c version (2.8" capacitive 320x240 screen)
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ cyd_28c /dev/ttyUSB0
+
+# Or flash the cyd_35c version (3.5" capacitive 480x320 screen)
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ cyd_35c /dev/ttyUSB0
 ```
 
