@@ -93,13 +93,66 @@ Connect the DHT sensor to the **CN1** breakout port:
 - **GND**: GND
 - **Data/Signal**: IO22
 
+    ```text
+    +------------------------------+
+    |                              |
+    |                          +------+
+    |                          |  P3  |
+    |                          +------+
+    |                              |
+    |                       +---------+
+    |                       |   CN1   |      +--------------+
+    |                       |  GND[X] |------| [X]GND       |
+    |                       | IO22[X] |------| [X]SIG / OUT |
+    |                       | IO27[ ] |      |              |
+    |                       | 3.3V[X] |------| [X]VCC       |
+    |                       +---------+      +--------------+ 
+    |                              |           DHT11 / DHT22
+    |                          +------+     
+    |                          |  SD  |
+    |                          | CARD |
+    |                          +------+
+    |                              |
+    | +--+ +-------+ +-----------+ |
+    +-|  |-| USB C |-| MICRO USB |-+
+      +--+ +-------+ +-----------+ 
+             ESP32-2432S028R  
+    ```
+
+    ```text
+    +------------------------------+
+    |                              |
+    |                          +------+
+    |                          |  P3  |
+    |                          +------+
+    |                              |
+    |                       +---------+
+    |                       |   CN1   |      +--------------+
+    |                       |  GND[X] |------| [X]GND       |
+    |                       | IO22[X] |------| [X]Sig / OUT |
+    |                       | IO21[ ] |      |              |
+    |                       | 3.3V[X] |------| [X]VCC       |
+    |                       +---------+      +--------------+ 
+    |                              |           DHT11 / DHT22
+    |                          +------+         
+    |                          |  SD  |
+    |                          | CARD |
+    |                          +------+
+    |                              |
+    | +--+           +-----------+ |
+    +-|  |-----------| MICRO USB |-+
+      +--+           +-----------+ 
+             ESP32-3248S035C  
+    ```
+
 ### SHT40 (I2C) Wiring
 Connect the SHT40 sensor to the **CN1** breakout port (do not use connector P3 as it lacks a 3.3V power supply):
 - **VCC**: 3V3
 - **GND**: GND
-- **SDA**: IO27
+- **SDA**: IO27 (on `cyd_28r`) or IO21 (on `cyd_35c` / `cyd_28c`)
 > [!NOTE]
-> IO27 must be used instead of IO21 to prevent conflicts with the display backlight
+> On the `cyd_28r` board, the CN1 connector breaks out **IO27**. IO27 must be used for SDA to prevent conflicts with the display backlight on IO21.
+> On the `cyd_35c` and `cyd_28c` boards, the CN1 connector breaks out **IO21**. IO21 must be used for SDA to prevent conflicts with the display backlight on IO27.
 - **SCL**: IO22
 
     ```text
@@ -126,6 +179,32 @@ Connect the SHT40 sensor to the **CN1** breakout port (do not use connector P3 a
     +-|  |-| USB C |-| MICRO USB |-+
       +--+ +-------+ +-----------+ 
              ESP32-2432S028R  
+    ```
+
+    ```text
+    +------------------------------+
+    |                              |
+    |                          +------+
+    |                          |  P3  |
+    |                          +------+
+    |                              |
+    |                       +---------+
+    |                       |   CN1   |      +--------+
+    |                       |  GND[X] |------| [X]GND |
+    |                       | IO22[X] |------| [X]SCL |
+    |                       | IO21[X] |------| [X]SDA |
+    |                       | 3.3V[X] |------| [X]VCC |
+    |                       +---------+      | [ ]3Vo | 
+    |                              |         +--------+
+    |                          +------+         SHT40
+    |                          |  SD  |
+    |                          | CARD |
+    |                          +------+
+    |                              |
+    | +--+           +-----------+ |
+    +-|  |-----------| MICRO USB |-+
+      +--+           +-----------+ 
+             ESP32-3248S035C  
     ```
 
 ### Local Sensor Calibration
@@ -595,8 +674,8 @@ Standard CYD boards (including `ESP32-2432W328C` and `CYD-2432S028`) do **not** 
 
 If you are using an **SHT40** sensor and it is failing to initialize or read:
 - **Use the CN1 Port**: Ensure you plug the sensor into the **CN1** connector (near the USB port). Connector **P3** (near the SD card slot) lacks a 3.3V power rail and cannot power the sensor.
-- **SDA Pin Selection**: Ensure **SDA** is wired to **IO27** and **not GPIO 21**. On `cyd_28r`, GPIO 21 is used for display backlight PWM (`TFT_BL`). Connecting I2C to GPIO 21 will interfere with I2C communications and cause the screen backlight to dim or turn off.
-- **Swap SDA & SCL Lines**: If the SHT40 sensor is not recognized or reports `[Sensor] Failed to read from SHT40 sensor!`, try switching/swapping the **SDA** and **SCL** wiring pins (ensure `SDA = 27` and `SCL = 22`).
+- **SDA Pin Selection**: On `cyd_28r`, ensure **SDA** is wired to **IO27**. GPIO 21 is used for display backlight PWM (`TFT_BL`). On `cyd_35c` and `cyd_28c`, ensure **SDA** is wired to **IO21**. IO27 is used for the display backlight. Connecting I2C to the backlight pin will interfere with I2C communications and cause the screen backlight to dim or turn off.
+- **Swap SDA & SCL Lines**: If the SHT40 sensor is not recognized or reports `[Sensor] Failed to read from SHT40 sensor!`, try switching/swapping the **SDA** and **SCL** wiring pins (ensure `SDA = 27` (or 21) and `SCL = 22`).
 
 ### RGB / BGR Swap
 If your screen has red and blue colors swapped, it means the display expects a BGR color order instead of RGB. A dedicated release is not currently provided for this variation, but you can fix it by building from source: simply append `-D TFT_RGB_ORDER=TFT_BGR` to your environment's `build_flags` in `platformio.ini`.
