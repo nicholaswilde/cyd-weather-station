@@ -124,7 +124,7 @@ Connect the SHT40 sensor to the **CN1** breakout port (do not use connector P3 a
     | +--+ +-------+ +-----------+ |
     +-|  |-| USB C |-| MICRO USB |-+
       +--+ +-------+ +-----------+ 
-                     CYD-28R   
+                 CYD-28R   
     ```
 
 ### Local Sensor Calibration
