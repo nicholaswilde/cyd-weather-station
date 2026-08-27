@@ -16,10 +16,13 @@
 #include "screensaver_manager.h"
 #include "button_manager.h"
 #include <DHT.h>
+#include <Adafruit_SHT4x.h>
+#include <Wire.h>
 
 #define DHTPIN 22
 DHT dht22(DHTPIN, DHT22);
 DHT dht11(DHTPIN, DHT11);
+Adafruit_SHT4x sht40 = Adafruit_SHT4x();
 unsigned long lastDhtRead = 0;
 BacklightManager backlight(TFT_BL, 0, 10.0f);
 ScreenSaverManager screensaver(backlight, SCREENSAVER_TIMEOUT_MS);
@@ -71,6 +74,15 @@ void setup() {
     dht22.begin();
     dht11.begin();
     Serial.println("[Sensor] DHT sensors initialized on GPIO 22");
+    
+    Wire1.begin(21, 22);
+    if (!sht40.begin(&Wire1)) {
+        Serial.println("[Sensor] Couldn't find SHT4x");
+    } else {
+        Serial.println("[Sensor] SHT4x sensor initialized on I2C (GPIO 21, 22)");
+        sht40.setPrecision(SHT4X_HIGH_PRECISION);
+        sht40.setHeater(SHT4X_NO_HEATER);
+    }
 
     // Load saved preferences
     settings.begin();
@@ -306,7 +318,33 @@ void loop() {
                     }
                 }
             } else if (settings.getLocalSensorType() == 2) { // SHT40
-                // Placeholder for next phase
+                sensors_event_t humidity, temp;
+                sht40.getEvent(&humidity, &temp);
+                
+                float h = humidity.relative_humidity;
+                float t = temp.temperature;
+                bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
+                if (isFahrenheit) {
+                    t = t * 1.8 + 32.0;
+                }
+                
+                if (isnan(h) || isnan(t)) {
+                    Serial.println("[Sensor] Failed to read from SHT40 sensor!");
+                } else {
+                    h += settings.getLocalSensorHumOffset();
+                    t += settings.getLocalSensorTempOffset();
+                    Serial.printf("[Sensor] SHT40 -> Humidity: %.1f%%  Temperature: %.1f%s\n", h, t, isFahrenheit ? "°F" : "°C");
+                    updateLocalSensorUI(t, h);
+                    
+                    if (mqtt.isConnected()) {
+                        char tempPayload[16];
+                        char humPayload[16];
+                        snprintf(tempPayload, sizeof(tempPayload), "%.1f", t);
+                        snprintf(humPayload, sizeof(humPayload), "%.1f", h);
+                        mqtt.publish("sensor/local_temperature", tempPayload);
+                        mqtt.publish("sensor/local_humidity", humPayload);
+                    }
+                }
             } else if (settings.getLocalSensorType() == 3) { // DHT11
                 float h = dht11.readHumidity();
                 bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
