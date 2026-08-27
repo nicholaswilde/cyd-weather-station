@@ -85,19 +85,20 @@ A beautiful, configurable real-time weather station and desk clock built for the
 To read local temperature and humidity, you can wire a sensor directly to the CYD board. 
 
 > [!NOTE]
-> Currently, the **DHT22 (AM2302)** and **DHT11** temperature and humidity sensors are supported. Additional sensors (such as SHT40) are planned for future releases (see [#12](https://github.com/nicholaswilde/cyd-weather-station/issues/12)).
+> Currently, the **DHT22 (AM2302)**, **DHT11**, and **SHT40 (I2C)** temperature and humidity sensors are supported.
 
-### CYD 35c (3.5" Capacitive)
+### DHT11 / DHT22 Wiring
 Connect the DHT sensor to the **CN1** breakout port:
 - **VCC**: 3V3
 - **GND**: GND
 - **Data/Signal**: IO22
 
-### CYD 28r / CYD 28c (2.8" Resistive / Capacitive)
-Connect the DHT sensor to the **CN1** breakout port:
-- **VCC**: 3V3 (Pin 4)
-- **GND**: GND (Pin 1)
-- **Data/Signal**: IO22 (Pin 2)
+### SHT40 (I2C) Wiring
+Connect the SHT40 sensor to the **CN1** breakout port (do not use connector P3 as it lacks a 3.3V power supply):
+- **VCC**: 3V3
+- **GND**: GND
+- **SDA**: IO27 *(Note: IO27 must be used instead of IO21 to prevent conflicts with the display backlight)*
+- **SCL**: IO22
 
 ### Local Sensor Calibration
 
@@ -561,8 +562,13 @@ Flashing a 3.5" image onto a 2.8" display (or vice versa) will result in garbled
 - **Erasing Flash**: Running a full `erase_flash` wipes all non-volatile storage (NVS), which erases previously saved Wi-Fi credentials and configuration. The device will reboot into Access Point (`192.168.4.1`) setup mode. Reflashing without erasing preserves your Wi-Fi credentials and saved runtime settings.
 - **Bootloader Mode**: If flashing manually via serial (`esptool.py`), the ESP32 might remain in bootloader mode after writing. Press the physical **RESET / EN** button (or power cycle the unit) to boot into the application.
 
-### Local Temperature & Humidity Shows Empty / Blank
-Standard CYD boards (including `ESP32-2432W328C` and `CYD-2432S028`) do **not** come with an onboard ambient temperature/humidity sensor. If no external DHT sensor is wired to the expansion header, the local sensor readings will remain empty. You can disable the local sensor tile in Settings (`/settings`) or connect a supported sensor (such as a DHT11 or DHT22).
+### Local Temperature & Humidity Issues / SHT40 Troubleshooting
+Standard CYD boards (including `ESP32-2432W328C` and `CYD-2432S028`) do **not** come with an onboard ambient temperature/humidity sensor. If no external sensor is wired to the expansion header, the local sensor readings will remain empty. You can disable the local sensor tile in Settings (`/settings`) or connect a supported sensor (DHT11, DHT22, or SHT40).
+
+If you are using an **SHT40** sensor and it is failing to initialize or read:
+- **Use the CN1 Port**: Ensure you plug the sensor into the **CN1** connector (near the USB port). Connector **P3** (near the SD card slot) lacks a 3.3V power rail and cannot power the sensor.
+- **SDA Pin Selection**: Ensure **SDA** is wired to **IO27** and **not GPIO 21**. On `cyd_28r`, GPIO 21 is used for display backlight PWM (`TFT_BL`). Connecting I2C to GPIO 21 will interfere with I2C communications and cause the screen backlight to dim or turn off.
+- **Swap SDA & SCL Lines**: If the SHT40 sensor is not recognized or reports `[Sensor] Failed to read from SHT40 sensor!`, try switching/swapping the **SDA** and **SCL** wiring pins (ensure `SDA = 27` and `SCL = 22`).
 
 ### RGB / BGR Swap
 If your screen has red and blue colors swapped, it means the display expects a BGR color order instead of RGB. A dedicated release is not currently provided for this variation, but you can fix it by building from source: simply append `-D TFT_RGB_ORDER=TFT_BGR` to your environment's `build_flags` in `platformio.ini`.
