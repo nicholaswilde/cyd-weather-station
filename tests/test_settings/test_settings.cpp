@@ -230,8 +230,27 @@ void test_settings_all_fields_and_factory_reset(void) {
     TEST_ASSERT_EQUAL_STRING("cyd/", freshSettings.getMqttBaseTopic().c_str());
 }
 
+void test_settings_24h_format(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    // Default depends on config.h, but we can just test setter/getter
+    settings.setUse24HourFormat(true);
+    TEST_ASSERT_TRUE(settings.getUse24HourFormat());
+
+    settings.setUse24HourFormat(false);
+    TEST_ASSERT_FALSE(settings.getUse24HourFormat());
+
+    // Test persistence
+    settings.setUse24HourFormat(true);
+    SettingsManager settings_new;
+    settings_new.begin();
+    TEST_ASSERT_TRUE(settings_new.getUse24HourFormat());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
+    RUN_TEST(test_settings_24h_format);
     RUN_TEST(test_settings_default_values);
     RUN_TEST(test_settings_save_and_load);
     RUN_TEST(test_settings_wifi_credentials);

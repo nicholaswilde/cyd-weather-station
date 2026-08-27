@@ -25,6 +25,8 @@
 // Find your region's POSIX string here: https://gist.github.com/alwynallan/24d96091655391107939
 #define NTP_SERVER "pool.ntp.org"
 #define TIMEZONE_DEFAULT "UTC0"       // POSIX Timezone string
+#define USE_24_HOUR_FORMAT false
+
 
 // US Eastern
 // #define TIMEZONE_DEFAULT "EST5EDT,M3.2.0,M11.1.0"

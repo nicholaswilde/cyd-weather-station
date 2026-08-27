@@ -186,6 +186,10 @@ void setup() {
             if (payload == "Metric") units = 1;
             settings.setUnitSystem(units);
             settings_unit_changed = true;
+        } else if (topic.endsWith("command/use_24h")) {
+            bool en = (payload == "ON" || payload == "1" || payload == "true");
+            settings.setUse24HourFormat(en);
+            footerNeedsTimeUpdate = true;
         } else if (topic.endsWith("command/screen_orientation")) {
             int orient = 1; // Default Landscape
             if (payload == "Portrait") orient = 0;
@@ -538,7 +542,15 @@ void loop() {
             struct tm timeinfo;
             if (getLocalTime(&timeinfo, 10)) {
                 char timeStr[16];
-                strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                if (settings.getUse24HourFormat()) {
+                    strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                } else {
+                    strftime(timeStr, sizeof(timeStr), "%I:%M %p", &timeinfo);
+                    // Remove leading zero
+                    if (timeStr[0] == '0') {
+                        memmove(timeStr, timeStr + 1, strlen(timeStr));
+                    }
+                }
                 updateTimeUI(timeStr);
             }
         }
@@ -613,7 +625,15 @@ void loop() {
             struct tm timeinfo;
             if (getLocalTime(&timeinfo, 10)) {
                 char timeStr[16];
-                strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                if (settings.getUse24HourFormat()) {
+                    strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                } else {
+                    strftime(timeStr, sizeof(timeStr), "%I:%M %p", &timeinfo);
+                    // Remove leading zero
+                    if (timeStr[0] == '0') {
+                        memmove(timeStr, timeStr + 1, strlen(timeStr));
+                    }
+                }
                 updateTimeUI(timeStr);
                 
                 if (footerNeedsTimeUpdate) {
@@ -670,7 +690,15 @@ void loop() {
                     struct tm timeinfo;
                     if (getLocalTime(&timeinfo, 10)) {
                         char timeStr[16];
-                        strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                        if (settings.getUse24HourFormat()) {
+                    strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
+                } else {
+                    strftime(timeStr, sizeof(timeStr), "%I:%M %p", &timeinfo);
+                    // Remove leading zero
+                    if (timeStr[0] == '0') {
+                        memmove(timeStr, timeStr + 1, strlen(timeStr));
+                    }
+                }
                         updateFooterUI(timeStr, data.cityName.c_str());
                         footerNeedsTimeUpdate = false;
 
@@ -766,6 +794,7 @@ void loop() {
         mqtt.publish("settings/theme", themeStr.c_str(), true);
         
         mqtt.publish("settings/units", settings.getUnitSystem() == 1 ? "Metric" : "Imperial", true);
+        mqtt.publish("settings/use_24h", settings.getUse24HourFormat() ? "ON" : "OFF", true);
         
         String orientStr = "Landscape";
         switch (settings.getScreenOrientation()) {

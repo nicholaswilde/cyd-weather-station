@@ -40,6 +40,7 @@ static lv_obj_t *ui_sleep_sw = nullptr;
 static lv_obj_t *ui_led_sw = nullptr;
 static lv_obj_t *ui_sd_log_sw = nullptr;
 static lv_obj_t *ui_sd_cache_sw = nullptr;
+static lv_obj_t *ui_24h_sw = nullptr;
 static lv_obj_t *ui_brightness_slider = nullptr;
 static lv_obj_t *ui_led_brightness_slider = nullptr;
 static lv_obj_t *ui_sw_local_sensor = nullptr;
@@ -173,6 +174,14 @@ static void sd_cache_sw_event_cb(lv_event_t * e) {
     lv_obj_t * sw = lv_event_get_target(e);
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
     settings.setSdCacheEnabled(is_checked);
+}
+
+static void use_24h_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setUse24HourFormat(is_checked);
+    extern bool footerNeedsTimeUpdate;
+    footerNeedsTimeUpdate = true;
 }
 
 static void screenshot_sw_event_cb(lv_event_t * e) {
@@ -1344,6 +1353,33 @@ void initUI() {
     lv_obj_align(tz_plus_lbl, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(tz_plus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)1);
 
+    // 24-hour format row
+    lv_obj_t * h24_row = lv_obj_create(right_col);
+    lv_obj_clear_flag(h24_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(h24_row, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(h24_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(h24_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(h24_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(h24_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(h24_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(h24_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * h24_label = lv_label_create(h24_row);
+    lv_label_set_text(h24_label, "24-Hour Time");
+    lv_obj_set_style_text_color(h24_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_font(h24_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_24h_sw = lv_switch_create(h24_row);
+    lv_obj_set_size(ui_24h_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_24h_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_24h_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_24h_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.getUse24HourFormat()) {
+        lv_obj_add_state(ui_24h_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(ui_24h_sw, use_24h_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+
     // Theme selector dropdown
     lv_obj_t * theme_dropdown = lv_dropdown_create(right_col);
     lv_obj_set_size(theme_dropdown, lv_pct(92), 26);
@@ -1984,6 +2020,14 @@ void ui_sync_toggles() {
         lv_textarea_set_text(ui_ta_hum_offset, buf);
     }
     
+    if (ui_24h_sw != nullptr) {
+        if (settings.getUse24HourFormat()) {
+            lv_obj_add_state(ui_24h_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_24h_sw, LV_STATE_CHECKED);
+        }
+    }
+
     if (ui_brightness_slider != nullptr) {
         lv_slider_set_value(ui_brightness_slider, settings.getBrightness(), LV_ANIM_OFF);
         if (settings.getAutoBrightness()) {

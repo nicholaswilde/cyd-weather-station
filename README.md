@@ -321,6 +321,7 @@ Example JSON response:
   "longitude": "",
   "owm_api_key": "",
   "ntp_server": "pool.ntp.org",
+  "use_24_hour_format": false,
   "local_sensor_enabled": true,
   "local_sensor_type": 1,
   "local_sensor_update_interval": 60,

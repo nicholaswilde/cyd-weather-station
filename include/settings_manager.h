@@ -46,6 +46,7 @@ private:
     String _longitude;
     String _owmApiKey;
     String _ntpServer;
+    bool _use24HourFormat;
     int _weatherUpdateInterval;
     bool _localSensorEnabled;
     int _localSensorType;
@@ -159,6 +160,9 @@ public:
 
     const String& getNtpServer() const;
     void setNtpServer(const String& ntpServer);
+
+    bool getUse24HourFormat() const;
+    void setUse24HourFormat(bool use24HourFormat);
 
     int getWeatherUpdateInterval() const;
     void setWeatherUpdateInterval(int interval);

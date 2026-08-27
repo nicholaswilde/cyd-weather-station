@@ -118,6 +118,12 @@ button:hover { background: #f5c2e7; }
 <label for='ntp_server' title='Network Time Protocol server for time synchronization'>NTP Server</label>
 <input type='text' id='ntp_server' name='ntp_server' value='%NTP_SERVER%'>
 
+<div class='checkbox-group'>
+    <input type='checkbox' id='use_24h' name='use_24h' value='1' %USE_24H_CHECKED%>
+    <label for='use_24h' title='Display time in 24-hour military format'>Use 24-Hour Format</label>
+</div>
+
+
 <label for='update_interval' title='How often to fetch new weather data'>Weather Update Interval (Minutes)</label>
 <input type='number' id='update_interval' name='update_interval' min='1' max='60' value='%UPDATE_INTERVAL%'>
 

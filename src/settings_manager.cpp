@@ -61,6 +61,7 @@ SettingsManager::SettingsManager() {
     _sleepScheduleEnabled = DEFAULT_SLEEP_SCHEDULE_ENABLED;
     _sleepStartTime = DEFAULT_SLEEP_START_TIME;
     _sleepEndTime = DEFAULT_SLEEP_END_TIME;
+    _use24HourFormat = USE_24_HOUR_FORMAT;
 }
 
 void SettingsManager::begin() {
@@ -114,6 +115,7 @@ void SettingsManager::begin() {
     _sleepScheduleEnabled = prefs.getBool("sleep_sched", DEFAULT_SLEEP_SCHEDULE_ENABLED);
     _sleepStartTime = prefs.getString("sleep_start", DEFAULT_SLEEP_START_TIME);
     _sleepEndTime = prefs.getString("sleep_end", DEFAULT_SLEEP_END_TIME);
+    _use24HourFormat = prefs.getBool("use_24h", USE_24_HOUR_FORMAT);
     
     prefs.end();
 }
@@ -672,6 +674,17 @@ void SettingsManager::setSleepEndTime(const String& endTime) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("sleep_end", _sleepEndTime);
+        prefs.end();
+    }
+}
+
+bool SettingsManager::getUse24HourFormat() const { return _use24HourFormat; }
+void SettingsManager::setUse24HourFormat(bool use24HourFormat) {
+    if (_use24HourFormat != use24HourFormat) {
+        _use24HourFormat = use24HourFormat;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("use_24h", _use24HourFormat);
         prefs.end();
     }
 }

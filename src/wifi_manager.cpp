@@ -604,6 +604,7 @@ void WifiManager::startWebServer() {
         doc["longitude"] = settings.getLongitude();
         doc["owm_api_key"] = settings.getOwmApiKey();
         doc["ntp_server"] = settings.getNtpServer();
+        doc["use_24_hour_format"] = settings.getUse24HourFormat();
         doc["local_sensor_enabled"] = settings.getLocalSensorEnabled();
         doc["local_sensor_type"] = settings.getLocalSensorType();
         doc["local_sensor_update_interval"] = settings.getLocalSensorUpdateInterval();
@@ -673,6 +674,7 @@ void WifiManager::startWebServer() {
         if (doc.containsKey("longitude")) settings.setLongitude(doc["longitude"].as<String>());
         if (doc.containsKey("owm_api_key")) settings.setOwmApiKey(doc["owm_api_key"].as<String>());
         if (doc.containsKey("ntp_server")) settings.setNtpServer(doc["ntp_server"].as<String>());
+        if (doc.containsKey("use_24_hour_format")) settings.setUse24HourFormat(doc["use_24_hour_format"]);
         if (doc.containsKey("local_sensor_enabled")) settings.setLocalSensorEnabled(doc["local_sensor_enabled"]);
         if (doc.containsKey("local_sensor_type")) settings.setLocalSensorType(doc["local_sensor_type"]);
         if (doc.containsKey("local_sensor_update_interval")) settings.setLocalSensorUpdateInterval(doc["local_sensor_update_interval"]);
@@ -844,6 +846,7 @@ void WifiManager::handleSettings() {
     html.replace("%LON%", settings.getLongitude());
     html.replace("%TZ%", settings.getTimezone());
     html.replace("%NTP_SERVER%", settings.getNtpServer());
+    html.replace("%USE_24H_CHECKED%", settings.getUse24HourFormat() ? "checked" : "");
     html.replace("%UPDATE_INTERVAL%", String(settings.getWeatherUpdateInterval()));
 
     html.replace("%LOCAL_SENSOR_ENABLED_CHECKED%", settings.getLocalSensorEnabled() ? "checked" : "");
@@ -916,6 +919,7 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("lon")) settings.setLongitude(_webServer->arg("lon"));
     if (_webServer->hasArg("tz")) settings.setTimezone(_webServer->arg("tz"));
     if (_webServer->hasArg("ntp_server")) settings.setNtpServer(_webServer->arg("ntp_server"));
+    settings.setUse24HourFormat(_webServer->hasArg("use_24h"));
     if (_webServer->hasArg("update_interval")) settings.setWeatherUpdateInterval(_webServer->arg("update_interval").toInt());
     
     settings.setLocalSensorEnabled(_webServer->hasArg("local_sensor_enabled"));
