@@ -82,13 +82,27 @@ void setup() {
     dht11.begin();
     Serial.println("[Sensor] DHT sensors initialized on GPIO 22");
     
-    Wire1.begin(SENSOR_SDA_PIN, SENSOR_SCL_PIN);
-    if (!sht40.begin(&Wire1)) {
-        Serial.println("[Sensor] Couldn't find SHT4x");
-    } else {
-        Serial.printf("[Sensor] SHT4x sensor initialized on I2C (SDA: %d, SCL: %d)\n", SENSOR_SDA_PIN, SENSOR_SCL_PIN);
-        sht40.setPrecision(SHT4X_HIGH_PRECISION);
-        sht40.setHeater(SHT4X_NO_HEATER);
+    bool sht_found = false;
+#if TFT_BL == 21
+    int sda_pins[] = {27, 22};
+    int scl_pins[] = {22, 27};
+#else
+    int sda_pins[] = {21, 22};
+    int scl_pins[] = {22, 21};
+#endif
+
+    for (int i = 0; i < 2; i++) {
+        Wire1.begin(sda_pins[i], scl_pins[i]);
+        if (sht40.begin(&Wire1)) {
+            Serial.printf("[Sensor] SHT4x sensor initialized on I2C (SDA: %d, SCL: %d)\n", sda_pins[i], scl_pins[i]);
+            sht40.setPrecision(SHT4X_HIGH_PRECISION);
+            sht40.setHeater(SHT4X_NO_HEATER);
+            sht_found = true;
+            break;
+        }
+    }
+    if (!sht_found) {
+        Serial.println("[Sensor] Couldn't find SHT4x on expected pins.");
     }
 
     // Load saved preferences
@@ -326,12 +340,12 @@ void loop() {
                 }
             } else if (settings.getLocalSensorType() == 2) { // SHT40
                 sensors_event_t humidity, temp;
-                sht40.getEvent(&humidity, &temp);
+                bool success = sht40.getEvent(&humidity, &temp);
                 
-                float h = humidity.relative_humidity;
-                float t = temp.temperature;
+                float h = success ? humidity.relative_humidity : NAN;
+                float t = success ? temp.temperature : NAN;
                 bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
-                if (isFahrenheit) {
+                if (isFahrenheit && success) {
                     t = t * 1.8 + 32.0;
                 }
                 
