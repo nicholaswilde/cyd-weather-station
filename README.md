@@ -97,11 +97,12 @@ Connect the DHT sensor to the **CN1** breakout port:
 Connect the SHT40 sensor to the **CN1** breakout port (do not use connector P3 as it lacks a 3.3V power supply):
 - **VCC**: 3V3
 - **GND**: GND
-- **SDA**: IO27 *(Note: IO27 must be used instead of IO21 to prevent conflicts with the display backlight)*
+- **SDA**: IO27
+> [!NOTE]
+> IO27 must be used instead of IO21 to prevent conflicts with the display backlight
 - **SCL**: IO22
 
     ```text
-     
     +------------------------------+
     |                              |
     |                          +------+
@@ -124,7 +125,7 @@ Connect the SHT40 sensor to the **CN1** breakout port (do not use connector P3 a
     | +--+ +-------+ +-----------+ |
     +-|  |-| USB C |-| MICRO USB |-+
       +--+ +-------+ +-----------+ 
-                 CYD-28R   
+             ESP32-2432S028R  
     ```
 
 ### Local Sensor Calibration
