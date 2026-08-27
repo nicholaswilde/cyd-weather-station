@@ -18,8 +18,8 @@
 #include <DHT.h>
 
 #define DHTPIN 22
-#define DHTTYPE DHT22
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht22(DHTPIN, DHT22);
+DHT dht11(DHTPIN, DHT11);
 unsigned long lastDhtRead = 0;
 BacklightManager backlight(TFT_BL, 0, 10.0f);
 ScreenSaverManager screensaver(backlight, SCREENSAVER_TIMEOUT_MS);
@@ -68,8 +68,9 @@ void setup() {
     Serial.begin(115200);
     Serial.println("[System] Booting ESP32 CYD Weather Station...");
 
-    dht.begin();
-    Serial.println("[Sensor] DHT22 sensor initialized on GPIO 22");
+    dht22.begin();
+    dht11.begin();
+    Serial.println("[Sensor] DHT sensors initialized on GPIO 22");
 
     // Load saved preferences
     settings.begin();
@@ -283,9 +284,9 @@ void loop() {
             lastDhtRead = currentMillis;
             
             if (settings.getLocalSensorType() == 1) { // DHT22
-                float h = dht.readHumidity();
+                float h = dht22.readHumidity();
                 bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
-                float t = dht.readTemperature(isFahrenheit);
+                float t = dht22.readTemperature(isFahrenheit);
                 
                 if (isnan(h) || isnan(t)) {
                     Serial.println("[Sensor] Failed to read from DHT22 sensor!");
@@ -307,7 +308,27 @@ void loop() {
             } else if (settings.getLocalSensorType() == 2) { // SHT40
                 // Placeholder for next phase
             } else if (settings.getLocalSensorType() == 3) { // DHT11
-                // Placeholder for next phase
+                float h = dht11.readHumidity();
+                bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
+                float t = dht11.readTemperature(isFahrenheit);
+                
+                if (isnan(h) || isnan(t)) {
+                    Serial.println("[Sensor] Failed to read from DHT11 sensor!");
+                } else {
+                    h += settings.getLocalSensorHumOffset();
+                    t += settings.getLocalSensorTempOffset();
+                    Serial.printf("[Sensor] DHT11 -> Humidity: %.1f%%  Temperature: %.1f%s\n", h, t, isFahrenheit ? "°F" : "°C");
+                    updateLocalSensorUI(t, h);
+                    
+                    if (mqtt.isConnected()) {
+                        char tempPayload[16];
+                        char humPayload[16];
+                        snprintf(tempPayload, sizeof(tempPayload), "%.1f", t);
+                        snprintf(humPayload, sizeof(humPayload), "%.1f", h);
+                        mqtt.publish("sensor/local_temperature", tempPayload);
+                        mqtt.publish("sensor/local_humidity", humPayload);
+                    }
+                }
             }
         }
     }
