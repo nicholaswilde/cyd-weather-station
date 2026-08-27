@@ -100,6 +100,33 @@ Connect the SHT40 sensor to the **CN1** breakout port (do not use connector P3 a
 - **SDA**: IO27 *(Note: IO27 must be used instead of IO21 to prevent conflicts with the display backlight)*
 - **SCL**: IO22
 
+    ```text
+     
+    +----------------------------------+
+    |                                  |
+    |                               +------+
+    |                               |  P3  |
+    |                               +------+
+    |                                  |
+    |                           +---------+
+    |                           |   CN1   |      +--------+
+    |                           |  GND[X] |------| [X]GND |
+    |                           | IO22[X] |------| [X]SCL |
+    |                           | IO27[X] |------| [X]SDA |
+    |                           | 3.3V[X] |------| [X]VCC |
+    |                           +---------+      | [ ]3Vo | 
+    |                                  |         +--------+
+    |                              +------+         SHT40
+    |                              |  SD  |
+    |                              | CARD |
+    |                              +------+
+    |                                  |
+    |     +--+ +-------+ +-----------+ |
+    +-----|  |-| USB C |-| MICRO USB |-+
+          +--+ +-------+ +-----------+ 
+                     CYD-28R   
+    ```
+
 ### Local Sensor Calibration
 
 Sensors mounted near the CYD board often pick up residual heat radiated by the ESP32 chip and LCD backlight (self-heating), resulting in temperature readings that are slightly high and relative humidity readings that are slightly low. You can calibrate both values using single-point linear offsets via the on-device Settings screen, the Web Settings UI, or MQTT/Home Assistant.
