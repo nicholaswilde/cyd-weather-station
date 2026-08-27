@@ -19,6 +19,13 @@
 #include <Adafruit_SHT4x.h>
 #include <Wire.h>
 
+#if TFT_BL == 21
+  #define SENSOR_SDA_PIN 27
+#else
+  #define SENSOR_SDA_PIN 21
+#endif
+#define SENSOR_SCL_PIN 22
+
 #define DHTPIN 22
 DHT dht22(DHTPIN, DHT22);
 DHT dht11(DHTPIN, DHT11);
@@ -75,11 +82,11 @@ void setup() {
     dht11.begin();
     Serial.println("[Sensor] DHT sensors initialized on GPIO 22");
     
-    Wire1.begin(21, 22);
+    Wire1.begin(SENSOR_SDA_PIN, SENSOR_SCL_PIN);
     if (!sht40.begin(&Wire1)) {
         Serial.println("[Sensor] Couldn't find SHT4x");
     } else {
-        Serial.println("[Sensor] SHT4x sensor initialized on I2C (GPIO 21, 22)");
+        Serial.printf("[Sensor] SHT4x sensor initialized on I2C (SDA: %d, SCL: %d)\n", SENSOR_SDA_PIN, SENSOR_SCL_PIN);
         sht40.setPrecision(SHT4X_HIGH_PRECISION);
         sht40.setHeater(SHT4X_NO_HEATER);
     }
