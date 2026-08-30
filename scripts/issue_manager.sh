@@ -16,7 +16,7 @@ if [ "$COMMAND" = "create" ]; then
         LABEL="bug"
     fi
     
-    ISSUE_URL=$(gh issue create --title "[$TYPE]: $TITLE" --body "Created via issue-manager automation." --label "$LABEL")
+    ISSUE_URL=$(rtk gh issue create --title "[$TYPE]: $TITLE" --body "Created via issue-manager automation." --label "$LABEL")
     ISSUE_NUM=$(echo "$ISSUE_URL" | grep -oE '[0-9]+$')
     
     echo "Issue created: $ISSUE_URL"
@@ -29,7 +29,7 @@ elif [ "$COMMAND" = "start" ]; then
         exit 1
     fi
     
-    LABELS=$(gh issue view "$ISSUE_NUM" --json labels --jq '.labels[].name' || echo "")
+    LABELS=$(rtk gh issue view "$ISSUE_NUM" --json labels --jq '.labels[].name' || echo "")
     
     PREFIX="feat"
     if echo "$LABELS" | grep -iq "bug"; then
@@ -47,7 +47,7 @@ elif [ "$COMMAND" = "start" ]; then
     
     echo "Ready to implement issue #$ISSUE_NUM on branch $BRANCH_NAME"
     echo "Issue Details:"
-    gh issue view "$ISSUE_NUM" | cat
+    rtk gh issue view "$ISSUE_NUM" | cat
 
 else
     echo "GitHub Issue Manager"
