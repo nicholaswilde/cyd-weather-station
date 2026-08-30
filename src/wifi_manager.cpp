@@ -78,6 +78,7 @@ void WifiManager::begin() {
         WiFi.disconnect();
         delay(100);
         
+        WiFi.setHostname(settings.getHostname().c_str());
         WiFi.begin(ssid, password);
         int attempts = 0;
         // Wait up to 8 seconds (16 * 500ms) to prevent browser RPC timeout (usually 10s)
@@ -102,6 +103,7 @@ void WifiManager::begin() {
         startAPMode();
     } else {
         configureStaticIP();
+        WiFi.setHostname(settings.getHostname().c_str());
         WiFi.begin(_ssid.c_str(), _password.c_str());
         _state = WIFI_STATE_CONNECTING;
         _connectionStartTime = millis();
@@ -123,7 +125,8 @@ void WifiManager::update() {
                 _lastReconnectAttempt = millis();
                 Serial.println("[WiFi] Reconnecting...");
                 configureStaticIP();
-                WiFi.begin(_ssid.c_str(), _password.c_str());
+                WiFi.setHostname(settings.getHostname().c_str());
+        WiFi.begin(_ssid.c_str(), _password.c_str());
                 _state = WIFI_STATE_CONNECTING;
                 _connectionStartTime = millis();
             }
@@ -272,6 +275,12 @@ void WifiManager::startAPMode() {
     _dnsServer->start(53, "*", apIP);
 
     _webServer = new WebServer(80);
+    if (MDNS.begin(settings.getHostname().c_str())) {
+        MDNS.addService("http", "tcp", 80);
+        Serial.printf("[mDNS] Responder started: http://%s.local\n", settings.getHostname().c_str());
+    } else {
+        Serial.println("[mDNS] Error setting up MDNS responder!");
+    }
     _webServer->on("/", [this]() { handleRoot(); });
     _webServer->on("/save", [this]() { handleSave(); });
     _webServer->on("/scan", [this]() {
@@ -510,6 +519,12 @@ void WifiManager::startWebServer() {
         stopWebServer();
     }
     _webServer = new WebServer(80);
+    if (MDNS.begin(settings.getHostname().c_str())) {
+        MDNS.addService("http", "tcp", 80);
+        Serial.printf("[mDNS] Responder started: http://%s.local\n", settings.getHostname().c_str());
+    } else {
+        Serial.println("[mDNS] Error setting up MDNS responder!");
+    }
     _webServer->on("/", [this]() { handleLanding(); });
     _webServer->on("/reset", [this]() {
         settings.factoryReset();
@@ -634,6 +649,7 @@ void WifiManager::startWebServer() {
         doc["sleep_start_time"] = settings.getSleepStartTime();
         doc["sleep_end_time"] = settings.getSleepEndTime();
         doc["weather_update_interval"] = settings.getWeatherUpdateInterval();
+        doc["hostname"] = settings.getHostname();
         doc["static_ip_enabled"] = settings.getStaticIpEnabled();
         doc["static_ip"] = settings.getStaticIp();
         doc["static_gateway"] = settings.getStaticGateway();
@@ -704,6 +720,9 @@ void WifiManager::startWebServer() {
         if (doc.containsKey("sleep_start_time")) settings.setSleepStartTime(doc["sleep_start_time"].as<String>());
         if (doc.containsKey("sleep_end_time")) settings.setSleepEndTime(doc["sleep_end_time"].as<String>());
         if (doc.containsKey("weather_update_interval")) settings.setWeatherUpdateInterval(doc["weather_update_interval"]);
+        doc["hostname"] = settings.getHostname();
+        if (doc.containsKey("hostname")) settings.setHostname(doc["hostname"].as<String>());
+    if (_webServer->hasArg("hostname")) settings.setHostname(_webServer->arg("hostname"));
         if (doc.containsKey("static_ip_enabled")) settings.setStaticIpEnabled(doc["static_ip_enabled"]);
         if (doc.containsKey("static_ip")) settings.setStaticIp(doc["static_ip"].as<String>());
         if (doc.containsKey("static_gateway")) settings.setStaticGateway(doc["static_gateway"].as<String>());
@@ -909,6 +928,7 @@ void WifiManager::handleSettings() {
     html.replace("%MQTT_PASSWORD%", settings.getMqttPassword());
     html.replace("%MQTT_BASE%", settings.getMqttBaseTopic());
     
+    html.replace("%HOSTNAME%", settings.getHostname());
     html.replace("%STATIC_IP_ENABLED%", settings.getStaticIpEnabled() ? "checked" : "");
     
     String staticIp = settings.getStaticIp();
@@ -980,6 +1000,7 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("mqtt_password")) settings.setMqttPassword(_webServer->arg("mqtt_password"));
     if (_webServer->hasArg("mqtt_base")) settings.setMqttBaseTopic(_webServer->arg("mqtt_base"));
     
+    if (_webServer->hasArg("hostname")) settings.setHostname(_webServer->arg("hostname"));
     settings.setStaticIpEnabled(_webServer->hasArg("static_ip_enabled"));
     if (_webServer->hasArg("static_ip")) settings.setStaticIp(_webServer->arg("static_ip"));
     if (_webServer->hasArg("static_gw")) settings.setStaticGateway(_webServer->arg("static_gw"));

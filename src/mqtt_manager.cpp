@@ -100,6 +100,7 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     subscribe("command/sleep_schedule", 0);
     subscribe("command/sleep_start", 0);
     subscribe("command/sleep_end", 0);
+    subscribe("command/hostname", 0);
     subscribe("command/theme", 0);
     subscribe("command/units", 0);
     subscribe("command/screen_orientation", 0);
@@ -197,6 +198,9 @@ void MqttManager::publishHADiscovery() {
 
     String sleepStartPayload = "{\"name\":\"Sleep Start Time\",\"state_topic\":\"" + _baseTopic + "settings/sleep_start\",\"command_topic\":\"" + _baseTopic + "command/sleep_start\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_sleep_start\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/text/" + deviceId + "/sleep_start/config").c_str(), 0, true, sleepStartPayload.c_str());
+
+    String hostnamePayload = "{\"name\":\"Hostname\",\"state_topic\":\"" + _baseTopic + "settings/hostname\",\"command_topic\":\"" + _baseTopic + "command/hostname\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_hostname\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/text/" + deviceId + "/hostname/config").c_str(), 0, true, hostnamePayload.c_str());
 
     String sleepEndPayload = "{\"name\":\"Sleep End Time\",\"state_topic\":\"" + _baseTopic + "settings/sleep_end\",\"command_topic\":\"" + _baseTopic + "command/sleep_end\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_sleep_end\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/text/" + deviceId + "/sleep_end/config").c_str(), 0, true, sleepEndPayload.c_str());

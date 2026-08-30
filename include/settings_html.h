@@ -189,6 +189,11 @@ button:hover { background: #f5c2e7; }
     <input type='text' id='mqtt_base' name='mqtt_base' value='%MQTT_BASE%'>
 </div>
 
+<div class='section-title'>Network Configuration</div>
+
+<label for='hostname' title='Device network hostname and mDNS address (e.g. cyd-weather-station.local)'>Hostname</label>
+<input type='text' id='hostname' name='hostname' value='%HOSTNAME%'>
+
 <div class='checkbox-group'>
     <input type='checkbox' id='screenshot_server_enabled' name='screenshot_server_enabled' value='1' %SCREENSHOT_ENABLED%>
     <label for='screenshot_server_enabled' title='Enable the screenshot server for remote viewing'>Screenshot Server</label>

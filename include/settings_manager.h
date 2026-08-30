@@ -24,6 +24,7 @@ private:
     String _staticSubnet;
     String _staticDns;
     String _apPassword;
+    String _hostname;
     int _screenOrientation;
     bool _ledEnabled;
     int _ledBrightness;
@@ -140,6 +141,9 @@ public:
 
     const String& getApPassword() const;
     void setApPassword(const String& password);
+
+    const String& getHostname() const;
+    void setHostname(const String& hostname);
 
     void factoryReset();
 

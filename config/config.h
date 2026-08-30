@@ -75,6 +75,9 @@ extern int getCurrentThemeFlavor();
 // API Server default status setting
 #define API_SERVER_ENABLED true
 
+// Network Defaults
+#define DEFAULT_HOSTNAME "cyd-weather-station"
+
 // Sleep Schedule Defaults
 #define DEFAULT_SLEEP_SCHEDULE_ENABLED false
 #define DEFAULT_SLEEP_START_TIME "22:00"

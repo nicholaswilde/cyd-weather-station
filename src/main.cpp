@@ -203,6 +203,8 @@ void setup() {
             settings.setSleepScheduleEnabled(en);
         } else if (topic.endsWith("command/sleep_start")) {
             settings.setSleepStartTime(payload);
+        } else if (topic.endsWith("command/hostname")) {
+            settings.setHostname(payload);
         } else if (topic.endsWith("command/sleep_end")) {
             settings.setSleepEndTime(payload);
         } else if (topic.endsWith("command/theme")) {
@@ -819,6 +821,7 @@ void loop() {
         mqtt.publish("settings/sleep_schedule", settings.getSleepScheduleEnabled() ? "ON" : "OFF", true);
         mqtt.publish("settings/sleep_start", settings.getSleepStartTime().c_str(), true);
         mqtt.publish("settings/sleep_end", settings.getSleepEndTime().c_str(), true);
+        mqtt.publish("settings/hostname", settings.getHostname().c_str(), true);
         
         String themeStr = "Mocha";
         switch (settings.getThemeFlavor()) {

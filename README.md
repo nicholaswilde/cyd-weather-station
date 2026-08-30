@@ -290,6 +290,7 @@ Example JSON response:
   "theme_flavor": 1,
   "sd_logging_enabled": true,
   "screenshot_server_enabled": false,
+  "hostname": "cyd-weather-station",
   "api_server_enabled": true,
   "screen_orientation": 1,
   "led_enabled": true,

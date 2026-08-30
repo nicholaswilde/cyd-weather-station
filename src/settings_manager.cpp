@@ -41,6 +41,7 @@ SettingsManager::SettingsManager() {
     _staticGateway = "";
     _staticSubnet = "255.255.255.0";
     _staticDns = "1.1.1.1";
+    _hostname = DEFAULT_HOSTNAME;
 #ifdef AP_PASSWORD
     _apPassword = AP_PASSWORD;
 #else
@@ -95,6 +96,7 @@ void SettingsManager::begin() {
     _staticGateway = prefs.getString("static_gw", "");
     _staticSubnet = prefs.getString("static_sn", "255.255.255.0");
     _staticDns = prefs.getString("static_dns", "1.1.1.1");
+    _hostname = prefs.getString("hostname", DEFAULT_HOSTNAME);
 #ifdef AP_PASSWORD
     _apPassword = prefs.getString("ap_pass", AP_PASSWORD);
 #else
@@ -563,6 +565,15 @@ void SettingsManager::setApPassword(const String& password) {
         _apPassword = password;
         Preferences prefs; prefs.begin("settings", false);
         prefs.putString("ap_pass", _apPassword); prefs.end();
+    }
+}
+
+const String& SettingsManager::getHostname() const { return _hostname; }
+void SettingsManager::setHostname(const String& hostname) {
+    if (_hostname != hostname) {
+        _hostname = hostname;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putString("hostname", _hostname); prefs.end();
     }
 }
 
