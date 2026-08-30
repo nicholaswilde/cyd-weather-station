@@ -49,10 +49,50 @@ elif [ "$COMMAND" = "start" ]; then
     echo "Issue Details:"
     rtk gh issue view "$ISSUE_NUM" | cat
 
+elif [ "$COMMAND" = "finish" ]; then
+    CURRENT_BRANCH=$(git branch --show-current)
+    if [[ ! "$CURRENT_BRANCH" =~ (feat|fix)/issue-([0-9]+) ]]; then
+        echo "Error: Current branch '$CURRENT_BRANCH' does not match pattern (feat|fix)/issue-<number>."
+        exit 1
+    fi
+    ISSUE_NUM="${BASH_REMATCH[2]}"
+
+    echo "Merging $CURRENT_BRANCH into main..."
+    git checkout main
+    git pull --rebase origin main
+    git merge "$CURRENT_BRANCH"
+    
+    echo "Pushing main..."
+    git push origin main
+    
+    echo "Cleaning up local branch..."
+    git branch -d "$CURRENT_BRANCH"
+    
+    echo "Closing issue #$ISSUE_NUM..."
+    rtk gh issue close "$ISSUE_NUM"
+    echo "Issue #$ISSUE_NUM closed successfully."
+
+elif [ "$COMMAND" = "submit" ]; then
+    CURRENT_BRANCH=$(git branch --show-current)
+    if [[ ! "$CURRENT_BRANCH" =~ (feat|fix)/issue-([0-9]+) ]]; then
+        echo "Error: Current branch '$CURRENT_BRANCH' does not match pattern (feat|fix)/issue-<number>."
+        exit 1
+    fi
+    ISSUE_NUM="${BASH_REMATCH[2]}"
+
+    echo "Pushing $CURRENT_BRANCH to origin..."
+    git push -u origin "$CURRENT_BRANCH"
+    
+    echo "Creating Pull Request for issue #$ISSUE_NUM..."
+    PR_URL=$(rtk gh pr create --fill --body "Resolves #$ISSUE_NUM" | cat)
+    echo "Pull Request created: $PR_URL"
+
 else
     echo "GitHub Issue Manager"
     echo "Usage:"
     echo "  $0 create <feat|bug> <\"title\">   - Create a new issue with proper labels"
     echo "  $0 start <issue_number>          - Checkout a new branch formatted for the issue"
+    echo "  $0 finish                        - Merge current branch to main, push, and close issue"
+    echo "  $0 submit                        - Push current branch and create a Pull Request"
     exit 1
 fi
