@@ -12,6 +12,7 @@ public:
     int8_t RSSI() { return -55; }
     void disconnect() {}
     void persistent(bool p) {}
+    bool setHostname(const char* hostname) { return true; }
     
     // AP / Captive Portal Mock additions
     bool softAP(const char* ssid, const char* passphrase = NULL, int channel = 1, int ssid_hidden = 0, int max_connection = 4) { return true; }
