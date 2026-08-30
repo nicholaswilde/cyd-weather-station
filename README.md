@@ -43,8 +43,9 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **Auto-Brightness & Gamma Scaling**: Uses the LDR photoresistor (GPIO 34) with an EMA filter and a perceptual $\gamma = 2.2$ gamma curve feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
 - **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured IANA timezone with full DST support.
 - **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) with gamma-corrected brightness provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
+- **Custom Hostname & mDNS**: Configurable network hostname (default `cyd-weather-station`) registered with DHCP (`WiFi.setHostname`) and mDNS responder (`MDNS.begin`) for access via `http://<hostname>.local/` without needing to find the device IP address.
 - **Web Dashboard & Settings Portal**:
-  - Access `http://<DEVICE_IP>/` in any browser for a central Catppuccin-themed dashboard.
+  - Access `http://<DEVICE_IP>/` or `http://<hostname>.local/` (e.g. `http://cyd-weather-station.local/`) in any browser for a central Catppuccin-themed dashboard.
   - Includes direct navigation links to Device Settings (`/settings`), Firmware Updates (`/update`), Live Screenshots (`/screenshot`), Clear SD Logs (`/clear_logs`), Clear SD Cache (`/clear_cache`), and Factory Reset (`/reset`).
   - Settings portal automatically redirects back to the main dashboard after saving settings once the device comes back online.
 - **Wi-Fi AP Captive Portal Fallback**:
@@ -254,11 +255,11 @@ The device supports capturing the current screen as a standard 24-bit BMP image 
 ### Remote Settings, Web Dashboard & API
 
 > [!NOTE]
-> The Settings Web UI, Dashboard, and Configuration API are available while the device is connected to Wi-Fi. The device IP is printed to serial on boot: `[WiFi] Connected! IP address: <IP>`.
+> The Settings Web UI, Dashboard, and Configuration API are available while the device is connected to Wi-Fi. Access the device via IP address (printed to serial: `[WiFi] Connected! IP address: <IP>`) or mDNS hostname: `http://<hostname>.local/` (default: `http://cyd-weather-station.local/`).
 
 **Web Dashboard:**
-Navigate to `http://<DEVICE_IP>/` in any browser to access the central Catppuccin-themed dashboard landing page. From here, you can access:
-- **⚙️ Device Settings (`/settings`)**: Configure all device parameters at runtime (Units, Theme, Screen & LED Brightness, Timezone, Weather Update Interval, Screensaver Timeout, Static IP, AP Password, API Server, SD Settings, MQTT, etc.) and save them without reflashing.
+Navigate to `http://<DEVICE_IP>/` or `http://cyd-weather-station.local/` in any browser to access the central Catppuccin-themed dashboard landing page. From here, you can access:
+- **⚙️ Device Settings (`/settings`)**: Configure all device parameters at runtime (Units, Theme, Screen & LED Brightness, Timezone, Hostname, Weather Update Interval, Screensaver Timeout, Static IP, AP Password, API Server, SD Settings, MQTT, etc.) and save them without reflashing.
 - **🔄 Firmware Update (`/update`)**: Flash new firmware binaries wirelessly.
 - **📸 View Screenshot (`/screenshot`)**: Stream a pixel-perfect image of the current screen (if enabled). Includes inline status indicators and help prompts.
 - **🗑️ Clear SD Logs (`/clear_logs`)**: Delete the weather history CSV file (`/weather_history.csv`) stored on the microSD card.
@@ -571,6 +572,8 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>settings/sleep_schedule` | Sleep schedule switch state | `ON` / `OFF` |
 | `<base_topic>settings/sleep_start` | Sleep schedule start time | `22:00` |
 | `<base_topic>settings/sleep_end` | Sleep schedule end time | `07:00` |
+| `<base_topic>settings/timezone` | Configured IANA timezone string | `America/New_York` |
+| `<base_topic>settings/hostname` | Configured device hostname | `cyd-weather-station` |
 | `<base_topic>settings/led` | Status LED enabled switch state | `ON` / `OFF` |
 | `<base_topic>settings/sd_log` | SD logging enabled switch state | `ON` / `OFF` |
 | `<base_topic>settings/sd_cache` | SD caching enabled switch state | `ON` / `OFF` |
@@ -586,6 +589,8 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>command/sleep_schedule` | `ON` / `OFF` / `1` / `0` | Enables or disables the sleep schedule. |
 | `<base_topic>command/sleep_start` | `HH:MM` | Sets the sleep schedule start time (24-hour format). |
 | `<base_topic>command/sleep_end` | `HH:MM` | Sets the sleep schedule end time (24-hour format). |
+| `<base_topic>command/timezone` | `America/Los_Angeles` | Sets the device IANA timezone string with dynamic DST recalculation. |
+| `<base_topic>command/hostname` | `cyd-weather-station` | Sets the device network hostname and mDNS address. |
 | `<base_topic>command/theme` | `Mocha` / `Macchiato` / `Frappe` / `Latte` | Changes the active Catppuccin theme flavor. |
 | `<base_topic>command/units` | `Imperial` / `Metric` | Changes the temperature and wind speed unit system. |
 | `<base_topic>command/screen_orientation`| `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` | Changes display orientation dynamically. |
@@ -602,8 +607,8 @@ On connection, the device automatically registers itself as `CYD Weather Station
 - **Diagnostics Sensors**: Connection Status (binary sensor), Uptime (s), Free Memory (B), Wi-Fi Signal (dBm), IP Address, Firmware Version, MAC Address.
 - **Controls & Sliders (Numbers)**: Screen Brightness (0–100%), LED Brightness (0–100%), Weather Update Interval (1–120 min), Screensaver Timeout (1–60 min).
 - **Configuration Switches**: Auto Brightness, Screensaver, Sleep Schedule, Status LED, SD Log, SD Cache.
-- **Text Controls**: Sleep Start Time, Sleep End Time.
-- **Dropdown Selectors**: Theme Flavor, Unit System, Screen Orientation.
+- **Text Controls**: Sleep Start Time, Sleep End Time, Hostname.
+- **Dropdown Selectors**: Theme Flavor, Unit System, Screen Orientation, Timezone.
 - **Buttons**: Device Reboot.
 
 #### Connection Management & Reconnect Backoff
