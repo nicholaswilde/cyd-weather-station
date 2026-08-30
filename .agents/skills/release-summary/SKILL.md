@@ -46,6 +46,7 @@ This skill retrieves the git commit logs for a specified range (or defaults to t
      where `<url_range>` is the range with `..` replaced by `...` (e.g., `v0.1.2...v0.1.3` or `HEAD`).
 
 5. **Update Draft Release via GitHub CLI:**
+   - **IMPORTANT**: Never delete an existing release draft, as doing so will also delete all assets that are attached to that draft. Always edit the existing draft in-place.
    - Save the generated markdown summary to a temporary file (e.g., `release_notes.md`).
    - Run the GitHub CLI to edit the existing draft release using the `LATEST` tag and the generated notes:
      `rtk gh release edit <LATEST> --draft -F release_notes.md | cat`

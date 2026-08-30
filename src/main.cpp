@@ -18,6 +18,37 @@
 #include <DHT.h>
 #include <Adafruit_SHT4x.h>
 #include <Wire.h>
+#include <AceTime.h>
+using namespace ace_time;
+
+static const int CACHE_SIZE = 1;
+static BasicZoneProcessorCache<CACHE_SIZE> zoneProcessorCache;
+static BasicZoneManager zoneManager(
+    zonedb::kZoneAndLinkRegistrySize,
+    zonedb::kZoneAndLinkRegistry,
+    zoneProcessorCache);
+
+bool getLocalTimeWrapper(struct tm* info, uint32_t ms = 5000) {
+    extern bool ntpInitialized;
+#include "settings_manager.h"
+extern SettingsManager settings;
+    if (!ntpInitialized) return false;
+    time_t now = time(nullptr);
+    if (now < 1000000000) return false;
+    TimeZone tz = zoneManager.createForZoneName(settings.getTimezone().c_str());
+    if (tz.isError()) tz = zoneManager.createForZoneName("UTC");
+    ZonedDateTime zdt = ZonedDateTime::forUnixSeconds64(now, tz);
+    if (zdt.isError()) return false;
+    info->tm_year = zdt.year() - 1900;
+    info->tm_mon = zdt.month() - 1;
+    info->tm_mday = zdt.day();
+    info->tm_hour = zdt.hour();
+    info->tm_min = zdt.minute();
+    info->tm_sec = zdt.second();
+    info->tm_wday = (zdt.dayOfWeek() == 7) ? 0 : zdt.dayOfWeek();
+    return true;
+}
+
 
 #if TFT_BL == 21
   #define SENSOR_SDA_PIN 27
@@ -218,6 +249,10 @@ void setup() {
                 settings.setLocalSensorUpdateInterval(interval);
                 settings_local_sensor_changed = true;
             }
+        } else if (topic.endsWith("command/timezone")) {
+            settings.setTimezone(payload);
+            extern volatile bool settings_timezone_changed;
+            settings_timezone_changed = true;
         } else if (topic.endsWith("command/local_sensor_temp_offset")) {
             float offset = payload.toFloat();
             if (offset >= -10.0f && offset <= 10.0f) {
@@ -277,7 +312,7 @@ void loop() {
         lastSleepCheck = currentMillis;
         if (settings.getSleepScheduleEnabled()) {
             struct tm timeinfo;
-            if (getLocalTime(&timeinfo)) {
+            if (getLocalTimeWrapper(&timeinfo)) {
                 int currentMins = timeinfo.tm_hour * 60 + timeinfo.tm_min;
                 
                 String startTime = settings.getSleepStartTime();
@@ -441,7 +476,7 @@ void loop() {
         struct tm timeinfo;
         std::string filename;
 #ifndef NATIVE_TEST
-        if (getLocalTime(&timeinfo, 10)) {
+        if (getLocalTimeWrapper(&timeinfo)) {
             filename = ScreenshotManager::generateFilename(&timeinfo, 0);
         } else {
             filename = ScreenshotManager::generateFilename(nullptr, millis());
@@ -471,7 +506,7 @@ void loop() {
 #ifndef NATIVE_TEST
         if (ntpInitialized) {
             Serial.println("[System] Timezone/DST settings changed. Reconfiguring NTP...");
-            configTzTime(settings.getTimezone().c_str(), settings.getNtpServer().c_str());
+            configTime(0, 0, settings.getNtpServer().c_str());
         }
 #endif
     }
@@ -540,7 +575,7 @@ void loop() {
 #ifndef NATIVE_TEST
         if (ntpInitialized) {
             struct tm timeinfo;
-            if (getLocalTime(&timeinfo, 10)) {
+            if (getLocalTimeWrapper(&timeinfo)) {
                 char timeStr[16];
                 if (settings.getUse24HourFormat()) {
                     strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
@@ -619,11 +654,11 @@ void loop() {
 #ifndef NATIVE_TEST
             if (!ntpInitialized) {
                 Serial.println("[System] Initializing NTP client...");
-                configTzTime(settings.getTimezone().c_str(), settings.getNtpServer().c_str());
+                configTime(0, 0, settings.getNtpServer().c_str());
                 ntpInitialized = true;
             }
             struct tm timeinfo;
-            if (getLocalTime(&timeinfo, 10)) {
+            if (getLocalTimeWrapper(&timeinfo)) {
                 char timeStr[16];
                 if (settings.getUse24HourFormat()) {
                     strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
@@ -688,7 +723,7 @@ void loop() {
 #ifndef NATIVE_TEST
                     // Update footer: "Last Update: HH:MM | City"
                     struct tm timeinfo;
-                    if (getLocalTime(&timeinfo, 10)) {
+                    if (getLocalTimeWrapper(&timeinfo)) {
                         char timeStr[16];
                         if (settings.getUse24HourFormat()) {
                     strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
@@ -814,6 +849,7 @@ void loop() {
         }
         mqtt.publish("settings/local_sensor_type", sensTypeStr.c_str(), true);
         mqtt.publish("settings/local_sensor_update_interval", String(settings.getLocalSensorUpdateInterval()).c_str(), true);
+        mqtt.publish("settings/timezone", settings.getTimezone().c_str(), true);
         mqtt.publish("settings/local_sensor_temp_offset", String(settings.getLocalSensorTempOffset(), 1).c_str(), true);
         mqtt.publish("settings/local_sensor_hum_offset", String(settings.getLocalSensorHumOffset(), 1).c_str(), true);
     }

@@ -108,6 +108,7 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     subscribe("command/local_sensor_type", 0);
     subscribe("command/local_sensor_update_interval", 0);
     subscribe("command/local_sensor_temp_offset", 0);
+    subscribe("command/timezone", 0);
     subscribe("command/local_sensor_hum_offset", 0);
 }
 
@@ -237,6 +238,10 @@ void MqttManager::publishHADiscovery() {
     // Local Sensor Hum Offset (Number)
     String locSensHumOffPayload = "{\"name\":\"Humidity Offset\",\"state_topic\":\"" + _baseTopic + "settings/local_sensor_hum_offset\",\"command_topic\":\"" + _baseTopic + "command/local_sensor_hum_offset\",\"min\":-20,\"max\":20,\"step\":0.1,\"mode\":\"box\",\"unique_id\":\"" + deviceId + "_loc_sens_hoff\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/number/" + deviceId + "/local_sensor_hum_offset/config").c_str(), 0, true, locSensHumOffPayload.c_str());
+
+    // Timezone (Select)
+    String tzPayload = "{\"name\":\"Timezone\",\"state_topic\":\"" + _baseTopic + "settings/timezone\",\"command_topic\":\"" + _baseTopic + "command/timezone\",\"options\":[\"UTC\",\"America/New_York\",\"America/Chicago\",\"America/Denver\",\"America/Los_Angeles\",\"Europe/London\",\"Europe/Berlin\",\"Australia/Sydney\",\"Asia/Tokyo\"],\"unique_id\":\"" + deviceId + "_timezone\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/timezone/config").c_str(), 0, true, tzPayload.c_str());
 
     vTaskDelay(pdMS_TO_TICKS(50));
 

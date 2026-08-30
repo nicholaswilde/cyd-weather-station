@@ -24,22 +24,16 @@
 // Note: We use POSIX strings for efficiency to avoid bundling a giant tzdata lookup table.
 // Find your region's POSIX string here: https://gist.github.com/alwynallan/24d96091655391107939
 #define NTP_SERVER "pool.ntp.org"
-#define TIMEZONE_DEFAULT "UTC0"       // POSIX Timezone string
+#define TIMEZONE_DEFAULT "UTC"       // IANA Timezone string (e.g. America/Los_Angeles)
 #define USE_24_HOUR_FORMAT false
+// Some common timezone strings:
+// #define TIMEZONE_DEFAULT "America/New_York"
+// #define TIMEZONE_DEFAULT "America/Chicago"
+// #define TIMEZONE_DEFAULT "America/Denver"
+// #define TIMEZONE_DEFAULT "America/Los_Angeles"
+// #define TIMEZONE_DEFAULT "Europe/London"
+// #define TIMEZONE_DEFAULT "Europe/Berlin"
 
-
-// US Eastern
-// #define TIMEZONE_DEFAULT "EST5EDT,M3.2.0,M11.1.0"
-// US Central
-// #define TIMEZONE_DEFAULT "CST6CDT,M3.2.0,M11.1.0"
-// US Mountain
-// #define TIMEZONE_DEFAULT "MST7MDT,M3.2.0,M11.1.0"
-// US Pacific
-// #define TIMEZONE_DEFAULT "PST8PDT,M3.2.0,M11.1.0"
-// London
-// #define TIMEZONE_DEFAULT "GMT0BST,M3.5.0/1,M10.5.0"
-// CET
-// #define TIMEZONE_DEFAULT "CET-1CEST,M3.5.0,M10.5.0/3"
 
 #include "catppuccin.h"
 

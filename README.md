@@ -27,7 +27,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Catppuccin Theme Flavor**: Choose between Mocha, Macchiato, Frappé, or Latte — the full UI redraws instantly in the selected palette.
   - **Auto Brightness**: Toggle automatic backlight dimming/brightening driven by the onboard LDR light sensor (GPIO 34) with smooth non-linear perceptual scaling.
   - **Manual Brightness**: Slider to set a fixed screen brightness level with natural $\gamma = 2.2$ gamma correction.
-  - **Timezone**: `–` / `+` buttons to cycle through common POSIX timezone presets for automatic DST handling.
+  - **Timezone**: `–` / `+` buttons to cycle through common IANA timezone presets with automatic DST handling powered by AceTime.
   - **SD Log**: Enable/disable weather logging to a microSD card.
   - **SD Cache**: Enable/disable weather caching to a microSD card (restores UI offline).
   - **Screenshot Server**: Enable/disable the remote screenshot HTTP server.
@@ -41,7 +41,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **Sleep Schedule**: Enable/disable automatic screen sleep during a configured time frame (e.g. 22:00 to 07:00).
   - **Screen Orientation**: Choose between Landscape, Portrait, Landscape Rev, or Portrait Rev—the entire UI dynamically scales/stacks, header height dynamically increases to 60px in portrait to fit a wrapped two-line title without overlaps, and touch coordinates update instantly.
 - **Auto-Brightness & Gamma Scaling**: Uses the LDR photoresistor (GPIO 34) with an EMA filter and a perceptual $\gamma = 2.2$ gamma curve feeding LEDC PWM (GPIO 21) to smoothly adapt screen brightness to ambient light.
-- **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured POSIX timezone.
+- **NTP Time Synchronization**: Connects to NTP on boot and keeps a live clock in the header bar, respecting the configured IANA timezone with full DST support.
 - **RGB LED Status Indicator**: Onboard RGB LED (GPIO 4/16/17) with gamma-corrected brightness provides Wi-Fi status feedback (blinking blue for connecting, solid green for connected, fast red for disconnected, slow purple blink for AP Mode) and a brief weather-condition color pulse on updates.
 - **Web Dashboard & Settings Portal**:
   - Access `http://<DEVICE_IP>/` in any browser for a central Catppuccin-themed dashboard.
@@ -286,7 +286,7 @@ Example JSON response:
   "unit_system": 2,
   "brightness": 75,
   "auto_brightness": false,
-  "timezone": "UTC0",
+  "timezone": "America/New_York",
   "theme_flavor": 1,
   "sd_logging_enabled": true,
   "screenshot_server_enabled": false,
@@ -491,7 +491,7 @@ All settings below are configured by touch on the device and saved to flash:
 | **Auto Light** | Enable/disable LDR-driven automatic backlight control. |
 | **Brightness** | Manual backlight level slider (disabled when Auto Light is on). |
 | **Theme** | Catppuccin flavor selector — Mocha / Macchiato / Frappé / Latte. Full UI redraws on change. |
-| **Timezone** | POSIX timezone selector (– / + buttons) to automatically handle DST offsets. |
+| **Timezone** | IANA timezone selector (– / + buttons) with automatic DST transitions via AceTime. |
 | **SD Log** | Toggle SD card weather logging. Disabled automatically if no card is inserted. |
 | **SD Cache** | Toggle SD card weather caching. |
 | **API Srv** | Toggle the remote screenshot & configuration HTTP API server on/off. |
@@ -507,33 +507,30 @@ All settings below are configured by touch on the device and saved to flash:
 
 ---
 
-### POSIX Timezone Configuration
+### Timezone Configuration (AceTime & IANA)
 
-The CYD Weather Station uses POSIX timezone strings to natively handle Daylight Saving Time (DST) changes. You can configure this via the device UI, the Wi-Fi Captive Portal, or pre-configure the default in `config.h`.
+The CYD Weather Station integrates [`bxparks/AceTime`](https://github.com/bxparks/AceTime) to provide full IANA timezone database support (e.g. `America/Los_Angeles`, `Europe/London`) and automatically manages Daylight Saving Time (DST) transitions year-round without manual intervention.
 
-> [!NOTE]
-> **Why POSIX strings instead of timezone names?**
-> The ESP32's C library natively parses POSIX strings to calculate local time and DST transitions. It does *not* include the massive IANA timezone database (tzdata) required to map names like `America/New_York` to offsets. Sticking to POSIX strings avoids embedding a bloated lookup table into flash memory, keeping the firmware extremely efficient.
-
-For a comprehensive list of POSIX timezone strings for all regions, see the [IBM POSIX Timezone Reference](https://www.ibm.com/docs/en/aix/7.2?topic=concepts-posix-time-zone-format) or community-maintained lists like [this Gist](https://gist.github.com/alwynallan/24d96091655391107939).
+You can configure the timezone via:
+1. **On-Device Settings Tab**: Cycle through presets using `–` / `+` buttons.
+2. **Web Settings Portal (`/settings`)**: Select from an interactive dropdown containing over 400 IANA timezone options.
+3. **REST API (`/api/config`)**: Send a JSON payload updating the `"timezone"` field.
+4. **MQTT**: Publish to `<base_topic>command/timezone` or control via Home Assistant's Select entity.
+5. **Config File**: Set the compile-time default in [`config/config.h`](config/config.h).
 
 The device UI Settings tab allows cycling through the following common presets:
 
-| Region | Preset Display | POSIX String |
+| Region | Preset Display | IANA String |
 | :--- | :--- | :--- |
-| **UTC** | UTC | `UTC0` |
-| **London** | London | `GMT0BST,M3.5.0/1,M10.5.0` |
-| **Central Europe** | CET | `CET-1CEST,M3.5.0,M10.5.0/3` |
-| **Eastern Europe** | EET | `EET-2EEST,M3.5.0/3,M10.5.0/4` |
-| **US Eastern** | US East | `EST5EDT,M3.2.0,M11.1.0` |
-| **US Central** | US Central | `CST6CDT,M3.2.0,M11.1.0` |
-| **US Mountain** | US Mount. | `MST7MDT,M3.2.0,M11.1.0` |
-| **US Pacific** | US Pacific | `PST8PDT,M3.2.0,M11.1.0` |
-| **US Alaska** | US Alaska | `AKST9AKDT,M3.2.0,M11.1.0` |
-| **US Hawaii** | US Hawaii | `HST10` |
-| **AU Eastern** | AU East | `AEST-10AEDT,M10.1.0,M4.1.0/3` |
-| **AU Central** | AU Central | `ACST-9:30ACDT,M10.1.0,M4.1.0/3` |
-| **AU Western** | AU West | `AWST-8` |
+| **UTC** | UTC | `UTC` |
+| **New York** | New York | `America/New_York` |
+| **Chicago** | Chicago | `America/Chicago` |
+| **Denver** | Denver | `America/Denver` |
+| **Los Angeles** | Los Angeles | `America/Los_Angeles` |
+| **London** | London | `Europe/London` |
+| **Berlin** | Berlin | `Europe/Berlin` |
+| **Sydney** | Sydney | `Australia/Sydney` |
+| **Tokyo** | Tokyo | `Asia/Tokyo` |
 
 ---
 

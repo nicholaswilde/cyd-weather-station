@@ -418,19 +418,15 @@ struct TimezonePreset {
     const char* value;
 };
 static const TimezonePreset tz_presets[] = {
-    {"UTC", "UTC0"},
-    {"London", "GMT0BST,M3.5.0/1,M10.5.0"},
-    {"CET", "CET-1CEST,M3.5.0,M10.5.0/3"},
-    {"EET", "EET-2EEST,M3.5.0/3,M10.5.0/4"},
-    {"US East", "EST5EDT,M3.2.0,M11.1.0"},
-    {"US Central", "CST6CDT,M3.2.0,M11.1.0"},
-    {"US Mount.", "MST7MDT,M3.2.0,M11.1.0"},
-    {"US Pacific", "PST8PDT,M3.2.0,M11.1.0"},
-    {"US Alaska", "AKST9AKDT,M3.2.0,M11.1.0"},
-    {"US Hawaii", "HST10"},
-    {"AU East", "AEST-10AEDT,M10.1.0,M4.1.0/3"},
-    {"AU Central", "ACST-9:30ACDT,M10.1.0,M4.1.0/3"},
-    {"AU West", "AWST-8"}
+    {"UTC", "UTC"},
+    {"New York", "America/New_York"},
+    {"Chicago", "America/Chicago"},
+    {"Denver", "America/Denver"},
+    {"Los Angeles", "America/Los_Angeles"},
+    {"London", "Europe/London"},
+    {"Berlin", "Europe/Berlin"},
+    {"Sydney", "Australia/Sydney"},
+    {"Tokyo", "Asia/Tokyo"}
 };
 static const int num_tz_presets = sizeof(tz_presets)/sizeof(tz_presets[0]);
 
