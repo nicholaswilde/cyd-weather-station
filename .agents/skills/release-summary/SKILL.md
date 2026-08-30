@@ -1,53 +1,18 @@
 ---
 name: release-summary
-description: Generates a clean, professional GitHub release summary based on git logs.
+description: Generates a clean, professional GitHub release summary based on git logs using scripts/release_summary.py.
 ---
 # /release-summary [range]
 
 Generates a clean, professional GitHub release summary based on git logs.
 
 ## Description
-This skill retrieves the git commit logs for a specified range (or defaults to the latest two tags) and formats them into a categorized, structured release summary suitable for GitHub.
+This skill uses `scripts/release_summary.py` to retrieve git commit logs, format them into a structured markdown summary (Features, Bug Fixes, etc.), and updates the existing GitHub draft release.
 
 ## Protocol
 
-1. **Determine the Git Log Range:**
-   - Check if a `[range]` argument (e.g., `v0.1.2..v0.1.3` or `HEAD`) is provided.
-   - If no range is specified, execute git commands to detect the latest two tags:
-     - Run `git tag --sort=-v:refname | head -n 2`
-     - Extract `LATEST` (the first line) and `PREVIOUS` (the second line).
-     - If `PREVIOUS` is empty (only one tag or no tags), default `range` to `HEAD`.
-     - Otherwise, set `range` to `PREVIOUS..LATEST`.
-
-2. **Retrieve Git Log Entries:**
-   - Run `git log --pretty=format:"- %s" <range>` where `<range>` is the determined range.
-
-3. **Generate and Format the Release Summary:**
-   - Categorize the commit messages into the following markdown sections (using `###` for headers):
-     - ### 🚀 **New Features** (for commits starting with `feat`)
-     - ### 🐛 **Bug Fixes** (for commits starting with `fix`)
-     - ### ✨ **Improvements** (for commits starting with `refactor`, `perf`, `style`)
-     - ### 📝 **Documentation** (for commits starting with `docs`)
-   - Clean up the commit messages:
-     - Exclude any commit messages related to `conductor` or `checkpoint` tasks (e.g., commits containing `conductor` or `checkpoint` in their type, scope, or message body).
-     - Strip the type prefix (e.g. "feat:", "fix:").
-     - If a scope is present (e.g., "api:"), keep it (e.g., `api: add status endpoint` -> `api: Add status endpoint`).
-     - Ensure the first letter of each bullet is capitalized.
-     - Use backticks for technical terms (e.g., `TFT_eSPI`, `LVGL`, `ArduinoJson`, `AsyncTCP`, `AsyncMqttClient`, `DNSServer`, `WebServer`, `esptool`).
-   - Format restrictions:
-     - Do not include line numbers in the output.
-     - Omit sections that have no matching changes.
-     - Do not include git commit hashes.
-     - Maintain a direct, professional, and technical tone.
-
-4. **Add Changelog Comparison Link:**
-   - At the bottom of the summary, add a comparison link:
-     `**Full Changelog**: https://github.com/nicholaswilde/cyd-weather-station/compare/<url_range>`
-     where `<url_range>` is the range with `..` replaced by `...` (e.g., `v0.1.2...v0.1.3` or `HEAD`).
-
-5. **Update Draft Release via GitHub CLI:**
-   - **IMPORTANT**: Never delete an existing release draft, as doing so will also delete all assets that are attached to that draft. Always edit the existing draft in-place.
-   - Save the generated markdown summary to a temporary file (e.g., `release_notes.md`).
-   - Run the GitHub CLI to edit the existing draft release using the `LATEST` tag and the generated notes:
-     `rtk gh release edit <LATEST> --draft -F release_notes.md | cat`
-   - Clean up the temporary file and output the URL of the updated draft release to the user.
+1. Execute the Python script. If no range is provided, it automatically detects the latest two tags.
+   ```bash
+   ./scripts/release_summary.py [range]
+   ```
+2. The script will parse the commits, generate the markdown, and automatically run `gh release edit` to update the draft release in-place.
