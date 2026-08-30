@@ -66,8 +66,8 @@ static void wifi_icon_click_cb(lv_event_t * e) {
     wifi_info_dialog = lv_obj_create(lv_scr_act());
     lv_obj_set_size(wifi_info_dialog, lv_pct(85), lv_pct(85));
     lv_obj_align(wifi_info_dialog, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_set_style_bg_color(wifi_info_dialog, lv_color_hex(COLOR_MANTLE), 0);
-    lv_obj_set_style_border_color(wifi_info_dialog, lv_color_hex(COLOR_OVERLAY), 0);
+    lv_obj_set_style_bg_color(wifi_info_dialog, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mantle), 0);
+    lv_obj_set_style_border_color(wifi_info_dialog, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), 0);
     lv_obj_set_style_border_width(wifi_info_dialog, 2, 0);
     lv_obj_set_style_radius(wifi_info_dialog, 10, 0);
     lv_obj_clear_flag(wifi_info_dialog, LV_OBJ_FLAG_SCROLLABLE);
@@ -76,17 +76,17 @@ static void wifi_icon_click_cb(lv_event_t * e) {
     lv_obj_t * lbl_title = lv_label_create(wifi_info_dialog);
     lv_label_set_text(lbl_title, "WiFi Info");
     lv_obj_set_style_text_font(lbl_title, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, 0);
-    lv_obj_set_style_text_color(lbl_title, lv_color_hex(COLOR_TEXT), 0);
+    lv_obj_set_style_text_color(lbl_title, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), 0);
     lv_obj_align(lbl_title, LV_ALIGN_TOP_MID, 0, isLargeScreen ? 10 : 5);
 
     // Status label
     lv_obj_t * lbl_status = lv_label_create(wifi_info_dialog);
     if (WiFi.getMode() == WIFI_AP) {
         lv_label_set_text(lbl_status, "AP Mode Active");
-        lv_obj_set_style_text_color(lbl_status, lv_color_hex(COLOR_MAUVE), 0);
+        lv_obj_set_style_text_color(lbl_status, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), 0);
     } else {
         lv_label_set_text(lbl_status, "Connected");
-        lv_obj_set_style_text_color(lbl_status, lv_color_hex(COLOR_GREEN), 0);
+        lv_obj_set_style_text_color(lbl_status, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).green), 0);
     }
     lv_obj_set_style_text_font(lbl_status, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, 0);
     lv_obj_align(lbl_status, LV_ALIGN_TOP_MID, 0, isLargeScreen ? 40 : 25);
@@ -111,19 +111,19 @@ static void wifi_icon_click_cb(lv_event_t * e) {
     lv_label_set_text(lbl_info, infoBuf);
     lv_obj_set_style_text_font(lbl_info, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, 0);
     lv_obj_set_style_text_align(lbl_info, LV_TEXT_ALIGN_CENTER, 0);
-    lv_obj_set_style_text_color(lbl_info, lv_color_hex(COLOR_TEXT), 0);
+    lv_obj_set_style_text_color(lbl_info, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), 0);
     lv_obj_align(lbl_info, LV_ALIGN_CENTER, 0, isLargeScreen ? 10 : 15);
 
     // Close Button
     lv_obj_t * btn_close = lv_btn_create(wifi_info_dialog);
     lv_obj_set_size(btn_close, isLargeScreen ? 120 : 80, isLargeScreen ? 40 : 30);
     lv_obj_align(btn_close, LV_ALIGN_BOTTOM_MID, 0, isLargeScreen ? -15 : -5);
-    lv_obj_set_style_bg_color(btn_close, lv_color_hex(COLOR_OVERLAY), 0);
+    lv_obj_set_style_bg_color(btn_close, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), 0);
     lv_obj_add_event_cb(btn_close, close_wifi_info_cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t * lbl_close = lv_label_create(btn_close);
     lv_label_set_text(lbl_close, "Close");
-    lv_obj_set_style_text_color(lbl_close, lv_color_hex(COLOR_CRUST), 0);
+    lv_obj_set_style_text_color(lbl_close, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), 0);
     lv_obj_set_style_text_font(lbl_close, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, 0);
     lv_obj_align(lbl_close, LV_ALIGN_CENTER, 0, 0);
 }
@@ -223,11 +223,11 @@ static void ta_event_cb(lv_event_t * e) {
         if (ui_settings_kb == nullptr) {
             ui_settings_kb = lv_keyboard_create(lv_scr_act());
             lv_keyboard_set_mode(ui_settings_kb, LV_KEYBOARD_MODE_NUMBER);
-            lv_obj_set_style_bg_color(ui_settings_kb, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
-            lv_obj_set_style_bg_color(ui_settings_kb, lv_color_hex(COLOR_MANTLE), LV_PART_ITEMS);
-            lv_obj_set_style_text_color(ui_settings_kb, lv_color_hex(COLOR_TEXT), LV_PART_ITEMS);
-            lv_obj_set_style_bg_color(ui_settings_kb, lv_color_hex(COLOR_BLUE), LV_PART_ITEMS | LV_STATE_CHECKED);
-            lv_obj_set_style_text_color(ui_settings_kb, lv_color_hex(COLOR_CRUST), LV_PART_ITEMS | LV_STATE_CHECKED);
+            lv_obj_set_style_bg_color(ui_settings_kb, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+            lv_obj_set_style_bg_color(ui_settings_kb, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mantle), LV_PART_ITEMS);
+            lv_obj_set_style_text_color(ui_settings_kb, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_ITEMS);
+            lv_obj_set_style_bg_color(ui_settings_kb, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_ITEMS | LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(ui_settings_kb, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_ITEMS | LV_STATE_CHECKED);
         }
         lv_keyboard_set_textarea(ui_settings_kb, ta);
         lv_obj_clear_flag(ui_settings_kb, LV_OBJ_FLAG_HIDDEN);
@@ -460,13 +460,13 @@ static void chart_draw_event_cb(lv_event_t * e) {
     if (dsc->part == LV_PART_TICKS || dsc->type == LV_CHART_DRAW_PART_TICK_LABEL) {
         // Style the tick lines
         if (dsc->line_dsc) {
-            dsc->line_dsc->color = lv_color_hex(COLOR_OVERLAY);
+            dsc->line_dsc->color = TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0);
             dsc->line_dsc->width = 2;
         }
         
         // Style the tick text labels
         if (dsc->label_dsc) {
-            dsc->label_dsc->color = lv_color_hex(COLOR_TEXT);
+            dsc->label_dsc->color = TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text);
         }
 
         if (dsc->id == LV_CHART_AXIS_PRIMARY_X && dsc->text) {
@@ -490,7 +490,7 @@ void initUI() {
     ui_settings_kb = nullptr;
     // Main screen setup (light grey background -> Catppuccin Base)
     lv_obj_t * scr = lv_scr_act();
-    lv_obj_set_style_bg_color(scr, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(scr, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).base), LV_PART_MAIN);
 
     // 1. Header Bar Container
     int rotation = 1;
@@ -506,7 +506,7 @@ void initUI() {
     lv_obj_t * header = lv_obj_create(scr);
     lv_obj_set_size(header, screen_w, header_h);
     lv_obj_align(header, LV_ALIGN_TOP_MID, 0, 0);
-    lv_obj_set_style_bg_color(header, lv_color_hex(COLOR_CRUST), LV_PART_MAIN); // Crust header background
+    lv_obj_set_style_bg_color(header, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN); // Crust header background
     lv_obj_set_style_border_width(header, 0, LV_PART_MAIN);
     lv_obj_set_style_radius(header, 0, LV_PART_MAIN);
     lv_obj_clear_flag(header, LV_OBJ_FLAG_SCROLLABLE);
@@ -518,7 +518,7 @@ void initUI() {
 #else
     lv_label_set_text(header_title, isLandscape ? "CYD Weather Station" : "CYD Weather\nStation");
 #endif
-    lv_obj_set_style_text_color(header_title, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(header_title, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_align(header_title, LV_ALIGN_LEFT_MID, 10, 0);
     lv_label_set_long_mode(header_title, LV_LABEL_LONG_DOT);
     lv_obj_set_width(header_title, isLandscape ? 220 : 120);
@@ -538,7 +538,7 @@ void initUI() {
     // Wi-Fi Label in Header
     wifi_label = lv_label_create(header_right_area);
     lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
-    lv_obj_set_style_text_color(wifi_label, lv_color_hex(COLOR_YELLOW), LV_PART_MAIN); // Yellow / Amber icon
+    lv_obj_set_style_text_color(wifi_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).yellow), LV_PART_MAIN); // Yellow / Amber icon
     lv_obj_add_flag(wifi_label, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_ext_click_area(wifi_label, 15);
     lv_obj_add_event_cb(wifi_label, wifi_icon_click_cb, LV_EVENT_CLICKED, NULL);
@@ -546,12 +546,12 @@ void initUI() {
     // Time Label in Header
     time_label = lv_label_create(header_right_area);
     lv_label_set_text(time_label, "--:--");
-    lv_obj_set_style_text_color(time_label, lv_color_hex(COLOR_HEADER_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(time_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
 
     // Offline Label in Header (initially hidden)
     offline_indicator = lv_label_create(header_right_area);
     lv_label_set_text(offline_indicator, LV_SYMBOL_WARNING " Offline");
-    lv_obj_set_style_text_color(offline_indicator, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+    lv_obj_set_style_text_color(offline_indicator, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).peach), LV_PART_MAIN);
     lv_obj_add_flag(offline_indicator, LV_OBJ_FLAG_HIDDEN);
 
     // 2. Tabview Setup
@@ -562,13 +562,13 @@ void initUI() {
 
     // Style the tabview container and buttons
     lv_obj_t * tab_btns = lv_tabview_get_tab_btns(tabview);
-    lv_obj_set_style_bg_color(tabview, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tabview, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).base), LV_PART_MAIN);
     
     // Style the buttons
-    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
-    lv_obj_set_style_text_color(tab_btns, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(tab_btns, lv_color_hex(COLOR_BASE), LV_PART_ITEMS | LV_STATE_CHECKED);
-    lv_obj_set_style_text_color(tab_btns, lv_color_hex(COLOR_PEACH), LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(tab_btns, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(tab_btns, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_btns, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).base), LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(tab_btns, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).peach), LV_PART_ITEMS | LV_STATE_CHECKED);
 
     // Adjust button padding and gaps to prevent text cramping in portrait mode (where width is only 240px)
     lv_obj_set_style_pad_left(tab_btns, isLandscape ? 8 : 2, LV_PART_ITEMS);
@@ -593,10 +593,10 @@ void initUI() {
     // NOTE: Do NOT clear LV_OBJ_FLAG_SCROLLABLE on the tab panels —
     // the tabview's internal content object uses horizontal scrolling to
     // animate between tabs when the user swipes left/right.
-    lv_obj_set_style_bg_color(tab_curr, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(tab_fore, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(tab_hourly, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(tab_settings, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_curr, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).base), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_fore, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).base), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_hourly, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).base), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(tab_settings, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).base), LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_curr, 5, LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_fore, 5, LV_PART_MAIN);
     lv_obj_set_style_pad_all(tab_hourly, 5, LV_PART_MAIN);
@@ -618,10 +618,10 @@ void initUI() {
     lv_chart_set_type(hourly_chart, LV_CHART_TYPE_LINE);
 
     // Styling Catppuccin
-    lv_obj_set_style_bg_color(hourly_chart, lv_color_hex(COLOR_BASE), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(hourly_chart, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).base), LV_PART_MAIN);
     lv_obj_set_style_border_width(hourly_chart, 0, LV_PART_MAIN);
-    lv_obj_set_style_line_color(hourly_chart, lv_color_hex(COLOR_OVERLAY), LV_PART_ITEMS); // grid lines
-    lv_obj_set_style_text_color(hourly_chart, lv_color_hex(COLOR_TEXT), LV_PART_TICKS); // axis tick text
+    lv_obj_set_style_line_color(hourly_chart, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_ITEMS); // grid lines
+    lv_obj_set_style_text_color(hourly_chart, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_TICKS); // axis tick text
     lv_obj_set_style_text_font(hourly_chart, isLargeScreen ? &lv_font_montserrat_14 : &lv_font_montserrat_10, LV_PART_TICKS);
     lv_obj_set_style_line_rounded(hourly_chart, true, LV_PART_ITEMS);
     lv_obj_set_style_line_width(hourly_chart, 3, LV_PART_ITEMS);
@@ -644,8 +644,8 @@ void initUI() {
     lv_obj_add_event_cb(hourly_chart, chart_draw_event_cb, LV_EVENT_DRAW_PART_BEGIN, NULL);
 
     // Add series
-    hourly_temp_series = lv_chart_add_series(hourly_chart, lv_color_hex(COLOR_MAUVE), LV_CHART_AXIS_PRIMARY_Y);
-    hourly_precip_series = lv_chart_add_series(hourly_chart, lv_color_hex(COLOR_BLUE), LV_CHART_AXIS_SECONDARY_Y);
+    hourly_temp_series = lv_chart_add_series(hourly_chart, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), LV_CHART_AXIS_PRIMARY_Y);
+    hourly_precip_series = lv_chart_add_series(hourly_chart, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_CHART_AXIS_SECONDARY_Y);
 
     // Container for the icon to accurately center it in the remaining space
     lv_obj_t * icon_cnt = lv_obj_create(tab_curr);
@@ -669,7 +669,7 @@ void initUI() {
         lv_obj_set_style_text_font(icon_lbl, &weather_icons_48, LV_PART_MAIN);
     }
     lv_label_set_text(icon_lbl, "\xef\x81\xbb"); // fallback NA icon (f07b)
-    lv_obj_set_style_text_color(icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_text_color(icon_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
     lv_obj_align(icon_lbl, LV_ALIGN_CENTER, 0, 0);
  
     // Vertical container for details on the right side
@@ -711,7 +711,7 @@ void initUI() {
     lv_obj_t * temp_icon_lbl = lv_label_create(temp_cnt);
     lv_obj_set_style_text_font(temp_icon_lbl, isLargeScreen ? &weather_icons_24 : &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(temp_icon_lbl, "\xef\x81\x95"); // U+F055 wi-thermometer
-    lv_obj_set_style_text_color(temp_icon_lbl, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+    lv_obj_set_style_text_color(temp_icon_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).peach), LV_PART_MAIN);
     lv_obj_set_width(temp_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(temp_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
@@ -722,7 +722,7 @@ void initUI() {
         lv_label_set_text(temp_label, "--.- °C");
     }
     lv_obj_set_style_text_font(temp_label, isLargeScreen ? &lv_font_montserrat_48 : &lv_font_montserrat_28, LV_PART_MAIN);
-    lv_obj_set_style_text_color(temp_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+    lv_obj_set_style_text_color(temp_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).peach), LV_PART_MAIN);
 
     // --- Humidity row (wi-humidity + value) ---
     lv_obj_t * hum_cnt = lv_obj_create(details_cnt);
@@ -739,14 +739,14 @@ void initUI() {
     lv_obj_t * hum_icon_lbl = lv_label_create(hum_cnt);
     lv_obj_set_style_text_font(hum_icon_lbl, isLargeScreen ? &weather_icons_24 : &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(hum_icon_lbl, "\xef\x81\xba"); // U+F07A wi-humidity
-    lv_obj_set_style_text_color(hum_icon_lbl, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
+    lv_obj_set_style_text_color(hum_icon_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_MAIN);
     lv_obj_set_width(hum_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(hum_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     hum_label = lv_label_create(hum_cnt);
     lv_obj_set_style_text_font(hum_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(hum_label, "--%");
-    lv_obj_set_style_text_color(hum_label, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
+    lv_obj_set_style_text_color(hum_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_MAIN);
 
     // --- Wind row (wi-windy + value) ---
     lv_obj_t * wind_cnt = lv_obj_create(details_cnt);
@@ -763,14 +763,14 @@ void initUI() {
     lv_obj_t * wind_icon_lbl = lv_label_create(wind_cnt);
     lv_obj_set_style_text_font(wind_icon_lbl, isLargeScreen ? &weather_icons_24 : &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(wind_icon_lbl, "\xef\x80\xa1"); // U+F021 (wi-windy)
-    lv_obj_set_style_text_color(wind_icon_lbl, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
+    lv_obj_set_style_text_color(wind_icon_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).lavender), LV_PART_MAIN);
     lv_obj_set_width(wind_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(wind_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     wind_label = lv_label_create(wind_cnt);
     lv_obj_set_style_text_font(wind_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(wind_label, "Wind: -- km/h");
-    lv_obj_set_style_text_color(wind_label, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN);
+    lv_obj_set_style_text_color(wind_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).lavender), LV_PART_MAIN);
 
     // --- Status row (dynamic weather-code icon + description text) ---
     lv_obj_t * status_cnt = lv_obj_create(details_cnt);
@@ -787,14 +787,14 @@ void initUI() {
     status_icon_lbl = lv_label_create(status_cnt);
     lv_obj_set_style_text_font(status_icon_lbl, isLargeScreen ? &weather_icons_24 : &weather_icons_16, LV_PART_MAIN); // 16px icon
     lv_label_set_text(status_icon_lbl, "\xef\x81\xbb"); // U+F07B wi-na (updated on fetch)
-    lv_obj_set_style_text_color(status_icon_lbl, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_text_color(status_icon_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
     lv_obj_set_width(status_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(status_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     status_lbl = lv_label_create(status_cnt);
     lv_obj_set_style_text_font(status_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(status_lbl, "Updating...");
-    lv_obj_set_style_text_color(status_lbl, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
+    lv_obj_set_style_text_color(status_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), LV_PART_MAIN);
 
     // --- Local Sensor row (wi-thermometer + text) ---
     local_sensor_cnt = lv_obj_create(details_cnt);
@@ -812,14 +812,14 @@ void initUI() {
     lv_obj_t * loc_icon_lbl = lv_label_create(local_sensor_cnt);
     lv_obj_set_style_text_font(loc_icon_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(loc_icon_lbl, LV_SYMBOL_HOME);
-    lv_obj_set_style_text_color(loc_icon_lbl, lv_color_hex(COLOR_GREEN), LV_PART_MAIN);
+    lv_obj_set_style_text_color(loc_icon_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).green), LV_PART_MAIN);
     lv_obj_set_width(loc_icon_lbl, isLargeScreen ? 30 : 20);
     lv_obj_set_style_text_align(loc_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     local_sensor_lbl = lv_label_create(local_sensor_cnt);
     lv_obj_set_style_text_font(local_sensor_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_text(local_sensor_lbl, "Local: --.-° / --%");
-    lv_obj_set_style_text_color(local_sensor_lbl, lv_color_hex(COLOR_GREEN), LV_PART_MAIN);
+    lv_obj_set_style_text_color(local_sensor_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).green), LV_PART_MAIN);
     
     if (!settings.getLocalSensorEnabled()) {
         lv_obj_add_flag(local_sensor_cnt, LV_OBJ_FLAG_HIDDEN);
@@ -828,7 +828,7 @@ void initUI() {
     // Footer bar: "Last Update: HH:MM | City Name"
     footer_label = lv_label_create(tab_curr);
     lv_label_set_text(footer_label, "Last Update: -- | --");
-    lv_obj_set_style_text_color(footer_label, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+    lv_obj_set_style_text_color(footer_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
     lv_obj_set_style_text_font(footer_label, &lv_font_montserrat_14, LV_PART_MAIN);
     lv_label_set_long_mode(footer_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(footer_label, isLandscape ? 300 : 220);
@@ -840,10 +840,10 @@ void initUI() {
         lv_obj_t *day_card = lv_obj_create(tab_fore);
         
         // Card styling: Catppuccin Mantle background
-        lv_obj_set_style_bg_color(day_card, lv_color_hex(COLOR_MANTLE), LV_PART_MAIN);
+        lv_obj_set_style_bg_color(day_card, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mantle), LV_PART_MAIN);
         lv_obj_set_style_radius(day_card, 8, LV_PART_MAIN);
         lv_obj_set_style_border_width(day_card, 1, LV_PART_MAIN);
-        lv_obj_set_style_border_color(day_card, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+        lv_obj_set_style_border_color(day_card, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
         lv_obj_clear_flag(day_card, LV_OBJ_FLAG_SCROLLABLE);
 
         if (isLandscape) {
@@ -861,28 +861,28 @@ void initUI() {
             fore_day_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tmrw" : "Day"));
             lv_obj_set_style_text_font(fore_day_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
-            lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+            lv_obj_set_style_text_color(fore_day_label[i], TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
             lv_obj_align(fore_day_label[i], LV_ALIGN_TOP_MID, 0, 5);
 
             // 2. Weather Icon Label
             fore_icon_label[i] = lv_label_create(day_card);
             lv_obj_set_style_text_font(fore_icon_label[i], isLargeScreen ? &weather_icons_48 : &weather_icons_24, LV_PART_MAIN);
             lv_label_set_text(fore_icon_label[i], "\xef\x81\xbb"); // fallback NA
-            lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+            lv_obj_set_style_text_color(fore_icon_label[i], TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
             lv_obj_align(fore_icon_label[i], LV_ALIGN_CENTER, 0, -5);
 
             // 3. Temp Label (High / Low)
             fore_temp_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_temp_label[i], "--°/--°");
             lv_obj_set_style_text_font(fore_temp_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
-            lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+            lv_obj_set_style_text_color(fore_temp_label[i], TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).peach), LV_PART_MAIN);
             lv_obj_align(fore_temp_label[i], LV_ALIGN_BOTTOM_MID, 0, isLargeScreen ? -40 : -22);
 
             // 4. Status Description Label
             fore_desc_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_desc_label[i], "Loading...");
             lv_obj_set_style_text_font(fore_desc_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
-            lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
+            lv_obj_set_style_text_color(fore_desc_label[i], TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), LV_PART_MAIN);
             lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
             lv_obj_set_width(fore_desc_label[i], lv_pct(95));
             lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_CENTER, 0);
@@ -904,7 +904,7 @@ void initUI() {
             fore_day_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_day_label[i], i == 0 ? "Today" : (i == 1 ? "Tmrw" : "Day"));
             lv_obj_set_style_text_font(fore_day_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
-            lv_obj_set_style_text_color(fore_day_label[i], lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+            lv_obj_set_style_text_color(fore_day_label[i], TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
             lv_obj_set_width(fore_day_label[i], isLargeScreen ? 65 : 50); // Increased from 60
             lv_obj_set_style_text_align(fore_day_label[i], LV_TEXT_ALIGN_LEFT, 0);
 
@@ -912,7 +912,7 @@ void initUI() {
             fore_icon_label[i] = lv_label_create(day_card);
             lv_obj_set_style_text_font(fore_icon_label[i], isLargeScreen ? &weather_icons_48 : &weather_icons_24, LV_PART_MAIN);
             lv_label_set_text(fore_icon_label[i], "\xef\x81\xbb"); // fallback NA
-            lv_obj_set_style_text_color(fore_icon_label[i], lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
+            lv_obj_set_style_text_color(fore_icon_label[i], TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
             lv_obj_set_width(fore_icon_label[i], isLargeScreen ? 48 : 24);
             lv_obj_set_style_text_align(fore_icon_label[i], LV_TEXT_ALIGN_CENTER, 0);
 
@@ -920,7 +920,7 @@ void initUI() {
             fore_temp_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_temp_label[i], "--°/--°");
             lv_obj_set_style_text_font(fore_temp_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
-            lv_obj_set_style_text_color(fore_temp_label[i], lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+            lv_obj_set_style_text_color(fore_temp_label[i], TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).peach), LV_PART_MAIN);
             lv_obj_set_width(fore_temp_label[i], isLargeScreen ? 85 : 65); // Increased from 70
             lv_obj_set_style_text_align(fore_temp_label[i], LV_TEXT_ALIGN_CENTER, 0);
 
@@ -928,7 +928,7 @@ void initUI() {
             fore_desc_label[i] = lv_label_create(day_card);
             lv_label_set_text(fore_desc_label[i], "Loading...");
             lv_obj_set_style_text_font(fore_desc_label[i], isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
-            lv_obj_set_style_text_color(fore_desc_label[i], lv_color_hex(COLOR_MAUVE), LV_PART_MAIN);
+            lv_obj_set_style_text_color(fore_desc_label[i], TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), LV_PART_MAIN);
             lv_label_set_long_mode(fore_desc_label[i], LV_LABEL_LONG_SCROLL_CIRCULAR);
             lv_obj_set_flex_grow(fore_desc_label[i], 1);
             lv_obj_set_style_text_align(fore_desc_label[i], LV_TEXT_ALIGN_RIGHT, 0);
@@ -988,17 +988,17 @@ void initUI() {
 
     lv_obj_t * unit_label = lv_label_create(unit_row);
     lv_label_set_text(unit_label, "Unit (C/F)");
-    lv_obj_set_style_text_color(unit_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(unit_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(unit_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * unit_sw = lv_switch_create(unit_row);
     lv_obj_set_size(unit_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
     // Switch track — off state
-    lv_obj_set_style_bg_color(unit_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(unit_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     // Switch track — on/checked state
-    lv_obj_set_style_bg_color(unit_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(unit_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
     // Switch knob
-    lv_obj_set_style_bg_color(unit_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(unit_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getUnitSystem() == UNIT_IMPERIAL) {
         lv_obj_add_state(unit_sw, LV_STATE_CHECKED);
     }
@@ -1017,7 +1017,7 @@ void initUI() {
 
     lv_obj_t * auto_label = lv_label_create(auto_row);
     lv_label_set_text(auto_label, "Auto Light");
-    lv_obj_set_style_text_color(auto_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(auto_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(auto_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
 
@@ -1035,14 +1035,14 @@ void initUI() {
 
     lv_obj_t * sd_label = lv_label_create(sd_row);
     lv_label_set_text(sd_label, "SD Log");
-    lv_obj_set_style_text_color(sd_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(sd_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(sd_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_sd_log_sw = lv_switch_create(sd_row);
     lv_obj_set_size(ui_sd_log_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(ui_sd_log_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_sd_log_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(ui_sd_log_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sd_log_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sd_log_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_sd_log_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (SdCardManager::isCardPresent()) {
         if (settings.getSdLoggingEnabled()) {
             lv_obj_add_state(ui_sd_log_sw, LV_STATE_CHECKED);
@@ -1065,14 +1065,14 @@ void initUI() {
 
     lv_obj_t * sd_cache_label = lv_label_create(sd_cache_row);
     lv_label_set_text(sd_cache_label, "SD Cache");
-    lv_obj_set_style_text_color(sd_cache_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(sd_cache_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(sd_cache_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_sd_cache_sw = lv_switch_create(sd_cache_row);
     lv_obj_set_size(ui_sd_cache_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(ui_sd_cache_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_sd_cache_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(ui_sd_cache_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sd_cache_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sd_cache_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_sd_cache_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (SdCardManager::isCardPresent()) {
         if (settings.getSdCacheEnabled()) {
             lv_obj_add_state(ui_sd_cache_sw, LV_STATE_CHECKED);
@@ -1095,14 +1095,14 @@ void initUI() {
 
     lv_obj_t * scr_label = lv_label_create(scr_row);
     lv_label_set_text(scr_label, "API Srv");
-    lv_obj_set_style_text_color(scr_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(scr_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(scr_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * scr_sw = lv_switch_create(scr_row);
     lv_obj_set_size(scr_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(scr_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(scr_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(scr_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(scr_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getScreenshotServerEnabled()) {
         lv_obj_add_state(scr_sw, LV_STATE_CHECKED);
     }
@@ -1121,14 +1121,14 @@ void initUI() {
 
     lv_obj_t * loc_sens_label = lv_label_create(loc_sens_row);
     lv_label_set_text(loc_sens_label, "Local Sensor");
-    lv_obj_set_style_text_color(loc_sens_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(loc_sens_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(loc_sens_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_sw_local_sensor = lv_switch_create(loc_sens_row);
     lv_obj_set_size(ui_sw_local_sensor, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(ui_sw_local_sensor, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_sw_local_sensor, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(ui_sw_local_sensor, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sw_local_sensor, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sw_local_sensor, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_sw_local_sensor, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getLocalSensorEnabled()) {
         lv_obj_add_state(ui_sw_local_sensor, LV_STATE_CHECKED);
     }
@@ -1147,14 +1147,14 @@ void initUI() {
 
     lv_obj_t * saver_label = lv_label_create(saver_row);
     lv_label_set_text(saver_label, "Scr Saver");
-    lv_obj_set_style_text_color(saver_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(saver_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(saver_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_screensaver_sw = lv_switch_create(saver_row);
     lv_obj_set_size(ui_screensaver_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(ui_screensaver_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_screensaver_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(ui_screensaver_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_screensaver_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_screensaver_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_screensaver_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getScreensaverEnabled()) {
         lv_obj_add_state(ui_screensaver_sw, LV_STATE_CHECKED);
     }
@@ -1174,14 +1174,14 @@ void initUI() {
 
     lv_obj_t *sleep_label = lv_label_create(sleep_row);
     lv_label_set_text(sleep_label, "Sleep Schedule");
-    lv_obj_set_style_text_color(sleep_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(sleep_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(sleep_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_sleep_sw = lv_switch_create(sleep_row);
     lv_obj_set_size(ui_sleep_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(ui_sleep_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sleep_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_sleep_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_sleep_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getSleepScheduleEnabled()) {
         lv_obj_add_state(ui_sleep_sw, LV_STATE_CHECKED);
     }
@@ -1201,14 +1201,14 @@ void initUI() {
 
     lv_obj_t * mqtt_label = lv_label_create(mqtt_row);
     lv_label_set_text(mqtt_label, "MQTT");
-    lv_obj_set_style_text_color(mqtt_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(mqtt_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(mqtt_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * mqtt_sw = lv_switch_create(mqtt_row);
     lv_obj_set_size(mqtt_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(mqtt_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(mqtt_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(mqtt_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(mqtt_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getMqttEnabled()) {
         lv_obj_add_state(mqtt_sw, LV_STATE_CHECKED);
     }
@@ -1221,7 +1221,7 @@ void initUI() {
     char slider_buf[32];
     snprintf(slider_buf, sizeof(slider_buf), "Bright: %d%%", settings.getBrightness());
     lv_label_set_text(slider_label, slider_buf);
-    lv_obj_set_style_text_color(slider_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(slider_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(slider_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     // Brightness slider — suppress thumb padding so it doesn't bloat height
@@ -1230,11 +1230,11 @@ void initUI() {
     lv_obj_set_style_pad_top(ui_brightness_slider, 4, LV_PART_KNOB);
     lv_obj_set_style_pad_bottom(ui_brightness_slider, 4, LV_PART_KNOB);
     // Slider track (unfilled)
-    lv_obj_set_style_bg_color(ui_brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_brightness_slider, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
     // Slider filled indicator
-    lv_obj_set_style_bg_color(ui_brightness_slider, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_brightness_slider, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_DEFAULT);
     // Slider knob
-    lv_obj_set_style_bg_color(ui_brightness_slider, lv_color_hex(COLOR_TEXT), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_brightness_slider, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_slider_set_range(ui_brightness_slider, 10, 100);
     lv_slider_set_value(ui_brightness_slider, settings.getBrightness(), LV_ANIM_OFF);
     lv_obj_add_event_cb(ui_brightness_slider, brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, slider_label);
@@ -1255,7 +1255,7 @@ void initUI() {
 
     lv_obj_t * led_label_txt = lv_label_create(led_row);
     lv_label_set_text(led_label_txt, "LED");
-    lv_obj_set_style_text_color(led_label_txt, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(led_label_txt, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(led_label_txt, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     // --- right column LED Brightness label + slider (created first so we can pass as user_data) ---
@@ -1264,16 +1264,16 @@ void initUI() {
     int led_bright_pct = (settings.getLedBrightness() * 100) / 255;
     snprintf(led_slider_buf, sizeof(led_slider_buf), "LED: %d%%", led_bright_pct);
     lv_label_set_text(led_slider_label, led_slider_buf);
-    lv_obj_set_style_text_color(led_slider_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(led_slider_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(led_slider_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_led_brightness_slider = lv_slider_create(right_col);
     lv_obj_set_size(ui_led_brightness_slider, lv_pct(92), 14);
     lv_obj_set_style_pad_top(ui_led_brightness_slider, 4, LV_PART_KNOB);
     lv_obj_set_style_pad_bottom(ui_led_brightness_slider, 4, LV_PART_KNOB);
-    lv_obj_set_style_bg_color(ui_led_brightness_slider, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_led_brightness_slider, lv_color_hex(COLOR_MAUVE), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_led_brightness_slider, lv_color_hex(COLOR_TEXT), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_led_brightness_slider, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_led_brightness_slider, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_led_brightness_slider, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_slider_set_range(ui_led_brightness_slider, 0, 255);
     lv_slider_set_value(ui_led_brightness_slider, settings.getLedBrightness(), LV_ANIM_OFF);
     lv_obj_add_event_cb(ui_led_brightness_slider, led_brightness_slider_event_cb, LV_EVENT_VALUE_CHANGED, led_slider_label);
@@ -1284,9 +1284,9 @@ void initUI() {
     // --- LED enable switch (created after slider so slider can be passed as user_data) ---
     ui_led_sw = lv_switch_create(led_row);
     lv_obj_set_size(ui_led_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(ui_led_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_led_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(ui_led_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_led_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_led_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_led_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getLedEnabled()) {
         lv_obj_add_state(ui_led_sw, LV_STATE_CHECKED);
     }
@@ -1295,9 +1295,9 @@ void initUI() {
     // Auto switch (created after slider so we can pass slider as user_data)
     ui_auto_bright_sw = lv_switch_create(auto_row);
     lv_obj_set_size(ui_auto_bright_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(ui_auto_bright_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_auto_bright_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(ui_auto_bright_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_auto_bright_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_auto_bright_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_auto_bright_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getAutoBrightness()) {
         lv_obj_add_state(ui_auto_bright_sw, LV_STATE_CHECKED);
     }
@@ -1306,7 +1306,7 @@ void initUI() {
     // Timezone label
     lv_obj_t * tz_label = lv_label_create(right_col);
     lv_label_set_text(tz_label, "Timezone");
-    lv_obj_set_style_text_color(tz_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(tz_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(tz_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     // Timezone +/- row
@@ -1322,11 +1322,11 @@ void initUI() {
 
     lv_obj_t * tz_minus_btn = lv_btn_create(tz_row);
     lv_obj_set_size(tz_minus_btn, 30, 24);
-    lv_obj_set_style_bg_color(tz_minus_btn, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(tz_minus_btn, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(tz_minus_btn, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(tz_minus_btn, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).lavender), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_t * tz_minus_lbl = lv_label_create(tz_minus_btn);
     lv_label_set_text(tz_minus_lbl, "-");
-    lv_obj_set_style_text_color(tz_minus_lbl, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
+    lv_obj_set_style_text_color(tz_minus_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
     lv_obj_align(tz_minus_lbl, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(tz_minus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)-1);
 
@@ -1340,16 +1340,16 @@ void initUI() {
         }
     }
     lv_label_set_text(tz_val_label, init_tz_label);
-    lv_obj_set_style_text_color(tz_val_label, lv_color_hex(COLOR_PEACH), LV_PART_MAIN);
+    lv_obj_set_style_text_color(tz_val_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).peach), LV_PART_MAIN);
     lv_obj_set_style_text_font(tz_val_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     lv_obj_t * tz_plus_btn = lv_btn_create(tz_row);
     lv_obj_set_size(tz_plus_btn, 30, 24);
-    lv_obj_set_style_bg_color(tz_plus_btn, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(tz_plus_btn, lv_color_hex(COLOR_LAVENDER), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(tz_plus_btn, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(tz_plus_btn, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).lavender), LV_PART_MAIN | LV_STATE_PRESSED);
     lv_obj_t * tz_plus_lbl = lv_label_create(tz_plus_btn);
     lv_label_set_text(tz_plus_lbl, "+");
-    lv_obj_set_style_text_color(tz_plus_lbl, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
+    lv_obj_set_style_text_color(tz_plus_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
     lv_obj_align(tz_plus_lbl, LV_ALIGN_CENTER, 0, 0);
     lv_obj_add_event_cb(tz_plus_btn, tz_btn_event_cb, LV_EVENT_CLICKED, (void*)(intptr_t)1);
 
@@ -1366,14 +1366,14 @@ void initUI() {
 
     lv_obj_t * h24_label = lv_label_create(h24_row);
     lv_label_set_text(h24_label, "24-Hour Time");
-    lv_obj_set_style_text_color(h24_label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(h24_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(h24_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_24h_sw = lv_switch_create(h24_row);
     lv_obj_set_size(ui_24h_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    lv_obj_set_style_bg_color(ui_24h_sw, lv_color_hex(COLOR_OVERLAY), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_24h_sw, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    lv_obj_set_style_bg_color(ui_24h_sw, lv_color_hex(COLOR_CRUST), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_24h_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_24h_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_24h_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
     if (settings.getUse24HourFormat()) {
         lv_obj_add_state(ui_24h_sw, LV_STATE_CHECKED);
     }
@@ -1387,17 +1387,17 @@ void initUI() {
     lv_dropdown_set_selected(theme_dropdown, settings.getThemeFlavor() - 1);
     lv_obj_add_event_cb(theme_dropdown, theme_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     // Dropdown button body
-    lv_obj_set_style_bg_color(theme_dropdown, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(theme_dropdown, lv_color_hex(COLOR_TEXT), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(theme_dropdown, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(theme_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(theme_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(theme_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(theme_dropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     // Dropdown list
     lv_obj_t * dropdown_list = lv_dropdown_get_list(theme_dropdown);
-    lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
-    lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-    lv_obj_set_style_border_color(dropdown_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(dropdown_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
-    lv_obj_set_style_text_color(dropdown_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(dropdown_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(dropdown_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_border_color(dropdown_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(dropdown_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(dropdown_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
 
     // Orientation selector dropdown
     lv_obj_t * orientation_dropdown = lv_dropdown_create(right_col);
@@ -1409,17 +1409,17 @@ void initUI() {
     }
     lv_obj_add_event_cb(orientation_dropdown, orientation_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     // Dropdown button body
-    lv_obj_set_style_bg_color(orientation_dropdown, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(orientation_dropdown, lv_color_hex(COLOR_TEXT), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(orientation_dropdown, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(orientation_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(orientation_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(orientation_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(orientation_dropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     // Dropdown list
     lv_obj_t * orient_list = lv_dropdown_get_list(orientation_dropdown);
-    lv_obj_set_style_bg_color(orient_list, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
-    lv_obj_set_style_text_color(orient_list, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-    lv_obj_set_style_border_color(orient_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(orient_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
-    lv_obj_set_style_text_color(orient_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(orient_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(orient_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_border_color(orient_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(orient_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(orient_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
 
     // Local Sensor Type Dropdown
     ui_dd_local_sensor_type = lv_dropdown_create(right_col);
@@ -1427,21 +1427,21 @@ void initUI() {
     lv_dropdown_set_options(ui_dd_local_sensor_type, "DHT22\nSHT40\nDHT11");
     lv_dropdown_set_selected(ui_dd_local_sensor_type, settings.getLocalSensorType() - 1);
     lv_obj_add_event_cb(ui_dd_local_sensor_type, local_sensor_type_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_obj_set_style_bg_color(ui_dd_local_sensor_type, lv_color_hex(COLOR_CRUST), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(ui_dd_local_sensor_type, lv_color_hex(COLOR_TEXT), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_color(ui_dd_local_sensor_type, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_dd_local_sensor_type, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_dd_local_sensor_type, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_dd_local_sensor_type, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(ui_dd_local_sensor_type, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_t * loc_type_list = lv_dropdown_get_list(ui_dd_local_sensor_type);
-    lv_obj_set_style_bg_color(loc_type_list, lv_color_hex(COLOR_CRUST), LV_PART_MAIN);
-    lv_obj_set_style_text_color(loc_type_list, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
-    lv_obj_set_style_border_color(loc_type_list, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(loc_type_list, lv_color_hex(COLOR_BLUE), LV_PART_SELECTED | LV_STATE_CHECKED);
-    lv_obj_set_style_text_color(loc_type_list, lv_color_hex(COLOR_CRUST), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(loc_type_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(loc_type_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_border_color(loc_type_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(loc_type_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(loc_type_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
 
     // Local Sensor Update Interval Slider
     lv_obj_t * loc_sens_slider_lbl = lv_label_create(right_col);
     lv_label_set_text_fmt(loc_sens_slider_lbl, "Sensor Update Interval: %ds", settings.getLocalSensorUpdateInterval());
-    lv_obj_set_style_text_color(loc_sens_slider_lbl, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(loc_sens_slider_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(loc_sens_slider_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_slider_local_sensor_update_interval = lv_slider_create(right_col);
@@ -1449,14 +1449,14 @@ void initUI() {
     lv_slider_set_value(ui_slider_local_sensor_update_interval, settings.getLocalSensorUpdateInterval(), LV_ANIM_OFF);
     lv_obj_set_size(ui_slider_local_sensor_update_interval, lv_pct(92), isLargeScreen ? 20 : 10);
     lv_obj_add_event_cb(ui_slider_local_sensor_update_interval, local_sensor_interval_slider_event_cb, LV_EVENT_VALUE_CHANGED, loc_sens_slider_lbl);
-    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, lv_color_hex(COLOR_OVERLAY), LV_PART_MAIN);
-    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, lv_color_hex(COLOR_BLUE), LV_PART_INDICATOR);
-    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, lv_color_hex(COLOR_CRUST), LV_PART_KNOB);
+    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(ui_slider_local_sensor_update_interval, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB);
 
     // Temperature Offset Text Area
     lv_obj_t * temp_offset_lbl = lv_label_create(right_col);
     lv_label_set_text(temp_offset_lbl, "Temperature Offset");
-    lv_obj_set_style_text_color(temp_offset_lbl, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(temp_offset_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(temp_offset_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_ta_temp_offset = lv_textarea_create(right_col);
@@ -1467,13 +1467,13 @@ void initUI() {
     snprintf(ta_buf, sizeof(ta_buf), "%.1f", settings.getLocalSensorTempOffset());
     lv_textarea_set_text(ui_ta_temp_offset, ta_buf);
     lv_obj_add_event_cb(ui_ta_temp_offset, ta_event_cb, LV_EVENT_ALL, NULL);
-    lv_obj_set_style_bg_color(ui_ta_temp_offset, lv_color_hex(COLOR_MANTLE), LV_PART_MAIN);
-    lv_obj_set_style_text_color(ui_ta_temp_offset, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_ta_temp_offset, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mantle), LV_PART_MAIN);
+    lv_obj_set_style_text_color(ui_ta_temp_offset, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
 
     // Humidity Offset Text Area
     lv_obj_t * hum_offset_lbl = lv_label_create(right_col);
     lv_label_set_text(hum_offset_lbl, "Humidity Offset");
-    lv_obj_set_style_text_color(hum_offset_lbl, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_text_color(hum_offset_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(hum_offset_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
     ui_ta_hum_offset = lv_textarea_create(right_col);
@@ -1483,8 +1483,8 @@ void initUI() {
     snprintf(ta_buf, sizeof(ta_buf), "%.1f", settings.getLocalSensorHumOffset());
     lv_textarea_set_text(ui_ta_hum_offset, ta_buf);
     lv_obj_add_event_cb(ui_ta_hum_offset, ta_event_cb, LV_EVENT_ALL, NULL);
-    lv_obj_set_style_bg_color(ui_ta_hum_offset, lv_color_hex(COLOR_MANTLE), LV_PART_MAIN);
-    lv_obj_set_style_text_color(ui_ta_hum_offset, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ui_ta_hum_offset, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mantle), LV_PART_MAIN);
+    lv_obj_set_style_text_color(ui_ta_hum_offset, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
 
     // Re-apply offline indicator state if active
     if (is_offline_mode) {
@@ -1495,16 +1495,16 @@ void initUI() {
 void updateWifiStatus(bool connected) {
     if (connected) {
         lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
-        lv_obj_set_style_text_color(wifi_label, lv_color_hex(COLOR_GREEN), LV_PART_MAIN); // Catppuccin Green
+        lv_obj_set_style_text_color(wifi_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).green), LV_PART_MAIN); // Catppuccin Green
     } else {
         lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
-        lv_obj_set_style_text_color(wifi_label, lv_color_hex(COLOR_RED), LV_PART_MAIN); // Catppuccin Red
+        lv_obj_set_style_text_color(wifi_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).red), LV_PART_MAIN); // Catppuccin Red
     }
 }
 
 void updateWifiAPMode(const char* apSSID) {
     lv_label_set_text(wifi_label, LV_SYMBOL_WIFI);
-    lv_obj_set_style_text_color(wifi_label, lv_color_hex(COLOR_MAUVE), LV_PART_MAIN); // Catppuccin Mauve for AP Mode
+    lv_obj_set_style_text_color(wifi_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mauve), LV_PART_MAIN); // Catppuccin Mauve for AP Mode
 
     lv_label_set_text(status_lbl, "AP Active");
     lv_label_set_text(temp_label, "Setup");
@@ -1557,12 +1557,12 @@ static uint32_t getIconColor(int code) {
     switch (code) {
         case 0:
         case 1:
-            return COLOR_YELLOW;
+            return getCatppuccinFlavor(getCurrentThemeFlavor()).yellow;
         case 2:
         case 3:
         case 45:
         case 48:
-            return COLOR_LAVENDER;
+            return getCatppuccinFlavor(getCurrentThemeFlavor()).lavender;
         case 51:
         case 53:
         case 55:
@@ -1572,7 +1572,7 @@ static uint32_t getIconColor(int code) {
         case 80:
         case 81:
         case 82:
-            return COLOR_BLUE;
+            return getCatppuccinFlavor(getCurrentThemeFlavor()).blue;
         case 56:
         case 57:
         case 66:
@@ -1583,13 +1583,13 @@ static uint32_t getIconColor(int code) {
         case 77:
         case 85:
         case 86:
-            return COLOR_LAVENDER;
+            return getCatppuccinFlavor(getCurrentThemeFlavor()).lavender;
         case 95:
         case 96:
         case 99:
-            return COLOR_MAUVE;
+            return getCatppuccinFlavor(getCurrentThemeFlavor()).mauve;
         default:
-            return COLOR_OVERLAY;
+            return getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0;
     }
 }
 
@@ -1887,8 +1887,8 @@ void showUIStatusMessage(const char* message) {
     lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
     
     // Style card
-    lv_obj_set_style_bg_color(card, lv_color_hex(COLOR_MANTLE), LV_PART_MAIN);
-    lv_obj_set_style_border_color(card, lv_color_hex(COLOR_BLUE), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(card, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).mantle), LV_PART_MAIN);
+    lv_obj_set_style_border_color(card, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_MAIN);
     lv_obj_set_style_border_width(card, 2, LV_PART_MAIN);
     lv_obj_set_style_border_opa(card, LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_set_style_radius(card, 8, LV_PART_MAIN);
@@ -1902,7 +1902,7 @@ void showUIStatusMessage(const char* message) {
     lv_obj_t * label = lv_label_create(card);
     if (label) {
         lv_label_set_text(label, message);
-        lv_obj_set_style_text_color(label, lv_color_hex(COLOR_TEXT), LV_PART_MAIN);
+        lv_obj_set_style_text_color(label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
         lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
     }
     

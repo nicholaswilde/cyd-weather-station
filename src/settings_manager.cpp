@@ -18,7 +18,7 @@ SettingsManager::SettingsManager() {
     _brightness = 80;
     _autoBrightness = USE_LDR_AUTO_BACKLIGHT;
     _timezone = TIMEZONE_DEFAULT;
-    _themeFlavor = CATPPUCCIN_MOCHA;
+    _themeFlavor = DEFAULT_THEME_FLAVOR;
     _sdLoggingEnabled = USE_SD_LOGGING;
     _screenshotServerEnabled = false; // Default to false
     _apiServerEnabled = API_SERVER_ENABLED;
@@ -72,7 +72,7 @@ void SettingsManager::begin() {
     _brightness = prefs.getInt("bright", 80);
     _autoBrightness = prefs.getBool("auto_bright", USE_LDR_AUTO_BACKLIGHT);
     _timezone = prefs.getString("tz", TIMEZONE_DEFAULT);
-    _themeFlavor = prefs.getInt("theme", CATPPUCCIN_MOCHA);
+    _themeFlavor = prefs.getInt("theme", DEFAULT_THEME_FLAVOR);
     _sdLoggingEnabled = prefs.getBool("sd_log", USE_SD_LOGGING);
     _screenshotServerEnabled = prefs.getBool("scr_srv", false);
     _apiServerEnabled = prefs.getBool("api_srv", API_SERVER_ENABLED);
