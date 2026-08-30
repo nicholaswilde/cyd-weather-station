@@ -2,9 +2,9 @@
 #define WIFI_MANAGER_H
 
 #include <WiFi.h>
-#include <ESPmDNS.h>
 
 #ifndef NATIVE_TEST
+#include <ESPmDNS.h>
 #include <DNSServer.h>
 #include <WebServer.h>
 #include <ImprovWiFiLibrary.h>
