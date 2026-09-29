@@ -42,17 +42,23 @@ The `ESP32-2432S028` designation is used across multiple manufacturers and clone
       -D TFT_HEIGHT=320
       -D TFT_BL=21
   ```
-* **Test `ST7789_DRIVER`**:
-  If the display uses an ST7789 controller (common on NM and 2USB models), configure:
+* **Use Pre-configured Environments (`cyd_28_nm` / `cyd_28_nm_inv`)**:
+  Pre-configured PlatformIO environments are available directly in `platformio.ini` for this variant:
   ```ini
-  build_flags =
-      ${cyd_base.build_flags}
-      -D ST7789_DRIVER=1
-      -D TFT_WIDTH=240
-      -D TFT_HEIGHT=320
-      -D TFT_RGB_ORDER=TFT_BGR
-      -D TFT_INVERSION_OFF=1
-      -D TFT_BL=21
+  [env:cyd_28_nm]
+  extends = cyd_base
+  build_flags = 
+  	${cyd_base.build_flags}
+  	-D ST7789_DRIVER=1
+  	-D TFT_WIDTH=240
+  	-D TFT_HEIGHT=320
+  	-D TFT_BL=21
+  	-D TFT_RGB_ORDER=TFT_BGR
+  	-D XPT2046_CS=33
+  	-D XPT2046_IRQ=36
+  	-D XPT2046_MOSI=32
+  	-D XPT2046_MISO=39
+  	-D XPT2046_CLK=25
   ```
 
 ---
