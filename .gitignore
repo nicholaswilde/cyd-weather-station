@@ -92,3 +92,6 @@ dist/
 # Scratch test files
 test.cpp
 test
+
+# Image files
+*.jpg

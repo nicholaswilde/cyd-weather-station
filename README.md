@@ -669,6 +669,9 @@ If the UI renders distorted, noisy, or with stretched fonts across the display, 
 
 Flashing a 3.5" image onto a 2.8" display (or vice versa) will result in garbled screens due to framebuffer and resolution mismatches.
 
+### Partial Screen Rendering / 80px Noise Band (1/4 Screen)
+If the UI displays across only 240 columns while the right 80 columns show uninitialized static noise, your board likely has an **ST7789** controller or an alternative **ILI9341 clone** controller (common on `ESP32-2432S028` boards manufactured under "NM" / NodeMiner or 2-USB variants). See the detailed guide in [docs/hardware-variants.md](docs/hardware-variants.md) for background and build configurations (`ILI9341_2_DRIVER` or `ST7789_DRIVER`).
+
 ### Flashing, Erasing Flash & Boot Reset
 - **Erasing Flash**: Running a full `erase_flash` wipes all non-volatile storage (NVS), which erases previously saved Wi-Fi credentials and configuration. The device will reboot into Access Point (`192.168.4.1`) setup mode. Reflashing without erasing preserves your Wi-Fi credentials and saved runtime settings.
 - **Bootloader Mode**: If flashing manually via serial (`esptool.py`), the ESP32 might remain in bootloader mode after writing. Press the physical **RESET / EN** button (or power cycle the unit) to boot into the application.
