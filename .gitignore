@@ -75,6 +75,7 @@ Testing/
 
 # Python Virtualenv
 .venv/
+venv/
 
 # Local Configuration Secrets
 config/secrets.h
