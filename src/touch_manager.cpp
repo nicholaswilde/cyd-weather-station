@@ -17,7 +17,7 @@ void setMockTouch(bool touched, int x, int y) {
     mockX = x;
     mockY = y;
 }
-#elif defined(ILI9341_DRIVER) && !defined(HAS_CAPACITIVE_TOUCH)
+#elif !defined(HAS_CAPACITIVE_TOUCH)
 #include <Arduino.h>
 #include <SPI.h>
 #include <XPT2046_Touchscreen.h>
