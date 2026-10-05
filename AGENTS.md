@@ -48,3 +48,16 @@
 - The user does **not** have physical access to the JC2432W328C board (https://www.amazon.com/dp/B0D5H84RDB).
 - When developing or testing for the `cyd_28c` and `cyd_28c_inv` environments, do not attempt to flash the device directly.
 - Instead, always use the `package-binaries` skill to generate firmware ZIP files (partitions.bin, firmware.bin, bootloader.bin) so the user can send them to a tester.
+
+## Context-Mode MCP Integration
+This project uses `context-mode` for token-optimized command execution, file inspection, and searching.
+- **Rules Reference**: See [`.agents/rules/context-mode-rules.md`](.agents/rules/context-mode-rules.md).
+
+## Serena Semantic Code Navigation & LSP
+This project uses Serena for semantic C/C++ and Python code navigation, AST symbol inspection, and LSP diagnostics.
+- **Rules Reference**: See [`.agents/rules/serena-rules.md`](.agents/rules/serena-rules.md) for tool mappings, refactoring protocols, and CodeGraph boundaries.
+- **Project Configuration**: Stored in `.serena/project.yml`.
+- **Compilation Database**: Clangd uses `compile_commands.json` (generated via `pio run -t compiledb`).
+- **Health Check**: Run `serena project health-check .` to verify language server connectivity and symbol lookup.
+- **Index Codebase**: Run `serena project index .` to rebuild the symbol cache.
+

@@ -96,3 +96,8 @@ test
 
 # Image files
 *.jpg
+
+# Serena
+.serena/cache/
+.serena/logs/
+.serena/project.local.yml
