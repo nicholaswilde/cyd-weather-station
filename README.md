@@ -288,6 +288,7 @@ Example JSON response:
   "unit_system": 2,
   "brightness": 75,
   "auto_brightness": false,
+  "show_title_version": true,
   "timezone": "America/New_York",
   "theme_flavor": 1,
   "sd_logging_enabled": true,

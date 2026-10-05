@@ -53,6 +53,9 @@ extern int getCurrentThemeFlavor();
 // #define UNIT_SYSTEM UNIT_METRIC
 #define UNIT_SYSTEM UNIT_IMPERIAL
 
+// Header Title and Version Display Settings
+#define SHOW_TITLE_VERSION true
+
 // Auto Backlight Settings
 #define USE_LDR_AUTO_BACKLIGHT false
 
