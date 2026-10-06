@@ -23,6 +23,12 @@ bash .agents/skills/package-binaries/package_binaries.sh cyd_28c cyd_28c_inv
 bash .agents/skills/package-binaries/package_binaries.sh cyd_28r cyd_35c
 ```
 
+To bundle multiple environments into a single zip file:
+
+```bash
+bash .agents/skills/package-binaries/package_binaries.sh --bundle cyd_28_nm_bundle.zip cyd_28_nm cyd_28_nm_inv
+```
+
 ### Outputs
 
 The resulting zip files will be placed in the `dist/` folder (or `$OUTPUT_DIR` if overridden):

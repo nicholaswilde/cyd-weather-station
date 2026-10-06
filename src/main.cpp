@@ -223,6 +223,9 @@ void setup() {
             bool en = (payload == "ON" || payload == "1" || payload == "true");
             settings.setUse24HourFormat(en);
             footerNeedsTimeUpdate = true;
+        } else if (topic.endsWith("command/title_version")) {
+            bool en = (payload == "ON" || payload == "1" || payload == "true");
+            settings.setShowTitleVersion(en);
         } else if (topic.endsWith("command/screen_orientation")) {
             int orient = 1; // Default Landscape
             if (payload == "Portrait") orient = 0;
@@ -833,6 +836,7 @@ void loop() {
         
         mqtt.publish("settings/units", settings.getUnitSystem() == 1 ? "Metric" : "Imperial", true);
         mqtt.publish("settings/use_24h", settings.getUse24HourFormat() ? "ON" : "OFF", true);
+        mqtt.publish("settings/title_version", settings.getShowTitleVersion() ? "ON" : "OFF", true);
         
         String orientStr = "Landscape";
         switch (settings.getScreenOrientation()) {

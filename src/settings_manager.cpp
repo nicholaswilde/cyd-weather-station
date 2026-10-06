@@ -63,6 +63,7 @@ SettingsManager::SettingsManager() {
     _sleepStartTime = DEFAULT_SLEEP_START_TIME;
     _sleepEndTime = DEFAULT_SLEEP_END_TIME;
     _use24HourFormat = USE_24_HOUR_FORMAT;
+    _showTitleVersion = SHOW_TITLE_VERSION;
 }
 
 void SettingsManager::begin() {
@@ -118,6 +119,7 @@ void SettingsManager::begin() {
     _sleepStartTime = prefs.getString("sleep_start", DEFAULT_SLEEP_START_TIME);
     _sleepEndTime = prefs.getString("sleep_end", DEFAULT_SLEEP_END_TIME);
     _use24HourFormat = prefs.getBool("use_24h", USE_24_HOUR_FORMAT);
+    _showTitleVersion = prefs.getBool("title_ver", SHOW_TITLE_VERSION);
     
     prefs.end();
 }
@@ -699,3 +701,18 @@ void SettingsManager::setUse24HourFormat(bool use24HourFormat) {
         prefs.end();
     }
 }
+
+bool SettingsManager::getShowTitleVersion() const {
+    return _showTitleVersion;
+}
+
+void SettingsManager::setShowTitleVersion(bool show) {
+    if (_showTitleVersion != show) {
+        _showTitleVersion = show;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("title_ver", _showTitleVersion);
+        prefs.end();
+    }
+}
+

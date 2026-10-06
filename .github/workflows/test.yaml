@@ -30,6 +30,8 @@ jobs:
           - cyd_35c_inv
           - cyd_28c
           - cyd_28c_inv
+          - cyd_28_nm
+          - cyd_28_nm_inv
     steps:
       - uses: actions/checkout@v4
         with:

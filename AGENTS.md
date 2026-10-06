@@ -1,6 +1,7 @@
 # Project Rules & Guidelines
 
 ## Codebase Lookup Preference
+- When referring to the cyd-weather-station project itself, always look at the local repository first at `/home/nicholas/git/nicholaswilde/cyd-weather-station/` before searching elsewhere.
 - Before performing any internet/web search for display, touchscreen, or hardware solutions for this ESP32 Cheap Yellow Display (CYD) project, **always search the local photo frame repository first** at `/home/nicholas/git/nicholaswilde/cyd-photo-frame/` for working reference code.
 - Additionally, reference the local repository at `/home/nicholas/git/witnessmenow/ESP32-Cheap-Yellow-Display` for other features specific to the CYD.
 - Reference `/home/nicholas/git/BruceDevices/firmware` for pinouts and hardware configurations for other CYD displays (such as `CYD-2432S028`, `CYD-2USB`, `CYD-2432W328C`, `CYD-2432W328R`/`S024R`, `CYD-3248S035R`/`C`, and `nm-cyd-c5`, excluding Elecrow devices).
@@ -47,3 +48,16 @@
 - The user does **not** have physical access to the JC2432W328C board (https://www.amazon.com/dp/B0D5H84RDB).
 - When developing or testing for the `cyd_28c` and `cyd_28c_inv` environments, do not attempt to flash the device directly.
 - Instead, always use the `package-binaries` skill to generate firmware ZIP files (partitions.bin, firmware.bin, bootloader.bin) so the user can send them to a tester.
+
+## Context-Mode MCP Integration
+This project uses `context-mode` for token-optimized command execution, file inspection, and searching.
+- **Rules Reference**: See [`.agents/rules/context-mode-rules.md`](.agents/rules/context-mode-rules.md).
+
+## Serena Semantic Code Navigation & LSP
+This project uses Serena for semantic C/C++ and Python code navigation, AST symbol inspection, and LSP diagnostics.
+- **Rules Reference**: See [`.agents/rules/serena-rules.md`](.agents/rules/serena-rules.md) for tool mappings, refactoring protocols, and CodeGraph boundaries.
+- **Project Configuration**: Stored in `.serena/project.yml`.
+- **Compilation Database**: Clangd uses `compile_commands.json` (generated via `pio run -t compiledb`).
+- **Health Check**: Run `serena project health-check .` to verify language server connectivity and symbol lookup.
+- **Index Codebase**: Run `serena project index .` to rebuild the symbol cache.
+
