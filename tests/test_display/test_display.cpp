@@ -113,6 +113,12 @@ void test_disp_flush_and_init(void) {
     initLVGL();
 
     lv_disp_drv_t drv;
+    lv_disp_drv_init(&drv);
+    lv_disp_draw_buf_t dbuf;
+    memset(&dbuf, 0, sizeof(dbuf));
+    drv.draw_buf = &dbuf;
+
+    lv_disp_drv_t *p_drv = (lv_disp_get_default() && lv_disp_get_default()->driver) ? lv_disp_get_default()->driver : &drv;
     lv_area_t area = {0, 0, 9, 9}; // 10x10 area
     lv_color_t color_buf[100];
     for (int i = 0; i < 100; ++i) {
@@ -120,11 +126,11 @@ void test_disp_flush_and_init(void) {
     }
 
     // Flush without screenshot capture
-    my_disp_flush(&drv, &area, color_buf);
+    my_disp_flush(p_drv, &area, color_buf);
 
     // Flush with screenshot capture active
     ScreenshotManager::beginCapture("/test_flush.bmp");
-    my_disp_flush(&drv, &area, color_buf);
+    my_disp_flush(p_drv, &area, color_buf);
     ScreenshotManager::endCapture();
 }
 
