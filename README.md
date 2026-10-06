@@ -12,7 +12,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
 ## :star: Features
 
 - **Dual API Integration**: 
-  - **Open-Meteo API**: Out-of-the-box fallback — no API key required.
+  - **Open-Meteo API**: Out-of-the-box fallback — no API key required. Automatically fetches 24-hour rolling hourly forecasts and 3-day daily forecasts in the user's local timezone.
   - **OpenWeatherMap API**: Automatically used if an API key is configured.
 - **Location Resolution & City Name Footer**:
   - Displays `Last Update: <time> | <city name>` centered at the bottom of the screen.
@@ -20,7 +20,8 @@ A beautiful, configurable real-time weather station and desk clock built for the
   - **IP Geolocation Fallback**: Automatically falls back to resolving location via IP geolocation (using `ip-api.com`) on boot if Zip Code and coordinates are left blank.
   - **Reverse Geocoding**: When using coordinates + Open-Meteo, the city is resolved using Nominatim OSM. OWM resolves and returns the city name natively.
 - **3-Day Forecast View**: Swipe to a dedicated Forecast tab showing daily high/low temperature and weather condition icons.
-- **Swipe Navigation**: Swipe left/right anywhere on the screen to switch between the Current, Forecast, and Settings tabs.
+- **24-Hour Hourly Forecast Chart**: Dedicated Hourly tab plotting dynamic temperature and precipitation probability curves across a 24-hour rolling window with 4-hour interval tick labels (`Now`, `+4h`, `+8h`, `+12h`, `+16h`, `+20h`, `+24h`).
+- **Swipe Navigation**: Swipe left/right anywhere on the screen to switch between the Current Weather, 3-Day Forecast, 24-Hour Hourly Forecast, and System Settings tabs.
 - **Dynamic Weather Icons**: A large (48px) custom weather glyph maps weather codes to condition icons, dynamically colored using the active Catppuccin palette.
 - **Interactive Settings Tab**: Touch-configurable settings persisted to flash across reboots:
   - **Temperature Unit**: Toggle between Celsius (°C) and Fahrenheit (°F).
