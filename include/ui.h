@@ -34,4 +34,14 @@ void setUIOrientation(int rotation);
 const char* getCardinalDirection(int degrees);
 void showUIStatusMessage(const char* message);
 
+inline void formatHourlyTickLabel(char* buf, size_t buf_len, int tick_idx) {
+    if (buf == nullptr || buf_len == 0) return;
+    int hour_offset = tick_idx * 4;
+    if (hour_offset == 0) {
+        lv_snprintf(buf, buf_len, "Now");
+    } else {
+        lv_snprintf(buf, buf_len, "+%dh", hour_offset);
+    }
+}
+
 #endif // UI_H

@@ -466,12 +466,7 @@ static void chart_draw_event_cb(lv_event_t * e) {
         }
 
         if (dsc->id == LV_CHART_AXIS_PRIMARY_X && dsc->text) {
-            int hour_idx = dsc->value;
-            if (hour_idx == 0) {
-                lv_snprintf(dsc->text, dsc->text_length, "Now");
-            } else {
-                lv_snprintf(dsc->text, dsc->text_length, "+%dh", hour_idx);
-            }
+            formatHourlyTickLabel(dsc->text, dsc->text_length, dsc->value);
         } else if (dsc->id == LV_CHART_AXIS_PRIMARY_Y && dsc->text) {
             int val = dsc->value;
             lv_snprintf(dsc->text, dsc->text_length, "%d°", val);
@@ -1932,7 +1927,7 @@ void updateHourlyUI(const WeatherData& data) {
 
     // Populate data using direct array access
     for (int i = 0; i < 24; i++) {
-        hourly_temp_series->y_points[i] = (lv_coord_t)data.hourly[i].temperature;
+        hourly_temp_series->y_points[i] = (lv_coord_t)roundf(data.hourly[i].temperature);
         hourly_precip_series->y_points[i] = (lv_coord_t)data.hourly[i].precipitationProbability;
     }
 

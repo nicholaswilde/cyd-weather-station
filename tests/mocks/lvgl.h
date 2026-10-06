@@ -2,6 +2,11 @@
 #define LVGL_MOCK_H
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
+
+#ifndef lv_snprintf
+#define lv_snprintf snprintf
+#endif
 
 typedef struct {
     int16_t x1;
