@@ -75,6 +75,7 @@ Testing/
 
 # Python Virtualenv
 .venv/
+venv/
 
 # Local Configuration Secrets
 config/secrets.h
@@ -92,3 +93,11 @@ dist/
 # Scratch test files
 test.cpp
 test
+
+# Image files
+*.jpg
+
+# Serena
+.serena/cache/
+.serena/logs/
+.serena/project.local.yml

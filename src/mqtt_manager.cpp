@@ -111,6 +111,8 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     subscribe("command/local_sensor_temp_offset", 0);
     subscribe("command/timezone", 0);
     subscribe("command/local_sensor_hum_offset", 0);
+    subscribe("command/use_24h", 0);
+    subscribe("command/title_version", 0);
 }
 
 void MqttManager::publishHADiscovery() {
@@ -214,6 +216,9 @@ void MqttManager::publishHADiscovery() {
     // 24-Hour Format (Switch)
     String use24hPayload = "{\"name\":\"24-Hour Format\",\"state_topic\":\"" + _baseTopic + "settings/use_24h\",\"command_topic\":\"" + _baseTopic + "command/use_24h\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_use24h\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/switch/" + deviceId + "/use_24h/config").c_str(), 0, true, use24hPayload.c_str());
+    // Title & Version (Switch)
+    String titleVerPayload = "{\"name\":\"Title & Version\",\"state_topic\":\"" + _baseTopic + "settings/title_version\",\"command_topic\":\"" + _baseTopic + "command/title_version\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_titlever\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/switch/" + deviceId + "/title_version/config").c_str(), 0, true, titleVerPayload.c_str());
     // Screen Orientation (Select)
     String orientPayload = "{\"name\":\"Screen Orientation\",\"state_topic\":\"" + _baseTopic + "settings/screen_orientation\",\"command_topic\":\"" + _baseTopic + "command/screen_orientation\",\"options\":[\"Landscape\",\"Portrait\",\"Portrait Rev\",\"Landscape Rev\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_orientation\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/select/" + deviceId + "/orientation/config").c_str(), 0, true, orientPayload.c_str());

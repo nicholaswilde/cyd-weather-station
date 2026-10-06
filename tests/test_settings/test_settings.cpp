@@ -2,7 +2,10 @@
 #include "../mocks/mocks.cpp"
 
 void setUp(void) {
-    // any setup
+    Preferences prefs;
+    prefs.begin("settings", false);
+    prefs.clear();
+    prefs.end();
 }
 
 void tearDown(void) {
@@ -39,6 +42,7 @@ void test_settings_default_values(void) {
 #endif
     TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_TEMP_OFFSET, settings.getLocalSensorTempOffset());
     TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_HUM_OFFSET, settings.getLocalSensorHumOffset());
+    TEST_ASSERT_EQUAL(SHOW_TITLE_VERSION, settings.getShowTitleVersion());
 }
 
 void test_settings_save_and_load(void) {
@@ -67,6 +71,7 @@ void test_settings_save_and_load(void) {
     settings.setApPassword("new_ap_pass");
     settings.setLocalSensorTempOffset(-1.5f);
     settings.setLocalSensorHumOffset(3.0f);
+    settings.setShowTitleVersion(false);
     
     // Create new instance to simulate re-reading from preferences
     SettingsManager settings_new;
@@ -93,6 +98,7 @@ void test_settings_save_and_load(void) {
     TEST_ASSERT_EQUAL_STRING("new_ap_pass", settings_new.getApPassword().c_str());
     TEST_ASSERT_EQUAL_FLOAT(-1.5f, settings_new.getLocalSensorTempOffset());
     TEST_ASSERT_EQUAL_FLOAT(3.0f, settings_new.getLocalSensorHumOffset());
+    TEST_ASSERT_EQUAL(false, settings_new.getShowTitleVersion());
 }
 
 void test_settings_wifi_credentials(void) {
@@ -223,11 +229,16 @@ void test_settings_all_fields_and_factory_reset(void) {
     settings.setSleepEndTime("06:30");
     TEST_ASSERT_EQUAL_STRING("06:30", settings.getSleepEndTime().c_str());
 
+    // Test Title & Version Setting
+    settings.setShowTitleVersion(false);
+    TEST_ASSERT_FALSE(settings.getShowTitleVersion());
+
     // Test Factory Reset
     settings.factoryReset();
     SettingsManager freshSettings;
     freshSettings.begin();
     TEST_ASSERT_EQUAL_STRING("cyd/", freshSettings.getMqttBaseTopic().c_str());
+    TEST_ASSERT_EQUAL(SHOW_TITLE_VERSION, freshSettings.getShowTitleVersion());
 }
 
 void test_settings_24h_format(void) {
@@ -248,10 +259,28 @@ void test_settings_24h_format(void) {
     TEST_ASSERT_TRUE(settings_new.getUse24HourFormat());
 }
 
+void test_settings_title_version(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    settings.setShowTitleVersion(false);
+    TEST_ASSERT_FALSE(settings.getShowTitleVersion());
+
+    settings.setShowTitleVersion(true);
+    TEST_ASSERT_TRUE(settings.getShowTitleVersion());
+
+    // Test persistence
+    settings.setShowTitleVersion(false);
+    SettingsManager settings_new;
+    settings_new.begin();
+    TEST_ASSERT_FALSE(settings_new.getShowTitleVersion());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
-    RUN_TEST(test_settings_24h_format);
     RUN_TEST(test_settings_default_values);
+    RUN_TEST(test_settings_24h_format);
+    RUN_TEST(test_settings_title_version);
     RUN_TEST(test_settings_save_and_load);
     RUN_TEST(test_settings_wifi_credentials);
     RUN_TEST(test_settings_location_data);

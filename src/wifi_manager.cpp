@@ -626,6 +626,7 @@ void WifiManager::startWebServer() {
         doc["unit_system"] = settings.getUnitSystem();
         doc["brightness"] = settings.getBrightness();
         doc["auto_brightness"] = settings.getAutoBrightness();
+        doc["show_title_version"] = settings.getShowTitleVersion();
         doc["timezone"] = settings.getTimezone();
         doc["theme_flavor"] = settings.getThemeFlavor();
         doc["sd_logging_enabled"] = settings.getSdLoggingEnabled();
@@ -694,6 +695,7 @@ void WifiManager::startWebServer() {
         if (doc.containsKey("unit_system")) settings.setUnitSystem(doc["unit_system"]);
         if (doc.containsKey("brightness")) settings.setBrightness(doc["brightness"]);
         if (doc.containsKey("auto_brightness")) settings.setAutoBrightness(doc["auto_brightness"]);
+        if (doc.containsKey("show_title_version")) settings.setShowTitleVersion(doc["show_title_version"]);
         if (doc.containsKey("timezone")) settings.setTimezone(doc["timezone"].as<String>());
         if (doc.containsKey("theme_flavor")) settings.setThemeFlavor(doc["theme_flavor"]);
         if (doc.containsKey("sd_logging_enabled")) settings.setSdLoggingEnabled(doc["sd_logging_enabled"]);
@@ -894,6 +896,7 @@ void WifiManager::handleSettings() {
     
     html.replace("%BRIGHTNESS%", String(settings.getBrightness()));
     html.replace("%AUTO_BRIGHTNESS%", settings.getAutoBrightness() ? "checked" : "");
+    html.replace("%SHOW_TITLE_VERSION%", settings.getShowTitleVersion() ? "checked" : "");
     html.replace("%SCREENSAVER_ENABLED%", settings.getScreensaverEnabled() ? "checked" : "");
     html.replace("%SLEEP_SCHEDULE_ENABLED%", settings.getSleepScheduleEnabled() ? "checked" : "");
     html.replace("%SLEEP_START_TIME%", settings.getSleepStartTime());
@@ -968,6 +971,7 @@ void WifiManager::handleSettingsSave() {
         settings.setLedBrightness((pct * 255) / 100);
     }
     settings.setAutoBrightness(_webServer->hasArg("auto_brightness"));
+    settings.setShowTitleVersion(_webServer->hasArg("show_title_version"));
     settings.setScreensaverEnabled(_webServer->hasArg("screensaver_enabled"));
     if (_webServer->hasArg("screensaver_timeout")) settings.setScreensaverTimeout(_webServer->arg("screensaver_timeout").toInt() * 60000);
     settings.setSleepScheduleEnabled(_webServer->hasArg("sleep_schedule_enabled"));

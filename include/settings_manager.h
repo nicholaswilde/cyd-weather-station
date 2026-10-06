@@ -54,6 +54,7 @@ private:
     int _localSensorUpdateInterval;
     float _localSensorTempOffset;
     float _localSensorHumOffset;
+    bool _showTitleVersion;
 
 public:
     SettingsManager();
@@ -185,6 +186,9 @@ public:
 
     float getLocalSensorHumOffset() const;
     void setLocalSensorHumOffset(float offset);
+
+    bool getShowTitleVersion() const;
+    void setShowTitleVersion(bool show);
 };
 
 #endif // SETTINGS_MANAGER_H

@@ -40,6 +40,7 @@ static lv_obj_t *ui_sleep_sw = nullptr;
 static lv_obj_t *ui_led_sw = nullptr;
 static lv_obj_t *ui_sd_log_sw = nullptr;
 static lv_obj_t *ui_sd_cache_sw = nullptr;
+static lv_obj_t *ui_title_ver_sw = nullptr;
 static lv_obj_t *ui_24h_sw = nullptr;
 static lv_obj_t *ui_brightness_slider = nullptr;
 static lv_obj_t *ui_led_brightness_slider = nullptr;
@@ -383,6 +384,19 @@ static void unit_sw_event_cb(lv_event_t * e) {
     settings_unit_changed = true;
 }
 
+static void title_ver_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+    settings.setShowTitleVersion(is_checked);
+    if (header_title != nullptr) {
+        if (is_checked) {
+            lv_obj_clear_flag(header_title, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(header_title, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+}
+
 static void auto_sw_event_cb(lv_event_t * e) {
     lv_obj_t * sw = lv_event_get_target(e);
     bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
@@ -513,6 +527,9 @@ void initUI() {
     lv_obj_align(header_title, LV_ALIGN_LEFT_MID, 10, 0);
     lv_label_set_long_mode(header_title, LV_LABEL_LONG_DOT);
     lv_obj_set_width(header_title, isLandscape ? 220 : 120);
+    if (!settings.getShowTitleVersion()) {
+        lv_obj_add_flag(header_title, LV_OBJ_FLAG_HIDDEN);
+    }
 
     // Header Right-Side Status Area Container (handles WiFi, clock, offline label)
     lv_obj_t * header_right_area = lv_obj_create(header);
@@ -994,6 +1011,32 @@ void initUI() {
         lv_obj_add_state(unit_sw, LV_STATE_CHECKED);
     }
     lv_obj_add_event_cb(unit_sw, unit_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
+    // Title & Version row
+    lv_obj_t * title_ver_row = lv_obj_create(left_col);
+    lv_obj_clear_flag(title_ver_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(title_ver_row, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(title_ver_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(title_ver_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(title_ver_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(title_ver_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(title_ver_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(title_ver_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * title_ver_label = lv_label_create(title_ver_row);
+    lv_label_set_text(title_ver_label, isLargeScreen ? "Title & Version" : "Title & Ver");
+    lv_obj_set_style_text_color(title_ver_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_text_font(title_ver_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_title_ver_sw = lv_switch_create(title_ver_row);
+    lv_obj_set_size(ui_title_ver_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_title_ver_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_title_ver_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_title_ver_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.getShowTitleVersion()) {
+        lv_obj_add_state(ui_title_ver_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(ui_title_ver_sw, title_ver_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
     // Auto Light row
     lv_obj_t * auto_row = lv_obj_create(left_col);
@@ -2016,6 +2059,22 @@ void ui_sync_toggles() {
             lv_obj_add_state(ui_24h_sw, LV_STATE_CHECKED);
         } else {
             lv_obj_clear_state(ui_24h_sw, LV_STATE_CHECKED);
+        }
+    }
+
+    if (ui_title_ver_sw != nullptr) {
+        if (settings.getShowTitleVersion()) {
+            lv_obj_add_state(ui_title_ver_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_title_ver_sw, LV_STATE_CHECKED);
+        }
+    }
+
+    if (header_title != nullptr) {
+        if (settings.getShowTitleVersion()) {
+            lv_obj_clear_flag(header_title, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(header_title, LV_OBJ_FLAG_HIDDEN);
         }
     }
 

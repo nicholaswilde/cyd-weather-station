@@ -77,6 +77,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **ESP32 Cheap Yellow Device (CYD)**:
   - **CYD 2.8" (Resistive)**: ESP32-2432S028R — 2.8″ 320×240 ILI9341 LCD with XPT2046 resistive touch.
   - **CYD 2.8" (Capacitive)**: ESP32-JC2432W328C — 2.8″ 320×240 ST7789 LCD with CST816 capacitive touch.
+  - **CYD 2.8" NodeMiner / Rockbase (Resistive)**: ESP32-2432S028 ("NM") — 2.8″ 320×240 ST7789 LCD with XPT2046 resistive touch.
   - **CYD 3.5" (Capacitive)**: ESP32-3248S035C — 3.5″ 480×320 ST7796 LCD with GT911/CST820 capacitive touch.
 - **Onboard Sensors**: LDR photoresistor (GPIO 34), Backlight PWM (GPIO 21), RGB LED (GPIO 4/16/17), BOOT button (GPIO 0).
 - **Storage**: MicroSD card slot (compatible with standard FAT32 formatted cards).
@@ -151,9 +152,9 @@ Connect the DHT sensor to the **CN1** breakout port:
 Connect the SHT40 sensor to the **CN1** breakout port (do not use connector P3 as it lacks a 3.3V power supply):
 - **VCC**: 3V3
 - **GND**: GND
-- **SDA**: IO27 (on `cyd_28r`) or IO21 (on `cyd_35c` / `cyd_28c`)
+- **SDA**: IO27 (on `cyd_28r` / `cyd_28_nm`) or IO21 (on `cyd_35c` / `cyd_28c`)
 > [!NOTE]
-> On the `cyd_28r` board, the CN1 connector breaks out **IO27**. IO27 must be used for SDA to prevent conflicts with the display backlight on IO21.
+> On the `cyd_28r` and `cyd_28_nm` boards, the CN1 connector breaks out **IO27**. IO27 must be used for SDA to prevent conflicts with the display backlight on IO21.
 > On the `cyd_35c` and `cyd_28c` boards, the CN1 connector breaks out **IO21**. IO21 must be used for SDA to prevent conflicts with the display backlight on IO27.
 - **SCL**: IO22
 
@@ -288,6 +289,7 @@ Example JSON response:
   "unit_system": 2,
   "brightness": 75,
   "auto_brightness": false,
+  "show_title_version": true,
   "timezone": "America/New_York",
   "theme_flavor": 1,
   "sd_logging_enabled": true,
@@ -375,6 +377,9 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weathe
 
 # Or flash the cyd_28c version (2.8" capacitive 320x240 screen)
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ cyd_28c /dev/ttyUSB0
+
+# Or flash the cyd_28_nm version (2.8" NodeMiner ST7789 320x240 screen)
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ cyd_28_nm /dev/ttyUSB0
 
 # Or flash the cyd_35c version (3.5" capacitive 480x320 screen)
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/nicholaswilde/cyd-weather-station/main/scripts/flash.sh)" _ cyd_35c /dev/ttyUSB0
@@ -659,16 +664,20 @@ If you encounter any issues with your screen or the software, please review the 
 
 ### Inverted Colors
 If the colors on your display appear inverted (for example, dark themes like `Mocha`, `Macchiato`, or `Frappe` display with bright white backgrounds while the light `Latte` theme appears dark), this is due to hardware display controller differences between CYD batches. You can easily resolve it by:
-- Flashing the alternative inversion release for your board (e.g., `cyd_28r` vs `cyd_28r_inv`, `cyd_28c` vs `cyd_28c_inv`, or `cyd_35c` vs `cyd_35c_inv`).
+- Flashing the alternative inversion release for your board (e.g., `cyd_28r` vs `cyd_28r_inv`, `cyd_28c` vs `cyd_28c_inv`, `cyd_28_nm` vs `cyd_28_nm_inv`, or `cyd_35c` vs `cyd_35c_inv`).
 - Or, if building from source, switching to the corresponding `_inv` environment in PlatformIO or toggling the `-D TFT_INVERSION_ON=1` build flag.
 
 ### Garbled or Scrambled Screen
 If the UI renders distorted, noisy, or with stretched fonts across the display, ensure you flashed the firmware matching your exact display size and controller:
 - **2.8" Resistive (ILI9341)**: `cyd_28r` / `cyd_28r_inv` (240x320)
 - **2.8" Capacitive (ESP32-2432W328C)**: `cyd_28c` / `cyd_28c_inv` (240x320)
+- **2.8" Resistive NodeMiner / ST7789 (`ESP32-2432S028`)**: `cyd_28_nm` / `cyd_28_nm_inv` (240x320)
 - **3.5" Capacitive (ST7796)**: `cyd_35c` / `cyd_35c_inv` (320x480)
 
 Flashing a 3.5" image onto a 2.8" display (or vice versa) will result in garbled screens due to framebuffer and resolution mismatches.
+
+### Partial Screen Rendering / 80px Noise Band (1/4 Screen)
+If the UI displays across only 240 columns while the right 80 columns show uninitialized static noise, your board likely has an **ST7789** controller or an alternative **ILI9341 clone** controller (common on `ESP32-2432S028` boards manufactured under "NM" / NodeMiner or 2-USB variants). Pre-configured environments `cyd_28_nm` and `cyd_28_nm_inv` are available for these boards directly in `platformio.ini`. See the detailed guide in [docs/hardware-variants.md](docs/hardware-variants.md) for background and build configurations (`ILI9341_2_DRIVER` or `ST7789_DRIVER`).
 
 ### Flashing, Erasing Flash & Boot Reset
 - **Erasing Flash**: Running a full `erase_flash` wipes all non-volatile storage (NVS), which erases previously saved Wi-Fi credentials and configuration. The device will reboot into Access Point (`192.168.4.1`) setup mode. Reflashing without erasing preserves your Wi-Fi credentials and saved runtime settings.
@@ -679,7 +688,7 @@ Standard CYD boards (including `ESP32-2432W328C` and `CYD-2432S028`) do **not** 
 
 If you are using an **SHT40** sensor and it is failing to initialize or read:
 - **Use the CN1 Port**: Ensure you plug the sensor into the **CN1** connector (near the USB port). Connector **P3** (near the SD card slot) lacks a 3.3V power rail and cannot power the sensor.
-- **SDA Pin Selection**: On `cyd_28r`, ensure **SDA** is wired to **IO27**. GPIO 21 is used for display backlight PWM (`TFT_BL`). On `cyd_35c` and `cyd_28c`, ensure **SDA** is wired to **IO21**. IO27 is used for the display backlight. Connecting I2C to the backlight pin will interfere with I2C communications and cause the screen backlight to dim or turn off.
+- **SDA Pin Selection**: On `cyd_28r` and `cyd_28_nm`, ensure **SDA** is wired to **IO27**. GPIO 21 is used for display backlight PWM (`TFT_BL`). On `cyd_35c` and `cyd_28c`, ensure **SDA** is wired to **IO21**. IO27 is used for the display backlight. Connecting I2C to the backlight pin will interfere with I2C communications and cause the screen backlight to dim or turn off.
 - **Swap SDA & SCL Lines**: If the SHT40 sensor is not recognized or reports `[Sensor] Failed to read from SHT40 sensor!`, try switching/swapping the **SDA** and **SCL** wiring pins (ensure `SDA = 27` (or 21) and `SCL = 22`).
 
 ### RGB / BGR Swap

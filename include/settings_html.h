@@ -73,6 +73,11 @@ button:hover { background: #f5c2e7; }
 </div>
 
 <div class='checkbox-group'>
+    <input type='checkbox' id='show_title_version' name='show_title_version' value='1' %SHOW_TITLE_VERSION%>
+    <label for='show_title_version' title='Display app title and version number in the header'>Show Title & Version</label>
+</div>
+
+<div class='checkbox-group'>
     <input type='checkbox' id='screensaver_enabled' name='screensaver_enabled' value='1' %SCREENSAVER_ENABLED% onchange='toggleScreensaverSettings()'>
     <label for='screensaver_enabled' title='Enable a screensaver after a period of inactivity'>Enable Screensaver</label>
 </div>
