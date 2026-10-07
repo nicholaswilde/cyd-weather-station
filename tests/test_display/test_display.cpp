@@ -1,6 +1,7 @@
 #include <unity.h>
 #include "../mocks/mocks.cpp"
 #include "display.h"
+#include "ui.h"
 #include "../../src/touch_manager.cpp"
 #include "../../src/display.cpp"
 #include "../../src/screenshot_manager.cpp"
@@ -118,7 +119,6 @@ void test_disp_flush_and_init(void) {
     memset(&dbuf, 0, sizeof(dbuf));
     drv.draw_buf = &dbuf;
 
-    lv_disp_drv_t *p_drv = (lv_disp_get_default() && lv_disp_get_default()->driver) ? lv_disp_get_default()->driver : &drv;
     lv_area_t area = {0, 0, 9, 9}; // 10x10 area
     lv_color_t color_buf[100];
     for (int i = 0; i < 100; ++i) {
@@ -126,12 +126,48 @@ void test_disp_flush_and_init(void) {
     }
 
     // Flush without screenshot capture
-    my_disp_flush(p_drv, &area, color_buf);
+    my_disp_flush(&drv, &area, color_buf);
 
     // Flush with screenshot capture active
     ScreenshotManager::beginCapture("/test_flush.bmp");
-    my_disp_flush(p_drv, &area, color_buf);
+    my_disp_flush(&drv, &area, color_buf);
     ScreenshotManager::endCapture();
+}
+
+void test_format_hourly_tick_label(void) {
+    char buf[16];
+
+    // Tick 0: Now
+    formatHourlyTickLabel(buf, sizeof(buf), 0);
+    TEST_ASSERT_EQUAL_STRING("Now", buf);
+
+    // Tick 1: +4h
+    formatHourlyTickLabel(buf, sizeof(buf), 1);
+    TEST_ASSERT_EQUAL_STRING("+4h", buf);
+
+    // Tick 2: +8h
+    formatHourlyTickLabel(buf, sizeof(buf), 2);
+    TEST_ASSERT_EQUAL_STRING("+8h", buf);
+
+    // Tick 3: +12h
+    formatHourlyTickLabel(buf, sizeof(buf), 3);
+    TEST_ASSERT_EQUAL_STRING("+12h", buf);
+
+    // Tick 4: +16h
+    formatHourlyTickLabel(buf, sizeof(buf), 4);
+    TEST_ASSERT_EQUAL_STRING("+16h", buf);
+
+    // Tick 5: +20h
+    formatHourlyTickLabel(buf, sizeof(buf), 5);
+    TEST_ASSERT_EQUAL_STRING("+20h", buf);
+
+    // Tick 6: +24h
+    formatHourlyTickLabel(buf, sizeof(buf), 6);
+    TEST_ASSERT_EQUAL_STRING("+24h", buf);
+
+    // Edge cases: null or empty
+    formatHourlyTickLabel(nullptr, 16, 0);
+    formatHourlyTickLabel(buf, 0, 0);
 }
 
 int main(int argc, char **argv) {
@@ -143,5 +179,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_coordinate_clamping_and_defaults);
     RUN_TEST(test_touch_manager_mock_and_callback);
     RUN_TEST(test_disp_flush_and_init);
+    RUN_TEST(test_format_hourly_tick_label);
     return UNITY_END();
 }

@@ -212,6 +212,7 @@ WeatherData WeatherClient::fetchWeather() {
         url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m";
         url += "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3";
         url += "&hourly=temperature_2m,precipitation_probability";
+        url += "&forecast_hours=24";
         url += "&timezone=auto"; // Return dates in local timezone, not UTC
         if (settings.getUnitSystem() == UNIT_IMPERIAL) {
             url += "&temperature_unit=fahrenheit";
@@ -275,14 +276,49 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
     if (doc.containsKey("hourly")) {
         JsonArray hourly_temp = doc["hourly"]["temperature_2m"];
         JsonArray hourly_precip = doc["hourly"]["precipitation_probability"];
+
+        int start_idx = 0;
+        if (doc.containsKey("hourly") && doc["hourly"].containsKey("time")) {
+            const char* current_time = nullptr;
+            if (doc.containsKey("current") && doc["current"].containsKey("time")) {
+                current_time = doc["current"]["time"];
+            }
+#ifndef NATIVE_TEST
+            char now_buf[14] = "";
+            if (current_time == nullptr) {
+                time_t now = time(nullptr);
+                if (now > 946684800L) {
+                    struct tm tm_now;
+                    localtime_r(&now, &tm_now);
+                    snprintf(now_buf, sizeof(now_buf), "%04d-%02d-%02dT%02d",
+                             tm_now.tm_year + 1900, tm_now.tm_mon + 1, tm_now.tm_mday, tm_now.tm_hour);
+                    current_time = now_buf;
+                }
+            }
+#endif
+            if (current_time != nullptr) {
+                JsonArray hourly_time = doc["hourly"]["time"];
+                for (size_t k = 0; k < hourly_time.size(); k++) {
+                    const char* ht = hourly_time[k];
+                    if (ht != nullptr) {
+                        if (strncmp(ht, current_time, 13) == 0 || strcmp(ht, current_time) == 0) {
+                            start_idx = (int)k;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         for (int i = 0; i < 24; i++) {
-            if (i < (int)hourly_temp.size()) {
-                data.hourly[i].temperature = hourly_temp[i].as<float>();
+            int src_idx = start_idx + i;
+            if (src_idx < (int)hourly_temp.size()) {
+                data.hourly[i].temperature = hourly_temp[src_idx].as<float>();
             } else {
                 data.hourly[i].temperature = 0.0f;
             }
-            if (i < (int)hourly_precip.size()) {
-                data.hourly[i].precipitationProbability = hourly_precip[i].as<int>();
+            if (src_idx < (int)hourly_precip.size()) {
+                data.hourly[i].precipitationProbability = hourly_precip[src_idx].as<int>();
             } else {
                 data.hourly[i].precipitationProbability = 0;
             }

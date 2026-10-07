@@ -337,6 +337,78 @@ void test_weather_client_parsing_errors(void) {
     TEST_ASSERT_FALSE(WeatherClient::parseIpLocationJson("{ invalid", lat, lon, city));
 }
 
+void test_weather_client_parse_weather_json_hourly_sliding_window(void) {
+    WeatherData data;
+    // Construct JSON where hourly data starts at 00:00 (midnight), but current time is 14:00 (index 14)
+    String json = "{\"current\":{\"time\":\"2026-10-05T14:00\",\"temperature_2m\":24.5,\"relative_humidity_2m\":50,\"weather_code\":0,\"wind_speed_10m\":5.0},"
+                  "\"hourly\":{\"time\":[";
+    for (int i = 0; i < 48; i++) {
+        char tBuf[32];
+        snprintf(tBuf, sizeof(tBuf), "\"2026-10-%02dT%02d:00\"%s", (i < 24 ? 5 : 6), i % 24, (i < 47 ? "," : ""));
+        json += tBuf;
+    }
+    json += "],\"temperature_2m\":[";
+    for (int i = 0; i < 48; i++) {
+        char vBuf[16];
+        snprintf(vBuf, sizeof(vBuf), "%.1f%s", (float)(10.0 + i), (i < 47 ? "," : ""));
+        json += vBuf;
+    }
+    json += "],\"precipitation_probability\":[";
+    for (int i = 0; i < 48; i++) {
+        char pBuf[16];
+        snprintf(pBuf, sizeof(pBuf), "%d%s", i, (i < 47 ? "," : ""));
+        json += pBuf;
+    }
+    json += "]}}";
+
+    bool parsed = WeatherClient::parseWeatherJson(json.c_str(), data);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_TRUE(data.valid);
+    // data.hourly[0] should match index 14 (14:00 = 24.0°C)
+    TEST_ASSERT_EQUAL_FLOAT(24.0f, data.hourly[0].temperature);
+    TEST_ASSERT_EQUAL(14, data.hourly[0].precipitationProbability);
+    // data.hourly[1] should match index 15 (15:00 = 25.0°C)
+    TEST_ASSERT_EQUAL_FLOAT(25.0f, data.hourly[1].temperature);
+    TEST_ASSERT_EQUAL(15, data.hourly[1].precipitationProbability);
+    // data.hourly[23] should match index 14 + 23 = 37 (10.0 + 37 = 47.0°C)
+    TEST_ASSERT_EQUAL_FLOAT(47.0f, data.hourly[23].temperature);
+    TEST_ASSERT_EQUAL(37, data.hourly[23].precipitationProbability);
+}
+
+void test_weather_client_parse_weather_json_hourly_subhour_current_time(void) {
+    WeatherData data;
+    // current.time has minutes (14:35), should still match 14:00 in hourly.time
+    String json = "{\"current\":{\"time\":\"2026-10-05T14:35\",\"temperature_2m\":24.5,\"relative_humidity_2m\":50,\"weather_code\":0,\"wind_speed_10m\":5.0},"
+                  "\"hourly\":{\"time\":[\"2026-10-05T12:00\",\"2026-10-05T13:00\",\"2026-10-05T14:00\",\"2026-10-05T15:00\"],"
+                  "\"temperature_2m\":[20.0,22.0,24.0,26.0],"
+                  "\"precipitation_probability\":[10,20,30,40]}}";
+
+    bool parsed = WeatherClient::parseWeatherJson(json.c_str(), data);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_TRUE(data.valid);
+    // data.hourly[0] matches 14:00 (index 2)
+    TEST_ASSERT_EQUAL_FLOAT(24.0f, data.hourly[0].temperature);
+    TEST_ASSERT_EQUAL(30, data.hourly[0].precipitationProbability);
+    TEST_ASSERT_EQUAL_FLOAT(26.0f, data.hourly[1].temperature);
+    TEST_ASSERT_EQUAL(40, data.hourly[1].precipitationProbability);
+}
+
+void test_weather_client_parse_weather_json_forecast_hours_24(void) {
+    WeatherData data;
+    // When forecast_hours=24 is used, hourly.time[0] is already the current hour
+    const char* json = "{\"current\":{\"time\":\"2026-10-05T20:00\",\"temperature_2m\":18.5},"
+                       "\"hourly\":{\"time\":[\"2026-10-05T20:00\",\"2026-10-05T21:00\"],"
+                       "\"temperature_2m\":[18.5,17.2],"
+                       "\"precipitation_probability\":[5,10]}}";
+
+    bool parsed = WeatherClient::parseWeatherJson(json, data);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_FLOAT(18.5f, data.hourly[0].temperature);
+    TEST_ASSERT_EQUAL(5, data.hourly[0].precipitationProbability);
+    TEST_ASSERT_EQUAL_FLOAT(17.2f, data.hourly[1].temperature);
+    TEST_ASSERT_EQUAL(10, data.hourly[1].precipitationProbability);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -349,6 +421,9 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_parse_ip_location_json_fail);
     RUN_TEST(test_weather_client_is_location_empty);
     RUN_TEST(test_weather_client_parse_weather_json_hourly);
+    RUN_TEST(test_weather_client_parse_weather_json_hourly_sliding_window);
+    RUN_TEST(test_weather_client_parse_weather_json_hourly_subhour_current_time);
+    RUN_TEST(test_weather_client_parse_weather_json_forecast_hours_24);
     RUN_TEST(test_weather_client_parse_owm_json_hourly);
     RUN_TEST(test_weather_client_parse_owm_json_city_override);
     RUN_TEST(test_weather_client_all_desc_codes);

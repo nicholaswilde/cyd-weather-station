@@ -61,3 +61,9 @@ This project uses Serena for semantic C/C++ and Python code navigation, AST symb
 - **Health Check**: Run `serena project health-check .` to verify language server connectivity and symbol lookup.
 - **Index Codebase**: Run `serena project index .` to rebuild the symbol cache.
 
+## Design System & Visual Guidelines
+This project follows the DESIGN.md format specification (https://github.com/google-labs-code/design.md) for its visual identity, Catppuccin color tokens, typography scales, touch targets, and LVGL UI components.
+- **Design System Reference**: See [`.agents/design.md`](.agents/design.md).
+- **Validation**: Validate design system adherence using `designmd lint .agents/design.md`.
+
+

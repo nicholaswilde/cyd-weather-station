@@ -167,6 +167,11 @@ tasks:
     cmds:
       - pio test -e native
 
+  lint:design:
+    desc: Validate design system specification against DESIGN.md
+    cmds:
+      - command -v designmd >/dev/null 2>&1 && designmd lint .agents/design.md || npx @google/design.md lint .agents/design.md
+
   check:
     desc: Run static code analysis / linting
     cmds:

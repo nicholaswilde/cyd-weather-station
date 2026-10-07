@@ -801,6 +801,13 @@ void loop() {
 
                     lastWeatherUpdate = currentMillis;
                     hasInitialFetch = true;
+                } else {
+                    Serial.println("[System] Weather fetch failed. Will retry next interval.");
+                    if (currentUpdateInterval > 60000UL) {
+                        lastWeatherUpdate = currentMillis - currentUpdateInterval + 60000UL;
+                    } else {
+                        lastWeatherUpdate = currentMillis;
+                    }
                 }
             }
         }
