@@ -35,8 +35,8 @@ public:
     WeatherData fetchWeather();
     const String& getCityName() const { return _cityName; }
     static String getWeatherDesc(int code);
-    static bool parseWeatherJson(const char* json, WeatherData& data);
-    bool parseOwmJson(const char* json, WeatherData& data);
+    static bool parseWeatherJson(const char* json, WeatherData& data, time_t ref_time = 0);
+    bool parseOwmJson(const char* json, WeatherData& data, time_t ref_time = 0);
     static String serializeWeatherData(const WeatherData& data);
     static bool deserializeWeatherData(const String& json, WeatherData& data);
     bool isLocationEmpty();

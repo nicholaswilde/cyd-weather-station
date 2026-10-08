@@ -18,36 +18,7 @@
 #include <DHT.h>
 #include <Adafruit_SHT4x.h>
 #include <Wire.h>
-#include <AceTime.h>
-using namespace ace_time;
-
-static const int CACHE_SIZE = 1;
-static BasicZoneProcessorCache<CACHE_SIZE> zoneProcessorCache;
-static BasicZoneManager zoneManager(
-    zonedb::kZoneAndLinkRegistrySize,
-    zonedb::kZoneAndLinkRegistry,
-    zoneProcessorCache);
-
-bool getLocalTimeWrapper(struct tm* info, uint32_t ms = 5000) {
-    extern bool ntpInitialized;
-#include "settings_manager.h"
-extern SettingsManager settings;
-    if (!ntpInitialized) return false;
-    time_t now = time(nullptr);
-    if (now < 1000000000) return false;
-    TimeZone tz = zoneManager.createForZoneName(settings.getTimezone().c_str());
-    if (tz.isError()) tz = zoneManager.createForZoneName("UTC");
-    ZonedDateTime zdt = ZonedDateTime::forUnixSeconds64(now, tz);
-    if (zdt.isError()) return false;
-    info->tm_year = zdt.year() - 1900;
-    info->tm_mon = zdt.month() - 1;
-    info->tm_mday = zdt.day();
-    info->tm_hour = zdt.hour();
-    info->tm_min = zdt.minute();
-    info->tm_sec = zdt.second();
-    info->tm_wday = (zdt.dayOfWeek() == 7) ? 0 : zdt.dayOfWeek();
-    return true;
-}
+#include "time_utils.h"
 
 
 #if TFT_BL == 21

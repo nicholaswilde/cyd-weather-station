@@ -1,4 +1,5 @@
 #include "weather_client.h"
+#include "time_utils.h"
 #include <ArduinoJson.h>
 #include "config/config.h"
 #include "settings_manager.h"
@@ -250,7 +251,7 @@ WeatherData WeatherClient::fetchWeather() {
 #endif
 }
 
-bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
+bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data, time_t ref_time) {
     DynamicJsonDocument doc(8192);
     DeserializationError error = deserializeJson(doc, json);
 
@@ -286,10 +287,8 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
 #ifndef NATIVE_TEST
             char now_buf[14] = "";
             if (current_time == nullptr) {
-                time_t now = time(nullptr);
-                if (now > 946684800L) {
-                    struct tm tm_now;
-                    localtime_r(&now, &tm_now);
+                struct tm tm_now;
+                if (getLocalTimeWrapper(&tm_now)) {
                     snprintf(now_buf, sizeof(now_buf), "%04d-%02d-%02dT%02d",
                              tm_now.tm_year + 1900, tm_now.tm_mon + 1, tm_now.tm_mday, tm_now.tm_hour);
                     current_time = now_buf;
@@ -337,22 +336,9 @@ bool WeatherClient::parseWeatherJson(const char* json, WeatherData& data) {
         // Falls back to index-based labelling if NTP hasn't synced yet.
         char today_str[11]    = "";
         char tomorrow_str[11] = "";
-#ifndef NATIVE_TEST
-        time_t now = time(nullptr);
-        const bool time_valid = (now > 946684800L); // after year 2000 = NTP synced
-        if (time_valid) {
-            struct tm tm_today, tm_tomorrow;
-            localtime_r(&now, &tm_today);
-            time_t tmrw = now + 86400;
-            localtime_r(&tmrw, &tm_tomorrow);
-            snprintf(today_str,    sizeof(today_str),    "%04d-%02d-%02d",
-                tm_today.tm_year + 1900,    tm_today.tm_mon + 1,    tm_today.tm_mday);
-            snprintf(tomorrow_str, sizeof(tomorrow_str), "%04d-%02d-%02d",
-                tm_tomorrow.tm_year + 1900, tm_tomorrow.tm_mon + 1, tm_tomorrow.tm_mday);
-        }
-#else
-        const bool time_valid = false; // native test: fall back to index-based
-#endif
+        const bool time_valid = getLocalDateStrings(today_str, sizeof(today_str),
+                                                    tomorrow_str, sizeof(tomorrow_str),
+                                                    ref_time);
 
         for (int i = 0; i < 3; i++) {
             if (i < (int)daily_time.size()) {
@@ -440,7 +426,7 @@ String WeatherClient::getWeatherDesc(int code) {
     }
 }
 
-bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
+bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref_time) {
     StaticJsonDocument<1024> filter;
     filter["list"][0]["dt_txt"] = true;
     filter["list"][0]["main"]["temp"] = true;
@@ -564,21 +550,9 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data) {
     // Now populate the 3 forecast days.
     char today_str[11] = "";
     char tomorrow_str[11] = "";
-    bool time_valid = false;
-#ifndef NATIVE_TEST
-    time_t now = time(nullptr);
-    time_valid = (now > 946684800L); // after year 2000
-    if (time_valid) {
-        struct tm tm_today, tm_tomorrow;
-        localtime_r(&now, &tm_today);
-        time_t tmrw = now + 86400;
-        localtime_r(&tmrw, &tm_tomorrow);
-        snprintf(today_str, sizeof(today_str), "%04d-%02d-%02d",
-            tm_today.tm_year + 1900, tm_today.tm_mon + 1, tm_today.tm_mday);
-        snprintf(tomorrow_str, sizeof(tomorrow_str), "%04d-%02d-%02d",
-            tm_tomorrow.tm_year + 1900, tm_tomorrow.tm_mon + 1, tm_tomorrow.tm_mday);
-    }
-#endif
+    bool time_valid = getLocalDateStrings(today_str, sizeof(today_str),
+                                          tomorrow_str, sizeof(tomorrow_str),
+                                          ref_time);
 
     // Map uniqueDays to forecast slots
     for (int i = 0; i < 3; i++) {

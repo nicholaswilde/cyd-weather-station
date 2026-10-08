@@ -2,6 +2,7 @@
 #include "weather_client.h"
 #include "weather_cache.h"
 #include "../mocks/mocks.cpp"
+#include "../../src/time_utils.cpp"
 #include "../../src/weather_client.cpp"
 #include "../../src/sd_card_manager.cpp"
 #include "../../src/weather_cache.cpp"

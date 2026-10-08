@@ -1,6 +1,7 @@
 #include <unity.h>
 #include "weather_client.h"
 #include "../mocks/mocks.cpp"
+#include "../../src/time_utils.cpp"
 #include "../../src/weather_client.cpp"
 
 void setUp(void) {
@@ -409,6 +410,126 @@ void test_weather_client_parse_weather_json_forecast_hours_24(void) {
     TEST_ASSERT_EQUAL(10, data.hourly[1].precipitationProbability);
 }
 
+void test_weather_client_forecast_day_labels_utc_rollover_issue_45(void) {
+    // Regression test for Issue #45:
+    // When local time is Wednesday evening in America/Los_Angeles (e.g. 2026-10-07 20:00 PDT),
+    // UTC is already Thursday morning (2026-10-08 03:00 UTC).
+    // The 3 daily forecast boxes must show "Today" (Wed), "Tmrw" (Thu), and "Fri".
+    // Previously, UTC rollover caused it to display "Wed", "Today", "Tmrw".
+    settings.setTimezone("America/Los_Angeles");
+    time_t wednesday_evening_pdt = 1791428400; // 2026-10-08 03:00:00 UTC = 2026-10-07 20:00 PDT
+
+    const char* json = "{"
+        "\"current\":{\"temperature_2m\":20.0,\"relative_humidity_2m\":50,\"weather_code\":0,\"wind_speed_10m\":5.0},"
+        "\"daily\":{"
+            "\"time\":[\"2026-10-07\",\"2026-10-08\",\"2026-10-09\"],"
+            "\"weather_code\":[0,1,2],"
+            "\"temperature_2m_max\":[75.0,76.0,77.0],"
+            "\"temperature_2m_min\":[55.0,56.0,57.0]"
+        "}"
+    "}";
+
+    WeatherData data = {};
+    bool parsed = WeatherClient::parseWeatherJson(json, data, wednesday_evening_pdt);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_STRING("Today", data.forecast[0].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Fri", data.forecast[2].dayName.c_str());
+}
+
+void test_weather_client_forecast_day_labels_owm_utc_rollover_issue_45(void) {
+    // Same UTC rollover condition for OpenWeatherMap parser
+    settings.setTimezone("America/Los_Angeles");
+    time_t wednesday_evening_pdt = 1791428400; // 2026-10-07 20:00 PDT
+
+    const char* owmJson = "{"
+        "\"list\":["
+            "{\"dt_txt\":\"2026-10-07 12:00:00\",\"main\":{\"temp\":70.0,\"temp_min\":55.0,\"temp_max\":75.0,\"humidity\":50},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":5.0,\"deg\":180}},"
+            "{\"dt_txt\":\"2026-10-08 12:00:00\",\"main\":{\"temp\":71.0,\"temp_min\":56.0,\"temp_max\":76.0,\"humidity\":50},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":5.0,\"deg\":180}},"
+            "{\"dt_txt\":\"2026-10-09 12:00:00\",\"main\":{\"temp\":72.0,\"temp_min\":57.0,\"temp_max\":77.0,\"humidity\":50},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":5.0,\"deg\":180}}"
+        "],"
+        "\"city\":{\"name\":\"Los Angeles\"}"
+    "}";
+
+    WeatherClient client;
+    WeatherData data = {};
+    bool parsed = client.parseOwmJson(owmJson, data, wednesday_evening_pdt);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_STRING("Today", data.forecast[0].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Fri", data.forecast[2].dayName.c_str());
+}
+
+void test_weather_client_forecast_day_labels_ahead_of_utc(void) {
+    // Timezone ahead of UTC (Asia/Tokyo, UTC+9):
+    // 2026-10-07 16:00:00 UTC = 2026-10-08 01:00:00 JST (Thursday)
+    settings.setTimezone("Asia/Tokyo");
+    time_t thursday_early_jst = 1791388800;
+
+    const char* json = "{"
+        "\"current\":{\"temperature_2m\":20.0,\"relative_humidity_2m\":50,\"weather_code\":0,\"wind_speed_10m\":5.0},"
+        "\"daily\":{"
+            "\"time\":[\"2026-10-08\",\"2026-10-09\",\"2026-10-10\"],"
+            "\"weather_code\":[0,1,2],"
+            "\"temperature_2m_max\":[22.0,23.0,24.0],"
+            "\"temperature_2m_min\":[14.0,15.0,16.0]"
+        "}"
+    "}";
+
+    WeatherData data = {};
+    bool parsed = WeatherClient::parseWeatherJson(json, data, thursday_early_jst);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_STRING("Today", data.forecast[0].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Sat", data.forecast[2].dayName.c_str());
+}
+
+void test_weather_client_forecast_day_labels_uninitialized_ntp_fallback(void) {
+    // When NTP has not synced yet (time < year 2000), fall back to index-based labeling
+    settings.setTimezone("America/Los_Angeles");
+    time_t unsynced_time = 500; // near unix epoch 1970
+
+    const char* json = "{"
+        "\"current\":{\"temperature_2m\":20.0,\"relative_humidity_2m\":50,\"weather_code\":0,\"wind_speed_10m\":5.0},"
+        "\"daily\":{"
+            "\"time\":[\"2026-10-07\",\"2026-10-08\",\"2026-10-09\"],"
+            "\"weather_code\":[0,1,2],"
+            "\"temperature_2m_max\":[75.0,76.0,77.0],"
+            "\"temperature_2m_min\":[55.0,56.0,57.0]"
+        "}"
+    "}";
+
+    WeatherData data = {};
+    bool parsed = WeatherClient::parseWeatherJson(json, data, unsynced_time);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_STRING("Today", data.forecast[0].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Fri", data.forecast[2].dayName.c_str());
+}
+
+void test_get_local_date_strings_direct(void) {
+    char today[11] = "";
+    char tomorrow[11] = "";
+
+    // Test America/Los_Angeles across UTC rollover
+    settings.setTimezone("America/Los_Angeles");
+    bool ok = getLocalDateStrings(today, sizeof(today), tomorrow, sizeof(tomorrow), 1791428400);
+    TEST_ASSERT_TRUE(ok);
+    TEST_ASSERT_EQUAL_STRING("2026-10-07", today);
+    TEST_ASSERT_EQUAL_STRING("2026-10-08", tomorrow);
+
+    // Test Asia/Tokyo across UTC boundary
+    settings.setTimezone("Asia/Tokyo");
+    ok = getLocalDateStrings(today, sizeof(today), tomorrow, sizeof(tomorrow), 1791388800);
+    TEST_ASSERT_TRUE(ok);
+    TEST_ASSERT_EQUAL_STRING("2026-10-08", today);
+    TEST_ASSERT_EQUAL_STRING("2026-10-09", tomorrow);
+
+    // Test invalid / unsynced time
+    ok = getLocalDateStrings(today, sizeof(today), tomorrow, sizeof(tomorrow), 1000);
+    TEST_ASSERT_FALSE(ok);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -429,5 +550,10 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_all_desc_codes);
     RUN_TEST(test_weather_client_owm_to_wmo_code_via_json);
     RUN_TEST(test_weather_client_parsing_errors);
+    RUN_TEST(test_weather_client_forecast_day_labels_utc_rollover_issue_45);
+    RUN_TEST(test_weather_client_forecast_day_labels_owm_utc_rollover_issue_45);
+    RUN_TEST(test_weather_client_forecast_day_labels_ahead_of_utc);
+    RUN_TEST(test_weather_client_forecast_day_labels_uninitialized_ntp_fallback);
+    RUN_TEST(test_get_local_date_strings_direct);
     return UNITY_END();
 }
