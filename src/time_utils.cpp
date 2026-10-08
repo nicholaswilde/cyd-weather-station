@@ -54,15 +54,17 @@ bool getLocalDateStrings(char* today_str, size_t today_size,
     ZonedDateTime zdt = ZonedDateTime::forUnixSeconds64(now, tz);
     if (zdt.isError()) return false;
 
+    LocalDate local_today = LocalDate::forComponents(zdt.year(), zdt.month(), zdt.day());
+    LocalDate local_tomorrow = LocalDate::forEpochDays(local_today.toEpochDays() + 1);
+
     if (today_str && today_size > 0) {
         snprintf(today_str, today_size, "%04d-%02d-%02d",
-                 zdt.year(), zdt.month(), zdt.day());
+                 local_today.year(), local_today.month(), local_today.day());
     }
 
     if (tomorrow_str && tomorrow_size > 0) {
-        LocalDate tomorrow = LocalDate::forEpochDays(zdt.toEpochDays() + 1);
         snprintf(tomorrow_str, tomorrow_size, "%04d-%02d-%02d",
-                 tomorrow.year(), tomorrow.month(), tomorrow.day());
+                 local_tomorrow.year(), local_tomorrow.month(), local_tomorrow.day());
     }
 
     return true;
