@@ -26,4 +26,25 @@ bool getLocalDateStrings(char* today_str, size_t today_size,
                          char* tomorrow_str, size_t tomorrow_size,
                          time_t now_override = 0);
 
+/**
+ * Converts a UTC timestamp into a local calendar date string "YYYY-MM-DD"
+ * and optionally retrieves the local hour (0-23) based on the configured timezone.
+ *
+ * @param utc_ts Unix epoch timestamp in UTC seconds.
+ * @param date_str Output buffer for date string (at least 11 bytes).
+ * @param date_size Size of date_str buffer.
+ * @param local_hour Optional pointer to int to receive the local hour (0-23).
+ * @return true if successfully converted, false otherwise.
+ */
+bool getLocalDateStringFromTimestamp(time_t utc_ts, char* date_str, size_t date_size,
+                                     int* local_hour = nullptr);
+
+/**
+ * Parses an ISO UTC date-time string like "YYYY-MM-DD HH:MM:SS" into UTC epoch seconds.
+ *
+ * @param dt_txt String formatted as "YYYY-MM-DD HH:MM:SS".
+ * @return UTC epoch seconds, or 0 on parse failure.
+ */
+time_t parseUtcDtTxt(const char* dt_txt);
+
 #endif // TIME_UTILS_H

@@ -428,6 +428,7 @@ String WeatherClient::getWeatherDesc(int code) {
 
 bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref_time) {
     StaticJsonDocument<1024> filter;
+    filter["list"][0]["dt"] = true;
     filter["list"][0]["dt_txt"] = true;
     filter["list"][0]["main"]["temp"] = true;
     filter["list"][0]["main"]["humidity"] = true;
@@ -439,6 +440,7 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref
     filter["list"][0]["weather"][0]["description"] = true;
     filter["list"][0]["pop"] = true;
     filter["city"]["name"] = true;
+    filter["city"]["timezone"] = true;
 
     DynamicJsonDocument doc(12288);
     DeserializationError error = deserializeJson(doc, json, DeserializationOption::Filter(filter));
@@ -486,27 +488,41 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref
     data.cityName = _cityName;
 
     // 2. Parse 3-day forecast (Today, Tomorrow, Day after)
-    // We group OWM's 3-hourly forecasts by local date.
-    // Each date will have max/min temps calculated, and we grab weather condition closest to midday (12:00:00).
+    // We group OWM's 3-hourly forecasts by local date in user's configured timezone.
+    // Each date will have max/min temps calculated, and we grab weather condition closest to midday (12:00 local).
     
     struct DayForecastTemp {
         float tempMin = 999.0f;
         float tempMax = -999.0f;
         int weatherCode = -1;
         String status = "";
-        bool hasMidday = false;
+        int bestMiddayDist = 999;
     };
 
-    String uniqueDays[5];
-    DayForecastTemp dayTemps[5];
+    String uniqueDays[6];
+    DayForecastTemp dayTemps[6];
     int dayCount = 0;
 
     for (JsonObject entry : list) {
-        String dt_txt = entry["dt_txt"].as<String>();
-        if (dt_txt.length() < 10) continue;
-        char dateBuf[11];
-        strncpy(dateBuf, dt_txt.c_str(), 10);
-        dateBuf[10] = '\0';
+        time_t utc_ts = 0;
+        if (entry.containsKey("dt")) {
+            utc_ts = entry["dt"].as<time_t>();
+        } else if (entry.containsKey("dt_txt")) {
+            utc_ts = parseUtcDtTxt(entry["dt_txt"].as<const char*>());
+        }
+
+        char dateBuf[11] = "";
+        int local_hour = 12;
+        if (utc_ts > 0) {
+            getLocalDateStringFromTimestamp(utc_ts, dateBuf, sizeof(dateBuf), &local_hour);
+        } else if (entry.containsKey("dt_txt")) {
+            String dt_txt = entry["dt_txt"].as<String>();
+            if (dt_txt.length() >= 10) {
+                strncpy(dateBuf, dt_txt.c_str(), 10);
+                dateBuf[10] = '\0';
+            }
+        }
+        if (dateBuf[0] == '\0') continue;
         String dateStr(dateBuf);
         
         // Find if this date is already tracked
@@ -519,7 +535,7 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref
         }
         
         if (idx == -1) {
-            if (dayCount >= 5) continue; // Only track up to 5 days
+            if (dayCount >= 6) continue; // Only track up to 6 unique days
             idx = dayCount;
             uniqueDays[idx] = dateStr;
             dayCount++;
@@ -531,18 +547,15 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref
         if (tMin < dayTemps[idx].tempMin) dayTemps[idx].tempMin = tMin;
         if (tMax > dayTemps[idx].tempMax) dayTemps[idx].tempMax = tMax;
 
-        // Pick weather condition. Prefer midday (12:00:00).
-        // If not midday, and we don't have midday set yet, use the first/any entry.
-        bool isMidday = strstr(dt_txt.c_str(), "12:00:00") != nullptr;
-        if (isMidday || (!dayTemps[idx].hasMidday && dayTemps[idx].weatherCode == -1)) {
+        // Pick weather condition closest to local midday (12:00)
+        int dist = abs(local_hour - 12);
+        if (dist < dayTemps[idx].bestMiddayDist || dayTemps[idx].weatherCode == -1) {
+            dayTemps[idx].bestMiddayDist = dist;
             int code = entry["weather"][0]["id"].as<int>();
             dayTemps[idx].weatherCode = owmToWmoCode(code);
             dayTemps[idx].status = entry["weather"][0]["description"].as<String>();
             if (dayTemps[idx].status.length() > 0) {
                 dayTemps[idx].status[0] = toupper(dayTemps[idx].status[0]);
-            }
-            if (isMidday) {
-                dayTemps[idx].hasMidday = true;
             }
         }
     }
@@ -554,15 +567,40 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref
                                           tomorrow_str, sizeof(tomorrow_str),
                                           ref_time);
 
-    // Map uniqueDays to forecast slots
-    for (int i = 0; i < 3; i++) {
-        if (i < dayCount) {
-            data.forecast[i].tempMax = dayTemps[i].tempMax;
-            data.forecast[i].tempMin = dayTemps[i].tempMin;
-            data.forecast[i].weatherCode = dayTemps[i].weatherCode;
-            data.forecast[i].status = dayTemps[i].status;
+    // Find the starting day index in uniqueDays
+    int start_idx = 0;
+    if (time_valid) {
+        bool found = false;
+        // 1. Look for today's date
+        for (int k = 0; k < dayCount; k++) {
+            if (uniqueDays[k] == today_str) {
+                start_idx = k;
+                found = true;
+                break;
+            }
+        }
+        // 2. If today has passed, look for tomorrow's date
+        if (!found) {
+            for (int k = 0; k < dayCount; k++) {
+                if (uniqueDays[k] == tomorrow_str) {
+                    start_idx = k;
+                    found = true;
+                    break;
+                }
+            }
+        }
+    }
 
-            String dateStr = uniqueDays[i];
+    // Map uniqueDays starting from start_idx to the 3 forecast slots
+    for (int i = 0; i < 3; i++) {
+        int dayIdx = start_idx + i;
+        if (dayIdx < dayCount) {
+            data.forecast[i].tempMax = dayTemps[dayIdx].tempMax;
+            data.forecast[i].tempMin = dayTemps[dayIdx].tempMin;
+            data.forecast[i].weatherCode = dayTemps[dayIdx].weatherCode;
+            data.forecast[i].status = dayTemps[dayIdx].status;
+
+            String dateStr = uniqueDays[dayIdx];
             if (time_valid && dateStr == today_str) {
                 data.forecast[i].dayName = "Today";
             } else if (time_valid && dateStr == tomorrow_str) {
@@ -581,8 +619,8 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref
                 static const char* days[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
                 static const int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
                 if (m < 3) y -= 1;
-                int dayIdx = (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7;
-                data.forecast[i].dayName = (dayIdx >= 0 && dayIdx < 7) ? days[dayIdx] : dateStr;
+                int dayOfWeek = (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7;
+                data.forecast[i].dayName = (dayOfWeek >= 0 && dayOfWeek < 7) ? days[dayOfWeek] : dateStr;
             }
         } else {
             data.forecast[i].tempMax = 0.0f;

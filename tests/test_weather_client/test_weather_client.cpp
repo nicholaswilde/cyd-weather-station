@@ -530,6 +530,108 @@ void test_get_local_date_strings_direct(void) {
     TEST_ASSERT_FALSE(ok);
 }
 
+void test_weather_client_owm_ahead_of_utc_morning_issue_45(void) {
+    // Regression test for user feedback / Issue #45:
+    // Location: Asia/Tokyo (UTC+9). Local time: Thursday 2026-10-08 06:00:00 JST.
+    // UTC time: Wednesday 2026-10-07 21:00:00.
+    // OpenWeatherMap dt_txt in UTC starts with "2026-10-07 21:00:00".
+    // Previously, dt_txt's raw UTC date "2026-10-07" was parsed as Box 0,
+    // which caused Box 0 to display "Thu" (or "Wed"), Box 1 "Today", Box 2 "Tmrw".
+    // With timezone-aware parsing, 1791406800 maps to 2026-10-08 (local Today).
+    settings.setTimezone("Asia/Tokyo");
+    time_t thursday_morning_jst = 1791406800; // 2026-10-08 06:00:00 JST = 2026-10-07 21:00:00 UTC
+
+    const char* owmJson = "{"
+        "\"list\":["
+            "{\"dt\":1791406800,\"dt_txt\":\"2026-10-07 21:00:00\",\"main\":{\"temp\":18.0,\"temp_min\":15.0,\"temp_max\":22.0,\"humidity\":60},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":3.0,\"deg\":90}},"
+            "{\"dt\":1791428400,\"dt_txt\":\"2026-10-08 03:00:00\",\"main\":{\"temp\":21.0,\"temp_min\":15.0,\"temp_max\":22.0,\"humidity\":50},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":4.0,\"deg\":90}},"
+            "{\"dt\":1791514800,\"dt_txt\":\"2026-10-09 03:00:00\",\"main\":{\"temp\":20.0,\"temp_min\":14.0,\"temp_max\":21.0,\"humidity\":55},\"weather\":[{\"id\":801,\"description\":\"few clouds\"}],\"wind\":{\"speed\":3.5,\"deg\":100}},"
+            "{\"dt\":1791601200,\"dt_txt\":\"2026-10-10 03:00:00\",\"main\":{\"temp\":19.0,\"temp_min\":13.0,\"temp_max\":20.0,\"humidity\":50},\"weather\":[{\"id\":802,\"description\":\"scattered clouds\"}],\"wind\":{\"speed\":3.0,\"deg\":110}}"
+        "],"
+        "\"city\":{\"name\":\"Tokyo\",\"timezone\":32400}"
+    "}";
+
+    WeatherClient client;
+    WeatherData data = {};
+    bool parsed = client.parseOwmJson(owmJson, data, thursday_morning_jst);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_STRING("Today", data.forecast[0].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Sat", data.forecast[2].dayName.c_str());
+}
+
+void test_weather_client_owm_behind_utc_evening_issue_45(void) {
+    // Location: America/Los_Angeles (PDT, UTC-7). Local time: Wednesday 2026-10-07 20:00:00 PDT.
+    // UTC time: Thursday 2026-10-08 03:00:00.
+    // dt: 1791428400 (Wed 20:00 PDT), dt_txt: "2026-10-08 03:00:00" (Thu in UTC).
+    // Box 0 must be "Today", Box 1 "Tmrw", Box 2 "Fri".
+    settings.setTimezone("America/Los_Angeles");
+    time_t wednesday_evening_pdt = 1791428400; // 2026-10-07 20:00 PDT
+
+    const char* owmJson = "{"
+        "\"list\":["
+            "{\"dt\":1791428400,\"dt_txt\":\"2026-10-08 03:00:00\",\"main\":{\"temp\":68.0,\"temp_min\":55.0,\"temp_max\":75.0,\"humidity\":50},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":5.0,\"deg\":180}},"
+            "{\"dt\":1791514800,\"dt_txt\":\"2026-10-09 03:00:00\",\"main\":{\"temp\":70.0,\"temp_min\":56.0,\"temp_max\":76.0,\"humidity\":50},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":5.0,\"deg\":180}},"
+            "{\"dt\":1791601200,\"dt_txt\":\"2026-10-10 03:00:00\",\"main\":{\"temp\":72.0,\"temp_min\":57.0,\"temp_max\":77.0,\"humidity\":50},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":5.0,\"deg\":180}}"
+        "],"
+        "\"city\":{\"name\":\"Los Angeles\",\"timezone\":-25200}"
+    "}";
+
+    WeatherClient client;
+    WeatherData data = {};
+    bool parsed = client.parseOwmJson(owmJson, data, wednesday_evening_pdt);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_STRING("Today", data.forecast[0].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Fri", data.forecast[2].dayName.c_str());
+}
+
+void test_weather_client_owm_yesterday_entry_skipped(void) {
+    // If the list starts with an entry from yesterday (e.g. at 01:00 AM local,
+    // current 3-hour period started at 22:00 yesterday), Box 0 must skip yesterday
+    // and anchor to Today.
+    settings.setTimezone("America/Los_Angeles");
+    time_t thursday_01am_pdt = 1791446400; // 2026-10-08 01:00 PDT = 2026-10-08 08:00 UTC
+
+    const char* owmJson = "{"
+        "\"list\":["
+            "{\"dt\":1791435600,\"dt_txt\":\"2026-10-08 05:00:00\",\"main\":{\"temp\":58.0,\"temp_min\":55.0,\"temp_max\":60.0,\"humidity\":70},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":3.0,\"deg\":180}}," // 2026-10-07 22:00 PDT (yesterday)
+            "{\"dt\":1791446400,\"dt_txt\":\"2026-10-08 08:00:00\",\"main\":{\"temp\":65.0,\"temp_min\":55.0,\"temp_max\":75.0,\"humidity\":60},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":4.0,\"deg\":180}}," // 2026-10-08 01:00 PDT (today)
+            "{\"dt\":1791532800,\"dt_txt\":\"2026-10-09 08:00:00\",\"main\":{\"temp\":68.0,\"temp_min\":56.0,\"temp_max\":76.0,\"humidity\":55},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":4.0,\"deg\":180}}," // 2026-10-09 01:00 PDT (tomorrow)
+            "{\"dt\":1791619200,\"dt_txt\":\"2026-10-10 08:00:00\",\"main\":{\"temp\":70.0,\"temp_min\":57.0,\"temp_max\":77.0,\"humidity\":50},\"weather\":[{\"id\":800,\"description\":\"clear sky\"}],\"wind\":{\"speed\":4.0,\"deg\":180}}"  // 2026-10-10 01:00 PDT (Sat)
+        "],"
+        "\"city\":{\"name\":\"Los Angeles\",\"timezone\":-25200}"
+    "}";
+
+    WeatherClient client;
+    WeatherData data = {};
+    bool parsed = client.parseOwmJson(owmJson, data, thursday_01am_pdt);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_EQUAL_STRING("Today", data.forecast[0].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Tmrw", data.forecast[1].dayName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Sat", data.forecast[2].dayName.c_str());
+}
+
+void test_get_local_date_string_from_timestamp_direct(void) {
+    char date_str[11] = "";
+    int local_hour = -1;
+
+    // 1791428400 = 2026-10-08 03:00:00 UTC
+    // America/Los_Angeles (PDT, UTC-7) -> 2026-10-07 20:00:00
+    settings.setTimezone("America/Los_Angeles");
+    bool ok = getLocalDateStringFromTimestamp(1791428400, date_str, sizeof(date_str), &local_hour);
+    TEST_ASSERT_TRUE(ok);
+    TEST_ASSERT_EQUAL_STRING("2026-10-07", date_str);
+    TEST_ASSERT_EQUAL_INT(20, local_hour);
+
+    // Asia/Tokyo (JST, UTC+9) -> 2026-10-08 12:00:00
+    settings.setTimezone("Asia/Tokyo");
+    ok = getLocalDateStringFromTimestamp(1791428400, date_str, sizeof(date_str), &local_hour);
+    TEST_ASSERT_TRUE(ok);
+    TEST_ASSERT_EQUAL_STRING("2026-10-08", date_str);
+    TEST_ASSERT_EQUAL_INT(12, local_hour);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -555,5 +657,9 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_forecast_day_labels_ahead_of_utc);
     RUN_TEST(test_weather_client_forecast_day_labels_uninitialized_ntp_fallback);
     RUN_TEST(test_get_local_date_strings_direct);
+    RUN_TEST(test_weather_client_owm_ahead_of_utc_morning_issue_45);
+    RUN_TEST(test_weather_client_owm_behind_utc_evening_issue_45);
+    RUN_TEST(test_weather_client_owm_yesterday_entry_skipped);
+    RUN_TEST(test_get_local_date_string_from_timestamp_direct);
     return UNITY_END();
 }
