@@ -22,6 +22,41 @@ set -euo pipefail
 OUTPUT_DIR="${OUTPUT_DIR:-dist}"
 mkdir -p "${OUTPUT_DIR}"
 
+# Helper to determine firmware version matching the GUI (APP_VERSION / extra_scripts.py)
+get_firmware_version() {
+  # 1. Prefer git describe (same command used by scripts/extra_scripts.py for APP_VERSION)
+  if [ -d ".git" ] && command -v git &>/dev/null; then
+    local ver
+    ver=$(git describe --dirty --always --tags 2>/dev/null || true)
+    if [ -n "$ver" ]; then
+      echo "$ver"
+      return 0
+    fi
+  fi
+
+  # 2. Check generated include/version.h
+  if [ -f "include/version.h" ]; then
+    local ver
+    ver=$(grep '#define APP_VERSION' include/version.h 2>/dev/null | sed -E 's/.*"([^"]+)".*/\1/')
+    if [ -n "$ver" ] && [ "$ver" != "unknown" ]; then
+      echo "$ver"
+      return 0
+    fi
+  fi
+
+  # 3. Fallback to version.txt
+  if [ -f "version.txt" ]; then
+    local ver
+    ver=$(tr -d '[:space:]' < version.txt)
+    if [ -n "$ver" ]; then
+      echo "$ver"
+      return 0
+    fi
+  fi
+
+  echo "unknown"
+}
+
 BUNDLE=false
 BUNDLE_ZIP="${BUNDLE_ZIP:-}"
 POSITIONAL=()
@@ -69,13 +104,19 @@ else
   ENVIRONMENTS=("cyd_28c" "cyd_28c_inv")
 fi
 
+FIRMWARE_VERSION="$(get_firmware_version)"
+
 if [ -n "${BUNDLE_ZIP}" ]; then
   BUNDLE=true
 fi
 
 if [ "${BUNDLE}" = true ]; then
   if [ -z "${BUNDLE_ZIP}" ]; then
-    BUNDLE_ZIP="${ENVIRONMENTS[0]}_bundle.zip"
+    if [ -n "${FIRMWARE_VERSION}" ] && [ "${FIRMWARE_VERSION}" != "unknown" ]; then
+      BUNDLE_ZIP="${ENVIRONMENTS[0]}_bundle_${FIRMWARE_VERSION}.zip"
+    else
+      BUNDLE_ZIP="${ENVIRONMENTS[0]}_bundle.zip"
+    fi
   fi
   if [[ "${BUNDLE_ZIP}" != *.zip ]]; then
     BUNDLE_ZIP="${BUNDLE_ZIP}.zip"
@@ -87,11 +128,14 @@ fi
 
 echo "=========================================="
 echo "Packaging binaries for environments: ${ENVIRONMENTS[*]}"
+echo "Firmware version: ${FIRMWARE_VERSION}"
 echo "Destination directory: ${OUTPUT_DIR}"
 if [ "${BUNDLE}" = true ]; then
   echo "Bundle archive: ${BUNDLE_ZIP}"
 fi
 echo "=========================================="
+
+ENV_VER="${FIRMWARE_VERSION}"
 
 for ENV in "${ENVIRONMENTS[@]}"; do
   echo ""
@@ -105,8 +149,15 @@ for ENV in "${ENVIRONMENTS[@]}"; do
     exit 1
   fi
 
+  # Refresh version after pio run to capture any newly generated version.h
+  ENV_VER="$(get_firmware_version)"
+
   if [ "${BUNDLE}" != true ]; then
-    ZIP_FILE="${OUTPUT_DIR}/${ENV}.zip"
+    if [ -n "${ENV_VER}" ] && [ "${ENV_VER}" != "unknown" ]; then
+      ZIP_FILE="${OUTPUT_DIR}/${ENV}_${ENV_VER}.zip"
+    else
+      ZIP_FILE="${OUTPUT_DIR}/${ENV}.zip"
+    fi
     echo "--> [2/2] Creating ZIP archive: ${ZIP_FILE}..."
     
     # Remove existing zip if present
@@ -144,6 +195,7 @@ import zipfile
 
 environments = '''${ENVIRONMENTS[*]}'''.split()
 bundle_zip = '''${BUNDLE_ZIP}'''
+firmware_ver = '''${ENV_VER:-$FIRMWARE_VERSION}'''
 
 files = []
 for env in environments:
@@ -154,6 +206,7 @@ for env in environments:
 
 readme_content = f'''CYD Weather Station Firmware Package
 ====================================
+Version: {firmware_ver}
 Environments included:
 {', '.join(environments)}
 
