@@ -164,6 +164,15 @@ void WifiManager::update() {
             break;
 
         case WIFI_STATE_AP_MODE:
+#ifndef NATIVE_TEST
+            if (_ssid.length() > 0 && (millis() - _lastReconnectAttempt > (_reconnectInterval * 3))) {
+                _lastReconnectAttempt = millis();
+                Serial.println("[WiFi] Attempting background STA reconnect in AP mode...");
+                configureStaticIP();
+                WiFi.setHostname(settings.getHostname().c_str());
+                WiFi.begin(_ssid.c_str(), _password.c_str());
+            }
+#endif
             if (WiFi.status() == WL_CONNECTED) {
                 Serial.println("[WiFi] Wi-Fi connected in background. Stopping AP Mode...");
 #ifndef NATIVE_TEST
@@ -241,6 +250,7 @@ String WifiManager::getAPSSID() {
 
 void WifiManager::startAPMode() {
     _state = WIFI_STATE_AP_MODE;
+    _lastReconnectAttempt = millis();
     String apSSID = getAPSSID();
     Serial.printf("[WiFi] Entering AP Mode. SSID: %s\n", apSSID.c_str());
 

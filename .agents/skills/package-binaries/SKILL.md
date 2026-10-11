@@ -31,9 +31,10 @@ bash .agents/skills/package-binaries/package_binaries.sh --bundle cyd_28_nm_bund
 
 ### Outputs
 
-The resulting zip files will be placed in the `dist/` folder (or `$OUTPUT_DIR` if overridden):
-- `dist/cyd_28c.zip`
-- `dist/cyd_28c_inv.zip`
+The resulting zip files will be placed in the `dist/` folder (or `$OUTPUT_DIR` if overridden), tagged with the firmware version and commit info (matching the version shown below the app title in the GUI):
+- `dist/cyd_28c_<version>-<commit>.zip` (e.g. `dist/cyd_28c_v0.1.38-4-g096e608.zip`)
+- `dist/cyd_28c_inv_<version>-<commit>.zip` (e.g. `dist/cyd_28c_inv_v0.1.38-4-g096e608.zip`)
+- Default bundle archive: `dist/<first_env>_bundle_<version>-<commit>.zip`
 
 Each zip package contains:
 - `bootloader.bin`
