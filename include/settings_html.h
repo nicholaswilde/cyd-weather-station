@@ -39,10 +39,32 @@ button:hover { background: #f5c2e7; }
 <form method='POST' action='/settings/save'>
 
 <div class='section-title' style='margin-top: 0;'>Display & UI</div>
-<label for='unit_system' title='Select the measurement units for weather data'>Unit System</label>
-<select id='unit_system' name='unit_system'>
-    <option value='1' %UNIT_METRIC%>Metric (Celsius, m/s)</option>
-    <option value='2' %UNIT_IMPERIAL%>Imperial (Fahrenheit, mph)</option>
+<label for='temp_unit' title='Select the temperature measurement unit'>Temperature Unit</label>
+<select id='temp_unit' name='temp_unit'>
+    <option value='1' %TEMP_UNIT_1%>Celsius (°C)</option>
+    <option value='2' %TEMP_UNIT_2%>Fahrenheit (°F)</option>
+</select>
+
+<label for='wind_unit' title='Select the wind speed measurement unit'>Wind Speed Unit</label>
+<select id='wind_unit' name='wind_unit'>
+    <option value='1' %WIND_UNIT_1%>km/h</option>
+    <option value='2' %WIND_UNIT_2%>mph</option>
+    <option value='3' %WIND_UNIT_3%>m/s</option>
+    <option value='4' %WIND_UNIT_4%>knots</option>
+</select>
+
+<label for='precip_unit' title='Select the precipitation measurement unit'>Precipitation Unit</label>
+<select id='precip_unit' name='precip_unit'>
+    <option value='1' %PRECIP_UNIT_1%>Millimeters (mm)</option>
+    <option value='2' %PRECIP_UNIT_2%>Inches (in)</option>
+</select>
+
+<label for='pressure_unit' title='Select the atmospheric pressure measurement unit'>Pressure Unit</label>
+<select id='pressure_unit' name='pressure_unit'>
+    <option value='1' %PRESSURE_UNIT_1%>hPa</option>
+    <option value='2' %PRESSURE_UNIT_2%>inHg</option>
+    <option value='3' %PRESSURE_UNIT_3%>mbar</option>
+    <option value='4' %PRESSURE_UNIT_4%>mmHg</option>
 </select>
 
 <label for='theme_flavor' title='Select the color palette for the user interface'>Theme (Catppuccin)</label>

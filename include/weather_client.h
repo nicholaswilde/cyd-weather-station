@@ -35,6 +35,12 @@ public:
     WeatherData fetchWeather();
     const String& getCityName() const { return _cityName; }
     static String getWeatherDesc(int code);
+    static String buildOpenMeteoUrl(const char* lat, const char* lng);
+    static String buildOwmUrl(const char* lat, const char* lng);
+    static float convertTemperature(float value, int fromUnit, int toUnit);
+    static float convertWindSpeed(float value, int fromUnit, int toUnit);
+    static float convertPrecipitation(float value, int fromUnit, int toUnit);
+    static float convertPressure(float value, int fromUnit, int toUnit);
     static bool parseWeatherJson(const char* json, WeatherData& data, time_t ref_time = 0);
     bool parseOwmJson(const char* json, WeatherData& data, time_t ref_time = 0);
     static String serializeWeatherData(const WeatherData& data);

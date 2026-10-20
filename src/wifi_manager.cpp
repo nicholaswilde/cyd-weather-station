@@ -634,6 +634,10 @@ void WifiManager::startWebServer() {
         }
         DynamicJsonDocument doc(2048);
         doc["unit_system"] = settings.getUnitSystem();
+        doc["temp_unit"] = settings.getTempUnit();
+        doc["wind_unit"] = settings.getWindUnit();
+        doc["precip_unit"] = settings.getPrecipUnit();
+        doc["pressure_unit"] = settings.getPressureUnit();
         doc["brightness"] = settings.getBrightness();
         doc["auto_brightness"] = settings.getAutoBrightness();
         doc["show_title_version"] = settings.getShowTitleVersion();
@@ -702,7 +706,26 @@ void WifiManager::startWebServer() {
             return;
         }
         
-        if (doc.containsKey("unit_system")) settings.setUnitSystem(doc["unit_system"]);
+        if (doc.containsKey("unit_system")) {
+            settings.setUnitSystem(doc["unit_system"]);
+            settings_unit_changed = true;
+        }
+        if (doc.containsKey("temp_unit")) {
+            settings.setTempUnit(doc["temp_unit"]);
+            settings_unit_changed = true;
+        }
+        if (doc.containsKey("wind_unit")) {
+            settings.setWindUnit(doc["wind_unit"]);
+            settings_unit_changed = true;
+        }
+        if (doc.containsKey("precip_unit")) {
+            settings.setPrecipUnit(doc["precip_unit"]);
+            settings_unit_changed = true;
+        }
+        if (doc.containsKey("pressure_unit")) {
+            settings.setPressureUnit(doc["pressure_unit"]);
+            settings_unit_changed = true;
+        }
         if (doc.containsKey("brightness")) settings.setBrightness(doc["brightness"]);
         if (doc.containsKey("auto_brightness")) settings.setAutoBrightness(doc["auto_brightness"]);
         if (doc.containsKey("show_title_version")) settings.setShowTitleVersion(doc["show_title_version"]);
@@ -893,6 +916,18 @@ void WifiManager::handleSettings() {
 
     html.replace("%UNIT_METRIC%", settings.getUnitSystem() == UNIT_METRIC ? "selected" : "");
     html.replace("%UNIT_IMPERIAL%", settings.getUnitSystem() == UNIT_IMPERIAL ? "selected" : "");
+    html.replace("%TEMP_UNIT_1%", settings.getTempUnit() == TEMP_UNIT_CELSIUS ? "selected" : "");
+    html.replace("%TEMP_UNIT_2%", settings.getTempUnit() == TEMP_UNIT_FAHRENHEIT ? "selected" : "");
+    html.replace("%WIND_UNIT_1%", settings.getWindUnit() == WIND_UNIT_KMH ? "selected" : "");
+    html.replace("%WIND_UNIT_2%", settings.getWindUnit() == WIND_UNIT_MPH ? "selected" : "");
+    html.replace("%WIND_UNIT_3%", settings.getWindUnit() == WIND_UNIT_MS ? "selected" : "");
+    html.replace("%WIND_UNIT_4%", settings.getWindUnit() == WIND_UNIT_KNOTS ? "selected" : "");
+    html.replace("%PRECIP_UNIT_1%", settings.getPrecipUnit() == PRECIP_UNIT_MM ? "selected" : "");
+    html.replace("%PRECIP_UNIT_2%", settings.getPrecipUnit() == PRECIP_UNIT_INCH ? "selected" : "");
+    html.replace("%PRESSURE_UNIT_1%", settings.getPressureUnit() == PRESSURE_UNIT_HPA ? "selected" : "");
+    html.replace("%PRESSURE_UNIT_2%", settings.getPressureUnit() == PRESSURE_UNIT_INHG ? "selected" : "");
+    html.replace("%PRESSURE_UNIT_3%", settings.getPressureUnit() == PRESSURE_UNIT_MBAR ? "selected" : "");
+    html.replace("%PRESSURE_UNIT_4%", settings.getPressureUnit() == PRESSURE_UNIT_MMHG ? "selected" : "");
     
     html.replace("%THEME_MOCHA%", settings.getThemeFlavor() == CATPPUCCIN_MOCHA ? "selected" : "");
     html.replace("%THEME_MACCHIATO%", settings.getThemeFlavor() == CATPPUCCIN_MACCHIATO ? "selected" : "");
@@ -972,6 +1007,10 @@ void WifiManager::handleSettings() {
 
 void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("unit_system")) settings.setUnitSystem(_webServer->arg("unit_system").toInt());
+    if (_webServer->hasArg("temp_unit")) settings.setTempUnit(_webServer->arg("temp_unit").toInt());
+    if (_webServer->hasArg("wind_unit")) settings.setWindUnit(_webServer->arg("wind_unit").toInt());
+    if (_webServer->hasArg("precip_unit")) settings.setPrecipUnit(_webServer->arg("precip_unit").toInt());
+    if (_webServer->hasArg("pressure_unit")) settings.setPressureUnit(_webServer->arg("pressure_unit").toInt());
     if (_webServer->hasArg("theme_flavor")) settings.setThemeFlavor(_webServer->arg("theme_flavor").toInt());
     if (_webServer->hasArg("screen_orientation")) settings.setScreenOrientation(_webServer->arg("screen_orientation").toInt());
     

@@ -39,7 +39,7 @@ mkdir -p screenshots
 OUT_FILE="screenshots/agent_${TAB}.bmp"
 
 echo "Capturing screenshot..."
-if ! curl -sS -f -m 15 "http://${CYD_DEVICE_IP}/screenshot" -o "${OUT_FILE}"; then
+if ! curl -sS -f -m 45 "http://${CYD_DEVICE_IP}/screenshot" -o "${OUT_FILE}"; then
     echo "Error: Failed to capture screenshot."
     exit 1
 fi

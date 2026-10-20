@@ -190,6 +190,32 @@ void setup() {
             if (payload == "Metric") units = 1;
             settings.setUnitSystem(units);
             settings_unit_changed = true;
+        } else if (topic.endsWith("command/units/temperature")) {
+            int unit = TEMP_UNIT_FAHRENHEIT;
+            if (payload == "°C" || payload == "C" || payload == "celsius" || payload == "Celsius" || payload == "1") {
+                unit = TEMP_UNIT_CELSIUS;
+            }
+            settings.setTempUnit(unit);
+            settings_unit_changed = true;
+        } else if (topic.endsWith("command/units/wind")) {
+            int unit = WIND_UNIT_KMH;
+            if (payload == "mph" || payload == "2") unit = WIND_UNIT_MPH;
+            else if (payload == "m/s" || payload == "ms" || payload == "3") unit = WIND_UNIT_MS;
+            else if (payload == "knots" || payload == "kn" || payload == "4") unit = WIND_UNIT_KNOTS;
+            settings.setWindUnit(unit);
+            settings_unit_changed = true;
+        } else if (topic.endsWith("command/units/precipitation")) {
+            int unit = PRECIP_UNIT_MM;
+            if (payload == "in" || payload == "inch" || payload == "2") unit = PRECIP_UNIT_INCH;
+            settings.setPrecipUnit(unit);
+            settings_unit_changed = true;
+        } else if (topic.endsWith("command/units/pressure")) {
+            int unit = PRESSURE_UNIT_HPA;
+            if (payload == "inHg" || payload == "2") unit = PRESSURE_UNIT_INHG;
+            else if (payload == "mbar" || payload == "3") unit = PRESSURE_UNIT_MBAR;
+            else if (payload == "mmHg" || payload == "4") unit = PRESSURE_UNIT_MMHG;
+            settings.setPressureUnit(unit);
+            settings_unit_changed = true;
         } else if (topic.endsWith("command/use_24h")) {
             bool en = (payload == "ON" || payload == "1" || payload == "true");
             settings.setUse24HourFormat(en);
@@ -333,7 +359,7 @@ void loop() {
             
             if (settings.getLocalSensorType() == 1) { // DHT22
                 float h = dht22.readHumidity();
-                bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
+                bool isFahrenheit = (settings.getTempUnit() == TEMP_UNIT_FAHRENHEIT);
                 float t = dht22.readTemperature(isFahrenheit);
                 
                 if (isnan(h) || isnan(t)) {
@@ -359,7 +385,7 @@ void loop() {
                 
                 float h = success ? humidity.relative_humidity : NAN;
                 float t = success ? temp.temperature : NAN;
-                bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
+                bool isFahrenheit = (settings.getTempUnit() == TEMP_UNIT_FAHRENHEIT);
                 if (isFahrenheit && success) {
                     t = t * 1.8 + 32.0;
                 }
@@ -383,7 +409,7 @@ void loop() {
                 }
             } else if (settings.getLocalSensorType() == 3) { // DHT11
                 float h = dht11.readHumidity();
-                bool isFahrenheit = (settings.getUnitSystem() == UNIT_IMPERIAL);
+                bool isFahrenheit = (settings.getTempUnit() == TEMP_UNIT_FAHRENHEIT);
                 float t = dht11.readTemperature(isFahrenheit);
                 
                 if (isnan(h) || isnan(t)) {
@@ -466,8 +492,9 @@ void loop() {
     // Handle runtime settings changes from UI
     if (settings_unit_changed) {
         settings_unit_changed = false;
-        Serial.println("[System] Temperature unit changed. Triggering weather refetch...");
+        Serial.println("[System] Unit settings changed. Triggering weather refetch...");
         hasInitialFetch = false;
+        lastDhtRead = 0;
     }
 
     if (settings_brightness_changed) {
@@ -813,6 +840,10 @@ void loop() {
         mqtt.publish("settings/theme", themeStr.c_str(), true);
         
         mqtt.publish("settings/units", settings.getUnitSystem() == 1 ? "Metric" : "Imperial", true);
+        mqtt.publish("settings/units/temperature", getTempUnitLabel(settings.getTempUnit()), true);
+        mqtt.publish("settings/units/wind", getWindUnitLabel(settings.getWindUnit()), true);
+        mqtt.publish("settings/units/precipitation", getPrecipUnitLabel(settings.getPrecipUnit()), true);
+        mqtt.publish("settings/units/pressure", getPressureUnitLabel(settings.getPressureUnit()), true);
         mqtt.publish("settings/use_24h", settings.getUse24HourFormat() ? "ON" : "OFF", true);
         mqtt.publish("settings/title_version", settings.getShowTitleVersion() ? "ON" : "OFF", true);
         

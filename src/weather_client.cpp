@@ -134,6 +134,148 @@ bool WeatherClient::reverseGeocode() {
 #endif
 }
 
+String WeatherClient::buildOpenMeteoUrl(const char* lat, const char* lng) {
+    String url = "http://api.open-meteo.com/v1/forecast?latitude=";
+    url += lat;
+    url += "&longitude=";
+    url += lng;
+    url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m";
+    url += "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3";
+    url += "&hourly=temperature_2m,precipitation_probability";
+    url += "&forecast_hours=24";
+    url += "&timezone=auto"; // Return dates in local timezone, not UTC
+
+    if (settings.getTempUnit() == TEMP_UNIT_FAHRENHEIT) {
+        url += "&temperature_unit=fahrenheit";
+    } else {
+        url += "&temperature_unit=celsius";
+    }
+
+    switch (settings.getWindUnit()) {
+        case WIND_UNIT_MPH:
+            url += "&windspeed_unit=mph";
+            break;
+        case WIND_UNIT_MS:
+            url += "&windspeed_unit=ms";
+            break;
+        case WIND_UNIT_KNOTS:
+            url += "&windspeed_unit=kn";
+            break;
+        case WIND_UNIT_KMH:
+        default:
+            url += "&windspeed_unit=kmh";
+            break;
+    }
+
+    if (settings.getPrecipUnit() == PRECIP_UNIT_INCH) {
+        url += "&precipitation_unit=inch";
+    } else {
+        url += "&precipitation_unit=mm";
+    }
+
+    return url;
+}
+
+String WeatherClient::buildOwmUrl(const char* lat, const char* lng) {
+    String url;
+    String cityCode = settings.getCityCode();
+    if (cityCode.length() > 0) {
+        url = "http://api.openweathermap.org/data/2.5/forecast?id=";
+        url += cityCode;
+    } else {
+        url = "http://api.openweathermap.org/data/2.5/forecast?lat=";
+        url += lat;
+        url += "&lon=";
+        url += lng;
+    }
+    url += "&appid=";
+    url += settings.getOwmApiKey();
+    url += "&units=";
+    url += (settings.getTempUnit() == TEMP_UNIT_FAHRENHEIT ? "imperial" : "metric");
+    return url;
+}
+
+float WeatherClient::convertTemperature(float value, int fromUnit, int toUnit) {
+    if (fromUnit == toUnit) return value;
+    if (fromUnit == TEMP_UNIT_CELSIUS && toUnit == TEMP_UNIT_FAHRENHEIT) {
+        return value * 1.8f + 32.0f;
+    }
+    if (fromUnit == TEMP_UNIT_FAHRENHEIT && toUnit == TEMP_UNIT_CELSIUS) {
+        return (value - 32.0f) / 1.8f;
+    }
+    return value;
+}
+
+float WeatherClient::convertWindSpeed(float value, int fromUnit, int toUnit) {
+    if (fromUnit == toUnit) return value;
+    float ms = value;
+    switch (fromUnit) {
+        case WIND_UNIT_KMH:
+            ms = value / 3.6f;
+            break;
+        case WIND_UNIT_MPH:
+            ms = value * 0.44704f;
+            break;
+        case WIND_UNIT_KNOTS:
+            ms = value * 0.514444f;
+            break;
+        case WIND_UNIT_MS:
+        default:
+            ms = value;
+            break;
+    }
+    switch (toUnit) {
+        case WIND_UNIT_KMH:
+            return ms * 3.6f;
+        case WIND_UNIT_MPH:
+            return ms / 0.44704f;
+        case WIND_UNIT_KNOTS:
+            return ms / 0.514444f;
+        case WIND_UNIT_MS:
+        default:
+            return ms;
+    }
+}
+
+float WeatherClient::convertPrecipitation(float value, int fromUnit, int toUnit) {
+    if (fromUnit == toUnit) return value;
+    if (fromUnit == PRECIP_UNIT_MM && toUnit == PRECIP_UNIT_INCH) {
+        return value / 25.4f;
+    }
+    if (fromUnit == PRECIP_UNIT_INCH && toUnit == PRECIP_UNIT_MM) {
+        return value * 25.4f;
+    }
+    return value;
+}
+
+float WeatherClient::convertPressure(float value, int fromUnit, int toUnit) {
+    if (fromUnit == toUnit) return value;
+    float hpa = value;
+    switch (fromUnit) {
+        case PRESSURE_UNIT_INHG:
+            hpa = value * 33.86389f;
+            break;
+        case PRESSURE_UNIT_MMHG:
+            hpa = value * 1.33322f;
+            break;
+        case PRESSURE_UNIT_HPA:
+        case PRESSURE_UNIT_MBAR:
+        default:
+            hpa = value;
+            break;
+    }
+    switch (toUnit) {
+        case PRESSURE_UNIT_INHG:
+            return hpa / 33.86389f;
+        case PRESSURE_UNIT_MMHG:
+            return hpa / 1.33322f;
+        case PRESSURE_UNIT_HPA:
+        case PRESSURE_UNIT_MBAR:
+        default:
+            return hpa;
+    }
+}
+
 WeatherData WeatherClient::fetchWeather() {
 
     _zipCode = settings.getZipCode();
@@ -191,34 +333,9 @@ WeatherData WeatherClient::fetchWeather() {
 
     String url;
     if (useOWM) {
-        String cityCode = settings.getCityCode();
-        if (cityCode.length() > 0) {
-            url = "http://api.openweathermap.org/data/2.5/forecast?id=";
-            url += cityCode;
-        } else {
-            url = "http://api.openweathermap.org/data/2.5/forecast?lat=";
-            url += lat;
-            url += "&lon=";
-            url += lng;
-        }
-        url += "&appid=";
-        url += settings.getOwmApiKey();
-        url += "&units=";
-        url += (settings.getUnitSystem() == UNIT_IMPERIAL ? "imperial" : "metric");
+        url = buildOwmUrl(lat, lng);
     } else {
-        url = "http://api.open-meteo.com/v1/forecast?latitude=";
-        url += lat;
-        url += "&longitude=";
-        url += lng;
-        url += "&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m";
-        url += "&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=3";
-        url += "&hourly=temperature_2m,precipitation_probability";
-        url += "&forecast_hours=24";
-        url += "&timezone=auto"; // Return dates in local timezone, not UTC
-        if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-            url += "&temperature_unit=fahrenheit";
-            url += "&windspeed_unit=mph";
-        }
+        url = buildOpenMeteoUrl(lat, lng);
     }
 
     Serial.print("[Weather] Fetching URL: ");
@@ -459,10 +576,9 @@ bool WeatherClient::parseOwmJson(const char* json, WeatherData& data, time_t ref
     data.humidity = current["main"]["humidity"].as<int>();
     data.windSpeed = current["wind"]["speed"].as<float>();
     data.windDirection = current["wind"]["deg"].is<int>() ? current["wind"]["deg"].as<int>() : 0;
-    // Convert metric wind speed from m/s to km/h (if metric)
-    if (settings.getUnitSystem() == UNIT_METRIC) {
-        data.windSpeed *= 3.6f;
-    }
+    // Convert OWM wind speed (mph if imperial, m/s if metric) to configured wind unit
+    int owmWindUnit = (settings.getTempUnit() == TEMP_UNIT_FAHRENHEIT) ? WIND_UNIT_MPH : WIND_UNIT_MS;
+    data.windSpeed = convertWindSpeed(data.windSpeed, owmWindUnit, settings.getWindUnit());
     
     int owmCode = current["weather"][0]["id"].as<int>();
     data.weatherCode = owmToWmoCode(owmCode);

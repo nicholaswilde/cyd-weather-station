@@ -10,6 +10,10 @@
 class SettingsManager {
 private:
     int _unitSystem;
+    int _tempUnit;
+    int _windUnit;
+    int _precipUnit;
+    int _pressureUnit;
     int _brightness;
     bool _autoBrightness;
     String _timezone;
@@ -62,6 +66,18 @@ public:
     
     int getUnitSystem() const;
     void setUnitSystem(int unitSystem);
+
+    int getTempUnit() const;
+    void setTempUnit(int unit);
+
+    int getWindUnit() const;
+    void setWindUnit(int unit);
+
+    int getPrecipUnit() const;
+    void setPrecipUnit(int unit);
+
+    int getPressureUnit() const;
+    void setPressureUnit(int unit);
     
     int getBrightness() const;
     void setBrightness(int brightness);

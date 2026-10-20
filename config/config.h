@@ -45,13 +45,58 @@ extern int getCurrentThemeFlavor();
 
 #define TO_LV_COLOR(c) (lv_color_t){.full = (c)}
 
-// Unit System Settings
+// Unit System Settings (Legacy global setting)
 #define UNIT_METRIC   1
 #define UNIT_IMPERIAL 2
 
 // Choose Unit System (UNIT_METRIC or UNIT_IMPERIAL)
 // #define UNIT_SYSTEM UNIT_METRIC
 #define UNIT_SYSTEM UNIT_IMPERIAL
+
+// Individual Metric Unit Definitions
+// Temperature Units: TEMP_UNIT_CELSIUS (1), TEMP_UNIT_FAHRENHEIT (2)
+#define TEMP_UNIT_CELSIUS    1
+#define TEMP_UNIT_FAHRENHEIT 2
+
+// Wind Speed Units: WIND_UNIT_KMH (1), WIND_UNIT_MPH (2), WIND_UNIT_MS (3), WIND_UNIT_KNOTS (4)
+#define WIND_UNIT_KMH   1
+#define WIND_UNIT_MPH   2
+#define WIND_UNIT_MS    3
+#define WIND_UNIT_KNOTS 4
+
+// Precipitation Units: PRECIP_UNIT_MM (1), PRECIP_UNIT_INCH (2)
+#define PRECIP_UNIT_MM   1
+#define PRECIP_UNIT_INCH 2
+
+// Pressure Units: PRESSURE_UNIT_HPA (1), PRESSURE_UNIT_INHG (2), PRESSURE_UNIT_MBAR (3), PRESSURE_UNIT_MMHG (4)
+#define PRESSURE_UNIT_HPA  1
+#define PRESSURE_UNIT_INHG 2
+#define PRESSURE_UNIT_MBAR 3
+#define PRESSURE_UNIT_MMHG 4
+
+// Default Metric Units
+// Uncomment any of the following to set explicit independent compile-time defaults.
+// If left commented, each unit automatically falls back to UNIT_SYSTEM.
+// #define DEFAULT_TEMP_UNIT     TEMP_UNIT_FAHRENHEIT
+// #define DEFAULT_WIND_UNIT     WIND_UNIT_MPH
+// #define DEFAULT_PRECIP_UNIT   PRECIP_UNIT_INCH
+// #define DEFAULT_PRESSURE_UNIT PRESSURE_UNIT_INHG
+
+#ifndef DEFAULT_TEMP_UNIT
+#define DEFAULT_TEMP_UNIT (UNIT_SYSTEM == UNIT_IMPERIAL ? TEMP_UNIT_FAHRENHEIT : TEMP_UNIT_CELSIUS)
+#endif
+
+#ifndef DEFAULT_WIND_UNIT
+#define DEFAULT_WIND_UNIT (UNIT_SYSTEM == UNIT_IMPERIAL ? WIND_UNIT_MPH : WIND_UNIT_KMH)
+#endif
+
+#ifndef DEFAULT_PRECIP_UNIT
+#define DEFAULT_PRECIP_UNIT (UNIT_SYSTEM == UNIT_IMPERIAL ? PRECIP_UNIT_INCH : PRECIP_UNIT_MM)
+#endif
+
+#ifndef DEFAULT_PRESSURE_UNIT
+#define DEFAULT_PRESSURE_UNIT (UNIT_SYSTEM == UNIT_IMPERIAL ? PRESSURE_UNIT_INHG : PRESSURE_UNIT_HPA)
+#endif
 
 // Header Title and Version Display Settings
 #define SHOW_TITLE_VERSION true

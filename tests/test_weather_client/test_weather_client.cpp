@@ -685,6 +685,119 @@ void test_weather_client_owm_device_tz_utc_with_city_tz_offset(void) {
     TEST_ASSERT_EQUAL_STRING("Fri", data.forecast[2].dayName.c_str());
 }
 
+void test_weather_client_build_open_meteo_url_units(void) {
+    // Metric: Celsius, km/h, mm
+    settings.setTempUnit(TEMP_UNIT_CELSIUS);
+    settings.setWindUnit(WIND_UNIT_KMH);
+    settings.setPrecipUnit(PRECIP_UNIT_MM);
+    String url1 = WeatherClient::buildOpenMeteoUrl("37.7749", "-122.4194");
+    TEST_ASSERT_NOT_NULL(strstr(url1.c_str(), "&temperature_unit=celsius"));
+    TEST_ASSERT_NOT_NULL(strstr(url1.c_str(), "&windspeed_unit=kmh"));
+    TEST_ASSERT_NOT_NULL(strstr(url1.c_str(), "&precipitation_unit=mm"));
+
+    // Imperial: Fahrenheit, mph, inch
+    settings.setTempUnit(TEMP_UNIT_FAHRENHEIT);
+    settings.setWindUnit(WIND_UNIT_MPH);
+    settings.setPrecipUnit(PRECIP_UNIT_INCH);
+    String url2 = WeatherClient::buildOpenMeteoUrl("37.7749", "-122.4194");
+    TEST_ASSERT_NOT_NULL(strstr(url2.c_str(), "&temperature_unit=fahrenheit"));
+    TEST_ASSERT_NOT_NULL(strstr(url2.c_str(), "&windspeed_unit=mph"));
+    TEST_ASSERT_NOT_NULL(strstr(url2.c_str(), "&precipitation_unit=inch"));
+
+    // Hybrid: Celsius, m/s, inch
+    settings.setTempUnit(TEMP_UNIT_CELSIUS);
+    settings.setWindUnit(WIND_UNIT_MS);
+    settings.setPrecipUnit(PRECIP_UNIT_INCH);
+    String url3 = WeatherClient::buildOpenMeteoUrl("37.7749", "-122.4194");
+    TEST_ASSERT_NOT_NULL(strstr(url3.c_str(), "&temperature_unit=celsius"));
+    TEST_ASSERT_NOT_NULL(strstr(url3.c_str(), "&windspeed_unit=ms"));
+    TEST_ASSERT_NOT_NULL(strstr(url3.c_str(), "&precipitation_unit=inch"));
+
+    // Hybrid: Fahrenheit, knots, mm
+    settings.setTempUnit(TEMP_UNIT_FAHRENHEIT);
+    settings.setWindUnit(WIND_UNIT_KNOTS);
+    settings.setPrecipUnit(PRECIP_UNIT_MM);
+    String url4 = WeatherClient::buildOpenMeteoUrl("37.7749", "-122.4194");
+    TEST_ASSERT_NOT_NULL(strstr(url4.c_str(), "&temperature_unit=fahrenheit"));
+    TEST_ASSERT_NOT_NULL(strstr(url4.c_str(), "&windspeed_unit=kn"));
+    TEST_ASSERT_NOT_NULL(strstr(url4.c_str(), "&precipitation_unit=mm"));
+
+    settings.setUnitSystem(UNIT_SYSTEM);
+}
+
+void test_weather_client_build_owm_url_units(void) {
+    settings.setCityCode("");
+    settings.setOwmApiKey("test_key");
+
+    settings.setTempUnit(TEMP_UNIT_CELSIUS);
+    String urlMetric = WeatherClient::buildOwmUrl("37.77", "-122.41");
+    TEST_ASSERT_NOT_NULL(strstr(urlMetric.c_str(), "&units=metric"));
+
+    settings.setTempUnit(TEMP_UNIT_FAHRENHEIT);
+    String urlImperial = WeatherClient::buildOwmUrl("37.77", "-122.41");
+    TEST_ASSERT_NOT_NULL(strstr(urlImperial.c_str(), "&units=imperial"));
+
+    settings.setUnitSystem(UNIT_SYSTEM);
+}
+
+void test_weather_client_unit_conversions(void) {
+    // Temperature
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 32.0f, WeatherClient::convertTemperature(0.0f, TEMP_UNIT_CELSIUS, TEMP_UNIT_FAHRENHEIT));
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 100.0f, WeatherClient::convertTemperature(212.0f, TEMP_UNIT_FAHRENHEIT, TEMP_UNIT_CELSIUS));
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 25.0f, WeatherClient::convertTemperature(25.0f, TEMP_UNIT_CELSIUS, TEMP_UNIT_CELSIUS));
+
+    // Wind Speed (10 m/s = 36 km/h = 22.3694 mph = 19.4384 kn)
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 36.0f, WeatherClient::convertWindSpeed(10.0f, WIND_UNIT_MS, WIND_UNIT_KMH));
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 22.37f, WeatherClient::convertWindSpeed(10.0f, WIND_UNIT_MS, WIND_UNIT_MPH));
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 19.44f, WeatherClient::convertWindSpeed(10.0f, WIND_UNIT_MS, WIND_UNIT_KNOTS));
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 10.0f, WeatherClient::convertWindSpeed(36.0f, WIND_UNIT_KMH, WIND_UNIT_MS));
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 10.0f, WeatherClient::convertWindSpeed(22.36936f, WIND_UNIT_MPH, WIND_UNIT_MS));
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 10.0f, WeatherClient::convertWindSpeed(19.43844f, WIND_UNIT_KNOTS, WIND_UNIT_MS));
+
+    // Precipitation (25.4 mm = 1.0 inch)
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 1.0f, WeatherClient::convertPrecipitation(25.4f, PRECIP_UNIT_MM, PRECIP_UNIT_INCH));
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 25.4f, WeatherClient::convertPrecipitation(1.0f, PRECIP_UNIT_INCH, PRECIP_UNIT_MM));
+
+    // Pressure (1013.25 hPa = 1013.25 mbar ≈ 29.92 inHg ≈ 760.0 mmHg)
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 1013.25f, WeatherClient::convertPressure(1013.25f, PRESSURE_UNIT_HPA, PRESSURE_UNIT_MBAR));
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 29.92f, WeatherClient::convertPressure(1013.25f, PRESSURE_UNIT_HPA, PRESSURE_UNIT_INHG));
+    TEST_ASSERT_FLOAT_WITHIN(0.1f, 760.0f, WeatherClient::convertPressure(1013.25f, PRESSURE_UNIT_HPA, PRESSURE_UNIT_MMHG));
+    TEST_ASSERT_FLOAT_WITHIN(0.5f, 1013.25f, WeatherClient::convertPressure(29.92126f, PRESSURE_UNIT_INHG, PRESSURE_UNIT_HPA));
+    TEST_ASSERT_FLOAT_WITHIN(0.5f, 1013.25f, WeatherClient::convertPressure(760.0f, PRESSURE_UNIT_MMHG, PRESSURE_UNIT_HPA));
+}
+
+void test_weather_client_parse_owm_json_hybrid_units(void) {
+    WeatherClient client;
+    WeatherData data = {};
+
+    const char* owmJson = "{"
+        "\"list\":["
+            "{"
+                "\"dt_txt\":\"2026-07-11 12:00:00\","
+                "\"main\":{\"temp\":20.0,\"humidity\":50,\"temp_min\":18.0,\"temp_max\":22.0},"
+                "\"wind\":{\"speed\":10.0,\"deg\":180},"
+                "\"weather\":[{\"id\":800,\"description\":\"clear sky\"}]"
+            "}"
+        "],"
+        "\"city\":{\"name\":\"TestCity\"}"
+    "}";
+
+    // Case 1: Temp = Celsius (OWM returns wind in m/s = 10.0), Wind = km/h (should convert to 36.0 km/h)
+    settings.setTempUnit(TEMP_UNIT_CELSIUS);
+    settings.setWindUnit(WIND_UNIT_KMH);
+    TEST_ASSERT_TRUE(client.parseOwmJson(owmJson, data));
+    TEST_ASSERT_FLOAT_WITHIN(0.01f, 20.0f, data.temperature);
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 36.0f, data.windSpeed);
+
+    // Case 2: Temp = Celsius (OWM returns wind in m/s = 10.0), Wind = mph (should convert to ~22.37 mph)
+    settings.setWindUnit(WIND_UNIT_MPH);
+    TEST_ASSERT_TRUE(client.parseOwmJson(owmJson, data));
+    TEST_ASSERT_FLOAT_WITHIN(0.05f, 22.37f, data.windSpeed);
+
+    // Restore defaults for other tests
+    settings.setUnitSystem(UNIT_SYSTEM);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -716,5 +829,9 @@ int main(int argc, char **argv) {
     RUN_TEST(test_get_local_date_string_from_timestamp_direct);
     RUN_TEST(test_weather_client_owm_late_evening_today_passed);
     RUN_TEST(test_weather_client_owm_device_tz_utc_with_city_tz_offset);
+    RUN_TEST(test_weather_client_build_open_meteo_url_units);
+    RUN_TEST(test_weather_client_build_owm_url_units);
+    RUN_TEST(test_weather_client_unit_conversions);
+    RUN_TEST(test_weather_client_parse_owm_json_hybrid_units);
     return UNITY_END();
 }
