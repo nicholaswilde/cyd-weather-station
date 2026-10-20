@@ -1,8 +1,0 @@
-{
-  "track_id": "cyd_weather_skeleton_20260707",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-07-07T12:39:30Z",
-  "updated_at": "2026-07-07T12:39:30Z",
-  "description": "Implement basic weather station UI skeleton and Wi-Fi connection"
-}

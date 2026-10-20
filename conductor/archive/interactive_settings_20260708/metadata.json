@@ -1,8 +1,0 @@
-{
-  "track_id": "interactive_settings_20260708",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-07-08T12:22:00-07:00",
-  "updated_at": "2026-07-08T12:22:00-07:00",
-  "description": "Add a settings screen allowing runtime configuration of units (Celsius/Fahrenheit), manual brightness, and timezone offset via touch"
-}
