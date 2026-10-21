@@ -103,6 +103,10 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     subscribe("command/hostname", 0);
     subscribe("command/theme", 0);
     subscribe("command/units", 0);
+    subscribe("command/units/temperature", 0);
+    subscribe("command/units/wind", 0);
+    subscribe("command/units/precipitation", 0);
+    subscribe("command/units/pressure", 0);
     subscribe("command/screen_orientation", 0);
     subscribe("command/update_interval", 0);
     subscribe("command/local_sensor", 0);
@@ -122,7 +126,8 @@ void MqttManager::publishHADiscovery() {
     String deviceJson = "\"device\":{\"identifiers\":[\"" + deviceId + "\"],\"name\":\"CYD Weather Station " + mac.substring(mac.length() - 4) + "\",\"manufacturer\":\"Nicholas Wilde\",\"model\":\"CYD-28R/35C\"}";
 
     // Temperature
-    String tempPayload = "{\"name\":\"Temperature\",\"state_topic\":\"" + _baseTopic + "weather/temperature\",\"unit_of_measurement\":\"°F\",\"device_class\":\"temperature\",\"unique_id\":\"" + deviceId + "_temp\"," + deviceJson + "}";
+    String tempUnit = settings.getTempUnit() == TEMP_UNIT_FAHRENHEIT ? "°F" : "°C";
+    String tempPayload = "{\"name\":\"Temperature\",\"state_topic\":\"" + _baseTopic + "weather/temperature\",\"unit_of_measurement\":\"" + tempUnit + "\",\"device_class\":\"temperature\",\"unique_id\":\"" + deviceId + "_temp\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/temperature/config").c_str(), 0, true, tempPayload.c_str());
 
     // Humidity
@@ -130,7 +135,15 @@ void MqttManager::publishHADiscovery() {
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/humidity/config").c_str(), 0, true, humPayload.c_str());
 
     // Wind Speed
-    String windPayload = "{\"name\":\"Wind Speed\",\"state_topic\":\"" + _baseTopic + "weather/wind_speed\",\"unit_of_measurement\":\"mph\",\"device_class\":\"wind_speed\",\"unique_id\":\"" + deviceId + "_wind\"," + deviceJson + "}";
+    String windUnit = "km/h";
+    switch (settings.getWindUnit()) {
+        case WIND_UNIT_MPH: windUnit = "mph"; break;
+        case WIND_UNIT_MS: windUnit = "m/s"; break;
+        case WIND_UNIT_KNOTS: windUnit = "kn"; break;
+        case WIND_UNIT_KMH:
+        default: windUnit = "km/h"; break;
+    }
+    String windPayload = "{\"name\":\"Wind Speed\",\"state_topic\":\"" + _baseTopic + "weather/wind_speed\",\"unit_of_measurement\":\"" + windUnit + "\",\"device_class\":\"wind_speed\",\"unique_id\":\"" + deviceId + "_wind\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/wind_speed/config").c_str(), 0, true, windPayload.c_str());
     vTaskDelay(pdMS_TO_TICKS(50));
 
@@ -213,6 +226,18 @@ void MqttManager::publishHADiscovery() {
     // Unit System (Select)
     String unitsPayload = "{\"name\":\"Unit System\",\"state_topic\":\"" + _baseTopic + "settings/units\",\"command_topic\":\"" + _baseTopic + "command/units\",\"options\":[\"Imperial\",\"Metric\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_units\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/select/" + deviceId + "/units/config").c_str(), 0, true, unitsPayload.c_str());
+    // Temperature Unit (Select)
+    String tempUnitPayload = "{\"name\":\"Temperature Unit\",\"state_topic\":\"" + _baseTopic + "settings/units/temperature\",\"command_topic\":\"" + _baseTopic + "command/units/temperature\",\"options\":[\"°C\",\"°F\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_temp_unit\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/temp_unit/config").c_str(), 0, true, tempUnitPayload.c_str());
+    // Wind Speed Unit (Select)
+    String windUnitPayload = "{\"name\":\"Wind Speed Unit\",\"state_topic\":\"" + _baseTopic + "settings/units/wind\",\"command_topic\":\"" + _baseTopic + "command/units/wind\",\"options\":[\"km/h\",\"mph\",\"m/s\",\"knots\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_wind_unit\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/wind_unit/config").c_str(), 0, true, windUnitPayload.c_str());
+    // Precipitation Unit (Select)
+    String precipUnitPayload = "{\"name\":\"Precipitation Unit\",\"state_topic\":\"" + _baseTopic + "settings/units/precipitation\",\"command_topic\":\"" + _baseTopic + "command/units/precipitation\",\"options\":[\"mm\",\"in\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_precip_unit\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/precip_unit/config").c_str(), 0, true, precipUnitPayload.c_str());
+    // Pressure Unit (Select)
+    String pressureUnitPayload = "{\"name\":\"Pressure Unit\",\"state_topic\":\"" + _baseTopic + "settings/units/pressure\",\"command_topic\":\"" + _baseTopic + "command/units/pressure\",\"options\":[\"hPa\",\"inHg\",\"mbar\",\"mmHg\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_pressure_unit\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/pressure_unit/config").c_str(), 0, true, pressureUnitPayload.c_str());
     // 24-Hour Format (Switch)
     String use24hPayload = "{\"name\":\"24-Hour Format\",\"state_topic\":\"" + _baseTopic + "settings/use_24h\",\"command_topic\":\"" + _baseTopic + "command/use_24h\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_use24h\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/switch/" + deviceId + "/use_24h/config").c_str(), 0, true, use24hPayload.c_str());
@@ -255,7 +280,6 @@ void MqttManager::publishHADiscovery() {
     vTaskDelay(pdMS_TO_TICKS(50));
 
     // Local Temperature
-    String tempUnit = settings.getUnitSystem() == UNIT_IMPERIAL ? "°F" : "°C";
     String locTempPayload = "{\"name\":\"Local Temperature\",\"state_topic\":\"" + _baseTopic + "sensor/local_temperature\",\"unit_of_measurement\":\"" + tempUnit + "\",\"device_class\":\"temperature\",\"state_class\":\"measurement\",\"unique_id\":\"" + deviceId + "_loc_temp\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/sensor/" + deviceId + "/local_temperature/config").c_str(), 0, true, locTempPayload.c_str());
 

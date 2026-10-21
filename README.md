@@ -24,7 +24,7 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **Swipe Navigation**: Swipe left/right anywhere on the screen to switch between the Current Weather, 3-Day Forecast, 24-Hour Hourly Forecast, and System Settings tabs.
 - **Dynamic Weather Icons**: A large (48px) custom weather glyph maps weather codes to condition icons, dynamically colored using the active Catppuccin palette.
 - **Interactive Settings Tab**: Touch-configurable settings persisted to flash across reboots:
-  - **Temperature Unit**: Toggle between Celsius (°C) and Fahrenheit (°F).
+  - **Independent Weather Metric Units**: Choose units independently for Temperature (°C / °F), Wind Speed (km/h, mph, m/s, kn), Precipitation (mm / in), and Pressure (hPa, inHg, mbar, mmHg).
   - **Catppuccin Theme Flavor**: Choose between Mocha, Macchiato, Frappé, or Latte — the full UI redraws instantly in the selected palette.
   - **Auto Brightness**: Toggle automatic backlight dimming/brightening driven by the onboard LDR light sensor (GPIO 34) with smooth non-linear perceptual scaling.
   - **Manual Brightness**: Slider to set a fixed screen brightness level with natural $\gamma = 2.2$ gamma correction.
@@ -287,6 +287,10 @@ Example JSON response:
 ```json
 {
   "unit_system": 2,
+  "temp_unit": 2,
+  "wind_unit": 2,
+  "precip_unit": 2,
+  "pressure_unit": 2,
   "brightness": 75,
   "auto_brightness": false,
   "show_title_version": true,
@@ -417,7 +421,20 @@ Wi-Fi credentials and API keys live in a Git-ignored secrets file to prevent com
 
 #### Configuration
 
-Static settings (location, update interval) live in [`config/config.h`](config/config.h). Runtime user preferences (units, brightness, theme, timezone) are changed via the on-device **Settings tab** and saved to flash.
+Static settings (location, update interval, default units) live in [`config/config.h`](config/config.h). Runtime user preferences (units, brightness, theme, timezone) are changed via the on-device **Settings tab**, Web UI, REST API, or MQTT and saved to flash.
+
+**Weather Units:**
+You can set compile-time defaults for each weather metric independently in `config/config.h` (or fall back to the legacy `UNIT_SYSTEM` macro):
+```cpp
+// Choose Unit System fallback (UNIT_METRIC or UNIT_IMPERIAL)
+#define UNIT_SYSTEM UNIT_IMPERIAL
+
+// Optional independent overrides:
+// #define DEFAULT_TEMP_UNIT     TEMP_UNIT_FAHRENHEIT // TEMP_UNIT_CELSIUS (1) or TEMP_UNIT_FAHRENHEIT (2)
+// #define DEFAULT_WIND_UNIT     WIND_UNIT_MPH        // WIND_UNIT_KMH (1), MPH (2), MS (3), KNOTS (4)
+// #define DEFAULT_PRECIP_UNIT   PRECIP_UNIT_INCH     // PRECIP_UNIT_MM (1) or PRECIP_UNIT_INCH (2)
+// #define DEFAULT_PRESSURE_UNIT PRESSURE_UNIT_INHG   // PRESSURE_UNIT_HPA (1), INHG (2), MBAR (3), MMHG (4)
+```
 
 **Location:**
 Location (Zip Code, City Code, or Coordinates) is configured dynamically via the **Captive Portal Wi-Fi Manager** when the device boots in AP mode. You can pre-configure the fallback defaults in `config/config.h`:
@@ -495,7 +512,10 @@ All settings below are configured by touch on the device and saved to flash:
 
 | Setting | Description |
 | :--- | :--- |
-| **Unit (C/F)** | Toggle between Celsius and Fahrenheit. |
+| **Temp Unit** | Select temperature unit: Celsius (°C) or Fahrenheit (°F). |
+| **Wind Unit** | Select wind speed unit: km/h, mph, m/s, or kn (knots). |
+| **Precip Unit** | Select precipitation unit: Millimeters (mm) or Inches (in). |
+| **Pressure Unit** | Select atmospheric pressure unit: hPa, inHg, mbar, or mmHg. |
 | **Auto Light** | Enable/disable LDR-driven automatic backlight control. |
 | **Brightness** | Manual backlight level slider (disabled when Auto Light is on). |
 | **Theme** | Catppuccin flavor selector — Mocha / Macchiato / Frappé / Latte. Full UI redraws on change. |
@@ -571,7 +591,11 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>settings/auto_brightness` | Auto brightness switch state | `ON` / `OFF` |
 | `<base_topic>settings/screensaver` | Screensaver switch state | `ON` / `OFF` |
 | `<base_topic>settings/theme` | Catppuccin theme flavor | `Mocha` / `Macchiato` / `Frappe` / `Latte` |
-| `<base_topic>settings/units` | Unit system | `Imperial` / `Metric` |
+| `<base_topic>settings/units` | Legacy unit system | `Imperial` / `Metric` |
+| `<base_topic>settings/units/temperature` | Temperature unit | `°C` / `°F` |
+| `<base_topic>settings/units/wind` | Wind speed unit | `km/h` / `mph` / `m/s` / `kn` |
+| `<base_topic>settings/units/precipitation` | Precipitation unit | `mm` / `in` |
+| `<base_topic>settings/units/pressure` | Pressure unit | `hPa` / `inHg` / `mbar` / `mmHg` |
 | `<base_topic>settings/screen_orientation`| Display orientation | `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` |
 | `<base_topic>settings/update_interval` | Weather update interval (mins) | `15` |
 | `<base_topic>settings/screensaver_timeout`| Screensaver timeout (mins) | `5` |
@@ -598,7 +622,11 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>command/timezone` | `America/Los_Angeles` | Sets the device IANA timezone string with dynamic DST recalculation. |
 | `<base_topic>command/hostname` | `cyd-weather-station` | Sets the device network hostname and mDNS address. |
 | `<base_topic>command/theme` | `Mocha` / `Macchiato` / `Frappe` / `Latte` | Changes the active Catppuccin theme flavor. |
-| `<base_topic>command/units` | `Imperial` / `Metric` | Changes the temperature and wind speed unit system. |
+| `<base_topic>command/units` | `Imperial` / `Metric` | Legacy command to change all units to Imperial or Metric. |
+| `<base_topic>command/units/temperature` | `°C` / `°F` | Changes the temperature unit independently. |
+| `<base_topic>command/units/wind` | `km/h` / `mph` / `m/s` / `kn` | Changes the wind speed unit independently. |
+| `<base_topic>command/units/precipitation` | `mm` / `in` | Changes the precipitation unit independently. |
+| `<base_topic>command/units/pressure` | `hPa` / `inHg` / `mbar` / `mmHg` | Changes the atmospheric pressure unit independently. |
 | `<base_topic>command/screen_orientation`| `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` | Changes display orientation dynamically. |
 | `<base_topic>command/update_interval` | `1`–`120` | Sets the weather fetch update interval in minutes. |
 | `<base_topic>command/screensaver_timeout`| `1`–`60` | Sets screensaver activation inactivity timeout in minutes. |
@@ -614,7 +642,7 @@ On connection, the device automatically registers itself as `CYD Weather Station
 - **Controls & Sliders (Numbers)**: Screen Brightness (0–100%), LED Brightness (0–100%), Weather Update Interval (1–120 min), Screensaver Timeout (1–60 min).
 - **Configuration Switches**: Auto Brightness, Screensaver, Sleep Schedule, Status LED, SD Log, SD Cache.
 - **Text Controls**: Sleep Start Time, Sleep End Time, Hostname.
-- **Dropdown Selectors**: Theme Flavor, Unit System, Screen Orientation, Timezone.
+- **Dropdown Selectors**: Theme Flavor, Temperature Unit, Wind Speed Unit, Precipitation Unit, Pressure Unit, Screen Orientation, Timezone.
 - **Buttons**: Device Reboot.
 
 #### Connection Management & Reconnect Backoff

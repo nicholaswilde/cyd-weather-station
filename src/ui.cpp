@@ -35,6 +35,10 @@ static bool is_offline_mode = false;
 static lv_obj_t *wifi_info_dialog = nullptr;
 
 static lv_obj_t *ui_auto_bright_sw = nullptr;
+static lv_obj_t *ui_dd_temp_unit = nullptr;
+static lv_obj_t *ui_dd_wind_unit = nullptr;
+static lv_obj_t *ui_dd_precip_unit = nullptr;
+static lv_obj_t *ui_dd_pressure_unit = nullptr;
 static lv_obj_t *ui_screensaver_sw = nullptr;
 static lv_obj_t *ui_sleep_sw = nullptr;
 static lv_obj_t *ui_led_sw = nullptr;
@@ -376,12 +380,40 @@ static void orientation_dropdown_event_cb(lv_event_t * e) {
     settings_orientation_changed = true;
 }
 
-static void unit_sw_event_cb(lv_event_t * e) {
-    lv_obj_t * sw = lv_event_get_target(e);
-    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
-    int unit = is_checked ? UNIT_IMPERIAL : UNIT_METRIC;
-    settings.setUnitSystem(unit);
-    settings_unit_changed = true;
+static void temp_unit_dropdown_event_cb(lv_event_t * e) {
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    int unit = lv_dropdown_get_selected(dropdown) + 1;
+    if (unit != settings.getTempUnit()) {
+        settings.setTempUnit(unit);
+        settings_unit_changed = true;
+    }
+}
+
+static void wind_unit_dropdown_event_cb(lv_event_t * e) {
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    int unit = lv_dropdown_get_selected(dropdown) + 1;
+    if (unit != settings.getWindUnit()) {
+        settings.setWindUnit(unit);
+        settings_unit_changed = true;
+    }
+}
+
+static void precip_unit_dropdown_event_cb(lv_event_t * e) {
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    int unit = lv_dropdown_get_selected(dropdown) + 1;
+    if (unit != settings.getPrecipUnit()) {
+        settings.setPrecipUnit(unit);
+        settings_unit_changed = true;
+    }
+}
+
+static void pressure_unit_dropdown_event_cb(lv_event_t * e) {
+    lv_obj_t * dropdown = lv_event_get_target(e);
+    int unit = lv_dropdown_get_selected(dropdown) + 1;
+    if (unit != settings.getPressureUnit()) {
+        settings.setPressureUnit(unit);
+        settings_unit_changed = true;
+    }
 }
 
 static void title_ver_sw_event_cb(lv_event_t * e) {
@@ -724,11 +756,9 @@ void initUI() {
     lv_obj_set_style_text_align(temp_icon_lbl, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
 
     temp_label = lv_label_create(temp_cnt);
-    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-        lv_label_set_text(temp_label, "--.- °F");
-    } else {
-        lv_label_set_text(temp_label, "--.- °C");
-    }
+    char temp_init_buf[16];
+    snprintf(temp_init_buf, sizeof(temp_init_buf), "--.- %s", getTempUnitLabel(settings.getTempUnit()));
+    lv_label_set_text(temp_label, temp_init_buf);
     lv_obj_set_style_text_font(temp_label, isLargeScreen ? &lv_font_montserrat_48 : &lv_font_montserrat_28, LV_PART_MAIN);
     lv_obj_set_style_text_color(temp_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).peach), LV_PART_MAIN);
 
@@ -777,7 +807,9 @@ void initUI() {
 
     wind_label = lv_label_create(wind_cnt);
     lv_obj_set_style_text_font(wind_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
-    lv_label_set_text(wind_label, "Wind: -- km/h");
+    char wind_init_buf[32];
+    snprintf(wind_init_buf, sizeof(wind_init_buf), "Wind: -- %s", getWindUnitLabel(settings.getWindUnit()));
+    lv_label_set_text(wind_label, wind_init_buf);
     lv_obj_set_style_text_color(wind_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).lavender), LV_PART_MAIN);
 
     // --- Status row (dynamic weather-code icon + description text) ---
@@ -983,34 +1015,93 @@ void initUI() {
 
     // --- Left column items ---
 
-    // Unit (C/F) row
-    lv_obj_t * unit_row = lv_obj_create(left_col);
-    lv_obj_clear_flag(unit_row, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_set_size(unit_row, lv_pct(100), LV_SIZE_CONTENT);
-    lv_obj_set_flex_flow(unit_row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(unit_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_bg_opa(unit_row, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(unit_row, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(unit_row, 0, LV_PART_MAIN);
-    lv_obj_clear_flag(unit_row, LV_OBJ_FLAG_SCROLLABLE);
+    // Temperature Unit dropdown
+    lv_obj_t * temp_unit_lbl = lv_label_create(left_col);
+    lv_label_set_text(temp_unit_lbl, "Temp Unit");
+    lv_obj_set_style_text_color(temp_unit_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_text_font(temp_unit_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
-    lv_obj_t * unit_label = lv_label_create(unit_row);
-    lv_label_set_text(unit_label, "Unit (C/F)");
-    lv_obj_set_style_text_color(unit_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
-    lv_obj_set_style_text_font(unit_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+    ui_dd_temp_unit = lv_dropdown_create(left_col);
+    lv_obj_set_size(ui_dd_temp_unit, lv_pct(92), 26);
+    lv_dropdown_set_options(ui_dd_temp_unit, "°C\n°F");
+    lv_dropdown_set_selected(ui_dd_temp_unit, settings.getTempUnit() - 1);
+    lv_obj_add_event_cb(ui_dd_temp_unit, temp_unit_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_dd_temp_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_dd_temp_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_dd_temp_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_dd_temp_unit, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t * temp_unit_list = lv_dropdown_get_list(ui_dd_temp_unit);
+    lv_obj_set_style_bg_color(temp_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(temp_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_border_color(temp_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(temp_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(temp_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
 
-    lv_obj_t * unit_sw = lv_switch_create(unit_row);
-    lv_obj_set_size(unit_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
-    // Switch track — off state
-    lv_obj_set_style_bg_color(unit_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    // Switch track — on/checked state
-    lv_obj_set_style_bg_color(unit_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
-    // Switch knob
-    lv_obj_set_style_bg_color(unit_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
-    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-        lv_obj_add_state(unit_sw, LV_STATE_CHECKED);
-    }
-    lv_obj_add_event_cb(unit_sw, unit_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    // Wind Speed Unit dropdown
+    lv_obj_t * wind_unit_lbl = lv_label_create(left_col);
+    lv_label_set_text(wind_unit_lbl, "Wind Unit");
+    lv_obj_set_style_text_color(wind_unit_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_text_font(wind_unit_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_dd_wind_unit = lv_dropdown_create(left_col);
+    lv_obj_set_size(ui_dd_wind_unit, lv_pct(92), 26);
+    lv_dropdown_set_options(ui_dd_wind_unit, "km/h\nmph\nm/s\nknots");
+    lv_dropdown_set_selected(ui_dd_wind_unit, settings.getWindUnit() - 1);
+    lv_obj_add_event_cb(ui_dd_wind_unit, wind_unit_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_dd_wind_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_dd_wind_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_dd_wind_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_dd_wind_unit, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t * wind_unit_list = lv_dropdown_get_list(ui_dd_wind_unit);
+    lv_obj_set_style_bg_color(wind_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(wind_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_border_color(wind_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(wind_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(wind_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
+
+    // Precipitation Unit dropdown
+    lv_obj_t * precip_unit_lbl = lv_label_create(left_col);
+    lv_label_set_text(precip_unit_lbl, "Precip Unit");
+    lv_obj_set_style_text_color(precip_unit_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_text_font(precip_unit_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_dd_precip_unit = lv_dropdown_create(left_col);
+    lv_obj_set_size(ui_dd_precip_unit, lv_pct(92), 26);
+    lv_dropdown_set_options(ui_dd_precip_unit, "mm\nin");
+    lv_dropdown_set_selected(ui_dd_precip_unit, settings.getPrecipUnit() - 1);
+    lv_obj_add_event_cb(ui_dd_precip_unit, precip_unit_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_dd_precip_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_dd_precip_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_dd_precip_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_dd_precip_unit, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t * precip_unit_list = lv_dropdown_get_list(ui_dd_precip_unit);
+    lv_obj_set_style_bg_color(precip_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(precip_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_border_color(precip_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(precip_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(precip_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
+
+    // Pressure Unit dropdown
+    lv_obj_t * pressure_unit_lbl = lv_label_create(left_col);
+    lv_label_set_text(pressure_unit_lbl, "Pressure Unit");
+    lv_obj_set_style_text_color(pressure_unit_lbl, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_text_font(pressure_unit_lbl, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_dd_pressure_unit = lv_dropdown_create(left_col);
+    lv_obj_set_size(ui_dd_pressure_unit, lv_pct(92), 26);
+    lv_dropdown_set_options(ui_dd_pressure_unit, "hPa\ninHg\nmbar\nmmHg");
+    lv_dropdown_set_selected(ui_dd_pressure_unit, settings.getPressureUnit() - 1);
+    lv_obj_add_event_cb(ui_dd_pressure_unit, pressure_unit_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_dd_pressure_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_dd_pressure_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_dd_pressure_unit, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_dd_pressure_unit, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t * pressure_unit_list = lv_dropdown_get_list(ui_dd_pressure_unit);
+    lv_obj_set_style_bg_color(pressure_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(pressure_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_border_color(pressure_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(pressure_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(pressure_unit_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
 
     // Title & Version row
     lv_obj_t * title_ver_row = lv_obj_create(left_col);
@@ -1207,7 +1298,7 @@ void initUI() {
     lv_obj_clear_flag(sleep_row, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t *sleep_label = lv_label_create(sleep_row);
-    lv_label_set_text(sleep_label, "Sleep Schedule");
+    lv_label_set_text(sleep_label, isLargeScreen ? "Sleep Schedule" : "Sleep Sched");
     lv_obj_set_style_text_color(sleep_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
     lv_obj_set_style_text_font(sleep_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
 
@@ -1638,22 +1729,15 @@ const char* getCardinalDirection(int degrees) {
 void updateLocalSensorUI(float temperature, float humidity) {
     if (local_sensor_lbl != nullptr) {
         char local_str[64];
-        if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-            snprintf(local_str, sizeof(local_str), "Local: %.1f °F / %.0f%%", temperature, humidity);
-        } else {
-            snprintf(local_str, sizeof(local_str), "Local: %.1f °C / %.0f%%", temperature, humidity);
-        }
+        snprintf(local_str, sizeof(local_str), "Local: %.1f %s / %.0f%%",
+                 temperature, getTempUnitLabel(settings.getTempUnit()), humidity);
         lv_label_set_text(local_sensor_lbl, local_str);
     }
 }
 
 void updateWeatherUI(float temperature, int humidity, const char* status, int weatherCode, float windSpeed, int windDirection) {
     char temp_str[32];
-    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-        snprintf(temp_str, sizeof(temp_str), "%.1f °F", temperature);
-    } else {
-        snprintf(temp_str, sizeof(temp_str), "%.1f °C", temperature);
-    }
+    snprintf(temp_str, sizeof(temp_str), "%.1f %s", temperature, getTempUnitLabel(settings.getTempUnit()));
     lv_label_set_text(temp_label, temp_str);
 
     char hum_str[32];
@@ -1662,11 +1746,7 @@ void updateWeatherUI(float temperature, int humidity, const char* status, int we
 
     char wind_str[48];
     const char* cardinal = getCardinalDirection(windDirection);
-    if (settings.getUnitSystem() == UNIT_IMPERIAL) {
-        snprintf(wind_str, sizeof(wind_str), "%.1f mph %s", windSpeed, cardinal);
-    } else {
-        snprintf(wind_str, sizeof(wind_str), "%.1f km/h %s", windSpeed, cardinal);
-    }
+    snprintf(wind_str, sizeof(wind_str), "%.1f %s %s", windSpeed, getWindUnitLabel(settings.getWindUnit()), cardinal);
     lv_label_set_text(wind_label, wind_str);
 
     lv_label_set_text(status_lbl, status);
@@ -1978,6 +2058,19 @@ void updateHourlyUI(const WeatherData& data) {
 }
 
 void ui_sync_toggles() {
+    if (ui_dd_temp_unit != nullptr) {
+        lv_dropdown_set_selected(ui_dd_temp_unit, settings.getTempUnit() - 1);
+    }
+    if (ui_dd_wind_unit != nullptr) {
+        lv_dropdown_set_selected(ui_dd_wind_unit, settings.getWindUnit() - 1);
+    }
+    if (ui_dd_precip_unit != nullptr) {
+        lv_dropdown_set_selected(ui_dd_precip_unit, settings.getPrecipUnit() - 1);
+    }
+    if (ui_dd_pressure_unit != nullptr) {
+        lv_dropdown_set_selected(ui_dd_pressure_unit, settings.getPressureUnit() - 1);
+    }
+
     if (ui_auto_bright_sw != nullptr) {
         if (settings.getAutoBrightness()) {
             lv_obj_add_state(ui_auto_bright_sw, LV_STATE_CHECKED);

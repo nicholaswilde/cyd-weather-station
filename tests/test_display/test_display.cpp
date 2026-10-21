@@ -170,6 +170,28 @@ void test_format_hourly_tick_label(void) {
     formatHourlyTickLabel(buf, 0, 0);
 }
 
+void test_unit_label_helpers(void) {
+    TEST_ASSERT_EQUAL_STRING("°C", getTempUnitLabel(TEMP_UNIT_CELSIUS));
+    TEST_ASSERT_EQUAL_STRING("°F", getTempUnitLabel(TEMP_UNIT_FAHRENHEIT));
+    TEST_ASSERT_EQUAL_STRING("°C", getTempUnitLabel(99));
+
+    TEST_ASSERT_EQUAL_STRING("km/h", getWindUnitLabel(WIND_UNIT_KMH));
+    TEST_ASSERT_EQUAL_STRING("mph", getWindUnitLabel(WIND_UNIT_MPH));
+    TEST_ASSERT_EQUAL_STRING("m/s", getWindUnitLabel(WIND_UNIT_MS));
+    TEST_ASSERT_EQUAL_STRING("knots", getWindUnitLabel(WIND_UNIT_KNOTS));
+    TEST_ASSERT_EQUAL_STRING("km/h", getWindUnitLabel(99));
+
+    TEST_ASSERT_EQUAL_STRING("mm", getPrecipUnitLabel(PRECIP_UNIT_MM));
+    TEST_ASSERT_EQUAL_STRING("in", getPrecipUnitLabel(PRECIP_UNIT_INCH));
+    TEST_ASSERT_EQUAL_STRING("mm", getPrecipUnitLabel(99));
+
+    TEST_ASSERT_EQUAL_STRING("hPa", getPressureUnitLabel(PRESSURE_UNIT_HPA));
+    TEST_ASSERT_EQUAL_STRING("inHg", getPressureUnitLabel(PRESSURE_UNIT_INHG));
+    TEST_ASSERT_EQUAL_STRING("mbar", getPressureUnitLabel(PRESSURE_UNIT_MBAR));
+    TEST_ASSERT_EQUAL_STRING("mmHg", getPressureUnitLabel(PRESSURE_UNIT_MMHG));
+    TEST_ASSERT_EQUAL_STRING("hPa", getPressureUnitLabel(99));
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_coordinate_mapping_landscape);
@@ -180,5 +202,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_touch_manager_mock_and_callback);
     RUN_TEST(test_disp_flush_and_init);
     RUN_TEST(test_format_hourly_tick_label);
+    RUN_TEST(test_unit_label_helpers);
     return UNITY_END();
 }

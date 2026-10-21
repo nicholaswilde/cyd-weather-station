@@ -66,4 +66,119 @@ This project follows the DESIGN.md format specification (https://github.com/goog
 - **Design System Reference**: See [`.agents/design.md`](.agents/design.md).
 - **Validation**: Validate design system adherence using `designmd lint .agents/design.md`.
 
+## Product Guide & Features
+
+### Overview
+The **ESP32 CYD LVGL Weather Station** is an interactive, touch-screen-enabled weather station app designed for the **ESP32-2432S028R** (Cheap Yellow Display / CYD) hardware. It fetches real-time weather data and forecasts from the free, open-source **Open-Meteo API** (or OpenWeatherMap) and displays it on the CYD screen using the **LVGL (Light and Versatile Graphics Library)** for a modern, responsive, and visually appealing user interface.
+
+### Target Hardware
+- **Display:** ESP32-2432S028R Cheap Yellow Display (CYD) 2.8" TFT touchscreen (typically ILI9341 driver + XPT2046 resistive touch controller), 2.8" capacitive (JC2432W328C), and 3.5" capacitive (ESP32-3248S035C).
+- **Core:** ESP32 dual-core processor with integrated Wi-Fi.
+
+### Key Features
+1. **Real-time Weather Display:** Displays current weather conditions including temperature, humidity, wind speed, and precipitation.
+2. **Forecast View:** Multi-day and hourly forecast screens to plan ahead.
+3. **LVGL Touch UI:** A polished, touch-interactive interface with widgets, smooth animations, and visual clarity suited for small displays.
+4. **Wi-Fi Connectivity:** Automated Wi-Fi connection with status indicators, reconnect logic, and an Access Point (AP) captive portal fallback configuration portal on timeout (30 seconds) allowing runtime Wi-Fi credentials setup.
+5. **Open-Meteo Integration:** Automated periodic JSON API requests to fetch weather data without requiring an API key.
+6. **Auto-Brightness Control:** Automatically dims the screen backlight in low-light environments and brightens it in well-lit rooms using the onboard LDR light sensor.
+7. **Dynamic Weather Status Icons:** Displays a large (48px) weather icon corresponding to the current weather condition (clear, cloudy, rainy, snowy, stormy) next to the weather reading, dynamically colored using the Catppuccin color scheme.
+8. **RGB LED Status Indicator:** Utilizes the onboard active-low RGB LED (GPIO 4/16/17) to provide secondary visual feedback about Wi-Fi connection states (slow blue blink for connecting, solid green for connected, fast red blink for disconnected, slow purple blink for AP mode) and brief weather status pulse notifications.
+9. **Interactive Settings Screen:** Adds a Settings tab to the Tabview allowing runtime configuration of independent weather units, themes, manual screen brightness, Auto Light brightness mode, and timezone settings via touch controls, persisting settings across boots.
+10. **SD Weather History & Sensor Data Logging:** Periodically logs hourly weather and system variables (temperature, humidity, wind speed, wind direction, weather code) alongside synchronized NTP timestamps to a CSV format file (`weather_history.csv`) on the root of the microSD card, with boot-time mounting and robust error handling.
+11. **Wireless OTA Firmware Updates:** Supports Over-The-Air (OTA) firmware updates via a web browser (`http://192.168.4.1/update` or local IP `/update`), utilizing a Catppuccin-themed HTML upload portal with progress feedback and automatic reboot.
+12. **Inactivity Sleep & Screen-Saver:** Auto-dims the screen backlight after configured inactivity and displays a floating digital clock overlay that drifts periodically to prevent screen pixel burn-in. Wakes instantly on any screen tap without triggering underlying widgets.
+13. **Multi-Action Physical Button:** Re-purposes the onboard BOOT button (GPIO 0) for multiple actions: a single quick press triggers an immediate weather update, and a long press (>= 2 seconds) takes a screenshot saved to the SD card.
+14. **SD Offline Cache Recovery:** Periodically saves weather data to microSD card (`/weather_cache.json`) in JSON format. On boot, if Wi-Fi connection fails or is unavailable, the device restores the cached weather data, updates the UI, and displays an offline status badge.
+15. **IP-Based Auto-Location:** Automatically queries an IP geolocation API (`ip-api.com`) to resolve coordinates and city name on boot if the user has not configured manual coordinates or a ZIP code.
+
+## Product Guidelines (UI/UX, Performance, Reliability)
+
+### 1. User Interface (UI) & User Experience (UX) Design
+* **Resolution Constraint:** All screens must fit a fixed 320x240 pixel portrait/landscape screen (ESP32-2432S028R default is landscape 320x240; also supports 320x480 for 3.5" boards).
+* **Typography:**
+  - Font sizes must be large enough to read from a distance of 1–2 meters (desk display).
+  - Use clear, sans-serif fonts compatible with LVGL (e.g., standard Montserrat fonts built into LVGL).
+* **Touch Targets:** Interactive elements (buttons, sliders, tabs) must have a minimum touch area of 40x40 pixels to facilitate easy control via resistive touchscreen.
+* **Layout and Navigation:**
+  - Keep the screen layout clean and uncluttered.
+  - Use simple tab views or swipe gestures to navigate between the "Current Weather", "Forecast", "Hourly", and "Settings" views.
+  - Provide immediate visual feedback for touch actions (e.g., button pressed state).
+
+### 2. Technical and Performance Guidelines
+* **Resource Optimization:**
+  - Minimize unnecessary screen refreshes. Redraw only the UI components whose values have changed.
+  - Compile custom icons or images as static C arrays to optimize flash/RAM memory usage.
+* **Network & API Polling:**
+  - Poll the Open-Meteo API at reasonable intervals (e.g., every 15–30 minutes) to avoid rate limits and save network bandwidth.
+  - Perform HTTP requests asynchronously (if supported) or handle them in a way that doesn't block the main LVGL GUI loop or cause noticeable UI freezing.
+
+### 3. Reliability & Error Recovery
+* **Network Status Indication:** Always show a clear Wi-Fi connection indicator (signal icon) on the screen.
+* **Graceful Degradation:**
+  - If Wi-Fi is disconnected, show a visual warning. Do not crash the application.
+  - If an API request fails, show the last successfully retrieved weather data along with an offline / stale data indicator.
+* **Sensor Integration:** Design the data model to allow local sensors (e.g., DHT22/SHT40) to easily supplement external weather data.
+
+## Technology Stack & Hardware Architecture
+
+### 1. Hardware Target
+* **Microcontroller:** ESP32-2432S028R (Cheap Yellow Display / CYD)
+  - Processor: ESP32 dual-core Xtensa 32-bit LX6
+  - Display: 2.8" TFT resistive touch screen (320x240) / 2.8" capacitive / 3.5" capacitive
+  - Graphics Controller: ILI9341 / ST7789 / ST7796
+  - Touch Controller: XPT2046 / CST816 / GT911
+  - Ambient Light Sensor: Onboard LDR photoresistor (GPIO 34)
+  - Backlight Control: PWM via LEDC (GPIO 21 or GPIO 27 depending on board)
+  - Status Indicator: Onboard active-low RGB LED (Red: GPIO 4, Green: GPIO 16, Blue: GPIO 17)
+  - Storage: Onboard microSD card slot (CS: GPIO 5, SCK: GPIO 18, MISO: GPIO 19, MOSI: GPIO 23, utilizing VSPI bus)
+
+### 2. Core Software Stack
+* **Language:** C/C++
+* **Core Framework:** Arduino Framework (PlatformIO `framework = arduino`)
+* **UI Library:** LVGL (Light and Versatile Graphics Library) - v8
+* **TFT & Touch Drivers:** TFT_eSPI or native LVGL display/touch interface (configured for CYD pinout)
+* **Custom Fonts:** Erik Flowers' Weather Icons font (uncompressed 48px and 24px C font files containing custom weather glyphs)
+* **Font Asset Tooling:** `lv_font_conv` (Node.js/npm) for generating custom LVGL font assets
+* **Preferences Storage:** ESP32 `Preferences` library (for saving runtime configurations in Flash memory across reboot cycles)
+* **Captive Portal Servers:** `DNSServer` and `WebServer` standard ESP32 libraries (for routing and serving the setup configuration page in AP mode)
+* **Storage & File System:** `SD` and `FS` standard ESP32 libraries (for card mounting and appending weather data records in CSV format)
+* **OTA Firmware Updates:** ESP32 `Update` library (for chunked flashing of firmware binary files wirelessly via the WebServer)
+* **Screen-Saver & Sleep Mode:** Custom `ScreenSaverManager` class integrated with BacklightManager fading and LVGL input touch callback hooks.
+
+### 3. Build, Execution, and Tooling
+* **Build System:** PlatformIO (Core CLI), managed via `platformio.ini` (Targets: Espressif 32 platform)
+* **Task Runner:** `go-task` (managed via `Taskfile.yml` in the root directory)
+* **Testing & Linting:**
+  - Testing: PlatformIO built-in test runner (`pio test`) with Unity test framework
+  - Linting: PlatformIO static code analysis (`pio check`) using `cppcheck`
+
+### 4. Network and APIs
+* **Weather Service:** Open-Meteo API (primary, free, no key required) and OpenWeatherMap (optional with API key)
+* **HTTP Client:** HTTPClient (standard Arduino library)
+* **JSON Parser:** ArduinoJson (for parsing API responses)
+
+## Code Style Principles
+
+### Readability
+- Code should be easy to read and understand by humans.
+- Avoid overly clever or obscure constructs.
+
+### Consistency
+- Follow existing patterns in the codebase.
+- Maintain consistent formatting, naming, and structure.
+
+### Simplicity
+- Prefer simple solutions over complex ones.
+- Break down complex problems into smaller, manageable parts.
+
+### Maintainability
+- Write code that is easy to modify and extend.
+- Minimize dependencies and coupling.
+
+### Documentation
+- Document *why* something is done, not just *what*.
+- Keep documentation up-to-date with code changes.
+
+
 

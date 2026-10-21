@@ -18,6 +18,10 @@ void test_settings_default_values(void) {
     
     // Default values expected:
     TEST_ASSERT_EQUAL(UNIT_SYSTEM, settings.getUnitSystem());
+    TEST_ASSERT_EQUAL(DEFAULT_TEMP_UNIT, settings.getTempUnit());
+    TEST_ASSERT_EQUAL(DEFAULT_WIND_UNIT, settings.getWindUnit());
+    TEST_ASSERT_EQUAL(DEFAULT_PRECIP_UNIT, settings.getPrecipUnit());
+    TEST_ASSERT_EQUAL(DEFAULT_PRESSURE_UNIT, settings.getPressureUnit());
     TEST_ASSERT_EQUAL(80, settings.getBrightness());
     TEST_ASSERT_EQUAL(USE_LDR_AUTO_BACKLIGHT, settings.getAutoBrightness());
     TEST_ASSERT_EQUAL_STRING(TIMEZONE_DEFAULT, settings.getTimezone().c_str());
@@ -179,6 +183,80 @@ void test_settings_clamping(void) {
     // Local sensor update interval clamping (min 1)
     settings.setLocalSensorUpdateInterval(0);
     TEST_ASSERT_EQUAL(1, settings.getLocalSensorUpdateInterval());
+
+    // Granular unit clamping
+    settings.setTempUnit(0);
+    TEST_ASSERT_EQUAL(TEMP_UNIT_CELSIUS, settings.getTempUnit());
+    settings.setTempUnit(99);
+    TEST_ASSERT_EQUAL(TEMP_UNIT_FAHRENHEIT, settings.getTempUnit());
+
+    settings.setWindUnit(0);
+    TEST_ASSERT_EQUAL(WIND_UNIT_KMH, settings.getWindUnit());
+    settings.setWindUnit(99);
+    TEST_ASSERT_EQUAL(WIND_UNIT_KNOTS, settings.getWindUnit());
+
+    settings.setPrecipUnit(0);
+    TEST_ASSERT_EQUAL(PRECIP_UNIT_MM, settings.getPrecipUnit());
+    settings.setPrecipUnit(99);
+    TEST_ASSERT_EQUAL(PRECIP_UNIT_INCH, settings.getPrecipUnit());
+
+    settings.setPressureUnit(0);
+    TEST_ASSERT_EQUAL(PRESSURE_UNIT_HPA, settings.getPressureUnit());
+    settings.setPressureUnit(99);
+    TEST_ASSERT_EQUAL(PRESSURE_UNIT_MMHG, settings.getPressureUnit());
+}
+
+void test_settings_granular_units_and_legacy_fallback(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    // Hybrid unit configuration: Celsius + mph + in + mmHg
+    settings.setTempUnit(TEMP_UNIT_CELSIUS);
+    settings.setWindUnit(WIND_UNIT_MPH);
+    settings.setPrecipUnit(PRECIP_UNIT_INCH);
+    settings.setPressureUnit(PRESSURE_UNIT_MMHG);
+
+    TEST_ASSERT_EQUAL(TEMP_UNIT_CELSIUS, settings.getTempUnit());
+    TEST_ASSERT_EQUAL(WIND_UNIT_MPH, settings.getWindUnit());
+    TEST_ASSERT_EQUAL(PRECIP_UNIT_INCH, settings.getPrecipUnit());
+    TEST_ASSERT_EQUAL(PRESSURE_UNIT_MMHG, settings.getPressureUnit());
+    TEST_ASSERT_EQUAL(UNIT_METRIC, settings.getUnitSystem());
+
+    // Verify persistence across reload
+    SettingsManager reloaded;
+    reloaded.begin();
+    TEST_ASSERT_EQUAL(TEMP_UNIT_CELSIUS, reloaded.getTempUnit());
+    TEST_ASSERT_EQUAL(WIND_UNIT_MPH, reloaded.getWindUnit());
+    TEST_ASSERT_EQUAL(PRECIP_UNIT_INCH, reloaded.getPrecipUnit());
+    TEST_ASSERT_EQUAL(PRESSURE_UNIT_MMHG, reloaded.getPressureUnit());
+
+    // Legacy setUnitSystem synchronizes all four units
+    reloaded.setUnitSystem(UNIT_IMPERIAL);
+    TEST_ASSERT_EQUAL(TEMP_UNIT_FAHRENHEIT, reloaded.getTempUnit());
+    TEST_ASSERT_EQUAL(WIND_UNIT_MPH, reloaded.getWindUnit());
+    TEST_ASSERT_EQUAL(PRECIP_UNIT_INCH, reloaded.getPrecipUnit());
+    TEST_ASSERT_EQUAL(PRESSURE_UNIT_INHG, reloaded.getPressureUnit());
+
+    reloaded.setUnitSystem(UNIT_METRIC);
+    TEST_ASSERT_EQUAL(TEMP_UNIT_CELSIUS, reloaded.getTempUnit());
+    TEST_ASSERT_EQUAL(WIND_UNIT_KMH, reloaded.getWindUnit());
+    TEST_ASSERT_EQUAL(PRECIP_UNIT_MM, reloaded.getPrecipUnit());
+    TEST_ASSERT_EQUAL(PRESSURE_UNIT_HPA, reloaded.getPressureUnit());
+
+    // Simulate legacy NVS state with only "unit" saved
+    Preferences prefs;
+    prefs.begin("settings", false);
+    prefs.clear();
+    prefs.putInt("unit", UNIT_METRIC);
+    prefs.end();
+
+    SettingsManager legacyLoaded;
+    legacyLoaded.begin();
+    TEST_ASSERT_EQUAL(UNIT_METRIC, legacyLoaded.getUnitSystem());
+    TEST_ASSERT_EQUAL(TEMP_UNIT_CELSIUS, legacyLoaded.getTempUnit());
+    TEST_ASSERT_EQUAL(WIND_UNIT_KMH, legacyLoaded.getWindUnit());
+    TEST_ASSERT_EQUAL(PRECIP_UNIT_MM, legacyLoaded.getPrecipUnit());
+    TEST_ASSERT_EQUAL(PRESSURE_UNIT_HPA, legacyLoaded.getPressureUnit());
 }
 
 void test_settings_all_fields_and_factory_reset(void) {
@@ -285,6 +363,7 @@ int main(int argc, char **argv) {
     RUN_TEST(test_settings_wifi_credentials);
     RUN_TEST(test_settings_location_data);
     RUN_TEST(test_settings_clamping);
+    RUN_TEST(test_settings_granular_units_and_legacy_fallback);
     RUN_TEST(test_settings_all_fields_and_factory_reset);
     return UNITY_END();
 }

@@ -15,6 +15,10 @@
 
 SettingsManager::SettingsManager() {
     _unitSystem = UNIT_SYSTEM;
+    _tempUnit = DEFAULT_TEMP_UNIT;
+    _windUnit = DEFAULT_WIND_UNIT;
+    _precipUnit = DEFAULT_PRECIP_UNIT;
+    _pressureUnit = DEFAULT_PRESSURE_UNIT;
     _brightness = 80;
     _autoBrightness = USE_LDR_AUTO_BACKLIGHT;
     _timezone = TIMEZONE_DEFAULT;
@@ -70,7 +74,17 @@ void SettingsManager::begin() {
     Preferences prefs;
     prefs.begin("settings", false);
     
-    _unitSystem = prefs.getInt("unit", UNIT_SYSTEM);
+    int legacyUnit = prefs.getInt("unit", -1);
+    _unitSystem = (legacyUnit != -1) ? legacyUnit : UNIT_SYSTEM;
+    int fallbackTemp = (legacyUnit != -1) ? ((_unitSystem == UNIT_IMPERIAL) ? TEMP_UNIT_FAHRENHEIT : TEMP_UNIT_CELSIUS) : DEFAULT_TEMP_UNIT;
+    int fallbackWind = (legacyUnit != -1) ? ((_unitSystem == UNIT_IMPERIAL) ? WIND_UNIT_MPH : WIND_UNIT_KMH) : DEFAULT_WIND_UNIT;
+    int fallbackPrecip = (legacyUnit != -1) ? ((_unitSystem == UNIT_IMPERIAL) ? PRECIP_UNIT_INCH : PRECIP_UNIT_MM) : DEFAULT_PRECIP_UNIT;
+    int fallbackPressure = (legacyUnit != -1) ? ((_unitSystem == UNIT_IMPERIAL) ? PRESSURE_UNIT_INHG : PRESSURE_UNIT_HPA) : DEFAULT_PRESSURE_UNIT;
+    _tempUnit = prefs.getInt("temp_unit", fallbackTemp);
+    _windUnit = prefs.getInt("wind_unit", fallbackWind);
+    _precipUnit = prefs.getInt("precip_unit", fallbackPrecip);
+    _pressureUnit = prefs.getInt("press_unit", fallbackPressure);
+    _unitSystem = (_tempUnit == TEMP_UNIT_CELSIUS) ? UNIT_METRIC : UNIT_IMPERIAL;
     _brightness = prefs.getInt("bright", 80);
     _autoBrightness = prefs.getBool("auto_bright", USE_LDR_AUTO_BACKLIGHT);
     _timezone = prefs.getString("tz", TIMEZONE_DEFAULT);
@@ -136,6 +150,67 @@ void SettingsManager::setUnitSystem(int unitSystem) {
         prefs.putInt("unit", _unitSystem);
         prefs.end();
     }
+    setTempUnit(unitSystem == UNIT_IMPERIAL ? TEMP_UNIT_FAHRENHEIT : TEMP_UNIT_CELSIUS);
+    setWindUnit(unitSystem == UNIT_IMPERIAL ? WIND_UNIT_MPH : WIND_UNIT_KMH);
+    setPrecipUnit(unitSystem == UNIT_IMPERIAL ? PRECIP_UNIT_INCH : PRECIP_UNIT_MM);
+    setPressureUnit(unitSystem == UNIT_IMPERIAL ? PRESSURE_UNIT_INHG : PRESSURE_UNIT_HPA);
+}
+
+int SettingsManager::getTempUnit() const {
+    return _tempUnit;
+}
+
+void SettingsManager::setTempUnit(int unit) {
+    if (unit < TEMP_UNIT_CELSIUS) unit = TEMP_UNIT_CELSIUS;
+    if (unit > TEMP_UNIT_FAHRENHEIT) unit = TEMP_UNIT_FAHRENHEIT;
+    _unitSystem = (unit == TEMP_UNIT_CELSIUS) ? UNIT_METRIC : UNIT_IMPERIAL;
+    _tempUnit = unit;
+    Preferences prefs;
+    prefs.begin("settings", false);
+    prefs.putInt("temp_unit", _tempUnit);
+    prefs.end();
+}
+
+int SettingsManager::getWindUnit() const {
+    return _windUnit;
+}
+
+void SettingsManager::setWindUnit(int unit) {
+    if (unit < WIND_UNIT_KMH) unit = WIND_UNIT_KMH;
+    if (unit > WIND_UNIT_KNOTS) unit = WIND_UNIT_KNOTS;
+    _windUnit = unit;
+    Preferences prefs;
+    prefs.begin("settings", false);
+    prefs.putInt("wind_unit", _windUnit);
+    prefs.end();
+}
+
+int SettingsManager::getPrecipUnit() const {
+    return _precipUnit;
+}
+
+void SettingsManager::setPrecipUnit(int unit) {
+    if (unit < PRECIP_UNIT_MM) unit = PRECIP_UNIT_MM;
+    if (unit > PRECIP_UNIT_INCH) unit = PRECIP_UNIT_INCH;
+    _precipUnit = unit;
+    Preferences prefs;
+    prefs.begin("settings", false);
+    prefs.putInt("precip_unit", _precipUnit);
+    prefs.end();
+}
+
+int SettingsManager::getPressureUnit() const {
+    return _pressureUnit;
+}
+
+void SettingsManager::setPressureUnit(int unit) {
+    if (unit < PRESSURE_UNIT_HPA) unit = PRESSURE_UNIT_HPA;
+    if (unit > PRESSURE_UNIT_MMHG) unit = PRESSURE_UNIT_MMHG;
+    _pressureUnit = unit;
+    Preferences prefs;
+    prefs.begin("settings", false);
+    prefs.putInt("press_unit", _pressureUnit);
+    prefs.end();
 }
 
 int SettingsManager::getBrightness() const {

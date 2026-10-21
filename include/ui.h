@@ -3,6 +3,7 @@
 
 #include <lvgl.h>
 #include "weather_client.h"
+#include "config/config.h"
 
 extern volatile bool settings_unit_changed;
 extern volatile bool settings_brightness_changed;
@@ -33,6 +34,34 @@ void setUIActiveTab(int index);
 void setUIOrientation(int rotation);
 const char* getCardinalDirection(int degrees);
 void showUIStatusMessage(const char* message);
+
+inline const char* getTempUnitLabel(int unit) {
+    return (unit == TEMP_UNIT_FAHRENHEIT) ? "°F" : "°C";
+}
+
+inline const char* getWindUnitLabel(int unit) {
+    switch (unit) {
+        case WIND_UNIT_MPH: return "mph";
+        case WIND_UNIT_MS: return "m/s";
+        case WIND_UNIT_KNOTS: return "knots";
+        case WIND_UNIT_KMH:
+        default: return "km/h";
+    }
+}
+
+inline const char* getPrecipUnitLabel(int unit) {
+    return (unit == PRECIP_UNIT_INCH) ? "in" : "mm";
+}
+
+inline const char* getPressureUnitLabel(int unit) {
+    switch (unit) {
+        case PRESSURE_UNIT_INHG: return "inHg";
+        case PRESSURE_UNIT_MBAR: return "mbar";
+        case PRESSURE_UNIT_MMHG: return "mmHg";
+        case PRESSURE_UNIT_HPA:
+        default: return "hPa";
+    }
+}
 
 inline void formatHourlyTickLabel(char* buf, size_t buf_len, int tick_idx) {
     if (buf == nullptr || buf_len == 0) return;
