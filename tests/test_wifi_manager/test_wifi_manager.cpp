@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "../mocks/mocks.cpp"
 #include "../../src/wifi_manager.cpp"
+#include "landing_html.h"
 
 void setUp(void) {
     WiFi._status = 0;
@@ -114,6 +115,14 @@ void test_wifi_manager_empty_ssid_starts_ap_mode(void) {
     TEST_ASSERT_EQUAL_STRING("192.168.4.1", wifi.getIPAddress().c_str());
 }
 
+void test_wifi_manager_factory_reset_uses_post(void) {
+    // Regression test for Issue #52: Factory reset must use HTTP POST form and not a GET link
+    TEST_ASSERT_NULL(strstr(landing_html, "<a href=\"/reset\""));
+    TEST_ASSERT_NULL(strstr(landing_html, "<a href='/reset'"));
+    TEST_ASSERT_NOT_NULL(strstr(landing_html, "action=\"/reset\""));
+    TEST_ASSERT_NOT_NULL(strstr(landing_html, "method=\"POST\""));
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_wifi_manager_initial_state);
@@ -125,5 +134,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_wifi_manager_set_credentials);
     RUN_TEST(test_wifi_manager_getters_and_helpers);
     RUN_TEST(test_wifi_manager_empty_ssid_starts_ap_mode);
+    RUN_TEST(test_wifi_manager_factory_reset_uses_post);
     return UNITY_END();
 }
