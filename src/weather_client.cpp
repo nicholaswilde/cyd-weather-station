@@ -867,6 +867,10 @@ bool WeatherClient::isLocationEmpty() {
     if (_resolvedLat.length() > 0 && _resolvedLng.length() > 0) {
         return false;
     }
+    // If using OpenWeatherMap with City ID, location is explicitly configured
+    if (settings.getCityCode().length() > 0 && settings.getOwmApiKey().length() > 0) {
+        return false;
+    }
     if (_useZip) {
         return _zipCode.length() == 0 || _zipCode == "YOUR_ZIP_CODE";
     } else {

@@ -454,8 +454,10 @@ const String& SettingsManager::getZipCode() const {
 }
 
 void SettingsManager::setZipCode(const String& zipCode) {
-    if (_zipCode != zipCode) {
-        _zipCode = zipCode;
+    String trimmed = zipCode;
+    trimmed.trim();
+    if (_zipCode != trimmed) {
+        _zipCode = trimmed;
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("zip", _zipCode);
@@ -468,8 +470,10 @@ const String& SettingsManager::getCityCode() const {
 }
 
 void SettingsManager::setCityCode(const String& cityCode) {
-    if (_cityCode != cityCode) {
-        _cityCode = cityCode;
+    String trimmed = cityCode;
+    trimmed.trim();
+    if (_cityCode != trimmed) {
+        _cityCode = trimmed;
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("city", _cityCode);
@@ -482,8 +486,10 @@ const String& SettingsManager::getLatitude() const {
 }
 
 void SettingsManager::setLatitude(const String& latitude) {
-    if (_latitude != latitude) {
-        _latitude = latitude;
+    String trimmed = latitude;
+    trimmed.trim();
+    if (_latitude != trimmed) {
+        _latitude = trimmed;
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("lat", _latitude);
@@ -496,8 +502,10 @@ const String& SettingsManager::getLongitude() const {
 }
 
 void SettingsManager::setLongitude(const String& longitude) {
-    if (_longitude != longitude) {
-        _longitude = longitude;
+    String trimmed = longitude;
+    trimmed.trim();
+    if (_longitude != trimmed) {
+        _longitude = trimmed;
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("lon", _longitude);
@@ -510,8 +518,10 @@ const String& SettingsManager::getOwmApiKey() const {
 }
 
 void SettingsManager::setOwmApiKey(const String& apiKey) {
-    if (_owmApiKey != apiKey) {
-        _owmApiKey = apiKey;
+    String trimmed = apiKey;
+    trimmed.trim();
+    if (_owmApiKey != trimmed) {
+        _owmApiKey = trimmed;
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("owm_api", _owmApiKey);
@@ -524,8 +534,10 @@ const String& SettingsManager::getNtpServer() const {
 }
 
 void SettingsManager::setNtpServer(const String& ntpServer) {
-    if (_ntpServer != ntpServer) {
-        _ntpServer = ntpServer;
+    String trimmed = ntpServer;
+    trimmed.trim();
+    if (_ntpServer != trimmed) {
+        _ntpServer = trimmed;
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putString("ntp_srv", _ntpServer);

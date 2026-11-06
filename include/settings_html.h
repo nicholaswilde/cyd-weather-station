@@ -1,6 +1,10 @@
 #ifndef SETTINGS_HTML_H
 #define SETTINGS_HTML_H
 
+#ifndef PROGMEM
+#define PROGMEM
+#endif
+
 const char settings_html[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
@@ -124,20 +128,20 @@ button:hover { background: #f5c2e7; }
 <div class='section-title'>Location & Weather</div>
 <label for='owm_api' title='Your OpenWeatherMap API key'>OpenWeatherMap API Key (<a href='https://home.openweathermap.org/api_keys' target='_blank' style='color: #89b4fa; text-decoration: none;'>Get Key</a>)</label>
 <div class='password-wrapper'>
-    <input type='password' id='owm_api' name='owm_api' value='%OWM_API%'>
-    <span class='toggle-password' onclick='togglePwd("owm_api", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+    <input type='text' id='owm_api' name='owm_api' placeholder='Leave blank for Open-Meteo' value='%OWM_API%' autocomplete='off' spellcheck='false' autocorrect='off' autocapitalize='off'>
+    <span class='toggle-password' onclick='togglePwd("owm_api", this)' title='Toggle mask'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
 </div>
 <label for='zip' title='Your US zip code for weather data'>Zip Code (US Only)</label>
-<input type='text' id='zip' name='zip' value='%ZIP%'>
+<input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='%ZIP%' autocomplete='off'>
 
 <label for='city' title='OpenWeatherMap City ID for accurate location'>City ID (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OpenWeatherMap</a>)</label>
-<input type='text' id='city' name='city' value='%CITY%'>
+<input type='text' id='city' name='city' placeholder='e.g. 2643743' value='%CITY%' autocomplete='off'>
 
 <label for='lat' title='Latitude for weather location'>Latitude</label>
-<input type='text' id='lat' name='lat' value='%LAT%'>
+<input type='text' id='lat' name='lat' placeholder='e.g. 34.1031' value='%LAT%' autocomplete='off'>
 
 <label for='lon' title='Longitude for weather location'>Longitude</label>
-<input type='text' id='lon' name='lon' value='%LON%'>
+<input type='text' id='lon' name='lon' placeholder='e.g. -118.416' value='%LON%' autocomplete='off'>
 
 <label for='tz' title='IANA timezone string for accurate local time'>Timezone</label>
 <select id='tz' name='tz'></select>

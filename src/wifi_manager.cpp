@@ -426,8 +426,8 @@ void WifiManager::handleRoot() {
     
     html += "<label for='owm_api'>OpenWeatherMap API Key</label>";
     html += "<div class='password-wrapper'>";
-    html += "<input type='password' id='owm_api' name='owm_api' placeholder='API Key' value='" + settings.getOwmApiKey() + "'>";
-    html += "<span class='toggle-password' onclick='togglePwd(\"owm_api\", this)'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg></span>";
+    html += "<input type='text' id='owm_api' name='owm_api' placeholder='Leave blank for Open-Meteo' value='" + settings.getOwmApiKey() + "' autocomplete='off' spellcheck='false' autocorrect='off' autocapitalize='off'>";
+    html += "<span class='toggle-password' onclick='togglePwd(\"owm_api\", this)' title='Toggle mask'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg></span>";
     html += "</div>";
     
     html += "<div class='section-title'>Location & Time</div>";
@@ -490,6 +490,16 @@ void WifiManager::handleSave() {
     html += "<p>The device will now reboot to apply the new settings. You can close this page.</p>";
     html += "</div>";
     html += "</body></html>";
+
+    ssid.trim();
+    pass.trim();
+    zip.trim();
+    city.trim();
+    lat.trim();
+    lon.trim();
+    tz.trim();
+    owmApi.trim();
+    ntpServer.trim();
 
     settings.setWifiSSID(ssid);
     settings.setWifiPassword(pass);
@@ -1030,13 +1040,41 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("sleep_start_time")) settings.setSleepStartTime(_webServer->arg("sleep_start_time"));
     if (_webServer->hasArg("sleep_end_time")) settings.setSleepEndTime(_webServer->arg("sleep_end_time"));
     
-    if (_webServer->hasArg("owm_api")) settings.setOwmApiKey(_webServer->arg("owm_api"));
-    if (_webServer->hasArg("zip")) settings.setZipCode(_webServer->arg("zip"));
-    if (_webServer->hasArg("city")) settings.setCityCode(_webServer->arg("city"));
-    if (_webServer->hasArg("lat")) settings.setLatitude(_webServer->arg("lat"));
-    if (_webServer->hasArg("lon")) settings.setLongitude(_webServer->arg("lon"));
-    if (_webServer->hasArg("tz")) settings.setTimezone(_webServer->arg("tz"));
-    if (_webServer->hasArg("ntp_server")) settings.setNtpServer(_webServer->arg("ntp_server"));
+    if (_webServer->hasArg("owm_api")) {
+        String owm = _webServer->arg("owm_api");
+        owm.trim();
+        settings.setOwmApiKey(owm);
+    }
+    if (_webServer->hasArg("zip")) {
+        String zip = _webServer->arg("zip");
+        zip.trim();
+        settings.setZipCode(zip);
+    }
+    if (_webServer->hasArg("city")) {
+        String city = _webServer->arg("city");
+        city.trim();
+        settings.setCityCode(city);
+    }
+    if (_webServer->hasArg("lat")) {
+        String lat = _webServer->arg("lat");
+        lat.trim();
+        settings.setLatitude(lat);
+    }
+    if (_webServer->hasArg("lon")) {
+        String lon = _webServer->arg("lon");
+        lon.trim();
+        settings.setLongitude(lon);
+    }
+    if (_webServer->hasArg("tz")) {
+        String tz = _webServer->arg("tz");
+        tz.trim();
+        settings.setTimezone(tz);
+    }
+    if (_webServer->hasArg("ntp_server")) {
+        String ntp = _webServer->arg("ntp_server");
+        ntp.trim();
+        settings.setNtpServer(ntp);
+    }
     settings.setUse24HourFormat(_webServer->hasArg("use_24h"));
     if (_webServer->hasArg("update_interval")) settings.setWeatherUpdateInterval(_webServer->arg("update_interval").toInt());
     
