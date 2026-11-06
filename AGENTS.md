@@ -2,7 +2,7 @@
 ## RTK Command Guidelines
 - **Git Operations**: Prefix `git` commands with `rtk` (e.g., `rtk git status`, `rtk git diff`, `rtk git log`, `rtk git commit`, `rtk git push`).
 - **GitHub CLI**: Prefix `gh` commands with `rtk` and pipe to `cat` (e.g., `rtk gh issue list | cat`, `rtk gh pr status | cat`). Always pipe to bypass interactive pagers.
-- **File & Directory Inspection**: Use `rtk ls`, `rtk tree`, `rtk find`, or `rtk read` when listing or reading files to get token-optimized output.
+- **File & Directory Inspection**: Use `rtk ls`, `rtk tree`, `rtk find`, `rtk fd`, or `rtk read` when listing or reading files to get token-optimized output.
 - **Searching**: Use `rtk rg` or `rg` (ripgrep) for line search pattern matching to save tokens.
 - **Build & Test Outputs**: Use `rtk err` or `rtk test` when running build/test commands to filter output to errors/failures only (e.g., `rtk test pio test -e native`).
 - **Exceptions**: Inside `ctx_execute` / `ctx_batch_execute` sandbox code, skip `rtk` (only printed output enters context). Drop `rtk` when exact raw bytes or patch required (`git diff` patch).
@@ -106,6 +106,12 @@ NEVER commit or stage sensitive personal, financial, or security data to reposit
 1. **Secrets & Credentials**: Never commit `.env` files, config, or settings files containing secrets, passwords, API keys, or private keys.
 2. **Explicit Staging**: Never use `git add .` when untracked secret files exist; stage explicitly by name.
 <!-- sensitive-information-protection-end -->
+
+<!-- uv-rules-begin -->
+## Python & `uv` Execution Rules
+- **Command Prefix**: Always prefix Python script executions and commands with `uv` (`rtk uv run <script>`, `rtk uv run python -m unittest ...`).
+- **Lockfile Synchronization**: Always maintain and update `uv.lock` and `pyproject.toml` when dependencies or project metadata change (`uv lock`, `uv add`, `uv sync`).
+<!-- uv-rules-end -->
 
 # Project Rules & Guidelines
 

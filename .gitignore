@@ -73,9 +73,11 @@ Testing/
 .pioenvs/
 .piolibdeps/
 
-# Python Virtualenv
+# Python Virtualenv & Cache
 .venv/
 venv/
+__pycache__/
+*.pyc
 
 # Local Configuration Secrets
 config/secrets.h
@@ -98,6 +100,14 @@ test
 *.jpg
 
 # Serena
-.serena/cache/
-.serena/logs/
-.serena/project.local.yml
+.serena/
+
+# RTK
+.rtk/*
+!.rtk/filters.toml
+
+# Agents
+.agents/*
+!.agents/skills/
+!.agents/rules/
+!.agents/skills_catalog.md
