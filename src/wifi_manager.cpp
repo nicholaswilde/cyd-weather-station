@@ -98,6 +98,13 @@ void WifiManager::begin() {
 #endif
     WiFi.mode(WIFI_STA);
     
+    if (settings.getForceAPMode()) {
+        settings.setForceAPMode(false);
+        Serial.println("[WiFi] Forced AP mode requested via settings. Launching AP mode directly...");
+        startAPMode();
+        return;
+    }
+
     if (_ssid.length() == 0) {
         Serial.println("[WiFi] No credentials configured. Launching AP mode directly...");
         startAPMode();
@@ -414,11 +421,11 @@ void WifiManager::handleRoot() {
     html += "</div>";
     
     html += "<label for='ssid'>SSID</label>";
-    html += "<input type='text' id='ssid' name='ssid' placeholder='SSID name' required>";
+    html += "<input type='text' id='ssid' name='ssid' placeholder='SSID name' value='" + settings.getWifiSSID() + "' required>";
     
     html += "<label for='pass'>Password</label>";
     html += "<div class='password-wrapper'>";
-    html += "<input type='password' id='pass' name='pass' placeholder='Password'>";
+    html += "<input type='password' id='pass' name='pass' placeholder='Password' value='" + settings.getWifiPassword() + "'>";
     html += "<span class='toggle-password' onclick='togglePwd(\"pass\", this)'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg></span>";
     html += "</div>";
     
@@ -510,6 +517,7 @@ void WifiManager::handleSave() {
     if (tz.length() > 0) settings.setTimezone(tz);
     if (owmApi.length() > 0) settings.setOwmApiKey(owmApi);
     if (ntpServer.length() > 0) settings.setNtpServer(ntpServer);
+    settings.setForceAPMode(false);
 
     _webServer->send(200, "text/html", html);
     delay(1000);
@@ -556,7 +564,36 @@ void WifiManager::startWebServer() {
         String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
         html += "<title>CYD Weather Station</title>";
         html += "<style>body { font-family: 'Inter', sans-serif; background: #1e1e2e; color: #cdd6f4; text-align: center; padding: 50px; }</style>";
-        html += "</head><body><h2 style='color: #f5c2e7;'>Factory Reset Complete</h2><p>The device is restarting in AP Setup mode...</p></body></html>";
+        html += "<script>if (window.history.replaceState) { window.history.replaceState(null, '', '/'); }</script>";
+        html += "</head><body><h2 style='color: #f38ba8;'>Factory Reset Complete</h2><p>All settings and Wi-Fi credentials have been erased. The device is restarting in AP Setup mode...</p></body></html>";
+        _webServer->send(200, "text/html", html);
+        delay(1000);
+        ESP.restart();
+    });
+    _webServer->on("/reboot_ap", HTTP_GET, [this]() {
+        _webServer->sendHeader("Location", "/", true);
+        _webServer->send(302, "text/plain", "");
+    });
+    _webServer->on("/reboot_ap", HTTP_POST, [this]() {
+        settings.setForceAPMode(true);
+        String apSSID = getAPSSID();
+        String html = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">";
+        html += "<title>Rebooting to AP Mode</title>";
+        html += "<style>body { font-family: 'Inter', system-ui, sans-serif; background: #1e1e2e; color: #cdd6f4; text-align: center; padding: 40px 20px; }";
+        html += ".card { background: #181825; border-radius: 12px; padding: 30px; max-width: 420px; margin: 0 auto; border: 1px solid #313244; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }";
+        html += "h2 { color: #cba6f7; margin-top: 0; }";
+        html += "p { line-height: 1.5; color: #cdd6f4; }";
+        html += ".ssid-badge { display: inline-block; background: #313244; color: #a6e3a1; font-weight: bold; padding: 8px 14px; border-radius: 6px; font-size: 16px; margin: 10px 0; letter-spacing: 0.5px; }";
+        html += "</style>";
+        html += "<script>if (window.history.replaceState) { window.history.replaceState(null, '', '/'); }</script>";
+        html += "</head><body>";
+        html += "<div class='card'>";
+        html += "<h2>Rebooting to AP Setup Mode</h2>";
+        html += "<p>The device is restarting in Access Point setup mode without erasing stored settings.</p>";
+        html += "<p>Connect to the Wi-Fi network:</p>";
+        html += "<div class='ssid-badge'>" + apSSID + "</div>";
+        html += "<p style='font-size: 13px; color: #a6adc8;'>Once connected, navigate to <strong>http://192.168.4.1</strong> if the setup portal does not open automatically.</p>";
+        html += "</div></body></html>";
         _webServer->send(200, "text/html", html);
         delay(1000);
         ESP.restart();
@@ -985,6 +1022,8 @@ void WifiManager::handleSettings() {
     html.replace("%MQTT_PASSWORD%", settings.getMqttPassword());
     html.replace("%MQTT_BASE%", settings.getMqttBaseTopic());
     
+    html.replace("%WIFI_SSID%", settings.getWifiSSID());
+    html.replace("%WIFI_PASSWORD%", settings.getWifiPassword());
     html.replace("%HOSTNAME%", settings.getHostname());
     html.replace("%STATIC_IP_ENABLED%", settings.getStaticIpEnabled() ? "checked" : "");
     
@@ -1090,6 +1129,17 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("mqtt_password")) settings.setMqttPassword(_webServer->arg("mqtt_password"));
     if (_webServer->hasArg("mqtt_base")) settings.setMqttBaseTopic(_webServer->arg("mqtt_base"));
     
+    if (_webServer->hasArg("wifi_ssid")) {
+        String ssid = _webServer->arg("wifi_ssid");
+        ssid.trim();
+        settings.setWifiSSID(ssid);
+    }
+    if (_webServer->hasArg("wifi_password")) {
+        String pass = _webServer->arg("wifi_password");
+        pass.trim();
+        settings.setWifiPassword(pass);
+    }
+
     if (_webServer->hasArg("hostname")) settings.setHostname(_webServer->arg("hostname"));
     settings.setStaticIpEnabled(_webServer->hasArg("static_ip_enabled"));
     if (_webServer->hasArg("static_ip")) settings.setStaticIp(_webServer->arg("static_ip"));
@@ -1113,6 +1163,7 @@ void WifiManager::handleSettingsSave() {
     html += "p { color: #cdd6f4; margin-bottom: 20px; line-height: 1.5; }";
     html += "</style>\n";
     html += "<script>\n";
+    html += "if (window.history.replaceState) { window.history.replaceState(null, '', '/'); }\n";
     html += "window.onload = function() {\n";
     html += "    const tzs = [\"Africa/Abidjan\", \"Africa/Accra\", \"Africa/Addis_Ababa\", \"Africa/Algiers\", \"Africa/Asmara\", \"Africa/Bamako\", \"Africa/Bangui\", \"Africa/Banjul\", \"Africa/Bissau\", \"Africa/Blantyre\", \"Africa/Brazzaville\", \"Africa/Bujumbura\", \"Africa/Cairo\", \"Africa/Casablanca\", \"Africa/Ceuta\", \"Africa/Conakry\", \"Africa/Dakar\", \"Africa/Dar_es_Salaam\", \"Africa/Djibouti\", \"Africa/Douala\", \"Africa/El_Aaiun\", \"Africa/Freetown\", \"Africa/Gaborone\", \"Africa/Harare\", \"Africa/Johannesburg\", \"Africa/Juba\", \"Africa/Kampala\", \"Africa/Khartoum\", \"Africa/Kigali\", \"Africa/Kinshasa\", \"Africa/Lagos\", \"Africa/Libreville\", \"Africa/Lome\", \"Africa/Luanda\", \"Africa/Lubumbashi\", \"Africa/Lusaka\", \"Africa/Malabo\", \"Africa/Maputo\", \"Africa/Maseru\", \"Africa/Mbabane\", \"Africa/Mogadishu\", \"Africa/Monrovia\", \"Africa/Nairobi\", \"Africa/Ndjamena\", \"Africa/Niamey\", \"Africa/Nouakchott\", \"Africa/Ouagadougou\", \"Africa/Porto-Novo\", \"Africa/Sao_Tome\", \"Africa/Timbuktu\", \"Africa/Tripoli\", \"Africa/Tunis\", \"Africa/Windhoek\", \"America/Adak\", \"America/Anchorage\", \"America/Anguilla\", \"America/Antigua\", \"America/Araguaina\", \"America/Argentina/Buenos_Aires\", \"America/Argentina/Catamarca\", \"America/Argentina/Cordoba\", \"America/Argentina/Jujuy\", \"America/Argentina/La_Rioja\", \"America/Argentina/Mendoza\", \"America/Argentina/Rio_Gallegos\", \"America/Argentina/Salta\", \"America/Argentina/San_Juan\", \"America/Argentina/San_Luis\", \"America/Argentina/Tucuman\", \"America/Argentina/Ushuaia\", \"America/Aruba\", \"America/Asuncion\", \"America/Atikokan\", \"America/Atka\", \"America/Bahia\", \"America/Bahia_Banderas\", \"America/Barbados\", \"America/Belem\", \"America/Belize\", \"America/Blanc-Sablon\", \"America/Boa_Vista\", \"America/Bogota\", \"America/Boise\", \"America/Cambridge_Bay\", \"America/Campo_Grande\", \"America/Cancun\", \"America/Caracas\", \"America/Cayenne\", \"America/Cayman\", \"America/Chicago\", \"America/Chihuahua\", \"America/Ciudad_Juarez\", \"America/Coral_Harbour\", \"America/Costa_Rica\", \"America/Coyhaique\", \"America/Creston\", \"America/Cuiaba\", \"America/Curacao\", \"America/Danmarkshavn\", \"America/Dawson\", \"America/Dawson_Creek\", \"America/Denver\", \"America/Detroit\", \"America/Dominica\", \"America/Edmonton\", \"America/Eirunepe\", \"America/El_Salvador\", \"America/Ensenada\", \"America/Fort_Nelson\", \"America/Fortaleza\", \"America/Glace_Bay\", \"America/Goose_Bay\", \"America/Grand_Turk\", \"America/Grenada\", \"America/Guadeloupe\", \"America/Guatemala\", \"America/Guayaquil\", \"America/Guyana\", \"America/Halifax\", \"America/Havana\", \"America/Hermosillo\", \"America/Indiana/Indianapolis\", \"America/Indiana/Knox\", \"America/Indiana/Marengo\", \"America/Indiana/Petersburg\", \"America/Indiana/Tell_City\", \"America/Indiana/Vevay\", \"America/Indiana/Vincennes\", \"America/Indiana/Winamac\", \"America/Inuvik\", \"America/Iqaluit\", \"America/Jamaica\", \"America/Juneau\", \"America/Kentucky/Louisville\", \"America/Kentucky/Monticello\", \"America/Kralendijk\", \"America/La_Paz\", \"America/Lima\", \"America/Los_Angeles\", \"America/Lower_Princes\", \"America/Maceio\", \"America/Managua\", \"America/Manaus\", \"America/Marigot\", \"America/Martinique\", \"America/Matamoros\", \"America/Mazatlan\", \"America/Menominee\", \"America/Merida\", \"America/Metlakatla\", \"America/Mexico_City\", \"America/Miquelon\", \"America/Moncton\", \"America/Monterrey\", \"America/Montevideo\", \"America/Montreal\", \"America/Montserrat\", \"America/Nassau\", \"America/New_York\", \"America/Nipigon\", \"America/Nome\", \"America/Noronha\", \"America/North_Dakota/Beulah\", \"America/North_Dakota/Center\", \"America/North_Dakota/New_Salem\", \"America/Nuuk\", \"America/Ojinaga\", \"America/Panama\", \"America/Pangnirtung\", \"America/Paramaribo\", \"America/Phoenix\", \"America/Port-au-Prince\", \"America/Port_of_Spain\", \"America/Porto_Acre\", \"America/Porto_Velho\", \"America/Puerto_Rico\", \"America/Punta_Arenas\", \"America/Rainy_River\", \"America/Rankin_Inlet\", \"America/Recife\", \"America/Regina\", \"America/Resolute\", \"America/Rio_Branco\", \"America/Santa_Isabel\", \"America/Santarem\", \"America/Santiago\", \"America/Santo_Domingo\", \"America/Sao_Paulo\", \"America/Scoresbysund\", \"America/Shiprock\", \"America/Sitka\", \"America/St_Barthelemy\", \"America/St_Johns\", \"America/St_Kitts\", \"America/St_Lucia\", \"America/St_Thomas\", \"America/St_Vincent\", \"America/Swift_Current\", \"America/Tegucigalpa\", \"America/Thule\", \"America/Thunder_Bay\", \"America/Tijuana\", \"America/Toronto\", \"America/Tortola\", \"America/Vancouver\", \"America/Virgin\", \"America/Whitehorse\", \"America/Winnipeg\", \"America/Yakutat\", \"America/Yellowknife\", \"Antarctica/Casey\", \"Antarctica/Davis\", \"Antarctica/DumontDUrville\", \"Antarctica/Macquarie\", \"Antarctica/Mawson\", \"Antarctica/McMurdo\", \"Antarctica/Palmer\", \"Antarctica/Rothera\", \"Antarctica/Syowa\", \"Antarctica/Troll\", \"Antarctica/Vostok\", \"Arctic/Longyearbyen\", \"Asia/Aden\", \"Asia/Almaty\", \"Asia/Amman\", \"Asia/Anadyr\", \"Asia/Aqtau\", \"Asia/Aqtobe\", \"Asia/Ashgabat\", \"Asia/Atyrau\", \"Asia/Baghdad\", \"Asia/Bahrain\", \"Asia/Baku\", \"Asia/Bangkok\", \"Asia/Barnaul\", \"Asia/Beirut\", \"Asia/Bishkek\", \"Asia/Brunei\", \"Asia/Chita\", \"Asia/Chongqing\", \"Asia/Colombo\", \"Asia/Damascus\", \"Asia/Dhaka\", \"Asia/Dili\", \"Asia/Dubai\", \"Asia/Dushanbe\", \"Asia/Famagusta\", \"Asia/Gaza\", \"Asia/Harbin\", \"Asia/Hebron\", \"Asia/Ho_Chi_Minh\", \"Asia/Hong_Kong\", \"Asia/Hovd\", \"Asia/Irkutsk\", \"Asia/Istanbul\", \"Asia/Jakarta\", \"Asia/Jayapura\", \"Asia/Jerusalem\", \"Asia/Kabul\", \"Asia/Kamchatka\", \"Asia/Karachi\", \"Asia/Kashgar\", \"Asia/Kathmandu\", \"Asia/Khandyga\", \"Asia/Kolkata\", \"Asia/Krasnoyarsk\", \"Asia/Kuala_Lumpur\", \"Asia/Kuching\", \"Asia/Kuwait\", \"Asia/Macau\", \"Asia/Magadan\", \"Asia/Makassar\", \"Asia/Manila\", \"Asia/Muscat\", \"Asia/Nicosia\", \"Asia/Novokuznetsk\", \"Asia/Novosibirsk\", \"Asia/Omsk\", \"Asia/Oral\", \"Asia/Phnom_Penh\", \"Asia/Pontianak\", \"Asia/Pyongyang\", \"Asia/Qatar\", \"Asia/Qostanay\", \"Asia/Qyzylorda\", \"Asia/Riyadh\", \"Asia/Sakhalin\", \"Asia/Samarkand\", \"Asia/Seoul\", \"Asia/Shanghai\", \"Asia/Singapore\", \"Asia/Srednekolymsk\", \"Asia/Taipei\", \"Asia/Tashkent\", \"Asia/Tbilisi\", \"Asia/Tehran\", \"Asia/Tel_Aviv\", \"Asia/Thimphu\", \"Asia/Tokyo\", \"Asia/Tomsk\", \"Asia/Ulaanbaatar\", \"Asia/Urumqi\", \"Asia/Ust-Nera\", \"Asia/Vientiane\", \"Asia/Vladivostok\", \"Asia/Yakutsk\", \"Asia/Yangon\", \"Asia/Yekaterinburg\", \"Asia/Yerevan\", \"Atlantic/Azores\", \"Atlantic/Bermuda\", \"Atlantic/Canary\", \"Atlantic/Cape_Verde\", \"Atlantic/Faroe\", \"Atlantic/Jan_Mayen\", \"Atlantic/Madeira\", \"Atlantic/Reykjavik\", \"Atlantic/South_Georgia\", \"Atlantic/St_Helena\", \"Atlantic/Stanley\", \"Australia/Adelaide\", \"Australia/Brisbane\", \"Australia/Broken_Hill\", \"Australia/Canberra\", \"Australia/Currie\", \"Australia/Darwin\", \"Australia/Eucla\", \"Australia/Hobart\", \"Australia/Lindeman\", \"Australia/Lord_Howe\", \"Australia/Melbourne\", \"Australia/Perth\", \"Australia/Sydney\", \"Australia/Yancowinna\", \"Europe/Amsterdam\", \"Europe/Andorra\", \"Europe/Astrakhan\", \"Europe/Athens\", \"Europe/Belfast\", \"Europe/Belgrade\", \"Europe/Berlin\", \"Europe/Bratislava\", \"Europe/Brussels\", \"Europe/Bucharest\", \"Europe/Budapest\", \"Europe/Busingen\", \"Europe/Chisinau\", \"Europe/Copenhagen\", \"Europe/Dublin\", \"Europe/Gibraltar\", \"Europe/Guernsey\", \"Europe/Helsinki\", \"Europe/Isle_of_Man\", \"Europe/Istanbul\", \"Europe/Jersey\", \"Europe/Kaliningrad\", \"Europe/Kirov\", \"Europe/Kyiv\", \"Europe/Lisbon\", \"Europe/Ljubljana\", \"Europe/London\", \"Europe/Luxembourg\", \"Europe/Madrid\", \"Europe/Malta\", \"Europe/Mariehamn\", \"Europe/Minsk\", \"Europe/Monaco\", \"Europe/Moscow\", \"Europe/Nicosia\", \"Europe/Oslo\", \"Europe/Paris\", \"Europe/Podgorica\", \"Europe/Prague\", \"Europe/Riga\", \"Europe/Rome\", \"Europe/Samara\", \"Europe/San_Marino\", \"Europe/Sarajevo\", \"Europe/Saratov\", \"Europe/Simferopol\", \"Europe/Skopje\", \"Europe/Sofia\", \"Europe/Stockholm\", \"Europe/Tallinn\", \"Europe/Tirane\", \"Europe/Tiraspol\", \"Europe/Ulyanovsk\", \"Europe/Vaduz\", \"Europe/Vatican\", \"Europe/Vienna\", \"Europe/Vilnius\", \"Europe/Volgograd\", \"Europe/Warsaw\", \"Europe/Zagreb\", \"Europe/Zurich\", \"Indian/Antananarivo\", \"Indian/Chagos\", \"Indian/Christmas\", \"Indian/Cocos\", \"Indian/Comoro\", \"Indian/Kerguelen\", \"Indian/Mahe\", \"Indian/Maldives\", \"Indian/Mauritius\", \"Indian/Mayotte\", \"Indian/Reunion\", \"Pacific/Apia\", \"Pacific/Auckland\", \"Pacific/Bougainville\", \"Pacific/Chatham\", \"Pacific/Chuuk\", \"Pacific/Easter\", \"Pacific/Efate\", \"Pacific/Fakaofo\", \"Pacific/Fiji\", \"Pacific/Funafuti\", \"Pacific/Galapagos\", \"Pacific/Gambier\", \"Pacific/Guadalcanal\", \"Pacific/Guam\", \"Pacific/Honolulu\", \"Pacific/Johnston\", \"Pacific/Kanton\", \"Pacific/Kiritimati\", \"Pacific/Kosrae\", \"Pacific/Kwajalein\", \"Pacific/Majuro\", \"Pacific/Marquesas\", \"Pacific/Midway\", \"Pacific/Nauru\", \"Pacific/Niue\", \"Pacific/Norfolk\", \"Pacific/Noumea\", \"Pacific/Pago_Pago\", \"Pacific/Palau\", \"Pacific/Pitcairn\", \"Pacific/Pohnpei\", \"Pacific/Port_Moresby\", \"Pacific/Rarotonga\", \"Pacific/Saipan\", \"Pacific/Samoa\", \"Pacific/Tahiti\", \"Pacific/Tarawa\", \"Pacific/Tongatapu\", \"Pacific/Wake\", \"Pacific/Wallis\", \"Pacific/Yap\", \"UTC\"];\n";
     html += "    const tzSelect = document.getElementById('tz');\n";

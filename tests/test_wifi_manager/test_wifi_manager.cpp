@@ -132,6 +132,34 @@ void test_wifi_manager_owm_api_input_configuration(void) {
     TEST_ASSERT_NOT_NULL(strstr(settings_html, "autocomplete='off'"));
 }
 
+void test_wifi_manager_reboot_ap_action(void) {
+    // Regression test for Issue #54: Dedicated Reboot to AP action and Wi-Fi fields in settings
+    TEST_ASSERT_NULL(strstr(landing_html, "<a href=\"/reboot_ap\""));
+    TEST_ASSERT_NULL(strstr(landing_html, "<a href='/reboot_ap'"));
+    TEST_ASSERT_NOT_NULL(strstr(landing_html, "action=\"/reboot_ap\""));
+    TEST_ASSERT_NOT_NULL(strstr(landing_html, "method=\"POST\""));
+
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "action='/reboot_ap'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "method='POST'"));
+
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "id='wifi_ssid'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "name='wifi_ssid'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "id='wifi_password'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "name='wifi_password'"));
+}
+
+void test_wifi_manager_forced_ap_mode_on_boot(void) {
+    // Regression test for Issue #54: Device boots directly into AP mode when requested via settings
+    settings.setForceAPMode(true);
+    TEST_ASSERT_TRUE(settings.getForceAPMode());
+
+    WifiManager wifi("SSID", "PASS");
+    wifi.begin();
+
+    TEST_ASSERT_EQUAL(WIFI_STATE_AP_MODE, wifi.getState());
+    TEST_ASSERT_FALSE(settings.getForceAPMode());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_wifi_manager_initial_state);
@@ -145,5 +173,7 @@ int main(int argc, char **argv) {
     RUN_TEST(test_wifi_manager_empty_ssid_starts_ap_mode);
     RUN_TEST(test_wifi_manager_factory_reset_uses_post);
     RUN_TEST(test_wifi_manager_owm_api_input_configuration);
+    RUN_TEST(test_wifi_manager_reboot_ap_action);
+    RUN_TEST(test_wifi_manager_forced_ap_mode_on_boot);
     return UNITY_END();
 }

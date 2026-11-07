@@ -68,6 +68,7 @@ SettingsManager::SettingsManager() {
     _sleepEndTime = DEFAULT_SLEEP_END_TIME;
     _use24HourFormat = USE_24_HOUR_FORMAT;
     _showTitleVersion = SHOW_TITLE_VERSION;
+    _forceAPMode = false;
 }
 
 void SettingsManager::begin() {
@@ -134,6 +135,7 @@ void SettingsManager::begin() {
     _sleepEndTime = prefs.getString("sleep_end", DEFAULT_SLEEP_END_TIME);
     _use24HourFormat = prefs.getBool("use_24h", USE_24_HOUR_FORMAT);
     _showTitleVersion = prefs.getBool("title_ver", SHOW_TITLE_VERSION);
+    _forceAPMode = prefs.getBool("force_ap", false);
     
     prefs.end();
 }
@@ -663,6 +665,15 @@ void SettingsManager::setHostname(const String& hostname) {
         _hostname = hostname;
         Preferences prefs; prefs.begin("settings", false);
         prefs.putString("hostname", _hostname); prefs.end();
+    }
+}
+
+bool SettingsManager::getForceAPMode() const { return _forceAPMode; }
+void SettingsManager::setForceAPMode(bool force) {
+    if (_forceAPMode != force) {
+        _forceAPMode = force;
+        Preferences prefs; prefs.begin("settings", false);
+        prefs.putBool("force_ap", _forceAPMode); prefs.end();
     }
 }
 

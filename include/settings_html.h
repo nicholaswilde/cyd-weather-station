@@ -222,6 +222,15 @@ button:hover { background: #f5c2e7; }
 
 <div class='section-title'>Network Configuration</div>
 
+<label for='wifi_ssid' title='Wi-Fi Network Name (SSID)'>Wi-Fi SSID</label>
+<input type='text' id='wifi_ssid' name='wifi_ssid' value='%WIFI_SSID%' placeholder='Network SSID'>
+
+<label for='wifi_password' title='Wi-Fi Network Password'>Wi-Fi Password</label>
+<div class='password-wrapper'>
+    <input type='password' id='wifi_password' name='wifi_password' value='%WIFI_PASSWORD%' placeholder='Password (blank for open network)'>
+    <span class='toggle-password' onclick='togglePwd("wifi_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+</div>
+
 <label for='hostname' title='Device network hostname and mDNS address (e.g. cyd-weather-station.local)'>Hostname</label>
 <input type='text' id='hostname' name='hostname' value='%HOSTNAME%'>
 
@@ -268,6 +277,9 @@ button:hover { background: #f5c2e7; }
 </div>
 
 <button type='submit'>Save Settings & Reboot</button>
+</form>
+<form method='POST' action='/reboot_ap' onsubmit="return confirm('Reboot device into Access Point (AP) setup mode? Stored settings will NOT be erased.');" style='margin-top: 15px; margin-bottom: 0;'>
+    <button type='submit' style='background: #cba6f7; width: 100%; border: none; font-family: inherit; padding: 12px; border-radius: 8px; color: #11111b; font-size: 15px; font-weight: bold; cursor: pointer; transition: transform 0.2s;'>📶 Reboot to AP Setup Mode</button>
 </form>
 <a href="/" class="btn-back">&larr; Back to Dashboard</a>
 <p style="margin-top: 25px; margin-bottom: 0; font-size: 13px; color: #6c7086; text-align: center;">Built for %DEVICE_NAME% | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>

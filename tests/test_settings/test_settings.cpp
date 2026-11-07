@@ -47,6 +47,7 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_TEMP_OFFSET, settings.getLocalSensorTempOffset());
     TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_HUM_OFFSET, settings.getLocalSensorHumOffset());
     TEST_ASSERT_EQUAL(SHOW_TITLE_VERSION, settings.getShowTitleVersion());
+    TEST_ASSERT_EQUAL(false, settings.getForceAPMode());
 }
 
 void test_settings_save_and_load(void) {
@@ -368,11 +369,30 @@ void test_settings_title_version(void) {
     TEST_ASSERT_FALSE(settings_new.getShowTitleVersion());
 }
 
+void test_settings_force_ap_mode(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    TEST_ASSERT_FALSE(settings.getForceAPMode());
+
+    settings.setForceAPMode(true);
+    TEST_ASSERT_TRUE(settings.getForceAPMode());
+
+    // Re-instantiate to simulate reboot
+    SettingsManager settings_new;
+    settings_new.begin();
+    TEST_ASSERT_TRUE(settings_new.getForceAPMode());
+
+    settings_new.setForceAPMode(false);
+    TEST_ASSERT_FALSE(settings_new.getForceAPMode());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_settings_default_values);
     RUN_TEST(test_settings_24h_format);
     RUN_TEST(test_settings_title_version);
+    RUN_TEST(test_settings_force_ap_mode);
     RUN_TEST(test_settings_save_and_load);
     RUN_TEST(test_settings_wifi_credentials);
     RUN_TEST(test_settings_location_data);
