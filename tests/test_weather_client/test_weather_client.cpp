@@ -186,7 +186,11 @@ void test_weather_client_is_location_empty(void) {
 
     // Test OpenWeatherMap with City ID and API Key (Issue #53)
     settings.setZipCode(""); settings.setLatitude(""); settings.setLongitude("");
-    settings.setCityCode("2643743"); settings.setOwmApiKey("test_owm_key");
+    settings.setCityCode("2643743"); settings.setOwmApiKey("YOUR_OPENWEATHERMAP_API_KEY");
+    WeatherClient client7_placeholder;
+    TEST_ASSERT_TRUE(client7_placeholder.isLocationEmpty());
+
+    settings.setOwmApiKey("test_owm_key");
     WeatherClient client7;
     TEST_ASSERT_FALSE(client7.isLocationEmpty());
 
