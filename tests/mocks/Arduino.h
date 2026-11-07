@@ -82,6 +82,15 @@ public:
         }
         return String(this->substr(from, to - from));
     }
+    void trim() {
+        size_t first = this->find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) {
+            this->clear();
+            return;
+        }
+        size_t last = this->find_last_not_of(" \t\r\n");
+        *this = this->substr(first, (last - first + 1));
+    }
 };
 
 class IPAddress {

@@ -284,7 +284,7 @@ WeatherData WeatherClient::fetchWeather() {
     _useZip = (_zipCode.length() > 0 && _zipCode != "YOUR_ZIP_CODE");
     WeatherData data = { 0.0f, 0, "Unknown", false, -1, 0.0f, 0, "", {} };
 
-    bool useOWM = (settings.getOwmApiKey().length() > 0);
+    bool useOWM = (settings.getOwmApiKey().length() > 0 && settings.getOwmApiKey() != "YOUR_OPENWEATHERMAP_API_KEY");
 
     // Resolve zip code if using zip code and not yet resolved
     if (_useZip && !_zipResolved) {
@@ -865,6 +865,10 @@ bool WeatherClient::isLocationEmpty() {
     _useZip = (_zipCode.length() > 0 && _zipCode != "YOUR_ZIP_CODE");
 
     if (_resolvedLat.length() > 0 && _resolvedLng.length() > 0) {
+        return false;
+    }
+    // If using OpenWeatherMap with City ID, location is explicitly configured
+    if (settings.getCityCode().length() > 0 && settings.getOwmApiKey().length() > 0 && settings.getOwmApiKey() != "YOUR_OPENWEATHERMAP_API_KEY") {
         return false;
     }
     if (_useZip) {

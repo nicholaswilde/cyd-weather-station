@@ -3,6 +3,8 @@
 #include "Arduino.h"
 #include "../mocks/mocks.cpp"
 #include "../../src/wifi_manager.cpp"
+#include "landing_html.h"
+#include "settings_html.h"
 
 void setUp(void) {
     WiFi._status = 0;
@@ -114,6 +116,50 @@ void test_wifi_manager_empty_ssid_starts_ap_mode(void) {
     TEST_ASSERT_EQUAL_STRING("192.168.4.1", wifi.getIPAddress().c_str());
 }
 
+void test_wifi_manager_factory_reset_uses_post(void) {
+    // Regression test for Issue #52: Factory reset must use HTTP POST form and not a GET link
+    TEST_ASSERT_NULL(strstr(landing_html, "<a href=\"/reset\""));
+    TEST_ASSERT_NULL(strstr(landing_html, "<a href='/reset'"));
+    TEST_ASSERT_NOT_NULL(strstr(landing_html, "action=\"/reset\""));
+    TEST_ASSERT_NOT_NULL(strstr(landing_html, "method=\"POST\""));
+}
+
+void test_wifi_manager_owm_api_input_configuration(void) {
+    // Regression test for Issue #53: OWM API key must not be masked as password or interfere with browser autofill
+    TEST_ASSERT_NULL(strstr(settings_html, "type='password' id='owm_api'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "type='text' id='owm_api'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "id='owm_api' name='owm_api' placeholder="));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "autocomplete='off'"));
+}
+
+void test_wifi_manager_reboot_ap_action(void) {
+    // Regression test for Issue #54: Dedicated Reboot to AP action and Wi-Fi fields in settings
+    TEST_ASSERT_NULL(strstr(landing_html, "<a href=\"/reboot_ap\""));
+    TEST_ASSERT_NULL(strstr(landing_html, "<a href='/reboot_ap'"));
+    TEST_ASSERT_NOT_NULL(strstr(landing_html, "action=\"/reboot_ap\""));
+    TEST_ASSERT_NOT_NULL(strstr(landing_html, "method=\"POST\""));
+
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "action='/reboot_ap'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "method='POST'"));
+
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "id='wifi_ssid'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "name='wifi_ssid'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "id='wifi_password'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "name='wifi_password'"));
+}
+
+void test_wifi_manager_forced_ap_mode_on_boot(void) {
+    // Regression test for Issue #54: Device boots directly into AP mode when requested via settings
+    settings.setForceAPMode(true);
+    TEST_ASSERT_TRUE(settings.getForceAPMode());
+
+    WifiManager wifi("SSID", "PASS");
+    wifi.begin();
+
+    TEST_ASSERT_EQUAL(WIFI_STATE_AP_MODE, wifi.getState());
+    TEST_ASSERT_FALSE(settings.getForceAPMode());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_wifi_manager_initial_state);
@@ -125,5 +171,9 @@ int main(int argc, char **argv) {
     RUN_TEST(test_wifi_manager_set_credentials);
     RUN_TEST(test_wifi_manager_getters_and_helpers);
     RUN_TEST(test_wifi_manager_empty_ssid_starts_ap_mode);
+    RUN_TEST(test_wifi_manager_factory_reset_uses_post);
+    RUN_TEST(test_wifi_manager_owm_api_input_configuration);
+    RUN_TEST(test_wifi_manager_reboot_ap_action);
+    RUN_TEST(test_wifi_manager_forced_ap_mode_on_boot);
     return UNITY_END();
 }

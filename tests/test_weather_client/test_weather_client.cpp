@@ -183,6 +183,19 @@ void test_weather_client_is_location_empty(void) {
 
     settings.setZipCode(""); settings.setLatitude("37.7749"); settings.setLongitude("-122.4194"); WeatherClient client6;
     TEST_ASSERT_FALSE(client6.isLocationEmpty());
+
+    // Test OpenWeatherMap with City ID and API Key (Issue #53)
+    settings.setZipCode(""); settings.setLatitude(""); settings.setLongitude("");
+    settings.setCityCode("2643743"); settings.setOwmApiKey("YOUR_OPENWEATHERMAP_API_KEY");
+    WeatherClient client7_placeholder;
+    TEST_ASSERT_TRUE(client7_placeholder.isLocationEmpty());
+
+    settings.setOwmApiKey("test_owm_key");
+    WeatherClient client7;
+    TEST_ASSERT_FALSE(client7.isLocationEmpty());
+
+    // Reset back
+    settings.setCityCode(""); settings.setOwmApiKey("");
 }
 
 void test_weather_client_parse_weather_json_hourly(void) {

@@ -1,6 +1,10 @@
 #ifndef LANDING_HTML_H
 #define LANDING_HTML_H
 
+#ifndef PROGMEM
+#define PROGMEM
+#endif
+
 const char landing_html[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
@@ -22,7 +26,9 @@ p.subtitle { color: #a6adc8; margin-top: 0; margin-bottom: 30px; font-size: 15px
 .btn-screenshot { background: #f5c2e7; }
 .btn-screenshot:hover { background: #f5e0dc; }
 .btn-screenshot.disabled { background: #45475a; color: #a6adc8; cursor: not-allowed; pointer-events: none; }
-.btn-reset { background: #f38ba8; margin-top: 30px; }
+.btn-reboot-ap { background: #cba6f7; width: 100%; border: none; font-family: inherit; }
+.btn-reboot-ap:hover { background: #b4befe; }
+.btn-reset { background: #f38ba8; width: 100%; border: none; font-family: inherit; }
 .btn-reset:hover { background: #eba0ac; }
 </style>
 </head>
@@ -37,7 +43,12 @@ p.subtitle { color: #a6adc8; margin-top: 0; margin-bottom: 30px; font-size: 15px
 %SCREENSHOT_HELP_TEXT%
 <a href="/clear_logs" class="btn btn-update" style="background: #fab387; color: #11111b;" onclick="return confirm('Are you sure you want to clear the SD card logs?');">🗑️ Clear SD Logs</a>
 <a href="/clear_cache" class="btn btn-update" style="background: #fab387; color: #11111b;" onclick="return confirm('Are you sure you want to clear the SD card cache?');">🗑️ Clear SD Cache</a>
-<a href="/reset" class="btn btn-reset" onclick="return confirm('Are you sure you want to factory reset this device? All settings and Wi-Fi credentials will be erased and the device will restart in AP Setup mode. This cannot be undone.');">⚠️ Factory Reset</a>
+<form method="POST" action="/reboot_ap" style="margin-top: 15px; margin-bottom: 0;" onsubmit="return confirm('Reboot device into Access Point (AP) setup mode? Stored settings will NOT be erased.');">
+    <button type="submit" class="btn btn-reboot-ap">📶 Reboot to AP Setup Mode</button>
+</form>
+<form method="POST" action="/reset" style="margin-top: 15px; margin-bottom: 0;" onsubmit="return confirm('Are you sure you want to factory reset this device? All settings and Wi-Fi credentials will be erased and the device will restart in AP Setup mode. This cannot be undone.');">
+    <button type="submit" class="btn btn-reset">⚠️ Factory Reset</button>
+</form>
 
 <p style="margin-top: 25px; font-size: 13px; color: #6c7086;">Built for %DEVICE_NAME% | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>
 </div>
