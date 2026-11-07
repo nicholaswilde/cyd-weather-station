@@ -47,7 +47,8 @@ A beautiful, configurable real-time weather station and desk clock built for the
 - **Custom Hostname & mDNS**: Configurable network hostname (default `cyd-weather-station`) registered with DHCP (`WiFi.setHostname`) and mDNS responder (`MDNS.begin`) for access via `http://<hostname>.local/` without needing to find the device IP address.
 - **Web Dashboard & Settings Portal**:
   - Access `http://<DEVICE_IP>/` or `http://<hostname>.local/` (e.g. `http://cyd-weather-station.local/`) in any browser for a central Catppuccin-themed dashboard.
-  - Includes direct navigation links to Device Settings (`/settings`), Firmware Updates (`/update`), Live Screenshots (`/screenshot`), Clear SD Logs (`/clear_logs`), Clear SD Cache (`/clear_cache`), and Factory Reset (`/reset`).
+  - Includes direct navigation links to Device Settings (`/settings`), Firmware Updates (`/update`), Live Screenshots (`/screenshot`), Clear SD Logs (`/clear_logs`), Clear SD Cache (`/clear_cache`), Reboot to AP Setup Mode (`/reboot_ap`), and Factory Reset (`/reset`).
+  - Configure Wi-Fi SSID and Password directly within `/settings` without requiring Access Point mode.
   - Settings portal automatically redirects back to the main dashboard after saving settings once the device comes back online.
 - **Wi-Fi AP Captive Portal Fallback**:
   - Automatically hosts an open Soft AP (`cyd-weather-station-<mac_short>`) if connection fails or times out after 30 seconds on boot.
@@ -261,11 +262,12 @@ The device supports capturing the current screen as a standard 24-bit BMP image 
 
 **Web Dashboard:**
 Navigate to `http://<DEVICE_IP>/` or `http://cyd-weather-station.local/` in any browser to access the central Catppuccin-themed dashboard landing page. From here, you can access:
-- **⚙️ Device Settings (`/settings`)**: Configure all device parameters at runtime (Units, Theme, Screen & LED Brightness, Timezone, Hostname, Weather Update Interval, Screensaver Timeout, Static IP, AP Password, API Server, SD Settings, MQTT, etc.) and save them without reflashing.
+- **⚙️ Device Settings (`/settings`)**: Configure all device parameters at runtime (Wi-Fi SSID & Password, Units, Theme, Screen & LED Brightness, Timezone, Hostname, Weather Update Interval, Screensaver Timeout, Static IP, AP Password, API Server, SD Settings, MQTT, etc.) and save them without reflashing.
 - **🔄 Firmware Update (`/update`)**: Flash new firmware binaries wirelessly.
 - **📸 View Screenshot (`/screenshot`)**: Stream a pixel-perfect image of the current screen (if enabled). Includes inline status indicators and help prompts.
 - **🗑️ Clear SD Logs (`/clear_logs`)**: Delete the weather history CSV file (`/weather_history.csv`) stored on the microSD card.
 - **🗑️ Clear SD Cache (`/clear_cache`)**: Delete the weather cache JSON file (`/weather_cache.json`) stored on the microSD card.
+- **📶 Reboot to AP Setup Mode (`/reboot_ap`)**: Reboot the device directly into Access Point captive portal setup mode (`192.168.4.1`) without erasing stored device settings, coordinates, or calibration values.
 - **⚠️ Factory Reset (`/reset`)**: Completely erase NVS settings and saved Wi-Fi credentials to reboot the device into AP Setup mode.
 
 **Capture Screenshot:**
