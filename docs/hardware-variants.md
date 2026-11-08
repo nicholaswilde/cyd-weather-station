@@ -54,6 +54,7 @@ The `ESP32-2432S028` designation is used across multiple manufacturers and clone
   	-D TFT_HEIGHT=320
   	-D TFT_BL=21
   	-D TFT_RGB_ORDER=TFT_BGR
+  	-D TFT_INVERSION_OFF=1
   	-D XPT2046_CS=33
   	-D XPT2046_IRQ=36
   	-D XPT2046_MOSI=32
@@ -70,8 +71,8 @@ The `ESP32-2432S028` designation is used across multiple manufacturers and clone
 * Text colors appear inverted (e.g., Catppuccin Mocha appears light, Latte appears dark).
 
 #### Solution
-* Flash the corresponding `_inv` release binary (e.g., `cyd_28r_inv`, `cyd_28c_inv`, `cyd_35c_inv`).
-* Or add `-D TFT_INVERSION_ON=1` to your custom build flags.
+* Flash the corresponding `_inv` release binary (e.g., `cyd_28r_inv`, `cyd_28c_inv`, `cyd_28_nm_inv`, `cyd_35c_inv`).
+* Or add `-D TFT_INVERSION_ON=1` (or `-D TFT_INVERSION_OFF=1` for ST7789 drivers) to your custom build flags.
 
 ---
 
