@@ -745,12 +745,80 @@ void test_weather_client_build_owm_url_units(void) {
     settings.setTempUnit(TEMP_UNIT_CELSIUS);
     String urlMetric = WeatherClient::buildOwmUrl("37.77", "-122.41");
     TEST_ASSERT_NOT_NULL(strstr(urlMetric.c_str(), "&units=metric"));
+    TEST_ASSERT_NOT_NULL(strstr(urlMetric.c_str(), "&cnt=24"));
 
     settings.setTempUnit(TEMP_UNIT_FAHRENHEIT);
     String urlImperial = WeatherClient::buildOwmUrl("37.77", "-122.41");
     TEST_ASSERT_NOT_NULL(strstr(urlImperial.c_str(), "&units=imperial"));
+    TEST_ASSERT_NOT_NULL(strstr(urlImperial.c_str(), "&cnt=24"));
 
+    // Numeric City ID uses ?id=
+    settings.setCityCode("5460459");
+    String urlCityId = WeatherClient::buildOwmUrl("37.77", "-122.41");
+    TEST_ASSERT_NOT_NULL(strstr(urlCityId.c_str(), "?id=5460459"));
+
+    // Non-numeric City name uses ?q=
+    settings.setCityCode("Carlsbad");
+    String urlCityName = WeatherClient::buildOwmUrl("37.77", "-122.41");
+    TEST_ASSERT_NOT_NULL(strstr(urlCityName.c_str(), "?q=Carlsbad"));
+
+    // Placeholder YOUR_CITY_CODE is ignored and falls back to lat/lon
+    settings.setCityCode("YOUR_CITY_CODE");
+    String urlPlaceholder = WeatherClient::buildOwmUrl("32.42", "-104.22");
+    TEST_ASSERT_NOT_NULL(strstr(urlPlaceholder.c_str(), "?lat=32.42&lon=-104.22"));
+
+    settings.setCityCode("");
+    settings.setOwmApiKey("");
     settings.setUnitSystem(UNIT_SYSTEM);
+}
+
+void test_weather_client_parse_owm_json_full_40_entries(void) {
+    // Regression test: Verify full 40-item OWM forecast payload (~16-18 KB) does not fail with NoMemory
+    WeatherClient client;
+    WeatherData data = {};
+
+    String json = "{\"cod\":\"200\",\"message\":0,\"cnt\":40,\"list\":[";
+    for (int i = 0; i < 40; i++) {
+        if (i > 0) json += ",";
+        long dt = 1791406800L + i * 10800L;
+        int day = 7 + (i / 8);
+        int hr = (i % 8) * 3;
+        char entry[512];
+        snprintf(entry, sizeof(entry),
+            "{\"dt\":%ld,\"main\":{\"temp\":%.2f,\"feels_like\":70.1,\"temp_min\":%.2f,\"temp_max\":%.2f,"
+            "\"pressure\":1015,\"sea_level\":1015,\"grnd_level\":910,\"humidity\":%d,\"temp_kf\":0.5},"
+            "\"weather\":[{\"id\":800,\"main\":\"Clear\",\"description\":\"clear sky\",\"icon\":\"01d\"}],"
+            "\"clouds\":{\"all\":0},\"wind\":{\"speed\":5.5,\"deg\":180,\"gust\":8.2},"
+            "\"visibility\":10000,\"pop\":0.15,\"sys\":{\"pod\":\"d\"},\"dt_txt\":\"2026-10-%02d %02d:00:00\"}",
+            dt, 65.0f + (i % 10), 60.0f, 78.0f, 40 + (i % 20), day, hr);
+        json += entry;
+    }
+    json += "],\"city\":{\"id\":5460459,\"name\":\"Carlsbad\",\"coord\":{\"lat\":32.4207,\"lon\":-104.2288},\"country\":\"US\",\"population\":28000,\"timezone\":-21600,\"sunrise\":1791378000,\"sunset\":1791419000}}";
+
+    bool parsed = client.parseOwmJson(json.c_str(), data, 1791406800L);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_TRUE(data.valid);
+    TEST_ASSERT_EQUAL_STRING("Carlsbad", data.cityName.c_str());
+    TEST_ASSERT_EQUAL_FLOAT(65.0f, data.temperature);
+}
+
+void test_weather_client_numeric_owm_api_and_city_resolution(void) {
+    // Regression test: If user enters numeric City ID (e.g. 5460459) in owm_api or cityCode,
+    // fetchWeather resolves it via Open-Meteo city geocoding and succeeds.
+    settings.setZipCode("");
+    settings.setCityCode("");
+    settings.setLatitude("YOUR_LATITUDE");
+    settings.setLongitude("YOUR_LONGITUDE");
+    settings.setOwmApiKey("5460459");
+
+    WeatherClient client;
+    WeatherData data = client.fetchWeather();
+    TEST_ASSERT_TRUE(data.valid);
+    TEST_ASSERT_EQUAL_STRING("Carlsbad", data.cityName.c_str());
+
+    settings.setOwmApiKey("");
+    settings.setLatitude("");
+    settings.setLongitude("");
 }
 
 void test_weather_client_unit_conversions(void) {
@@ -844,6 +912,8 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_owm_device_tz_utc_with_city_tz_offset);
     RUN_TEST(test_weather_client_build_open_meteo_url_units);
     RUN_TEST(test_weather_client_build_owm_url_units);
+    RUN_TEST(test_weather_client_parse_owm_json_full_40_entries);
+    RUN_TEST(test_weather_client_numeric_owm_api_and_city_resolution);
     RUN_TEST(test_weather_client_unit_conversions);
     RUN_TEST(test_weather_client_parse_owm_json_hybrid_units);
     return UNITY_END();

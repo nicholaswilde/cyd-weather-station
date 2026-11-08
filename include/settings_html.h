@@ -212,7 +212,7 @@ button:hover { background: #f5c2e7; }
     
     <label for='mqtt_password' title='Password for MQTT authentication (leave blank if none)'>MQTT Password</label>
     <div class='password-wrapper'>
-        <input type='password' id='mqtt_password' name='mqtt_password' value='%MQTT_PASSWORD%'>
+        <input type='password' id='mqtt_password' name='mqtt_password' value='%MQTT_PASSWORD%' autocomplete='new-password'>
         <span class='toggle-password' onclick='togglePwd("mqtt_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
     </div>
 
@@ -223,11 +223,11 @@ button:hover { background: #f5c2e7; }
 <div class='section-title'>Network Configuration</div>
 
 <label for='wifi_ssid' title='Wi-Fi Network Name (SSID)'>Wi-Fi SSID</label>
-<input type='text' id='wifi_ssid' name='wifi_ssid' value='%WIFI_SSID%' placeholder='Network SSID'>
+<input type='text' id='wifi_ssid' name='wifi_ssid' value='%WIFI_SSID%' placeholder='Network SSID' autocomplete='off'>
 
 <label for='wifi_password' title='Wi-Fi Network Password'>Wi-Fi Password</label>
 <div class='password-wrapper'>
-    <input type='password' id='wifi_password' name='wifi_password' value='%WIFI_PASSWORD%' placeholder='Password (blank for open network)'>
+    <input type='password' id='wifi_password' name='wifi_password' value='%WIFI_PASSWORD%' placeholder='Password (blank for open network)' autocomplete='new-password'>
     <span class='toggle-password' onclick='togglePwd("wifi_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
 </div>
 
@@ -262,7 +262,7 @@ button:hover { background: #f5c2e7; }
 
 <label for='ap_password' title='Password for the device&#39;s configuration Access Point'>Configuration AP Password (min 8 chars)</label>
 <div class='password-wrapper'>
-    <input type='password' id='ap_password' name='ap_password' value='%AP_PASSWORD%'>
+    <input type='password' id='ap_password' name='ap_password' value='%AP_PASSWORD%' autocomplete='new-password'>
     <span class='toggle-password' onclick='togglePwd("ap_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
 </div>
 
