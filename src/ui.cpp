@@ -12,6 +12,7 @@ LV_FONT_DECLARE(weather_icons_72);
 LV_FONT_DECLARE(weather_icons_48);
 LV_FONT_DECLARE(weather_icons_24);
 LV_FONT_DECLARE(weather_icons_16);
+LV_FONT_DECLARE(montserrat_digits_72);
 }
 
 extern SettingsManager settings;
@@ -2001,7 +2002,8 @@ void showScreenSaver() {
     }
 #endif
     lv_obj_set_style_text_color(screensaver_clock, clock_color, 0);
-    lv_obj_set_style_text_font(screensaver_clock, &lv_font_montserrat_48, 0);
+    bool isLargeScreen = (lv_disp_get_hor_res(NULL) >= 480 || lv_disp_get_ver_res(NULL) >= 480);
+    lv_obj_set_style_text_font(screensaver_clock, isLargeScreen ? &montserrat_digits_72 : &lv_font_montserrat_48, 0);
     
     if (time_label != nullptr) {
         lv_label_set_text(screensaver_clock, lv_label_get_text(time_label));
@@ -2035,18 +2037,16 @@ void updateScreenSaverTime(const char* time_str) {
     if (update_counter >= 15) {
         update_counter = 0;
         
-        int max_x = 100;
-        int max_y = 100;
-#ifndef NATIVE_TEST
-        int rotation = settings.getScreenOrientation();
-        if (rotation == 1 || rotation == 3) {
-            max_x = 320 - 150;
-            max_y = 240 - 55;
-        } else {
-            max_x = 240 - 150;
-            max_y = 320 - 55;
-        }
-#endif
+        lv_coord_t hor_res = lv_disp_get_hor_res(NULL);
+        lv_coord_t ver_res = lv_disp_get_ver_res(NULL);
+        bool isLarge = (hor_res >= 480 || ver_res >= 480);
+        lv_coord_t clock_w = lv_obj_get_width(screensaver_clock);
+        lv_coord_t clock_h = lv_obj_get_height(screensaver_clock);
+        if (clock_w <= 0) clock_w = isLarge ? 240 : 150;
+        if (clock_h <= 0) clock_h = isLarge ? 70 : 50;
+
+        int max_x = hor_res - clock_w - 10;
+        int max_y = ver_res - clock_h - 10;
         if (max_x < 10) max_x = 10;
         if (max_y < 10) max_y = 10;
 
