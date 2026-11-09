@@ -22,6 +22,7 @@ private:
     bool _screenshotServerEnabled;
     bool _apiServerEnabled;
     int _screensaverTimeout;
+    int _screensaverColor;
     bool _staticIpEnabled;
     String _staticIp;
     String _staticGateway;
@@ -30,6 +31,7 @@ private:
     String _apPassword;
     String _hostname;
     int _screenOrientation;
+    bool _invertDisplay;
     bool _ledEnabled;
     int _ledBrightness;
     bool _mqttEnabled;
@@ -103,6 +105,9 @@ public:
     int getScreenOrientation() const;
     void setScreenOrientation(int orientation);
 
+    bool isDisplayInverted() const;
+    void setDisplayInverted(bool inverted);
+
     bool getLedEnabled() const;
     void setLedEnabled(bool enabled);
 
@@ -138,6 +143,9 @@ public:
 
     int getScreensaverTimeout() const;
     void setScreensaverTimeout(int timeout);
+
+    int getScreensaverColor() const;
+    void setScreensaverColor(int color);
 
     bool getSleepScheduleEnabled() const;
     void setSleepScheduleEnabled(bool enabled);

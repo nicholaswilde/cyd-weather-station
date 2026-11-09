@@ -87,6 +87,11 @@ button:hover { background: #f5c2e7; }
     <option value='3' %ORIENT_3%>Landscape Rev (270°)</option>
 </select>
 
+<div class='checkbox-group'>
+    <input type='checkbox' id='display_inverted' name='display_inverted' value='1' %DISPLAY_INVERTED%>
+    <label for='display_inverted' title='Invert display colors for panels requiring inverted color signals'>Invert Display Colors</label>
+</div>
+
 <label for='brightness' title='Adjust the display backlight brightness'>Screen Brightness (10-100%)</label>
 <div class='slider-group'>
     <input type='range' id='brightness_slider' min='10' max='100' value='%BRIGHTNESS%' oninput='document.getElementById("brightness").value = this.value'>
@@ -111,6 +116,13 @@ button:hover { background: #f5c2e7; }
 <div id='screensaver_settings' style='display: none; margin-left: 20px; border-left: 2px solid #313244; padding-left: 15px; margin-bottom: 20px;'>
     <label for='screensaver_timeout' title='Time in minutes before the screensaver activates'>Screensaver Timeout (Minutes)</label>
     <input type='number' id='screensaver_timeout' name='screensaver_timeout' min='1' max='60' value='%SCREENSAVER_TIMEOUT%'>
+    <label for='screensaver_color' title='Text color of the screensaver clock'>Screensaver Clock Color</label>
+    <select id='screensaver_color' name='screensaver_color'>
+        <option value='0' %SCR_COLOR_WHITE%>White (High Contrast)</option>
+        <option value='1' %SCR_COLOR_RED%>Red (Night Vision)</option>
+        <option value='2' %SCR_COLOR_AMBER%>Amber</option>
+        <option value='3' %SCR_COLOR_GREEN%>Green</option>
+    </select>
 </div>
 
 <div class='checkbox-group'>

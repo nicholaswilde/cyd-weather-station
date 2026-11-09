@@ -223,6 +223,15 @@ void setup() {
         } else if (topic.endsWith("command/title_version")) {
             bool en = (payload == "ON" || payload == "1" || payload == "true");
             settings.setShowTitleVersion(en);
+        } else if (topic.endsWith("command/display_inversion")) {
+            bool en = (payload == "ON" || payload == "1" || payload == "true");
+            settings.setDisplayInverted(en);
+        } else if (topic.endsWith("command/screensaver_color")) {
+            int color = 0;
+            if (payload == "Red" || payload == "1") color = 1;
+            else if (payload == "Amber" || payload == "2") color = 2;
+            else if (payload == "Green" || payload == "3") color = 3;
+            settings.setScreensaverColor(color);
         } else if (topic.endsWith("command/screen_orientation")) {
             int orient = 1; // Default Landscape
             if (payload == "Portrait") orient = 0;
@@ -860,6 +869,14 @@ void loop() {
             case 3: orientStr = "Landscape Rev"; break;
         }
         mqtt.publish("settings/screen_orientation", orientStr.c_str(), true);
+        mqtt.publish("settings/display_inversion", settings.isDisplayInverted() ? "ON" : "OFF", true);
+        String ssColorStr = "White";
+        switch (settings.getScreensaverColor()) {
+            case 1: ssColorStr = "Red"; break;
+            case 2: ssColorStr = "Amber"; break;
+            case 3: ssColorStr = "Green"; break;
+        }
+        mqtt.publish("settings/screensaver_color", ssColorStr.c_str(), true);
         mqtt.publish("settings/update_interval", String(settings.getWeatherUpdateInterval()).c_str(), true);
         
         mqtt.publish("settings/local_sensor", settings.getLocalSensorEnabled() ? "ON" : "OFF", true);

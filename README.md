@@ -303,6 +303,7 @@ Example JSON response:
   "hostname": "cyd-weather-station",
   "api_server_enabled": true,
   "screen_orientation": 1,
+  "display_inverted": false,
   "led_enabled": true,
   "led_brightness": 60,
   "mqtt_enabled": true,
@@ -316,6 +317,7 @@ Example JSON response:
   "sd_cache_enabled": true,
   "screensaver_enabled": false,
   "screensaver_timeout": 300000,
+  "screensaver_color": 0,
   "sleep_schedule_enabled": false,
   "sleep_start_time": "22:00",
   "sleep_end_time": "07:00",
@@ -599,6 +601,8 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>settings/units/precipitation` | Precipitation unit | `mm` / `in` |
 | `<base_topic>settings/units/pressure` | Pressure unit | `hPa` / `inHg` / `mbar` / `mmHg` |
 | `<base_topic>settings/screen_orientation`| Display orientation | `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` |
+| `<base_topic>settings/display_inversion` | Display inversion switch state | `ON` / `OFF` |
+| `<base_topic>settings/screensaver_color` | Screensaver clock color | `White` / `Red` / `Amber` / `Green` |
 | `<base_topic>settings/update_interval` | Weather update interval (mins) | `15` |
 | `<base_topic>settings/screensaver_timeout`| Screensaver timeout (mins) | `5` |
 | `<base_topic>settings/sleep_schedule` | Sleep schedule switch state | `ON` / `OFF` |
@@ -630,6 +634,8 @@ When MQTT is enabled in settings, the CYD Weather Station connects to your confi
 | `<base_topic>command/units/precipitation` | `mm` / `in` | Changes the precipitation unit independently. |
 | `<base_topic>command/units/pressure` | `hPa` / `inHg` / `mbar` / `mmHg` | Changes the atmospheric pressure unit independently. |
 | `<base_topic>command/screen_orientation`| `Landscape` / `Portrait` / `Landscape Rev` / `Portrait Rev` | Changes display orientation dynamically. |
+| `<base_topic>command/display_inversion` | `ON` / `OFF` / `1` / `0` | Toggles display color inversion at runtime. |
+| `<base_topic>command/screensaver_color` | `White` / `Red` / `Amber` / `Green` | Changes the screensaver clock color palette. |
 | `<base_topic>command/update_interval` | `1`–`120` | Sets the weather fetch update interval in minutes. |
 | `<base_topic>command/screensaver_timeout`| `1`–`60` | Sets screensaver activation inactivity timeout in minutes. |
 | `<base_topic>command/led` | `ON` / `OFF` / `1` / `0` | Enables or disables the onboard status RGB LED. |
@@ -642,7 +648,8 @@ On connection, the device automatically registers itself as `CYD Weather Station
 - **Weather Sensors**: Temperature (°F/°C), Humidity (%), Wind Speed (mph/m/s), Wind Direction, Weather Condition, City Name.
 - **Diagnostics Sensors**: Connection Status (binary sensor), Uptime (s), Free Memory (B), Wi-Fi Signal (dBm), IP Address, Firmware Version, MAC Address.
 - **Controls & Sliders (Numbers)**: Screen Brightness (0–100%), LED Brightness (0–100%), Weather Update Interval (1–120 min), Screensaver Timeout (1–60 min).
-- **Configuration Switches**: Auto Brightness, Screensaver, Sleep Schedule, Status LED, SD Log, SD Cache.
+- **Configuration Switches**: Auto Brightness, Screensaver, Sleep Schedule, Status LED, SD Log, SD Cache, Invert Display.
+- **Configuration Selects**: Theme Flavor, Screen Orientation, Screensaver Color, Unit Preferences.
 - **Text Controls**: Sleep Start Time, Sleep End Time, Hostname.
 - **Dropdown Selectors**: Theme Flavor, Temperature Unit, Wind Speed Unit, Precipitation Unit, Pressure Unit, Screen Orientation, Timezone.
 - **Buttons**: Device Reboot.
@@ -694,6 +701,7 @@ If you encounter any issues with your screen or the software, please review the 
 
 ### Inverted Colors
 If the colors on your display appear inverted (for example, dark themes like `Mocha`, `Macchiato`, or `Frappe` display with bright white backgrounds while the light `Latte` theme appears dark), this is due to hardware display controller differences between CYD batches. You can easily resolve it by:
+- Toggling **Invert Display Colors** at runtime in the on-device **Settings** tab, Web configuration portal (`/settings`), REST API (`/api/config`), or via MQTT (`command/display_inversion`) without needing to re-flash firmware.
 - Flashing the alternative inversion release for your board (e.g., `cyd_28r` vs `cyd_28r_inv`, `cyd_28c` vs `cyd_28c_inv`, `cyd_28_nm` vs `cyd_28_nm_inv`, or `cyd_35c` vs `cyd_35c_inv`).
 - Or, if building from source, switching to the corresponding `_inv` environment in PlatformIO or toggling the `-D TFT_INVERSION_ON=1` build flag.
 

@@ -156,6 +156,10 @@ static void my_touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
     }
 }
 
+void setDisplayInversion(bool invert) {
+    tft.invertDisplay(invert);
+}
+
 void initDisplayAndTouch() {
     // NOTE: TFT_BL is intentionally NOT set up here via digitalWrite.
     // BacklightManager::begin() configures it exclusively as an LEDC PWM output.
@@ -168,6 +172,7 @@ void initDisplayAndTouch() {
     // Initialize display
     tft.init();
     tft.setRotation(rotation);
+    tft.invertDisplay(settings.isDisplayInverted());
     tft.fillScreen(TFT_BLACK);
 
     // Initialize TouchManager
