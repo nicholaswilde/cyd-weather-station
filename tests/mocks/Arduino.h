@@ -82,6 +82,22 @@ public:
         }
         return String(this->substr(from, to - from));
     }
+    int indexOf(char ch, size_t fromIndex = 0) const {
+        size_t pos = this->find(ch, fromIndex);
+        return (pos == std::string::npos) ? -1 : (int)pos;
+    }
+    int indexOf(const char* s, size_t fromIndex = 0) const {
+        size_t pos = this->find(s, fromIndex);
+        return (pos == std::string::npos) ? -1 : (int)pos;
+    }
+    int lastIndexOf(char ch) const {
+        size_t pos = this->rfind(ch);
+        return (pos == std::string::npos) ? -1 : (int)pos;
+    }
+    int lastIndexOf(char ch, size_t fromIndex) const {
+        size_t pos = this->rfind(ch, fromIndex);
+        return (pos == std::string::npos) ? -1 : (int)pos;
+    }
     void trim() {
         size_t first = this->find_first_not_of(" \t\r\n");
         if (first == std::string::npos) {
