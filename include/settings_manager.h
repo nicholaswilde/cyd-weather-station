@@ -59,6 +59,7 @@ private:
     float _localSensorTempOffset;
     float _localSensorHumOffset;
     bool _showTitleVersion;
+    bool _forceAPMode;
 
 public:
     SettingsManager();
@@ -161,6 +162,9 @@ public:
 
     const String& getHostname() const;
     void setHostname(const String& hostname);
+
+    bool getForceAPMode() const;
+    void setForceAPMode(bool force);
 
     void factoryReset();
 

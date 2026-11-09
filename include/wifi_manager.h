@@ -39,6 +39,7 @@ private:
     String _ssid;
     String _password;
     WifiState _state;
+    bool _hasConnectedOnce = false;
     unsigned long _lastReconnectAttempt;
     unsigned long _connectionStartTime;
     const unsigned long _reconnectInterval = 10000; // 10 seconds

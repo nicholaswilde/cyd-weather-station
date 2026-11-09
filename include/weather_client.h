@@ -51,14 +51,18 @@ public:
 
 private:
     bool geocodeZip();
+    bool geocodeCity(const String& cityQuery);
     bool reverseGeocode();
     static int owmToWmoCode(int owmCode);
 
     String _latitude;
     String _longitude;
     String _zipCode;
+    String _lastResolvedZip;
+    String _lastResolvedCity;
     bool _useZip;
     bool _zipResolved;
+    bool _cityResolved = false;
     String _resolvedLat;
     String _resolvedLng;
     String _cityName;
