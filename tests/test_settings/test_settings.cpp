@@ -47,6 +47,7 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_TEMP_OFFSET, settings.getLocalSensorTempOffset());
     TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_HUM_OFFSET, settings.getLocalSensorHumOffset());
     TEST_ASSERT_EQUAL(SHOW_TITLE_VERSION, settings.getShowTitleVersion());
+    TEST_ASSERT_EQUAL(false, settings.getForceAPMode());
 }
 
 void test_settings_save_and_load(void) {
@@ -299,6 +300,20 @@ void test_settings_all_fields_and_factory_reset(void) {
     settings.setNtpServer("time.google.com");
     TEST_ASSERT_EQUAL_STRING("time.google.com", settings.getNtpServer().c_str());
 
+    // Test whitespace trimming on string settings (Issue #53)
+    settings.setOwmApiKey("  trimmed_api_key \r\n");
+    TEST_ASSERT_EQUAL_STRING("trimmed_api_key", settings.getOwmApiKey().c_str());
+    settings.setCityCode("  2643743 \t");
+    TEST_ASSERT_EQUAL_STRING("2643743", settings.getCityCode().c_str());
+    settings.setZipCode("  90210 \n");
+    TEST_ASSERT_EQUAL_STRING("90210", settings.getZipCode().c_str());
+    settings.setLatitude("  34.1031 ");
+    TEST_ASSERT_EQUAL_STRING("34.1031", settings.getLatitude().c_str());
+    settings.setLongitude(" -118.416 \r");
+    TEST_ASSERT_EQUAL_STRING("-118.416", settings.getLongitude().c_str());
+    settings.setNtpServer("  pool.ntp.org \n");
+    TEST_ASSERT_EQUAL_STRING("pool.ntp.org", settings.getNtpServer().c_str());
+
     // Test Sleep Schedule Settings
     settings.setSleepScheduleEnabled(true);
     TEST_ASSERT_TRUE(settings.getSleepScheduleEnabled());
@@ -354,11 +369,30 @@ void test_settings_title_version(void) {
     TEST_ASSERT_FALSE(settings_new.getShowTitleVersion());
 }
 
+void test_settings_force_ap_mode(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    TEST_ASSERT_FALSE(settings.getForceAPMode());
+
+    settings.setForceAPMode(true);
+    TEST_ASSERT_TRUE(settings.getForceAPMode());
+
+    // Re-instantiate to simulate reboot
+    SettingsManager settings_new;
+    settings_new.begin();
+    TEST_ASSERT_TRUE(settings_new.getForceAPMode());
+
+    settings_new.setForceAPMode(false);
+    TEST_ASSERT_FALSE(settings_new.getForceAPMode());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_settings_default_values);
     RUN_TEST(test_settings_24h_format);
     RUN_TEST(test_settings_title_version);
+    RUN_TEST(test_settings_force_ap_mode);
     RUN_TEST(test_settings_save_and_load);
     RUN_TEST(test_settings_wifi_credentials);
     RUN_TEST(test_settings_location_data);

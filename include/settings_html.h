@@ -1,6 +1,10 @@
 #ifndef SETTINGS_HTML_H
 #define SETTINGS_HTML_H
 
+#ifndef PROGMEM
+#define PROGMEM
+#endif
+
 const char settings_html[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
@@ -124,20 +128,20 @@ button:hover { background: #f5c2e7; }
 <div class='section-title'>Location & Weather</div>
 <label for='owm_api' title='Your OpenWeatherMap API key'>OpenWeatherMap API Key (<a href='https://home.openweathermap.org/api_keys' target='_blank' style='color: #89b4fa; text-decoration: none;'>Get Key</a>)</label>
 <div class='password-wrapper'>
-    <input type='password' id='owm_api' name='owm_api' value='%OWM_API%'>
-    <span class='toggle-password' onclick='togglePwd("owm_api", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+    <input type='text' id='owm_api' name='owm_api' placeholder='Leave blank for Open-Meteo' value='%OWM_API%' autocomplete='off' spellcheck='false' autocorrect='off' autocapitalize='off'>
+    <span class='toggle-password' onclick='togglePwd("owm_api", this)' title='Toggle mask'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg></span>
 </div>
 <label for='zip' title='Your US zip code for weather data'>Zip Code (US Only)</label>
-<input type='text' id='zip' name='zip' value='%ZIP%'>
+<input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='%ZIP%' autocomplete='off'>
 
 <label for='city' title='OpenWeatherMap City ID for accurate location'>City ID (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OpenWeatherMap</a>)</label>
-<input type='text' id='city' name='city' value='%CITY%'>
+<input type='text' id='city' name='city' placeholder='e.g. 2643743' value='%CITY%' autocomplete='off'>
 
 <label for='lat' title='Latitude for weather location'>Latitude</label>
-<input type='text' id='lat' name='lat' value='%LAT%'>
+<input type='text' id='lat' name='lat' placeholder='e.g. 34.1031' value='%LAT%' autocomplete='off'>
 
 <label for='lon' title='Longitude for weather location'>Longitude</label>
-<input type='text' id='lon' name='lon' value='%LON%'>
+<input type='text' id='lon' name='lon' placeholder='e.g. -118.416' value='%LON%' autocomplete='off'>
 
 <label for='tz' title='IANA timezone string for accurate local time'>Timezone</label>
 <select id='tz' name='tz'></select>
@@ -208,7 +212,7 @@ button:hover { background: #f5c2e7; }
     
     <label for='mqtt_password' title='Password for MQTT authentication (leave blank if none)'>MQTT Password</label>
     <div class='password-wrapper'>
-        <input type='password' id='mqtt_password' name='mqtt_password' value='%MQTT_PASSWORD%'>
+        <input type='password' id='mqtt_password' name='mqtt_password' value='%MQTT_PASSWORD%' autocomplete='new-password'>
         <span class='toggle-password' onclick='togglePwd("mqtt_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
     </div>
 
@@ -217,6 +221,15 @@ button:hover { background: #f5c2e7; }
 </div>
 
 <div class='section-title'>Network Configuration</div>
+
+<label for='wifi_ssid' title='Wi-Fi Network Name (SSID)'>Wi-Fi SSID</label>
+<input type='text' id='wifi_ssid' name='wifi_ssid' value='%WIFI_SSID%' placeholder='Network SSID' autocomplete='off'>
+
+<label for='wifi_password' title='Wi-Fi Network Password'>Wi-Fi Password</label>
+<div class='password-wrapper'>
+    <input type='password' id='wifi_password' name='wifi_password' value='%WIFI_PASSWORD%' placeholder='Password (blank for open network)' autocomplete='new-password'>
+    <span class='toggle-password' onclick='togglePwd("wifi_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+</div>
 
 <label for='hostname' title='Device network hostname and mDNS address (e.g. cyd-weather-station.local)'>Hostname</label>
 <input type='text' id='hostname' name='hostname' value='%HOSTNAME%'>
@@ -249,7 +262,7 @@ button:hover { background: #f5c2e7; }
 
 <label for='ap_password' title='Password for the device&#39;s configuration Access Point'>Configuration AP Password (min 8 chars)</label>
 <div class='password-wrapper'>
-    <input type='password' id='ap_password' name='ap_password' value='%AP_PASSWORD%'>
+    <input type='password' id='ap_password' name='ap_password' value='%AP_PASSWORD%' autocomplete='new-password'>
     <span class='toggle-password' onclick='togglePwd("ap_password", this)'><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
 </div>
 
@@ -264,6 +277,9 @@ button:hover { background: #f5c2e7; }
 </div>
 
 <button type='submit'>Save Settings & Reboot</button>
+</form>
+<form method='POST' action='/reboot_ap' onsubmit="return confirm('Reboot device into Access Point (AP) setup mode? Stored settings will NOT be erased.');" style='margin-top: 15px; margin-bottom: 0;'>
+    <button type='submit' style='background: #cba6f7; width: 100%; border: none; font-family: inherit; padding: 12px; border-radius: 8px; color: #11111b; font-size: 15px; font-weight: bold; cursor: pointer; transition: transform 0.2s;'>📶 Reboot to AP Setup Mode</button>
 </form>
 <a href="/" class="btn-back">&larr; Back to Dashboard</a>
 <p style="margin-top: 25px; margin-bottom: 0; font-size: 13px; color: #6c7086; text-align: center;">Built for %DEVICE_NAME% | <a href="https://github.com/nicholaswilde/cyd-weather-station" target="_blank" style="color: #89b4fa; text-decoration: none;">GitHub</a></p>

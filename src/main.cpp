@@ -629,15 +629,21 @@ void loop() {
         lastWifiUpdate = currentMillis;
 
         // Reflect WiFi status in UI
-        bool isConnected = (wifi.getState() == WIFI_STATE_CONNECTED);
-        if (wifi.getState() == WIFI_STATE_AP_MODE) {
+        WifiState currentWifiState = wifi.getState();
+        bool isConnected = (currentWifiState == WIFI_STATE_CONNECTED);
+        static bool wasInAPMode = false;
+        if (currentWifiState == WIFI_STATE_AP_MODE) {
             updateWifiAPMode(wifi.getAPSSID().c_str());
+            wasInAPMode = true;
         } else {
+            if (wasInAPMode && isConnected) {
+                hasInitialFetch = false;
+                wasInAPMode = false;
+            }
             updateWifiStatus(isConnected);
         }
 
 #if USE_RGB_LED_STATUS
-        WifiState currentWifiState = wifi.getState();
         if (currentWifiState != lastWifiState) {
             if (currentWifiState == WIFI_STATE_CONNECTED) {
                 led.setState(LedManager::STATE_CONNECTED);
