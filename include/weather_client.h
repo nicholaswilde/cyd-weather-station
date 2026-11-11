@@ -48,6 +48,9 @@ public:
     bool isLocationEmpty();
     bool fetchIpLocation(String& latStr, String& lonStr, String& city);
     static bool parseIpLocationJson(const char* json, float& lat, float& lon, String& city);
+    static const char* usStateToAbbr(const char* stateName);
+    static String formatCityWithState(const char* name, const char* admin1, const char* countryCode = "");
+    static String normalizeCityQuery(const String& query);
 
 private:
     bool geocodeZip();

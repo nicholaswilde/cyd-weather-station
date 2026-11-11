@@ -146,8 +146,8 @@ button:hover { background: #f5c2e7; }
 <label for='zip' title='Your US zip code for weather data'>Zip Code (US Only)</label>
 <input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='%ZIP%' autocomplete='off'>
 
-<label for='city' title='OpenWeatherMap City ID for accurate location'>City ID (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OpenWeatherMap</a>)</label>
-<input type='text' id='city' name='city' placeholder='e.g. 2643743' value='%CITY%' autocomplete='off'>
+<label for='city' title='City Name (e.g. Carlsbad, NM) or OpenWeatherMap City ID'>City (Name, City State, or OWM ID) (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OWM</a>)</label>
+<input type='text' id='city' name='city' placeholder='e.g. Carlsbad, NM or 2643743' value='%CITY%' autocomplete='off'>
 
 <label for='lat' title='Latitude for weather location'>Latitude</label>
 <input type='text' id='lat' name='lat' placeholder='e.g. 34.1031' value='%LAT%' autocomplete='off'>

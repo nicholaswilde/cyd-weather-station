@@ -25,6 +25,114 @@ static bool isAllDigitsStr(const String& s) {
     return true;
 }
 
+const char* WeatherClient::usStateToAbbr(const char* stateName) {
+    if (!stateName || stateName[0] == '\0') return nullptr;
+
+    struct StateMap {
+        const char* name;
+        const char* abbr;
+    };
+
+    static const StateMap states[] = {
+        {"Alabama", "AL"}, {"Alaska", "AK"}, {"Arizona", "AZ"}, {"Arkansas", "AR"},
+        {"California", "CA"}, {"Colorado", "CO"}, {"Connecticut", "CT"}, {"Delaware", "DE"},
+        {"Florida", "FL"}, {"Georgia", "GA"}, {"Hawaii", "HI"}, {"Idaho", "ID"},
+        {"Illinois", "IL"}, {"Indiana", "IN"}, {"Iowa", "IA"}, {"Kansas", "KS"},
+        {"Kentucky", "KY"}, {"Louisiana", "LA"}, {"Maine", "ME"}, {"Maryland", "MD"},
+        {"Massachusetts", "MA"}, {"Michigan", "MI"}, {"Minnesota", "MN"}, {"Mississippi", "MS"},
+        {"Missouri", "MO"}, {"Montana", "MT"}, {"Nebraska", "NE"}, {"Nevada", "NV"},
+        {"New Hampshire", "NH"}, {"New Jersey", "NJ"}, {"New Mexico", "NM"}, {"New York", "NY"},
+        {"North Carolina", "NC"}, {"North Dakota", "ND"}, {"Ohio", "OH"}, {"Oklahoma", "OK"},
+        {"Oregon", "OR"}, {"Pennsylvania", "PA"}, {"Rhode Island", "RI"}, {"South Carolina", "SC"},
+        {"South Dakota", "SD"}, {"Tennessee", "TN"}, {"Texas", "TX"}, {"Utah", "UT"},
+        {"Vermont", "VT"}, {"Virginia", "VA"}, {"Washington", "WA"}, {"West Virginia", "WV"},
+        {"Wisconsin", "WI"}, {"Wyoming", "WY"}, {"District of Columbia", "DC"}, {"Puerto Rico", "PR"},
+        {"Guam", "GU"}, {"Virgin Islands", "VI"}
+    };
+
+    if (strlen(stateName) == 2) {
+        for (size_t i = 0; i < sizeof(states)/sizeof(states[0]); i++) {
+            if (strcasecmp(stateName, states[i].abbr) == 0) {
+                return states[i].abbr;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < sizeof(states)/sizeof(states[0]); i++) {
+        if (strcasecmp(stateName, states[i].name) == 0) {
+            return states[i].abbr;
+        }
+    }
+    return nullptr;
+}
+
+String WeatherClient::formatCityWithState(const char* name, const char* admin1, const char* countryCode) {
+    if (!name || name[0] == '\0') return "Unknown";
+    String res = name;
+    res.trim();
+    if (res.indexOf(',') >= 0) {
+        return res;
+    }
+    if (admin1 && admin1[0] != '\0') {
+        const char* stAbbr = usStateToAbbr(admin1);
+        if (stAbbr != nullptr) {
+            return res + ", " + stAbbr;
+        }
+    }
+    if (countryCode && countryCode[0] != '\0' && strcasecmp(countryCode, "US") != 0) {
+        return res + ", " + countryCode;
+    }
+    return res;
+}
+
+String WeatherClient::normalizeCityQuery(const String& query) {
+    String s = query;
+    s.trim();
+    if (s.length() == 0 || isAllDigitsStr(s)) {
+        return s;
+    }
+
+    int commaIdx = s.indexOf(',');
+    if (commaIdx >= 0) {
+        String cityPart = s.substring(0, commaIdx);
+        cityPart.trim();
+        String statePart = s.substring(commaIdx + 1);
+        statePart.trim();
+        const char* st = usStateToAbbr(statePart.c_str());
+        if (st != nullptr) {
+            return cityPart + ", " + st;
+        }
+        if (statePart.length() > 0) {
+            return cityPart + ", " + statePart;
+        }
+        return cityPart;
+    }
+
+    int lastSpace = s.lastIndexOf(' ');
+    if (lastSpace > 0) {
+        String lastWord = s.substring(lastSpace + 1);
+        const char* st = usStateToAbbr(lastWord.c_str());
+        if (st != nullptr) {
+            String cityPart = s.substring(0, lastSpace);
+            cityPart.trim();
+            return cityPart + ", " + st;
+        }
+
+        int prevSpace = s.lastIndexOf(' ', lastSpace - 1);
+        if (prevSpace >= 0) {
+            String lastTwo = s.substring(prevSpace + 1);
+            const char* st2 = usStateToAbbr(lastTwo.c_str());
+            if (st2 != nullptr) {
+                String cityPart = s.substring(0, prevSpace);
+                cityPart.trim();
+                return cityPart + ", " + st2;
+            }
+        }
+    }
+
+    return s;
+}
+
 WeatherClient::WeatherClient()
     : _useZip(false), _zipResolved(false), _cityResolved(false), _cityName("") {}
 
@@ -32,6 +140,7 @@ bool WeatherClient::geocodeZip() {
 #ifdef NATIVE_TEST
     _resolvedLat = "34.0736";
     _resolvedLng = "-118.4004";
+    _cityName = "Beverly Hills, CA";
     _zipResolved = true;
     _lastResolvedZip = _zipCode;
     return true;
@@ -44,9 +153,13 @@ bool WeatherClient::geocodeZip() {
     WiFiClient client;
     HTTPClient http;
 
+    String query = isAllDigitsStr(_zipCode) ? _zipCode : normalizeCityQuery(_zipCode);
+    String encoded = query;
+    encoded.replace(" ", "%20");
+
     String url = "http://geocoding-api.open-meteo.com/v1/search?name=";
-    url += _zipCode;
-    url += "&count=1&language=en&format=json";
+    url += encoded;
+    url += "&count=5&language=en&format=json";
 
     Serial.print("[Weather] Geocoding Zip Code: ");
     Serial.println(_zipCode);
@@ -56,26 +169,42 @@ bool WeatherClient::geocodeZip() {
         if (httpCode == HTTP_CODE_OK) {
             String payload = http.getString();
             http.end();
-            StaticJsonDocument<128> filter;
+            StaticJsonDocument<256> filter;
             filter["results"][0]["latitude"] = true;
             filter["results"][0]["longitude"] = true;
             filter["results"][0]["name"] = true;
-            StaticJsonDocument<512> doc;
+            filter["results"][0]["admin1"] = true;
+            filter["results"][0]["country_code"] = true;
+            StaticJsonDocument<1024> doc;
             DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
 
             if (!error && doc["results"].is<JsonArray>() && doc["results"].size() > 0) {
-                float lat = doc["results"][0]["latitude"] | 0.0f;
-                float lng = doc["results"][0]["longitude"] | 0.0f;
-                const char* name = doc["results"][0]["name"] | "Unknown";
+                JsonArray results = doc["results"];
+                size_t chosenIdx = 0;
+                if (isAllDigitsStr(_zipCode) && _zipCode.length() == 5) {
+                    for (size_t i = 0; i < results.size(); i++) {
+                        const char* cc = results[i]["country_code"] | "";
+                        if (strcasecmp(cc, "US") == 0) {
+                            chosenIdx = i;
+                            break;
+                        }
+                    }
+                }
+
+                float lat = results[chosenIdx]["latitude"] | 0.0f;
+                float lng = results[chosenIdx]["longitude"] | 0.0f;
+                const char* name = results[chosenIdx]["name"] | "Unknown";
+                const char* admin1 = results[chosenIdx]["admin1"] | "";
+                const char* countryCode = results[chosenIdx]["country_code"] | "";
 
                 _resolvedLat = String(lat, 5);
                 _resolvedLng = String(lng, 5);
-                _cityName    = String(name);
+                _cityName    = formatCityWithState(name, admin1, countryCode);
                 _zipResolved = true;
                 _lastResolvedZip = _zipCode;
 
                 Serial.printf("[Weather] Zip %s resolved to %s (%s, %s)\n",
-                    _zipCode.c_str(), name, _resolvedLat.c_str(), _resolvedLng.c_str());
+                    _zipCode.c_str(), _cityName.c_str(), _resolvedLat.c_str(), _resolvedLng.c_str());
                 return true;
             } else {
                 Serial.print("[Weather] Geocoding JSON parsing failed or empty: ");
@@ -84,8 +213,8 @@ bool WeatherClient::geocodeZip() {
             }
         } else {
             Serial.printf("[Weather] Geocoding HTTP GET failed: %d\n", httpCode);
+            http.end();
         }
-        http.end();
     }
     return false;
 #endif
@@ -96,7 +225,7 @@ bool WeatherClient::geocodeCity(const String& cityQuery) {
 #ifdef NATIVE_TEST
     _resolvedLat = "32.42067";
     _resolvedLng = "-104.22884";
-    _cityName = "Carlsbad";
+    _cityName = "Carlsbad, NM";
     _cityResolved = true;
     _lastResolvedCity = cityQuery;
     return true;
@@ -114,9 +243,10 @@ bool WeatherClient::geocodeCity(const String& cityQuery) {
     if (numericId) {
         url = "http://geocoding-api.open-meteo.com/v1/get?id=" + cityQuery;
     } else {
-        String encoded = cityQuery;
+        String normalized = normalizeCityQuery(cityQuery);
+        String encoded = normalized;
         encoded.replace(" ", "%20");
-        url = "http://geocoding-api.open-meteo.com/v1/search?name=" + encoded + "&count=1&language=en&format=json";
+        url = "http://geocoding-api.open-meteo.com/v1/search?name=" + encoded + "&count=5&language=en&format=json";
     }
 
     Serial.print("[Weather] Geocoding City: ");
@@ -127,31 +257,43 @@ bool WeatherClient::geocodeCity(const String& cityQuery) {
         if (httpCode == HTTP_CODE_OK) {
             String payload = http.getString();
             http.end();
-            StaticJsonDocument<192> filter;
+            StaticJsonDocument<256> filter;
             filter["latitude"] = true;
             filter["longitude"] = true;
             filter["name"] = true;
+            filter["admin1"] = true;
+            filter["country_code"] = true;
             filter["results"][0]["latitude"] = true;
             filter["results"][0]["longitude"] = true;
             filter["results"][0]["name"] = true;
-            StaticJsonDocument<512> doc;
+            filter["results"][0]["admin1"] = true;
+            filter["results"][0]["country_code"] = true;
+            StaticJsonDocument<1024> doc;
             DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
 
             if (!error) {
-                JsonVariant target = numericId ? doc.as<JsonVariant>() : doc["results"][0].as<JsonVariant>();
+                JsonVariant target;
+                if (numericId) {
+                    target = doc.as<JsonVariant>();
+                } else if (doc["results"].is<JsonArray>() && doc["results"].size() > 0) {
+                    target = doc["results"][0].as<JsonVariant>();
+                }
+
                 if (!target.isNull() && target.containsKey("latitude") && target.containsKey("longitude")) {
                     float lat = target["latitude"] | 0.0f;
                     float lng = target["longitude"] | 0.0f;
                     const char* name = target["name"] | "Unknown";
+                    const char* admin1 = target["admin1"] | "";
+                    const char* countryCode = target["country_code"] | "";
 
                     _resolvedLat = String(lat, 5);
                     _resolvedLng = String(lng, 5);
-                    _cityName    = String(name);
+                    _cityName    = formatCityWithState(name, admin1, countryCode);
                     _cityResolved = true;
                     _lastResolvedCity = cityQuery;
 
                     Serial.printf("[Weather] City %s resolved to %s (%s, %s)\n",
-                        cityQuery.c_str(), name, _resolvedLat.c_str(), _resolvedLng.c_str());
+                        cityQuery.c_str(), _cityName.c_str(), _resolvedLat.c_str(), _resolvedLng.c_str());
                     return true;
                 }
             }
@@ -159,8 +301,8 @@ bool WeatherClient::geocodeCity(const String& cityQuery) {
             return false;
         } else {
             Serial.printf("[Weather] City geocoding HTTP GET failed: %d\n", httpCode);
+            http.end();
         }
-        http.end();
     }
     return false;
 #endif
@@ -196,15 +338,18 @@ bool WeatherClient::reverseGeocode() {
         if (httpCode == HTTP_CODE_OK) {
             String payload = http.getString();
             http.end();
-            StaticJsonDocument<192> filter;
+            StaticJsonDocument<256> filter;
             filter["city"] = true;
             filter["locality"] = true;
             filter["principalSubdivision"] = true;
+            filter["countryCode"] = true;
             filter["address"]["city"] = true;
             filter["address"]["town"] = true;
             filter["address"]["village"] = true;
             filter["address"]["county"] = true;
-            StaticJsonDocument<512> doc;
+            filter["address"]["state"] = true;
+            filter["address"]["country_code"] = true;
+            StaticJsonDocument<1024> doc;
             DeserializationError error = deserializeJson(doc, payload, DeserializationOption::Filter(filter));
             if (!error) {
                 const char* city = nullptr;
@@ -223,7 +368,14 @@ bool WeatherClient::reverseGeocode() {
                 if (!city && doc["address"]["county"].is<const char*>())
                     city = doc["address"]["county"];
                 if (city && city[0] != '\0') {
-                    _cityName = String(city);
+                    const char* state = nullptr;
+                    if (doc["principalSubdivision"].is<const char*>()) state = doc["principalSubdivision"];
+                    if (!state && doc["address"]["state"].is<const char*>()) state = doc["address"]["state"];
+                    const char* countryCode = nullptr;
+                    if (doc["countryCode"].is<const char*>()) countryCode = doc["countryCode"];
+                    if (!countryCode && doc["address"]["country_code"].is<const char*>()) countryCode = doc["address"]["country_code"];
+
+                    _cityName = formatCityWithState(city, state, countryCode);
                     Serial.printf("[Weather] Reverse geocode: %s\n", _cityName.c_str());
                     return true;
                 }
@@ -234,8 +386,8 @@ bool WeatherClient::reverseGeocode() {
             return false;
         } else {
             Serial.printf("[Weather] Reverse geocode HTTP failed: %d\n", httpCode);
+            http.end();
         }
-        http.end();
     }
     return false;
 #endif
@@ -1166,7 +1318,13 @@ bool WeatherClient::parseIpLocationJson(const char* json, float& lat, float& lon
     lat = doc["lat"] | 0.0f;
     lon = doc["lon"] | 0.0f;
     const char* city_c = doc["city"] | "Unknown";
-    city = String(city_c);
+    const char* region = doc["region"] | "";
+    const char* countryCode = doc["countryCode"] | "";
+    if (region && region[0] != '\0') {
+        city = formatCityWithState(city_c, region, countryCode);
+    } else {
+        city = String(city_c);
+    }
 
     return true;
 }
