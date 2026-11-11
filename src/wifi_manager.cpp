@@ -475,8 +475,8 @@ void WifiManager::handleRoot() {
     html += "<label for='zip'>Zip Code (US Only)</label>";
     html += "<input type='text' id='zip' name='zip' placeholder='e.g. 90210' value='" + currentZip + "'>";
     
-    html += "<label for='city'>City ID (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OpenWeatherMap</a>)</label>";
-    html += "<input type='text' id='city' name='city' placeholder='e.g. 2643743' value='" + currentCity + "'>";
+    html += "<label for='city'>City (Name, City State, or OWM ID) (<a href='https://openweathermap.org/find' target='_blank' style='color: #89b4fa; text-decoration: none;'>OWM</a>)</label>";
+    html += "<input type='text' id='city' name='city' placeholder='e.g. Carlsbad, NM or 2643743' value='" + currentCity + "'>";
     
     html += "<label for='lat'>Latitude</label>";
     html += "<input type='text' id='lat' name='lat' placeholder='e.g. 34.1031' value='" + currentLat + "'>";

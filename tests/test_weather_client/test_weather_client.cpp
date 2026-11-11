@@ -814,7 +814,7 @@ void test_weather_client_numeric_owm_api_and_city_resolution(void) {
     WeatherClient client;
     WeatherData data = client.fetchWeather();
     TEST_ASSERT_TRUE(data.valid);
-    TEST_ASSERT_EQUAL_STRING("Carlsbad", data.cityName.c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", data.cityName.c_str());
 
     settings.setOwmApiKey("");
     settings.setLatitude("");
@@ -879,6 +879,73 @@ void test_weather_client_parse_owm_json_hybrid_units(void) {
     settings.setUnitSystem(UNIT_SYSTEM);
 }
 
+void test_weather_client_us_state_to_abbr(void) {
+    TEST_ASSERT_EQUAL_STRING("NM", WeatherClient::usStateToAbbr("New Mexico"));
+    TEST_ASSERT_EQUAL_STRING("CA", WeatherClient::usStateToAbbr("California"));
+    TEST_ASSERT_EQUAL_STRING("TX", WeatherClient::usStateToAbbr("Texas"));
+    TEST_ASSERT_EQUAL_STRING("NY", WeatherClient::usStateToAbbr("New York"));
+    TEST_ASSERT_EQUAL_STRING("DC", WeatherClient::usStateToAbbr("District of Columbia"));
+    TEST_ASSERT_EQUAL_STRING("NM", WeatherClient::usStateToAbbr("NM"));
+    TEST_ASSERT_EQUAL_STRING("CA", WeatherClient::usStateToAbbr("ca"));
+    TEST_ASSERT_EQUAL_STRING("TX", WeatherClient::usStateToAbbr("Tx"));
+    TEST_ASSERT_NULL(WeatherClient::usStateToAbbr("England"));
+    TEST_ASSERT_NULL(WeatherClient::usStateToAbbr("France"));
+    TEST_ASSERT_NULL(WeatherClient::usStateToAbbr(""));
+    TEST_ASSERT_NULL(WeatherClient::usStateToAbbr(nullptr));
+}
+
+void test_weather_client_format_city_with_state(void) {
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", WeatherClient::formatCityWithState("Carlsbad", "New Mexico", "US").c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", WeatherClient::formatCityWithState("Carlsbad", "NM", "US").c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, CA", WeatherClient::formatCityWithState("Carlsbad", "California", "US").c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", WeatherClient::formatCityWithState("Carlsbad, NM", "New Mexico", "US").c_str());
+    TEST_ASSERT_EQUAL_STRING("Paris, FR", WeatherClient::formatCityWithState("Paris", "Île-de-France", "FR").c_str());
+    TEST_ASSERT_EQUAL_STRING("London, GB", WeatherClient::formatCityWithState("London", "England", "GB").c_str());
+    TEST_ASSERT_EQUAL_STRING("UnknownCity", WeatherClient::formatCityWithState("UnknownCity", nullptr, nullptr).c_str());
+    TEST_ASSERT_EQUAL_STRING("Unknown", WeatherClient::formatCityWithState(nullptr, nullptr, nullptr).c_str());
+}
+
+void test_weather_client_normalize_city_query(void) {
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", WeatherClient::normalizeCityQuery("Carlsbad NM").c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", WeatherClient::normalizeCityQuery("Carlsbad, NM").c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", WeatherClient::normalizeCityQuery("Carlsbad,NM").c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", WeatherClient::normalizeCityQuery("Carlsbad New Mexico").c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", WeatherClient::normalizeCityQuery("Carlsbad, New Mexico").c_str());
+    TEST_ASSERT_EQUAL_STRING("Salt Lake City, UT", WeatherClient::normalizeCityQuery("Salt Lake City UT").c_str());
+    TEST_ASSERT_EQUAL_STRING("New York, NY", WeatherClient::normalizeCityQuery("New York NY").c_str());
+    TEST_ASSERT_EQUAL_STRING("Carlsbad", WeatherClient::normalizeCityQuery("Carlsbad").c_str());
+    TEST_ASSERT_EQUAL_STRING("5460459", WeatherClient::normalizeCityQuery("5460459").c_str());
+}
+
+void test_weather_client_parse_ip_location_json_with_region(void) {
+    const char* ipLocationJson = "{"
+        "\"status\":\"success\","
+        "\"city\":\"Carlsbad\","
+        "\"region\":\"NM\","
+        "\"countryCode\":\"US\","
+        "\"lat\":32.4207,"
+        "\"lon\":-104.2288"
+    "}";
+    float lat = 0.0f;
+    float lon = 0.0f;
+    String city = "";
+    bool parsed = WeatherClient::parseIpLocationJson(ipLocationJson, lat, lon, city);
+    TEST_ASSERT_TRUE(parsed);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, 32.4207f, lat);
+    TEST_ASSERT_FLOAT_WITHIN(0.001f, -104.2288f, lon);
+    TEST_ASSERT_EQUAL_STRING("Carlsbad, NM", city.c_str());
+}
+
+void test_weather_client_zip_code_resolution_with_state(void) {
+    settings.setZipCode("90210");
+    settings.setLatitude("");
+    settings.setLongitude("");
+    WeatherClient client;
+    WeatherData data = client.fetchWeather();
+    TEST_ASSERT_TRUE(data.valid);
+    TEST_ASSERT_EQUAL_STRING("Beverly Hills, CA", data.cityName.c_str());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_weather_client_initialization);
@@ -916,5 +983,10 @@ int main(int argc, char **argv) {
     RUN_TEST(test_weather_client_numeric_owm_api_and_city_resolution);
     RUN_TEST(test_weather_client_unit_conversions);
     RUN_TEST(test_weather_client_parse_owm_json_hybrid_units);
+    RUN_TEST(test_weather_client_us_state_to_abbr);
+    RUN_TEST(test_weather_client_format_city_with_state);
+    RUN_TEST(test_weather_client_normalize_city_query);
+    RUN_TEST(test_weather_client_parse_ip_location_json_with_region);
+    RUN_TEST(test_weather_client_zip_code_resolution_with_state);
     return UNITY_END();
 }
