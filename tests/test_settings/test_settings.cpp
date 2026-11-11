@@ -48,6 +48,8 @@ void test_settings_default_values(void) {
     TEST_ASSERT_EQUAL_FLOAT(LOCAL_SENSOR_HUM_OFFSET, settings.getLocalSensorHumOffset());
     TEST_ASSERT_EQUAL(SHOW_TITLE_VERSION, settings.getShowTitleVersion());
     TEST_ASSERT_EQUAL(false, settings.getForceAPMode());
+    TEST_ASSERT_EQUAL(DEFAULT_INVERT_DISPLAY, settings.isDisplayInverted());
+    TEST_ASSERT_EQUAL(DEFAULT_SCREENSAVER_COLOR, settings.getScreensaverColor());
 }
 
 void test_settings_save_and_load(void) {
@@ -387,12 +389,48 @@ void test_settings_force_ap_mode(void) {
     TEST_ASSERT_FALSE(settings_new.getForceAPMode());
 }
 
+void test_settings_display_inversion_and_screensaver_color(void) {
+    SettingsManager settings;
+    settings.begin();
+
+    // Inversion
+    settings.setDisplayInverted(true);
+    TEST_ASSERT_TRUE(settings.isDisplayInverted());
+
+    settings.setDisplayInverted(false);
+    TEST_ASSERT_FALSE(settings.isDisplayInverted());
+
+    // Screensaver color
+    settings.setScreensaverColor(SCREENSAVER_COLOR_RED);
+    TEST_ASSERT_EQUAL(SCREENSAVER_COLOR_RED, settings.getScreensaverColor());
+
+    settings.setScreensaverColor(SCREENSAVER_COLOR_AMBER);
+    TEST_ASSERT_EQUAL(SCREENSAVER_COLOR_AMBER, settings.getScreensaverColor());
+
+    settings.setScreensaverColor(SCREENSAVER_COLOR_GREEN);
+    TEST_ASSERT_EQUAL(SCREENSAVER_COLOR_GREEN, settings.getScreensaverColor());
+
+    // Out of range clamping
+    settings.setScreensaverColor(99);
+    TEST_ASSERT_EQUAL(0, settings.getScreensaverColor());
+
+    // Persistence simulation
+    settings.setDisplayInverted(true);
+    settings.setScreensaverColor(SCREENSAVER_COLOR_RED);
+
+    SettingsManager settings_new;
+    settings_new.begin();
+    TEST_ASSERT_TRUE(settings_new.isDisplayInverted());
+    TEST_ASSERT_EQUAL(SCREENSAVER_COLOR_RED, settings_new.getScreensaverColor());
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_settings_default_values);
     RUN_TEST(test_settings_24h_format);
     RUN_TEST(test_settings_title_version);
     RUN_TEST(test_settings_force_ap_mode);
+    RUN_TEST(test_settings_display_inversion_and_screensaver_color);
     RUN_TEST(test_settings_save_and_load);
     RUN_TEST(test_settings_wifi_credentials);
     RUN_TEST(test_settings_location_data);

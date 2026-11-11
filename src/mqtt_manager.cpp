@@ -117,6 +117,8 @@ void MqttManager::onMqttConnect(bool sessionPresent) {
     subscribe("command/local_sensor_hum_offset", 0);
     subscribe("command/use_24h", 0);
     subscribe("command/title_version", 0);
+    subscribe("command/display_inversion", 0);
+    subscribe("command/screensaver_color", 0);
 }
 
 void MqttManager::publishHADiscovery() {
@@ -247,6 +249,12 @@ void MqttManager::publishHADiscovery() {
     // Screen Orientation (Select)
     String orientPayload = "{\"name\":\"Screen Orientation\",\"state_topic\":\"" + _baseTopic + "settings/screen_orientation\",\"command_topic\":\"" + _baseTopic + "command/screen_orientation\",\"options\":[\"Landscape\",\"Portrait\",\"Portrait Rev\",\"Landscape Rev\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_orientation\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/select/" + deviceId + "/orientation/config").c_str(), 0, true, orientPayload.c_str());
+    // Invert Display (Switch)
+    String invPayload = "{\"name\":\"Invert Display\",\"state_topic\":\"" + _baseTopic + "settings/display_inversion\",\"command_topic\":\"" + _baseTopic + "command/display_inversion\",\"payload_on\":\"ON\",\"payload_off\":\"OFF\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_invert_display\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/switch/" + deviceId + "/display_inversion/config").c_str(), 0, true, invPayload.c_str());
+    // Screensaver Color (Select)
+    String ssColorPayload = "{\"name\":\"Screensaver Color\",\"state_topic\":\"" + _baseTopic + "settings/screensaver_color\",\"command_topic\":\"" + _baseTopic + "command/screensaver_color\",\"options\":[\"White\",\"Red\",\"Amber\",\"Green\"],\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_screensaver_color\"," + deviceJson + "}";
+    _mqttClient.publish(("homeassistant/select/" + deviceId + "/screensaver_color/config").c_str(), 0, true, ssColorPayload.c_str());
     // Update Interval (Number)
     String updPayload = "{\"name\":\"Update Interval\",\"state_topic\":\"" + _baseTopic + "settings/update_interval\",\"command_topic\":\"" + _baseTopic + "command/update_interval\",\"min\":1,\"max\":120,\"unit_of_measurement\":\"min\",\"entity_category\":\"config\",\"unique_id\":\"" + deviceId + "_updint\"," + deviceJson + "}";
     _mqttClient.publish(("homeassistant/number/" + deviceId + "/update_interval/config").c_str(), 0, true, updPayload.c_str());

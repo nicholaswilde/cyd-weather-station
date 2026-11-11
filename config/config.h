@@ -101,12 +101,31 @@ extern int getCurrentThemeFlavor();
 // Header Title and Version Display Settings
 #define SHOW_TITLE_VERSION true
 
+// Display Color Inversion Setting
+#ifndef DEFAULT_INVERT_DISPLAY
+#ifdef TFT_INVERSION_ON
+#define DEFAULT_INVERT_DISPLAY true
+#else
+#define DEFAULT_INVERT_DISPLAY false
+#endif
+#endif
+
 // Auto Backlight Settings
 #define USE_LDR_AUTO_BACKLIGHT false
 
 // Screensaver Settings
 #define SCREENSAVER_ENABLED false
 #define SCREENSAVER_TIMEOUT_MS 300000 // 5 minutes (in milliseconds)
+
+// Screensaver Color Scheme Defaults (0: White, 1: Red, 2: Amber, 3: Green)
+#define SCREENSAVER_COLOR_WHITE 0
+#define SCREENSAVER_COLOR_RED   1
+#define SCREENSAVER_COLOR_AMBER 2
+#define SCREENSAVER_COLOR_GREEN 3
+
+#ifndef DEFAULT_SCREENSAVER_COLOR
+#define DEFAULT_SCREENSAVER_COLOR SCREENSAVER_COLOR_WHITE
+#endif
 
 // RGB LED Status Settings
 #define USE_RGB_LED_STATUS true

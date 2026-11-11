@@ -230,6 +230,13 @@ void test_wifi_manager_forced_ap_mode_on_boot(void) {
     TEST_ASSERT_FALSE(settings.getForceAPMode());
 }
 
+void test_wifi_manager_display_inversion_and_screensaver_color_html(void) {
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "id='display_inverted'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "name='display_inverted'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "id='screensaver_color'"));
+    TEST_ASSERT_NOT_NULL(strstr(settings_html, "name='screensaver_color'"));
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_wifi_manager_initial_state);
@@ -248,5 +255,6 @@ int main(int argc, char **argv) {
     RUN_TEST(test_wifi_manager_owm_api_input_configuration);
     RUN_TEST(test_wifi_manager_reboot_ap_action);
     RUN_TEST(test_wifi_manager_forced_ap_mode_on_boot);
+    RUN_TEST(test_wifi_manager_display_inversion_and_screensaver_color_html);
     return UNITY_END();
 }
