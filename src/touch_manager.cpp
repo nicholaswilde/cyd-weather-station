@@ -4,6 +4,7 @@
 static bool mockTouched = false;
 static int mockX = 0;
 static int mockY = 0;
+static bool mockCapacitive = false;
 
 void TouchManager::begin() {}
 bool TouchManager::isTouched() { return mockTouched; }
@@ -16,6 +17,9 @@ void setMockTouch(bool touched, int x, int y) {
     mockTouched = touched;
     mockX = x;
     mockY = y;
+}
+void setMockCapacitive(bool capacitive) {
+    mockCapacitive = capacitive;
 }
 #elif !defined(HAS_CAPACITIVE_TOUCH)
 #include <Arduino.h>
@@ -219,7 +223,9 @@ bool TouchManager::getTouchPoint(int& x, int& y) {
 #endif
 
 bool TouchManager::isCapacitive() {
-#if defined(HAS_CAPACITIVE_TOUCH)
+#if defined(NATIVE_TEST)
+    return mockCapacitive;
+#elif defined(HAS_CAPACITIVE_TOUCH)
     return true;
 #else
     return false;

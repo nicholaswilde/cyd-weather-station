@@ -142,10 +142,7 @@ static void my_touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
         
         int16_t x = 0;
         int16_t y = 0;
-        int orientation = 1;
-#ifndef NATIVE_TEST
-        orientation = settings.getScreenOrientation();
-#endif
+        int orientation = settings.getScreenOrientation();
         mapTouchCoordinates(tx, ty, x, y, orientation);
 
         data->state = LV_INDEV_STATE_PR;
@@ -164,10 +161,7 @@ void initDisplayAndTouch() {
     // NOTE: TFT_BL is intentionally NOT set up here via digitalWrite.
     // BacklightManager::begin() configures it exclusively as an LEDC PWM output.
 
-    int rotation = 1;
-#ifndef NATIVE_TEST
-    rotation = settings.getScreenOrientation();
-#endif
+    int rotation = settings.getScreenOrientation();
 
     // Initialize display
     tft.init();
@@ -187,10 +181,7 @@ void initLVGL() {
     static lv_disp_drv_t disp_drv;
     lv_disp_drv_init(&disp_drv);
     
-    int rotation = 1;
-#ifndef NATIVE_TEST
-    rotation = settings.getScreenOrientation();
-#endif
+    int rotation = settings.getScreenOrientation();
     if (rotation == 1 || rotation == 3) {
         disp_drv.hor_res = TFT_HEIGHT;
         disp_drv.ver_res = TFT_WIDTH;
