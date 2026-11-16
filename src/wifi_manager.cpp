@@ -717,6 +717,7 @@ void WifiManager::startWebServer() {
         doc["screenshot_server_enabled"] = settings.getScreenshotServerEnabled();
         doc["api_server_enabled"] = settings.getApiServerEnabled();
         doc["screen_orientation"] = settings.getScreenOrientation();
+        doc["display_inverted"] = settings.isDisplayInverted();
         doc["led_enabled"] = settings.getLedEnabled();
         doc["led_brightness"] = (settings.getLedBrightness() * 100) / 255;
         doc["mqtt_enabled"] = settings.getMqttEnabled();
@@ -730,6 +731,7 @@ void WifiManager::startWebServer() {
         doc["sd_cache_enabled"] = settings.getSdCacheEnabled();
         doc["screensaver_enabled"] = settings.getScreensaverEnabled();
         doc["screensaver_timeout"] = settings.getScreensaverTimeout();
+        doc["screensaver_color"] = settings.getScreensaverColor();
         doc["sleep_schedule_enabled"] = settings.getSleepScheduleEnabled();
         doc["sleep_start_time"] = settings.getSleepStartTime();
         doc["sleep_end_time"] = settings.getSleepEndTime();
@@ -805,6 +807,7 @@ void WifiManager::startWebServer() {
         if (doc.containsKey("screenshot_server_enabled")) settings.setScreenshotServerEnabled(doc["screenshot_server_enabled"]);
         if (doc.containsKey("api_server_enabled")) settings.setApiServerEnabled(doc["api_server_enabled"]);
         if (doc.containsKey("screen_orientation")) settings.setScreenOrientation(doc["screen_orientation"]);
+        if (doc.containsKey("display_inverted")) settings.setDisplayInverted(doc["display_inverted"]);
         if (doc.containsKey("led_enabled")) settings.setLedEnabled(doc["led_enabled"]);
         if (doc.containsKey("led_brightness")) {
             int pct = doc["led_brightness"];
@@ -821,6 +824,7 @@ void WifiManager::startWebServer() {
         if (doc.containsKey("sd_cache_enabled")) settings.setSdCacheEnabled(doc["sd_cache_enabled"]);
         if (doc.containsKey("screensaver_enabled")) settings.setScreensaverEnabled(doc["screensaver_enabled"]);
         if (doc.containsKey("screensaver_timeout")) settings.setScreensaverTimeout(doc["screensaver_timeout"]);
+        if (doc.containsKey("screensaver_color")) settings.setScreensaverColor(doc["screensaver_color"]);
         if (doc.containsKey("sleep_schedule_enabled")) settings.setSleepScheduleEnabled(doc["sleep_schedule_enabled"]);
         if (doc.containsKey("sleep_start_time")) settings.setSleepStartTime(doc["sleep_start_time"].as<String>());
         if (doc.containsKey("sleep_end_time")) settings.setSleepEndTime(doc["sleep_end_time"].as<String>());
@@ -1004,6 +1008,7 @@ void WifiManager::handleSettings() {
     html.replace("%ORIENT_1%", settings.getScreenOrientation() == 1 ? "selected" : "");
     html.replace("%ORIENT_2%", settings.getScreenOrientation() == 2 ? "selected" : "");
     html.replace("%ORIENT_3%", settings.getScreenOrientation() == 3 ? "selected" : "");
+    html.replace("%DISPLAY_INVERTED%", settings.isDisplayInverted() ? "checked" : "");
     
     html.replace("%BRIGHTNESS%", String(settings.getBrightness()));
     html.replace("%AUTO_BRIGHTNESS%", settings.getAutoBrightness() ? "checked" : "");
@@ -1013,6 +1018,10 @@ void WifiManager::handleSettings() {
     html.replace("%SLEEP_START_TIME%", settings.getSleepStartTime());
     html.replace("%SLEEP_END_TIME%", settings.getSleepEndTime());
     html.replace("%SCREENSAVER_TIMEOUT%", String(settings.getScreensaverTimeout() / 60000));
+    html.replace("%SCR_COLOR_WHITE%", settings.getScreensaverColor() == 0 ? "selected" : "");
+    html.replace("%SCR_COLOR_RED%", settings.getScreensaverColor() == 1 ? "selected" : "");
+    html.replace("%SCR_COLOR_AMBER%", settings.getScreensaverColor() == 2 ? "selected" : "");
+    html.replace("%SCR_COLOR_GREEN%", settings.getScreensaverColor() == 3 ? "selected" : "");
     
     String owmVal = settings.getOwmApiKey();
     if (owmVal == "YOUR_OPENWEATHERMAP_API_KEY") owmVal = "";
@@ -1096,6 +1105,7 @@ void WifiManager::handleSettingsSave() {
     if (_webServer->hasArg("pressure_unit")) settings.setPressureUnit(_webServer->arg("pressure_unit").toInt());
     if (_webServer->hasArg("theme_flavor")) settings.setThemeFlavor(_webServer->arg("theme_flavor").toInt());
     if (_webServer->hasArg("screen_orientation")) settings.setScreenOrientation(_webServer->arg("screen_orientation").toInt());
+    settings.setDisplayInverted(_webServer->hasArg("display_inverted"));
     
     if (_webServer->hasArg("brightness")) settings.setBrightness(_webServer->arg("brightness").toInt());
     if (_webServer->hasArg("led_brightness")) {
@@ -1106,6 +1116,7 @@ void WifiManager::handleSettingsSave() {
     settings.setShowTitleVersion(_webServer->hasArg("show_title_version"));
     settings.setScreensaverEnabled(_webServer->hasArg("screensaver_enabled"));
     if (_webServer->hasArg("screensaver_timeout")) settings.setScreensaverTimeout(_webServer->arg("screensaver_timeout").toInt() * 60000);
+    if (_webServer->hasArg("screensaver_color")) settings.setScreensaverColor(_webServer->arg("screensaver_color").toInt());
     settings.setSleepScheduleEnabled(_webServer->hasArg("sleep_schedule_enabled"));
     if (_webServer->hasArg("sleep_start_time")) settings.setSleepStartTime(_webServer->arg("sleep_start_time"));
     if (_webServer->hasArg("sleep_end_time")) settings.setSleepEndTime(_webServer->arg("sleep_end_time"));

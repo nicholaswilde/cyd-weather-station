@@ -192,6 +192,107 @@ void test_unit_label_helpers(void) {
     TEST_ASSERT_EQUAL_STRING("hPa", getPressureUnitLabel(99));
 }
 
+void test_capacitive_touch_mapping_portrait_raw(void) {
+    setMockCapacitive(true);
+    TEST_ASSERT_TRUE(TouchManager::isCapacitive());
+
+    int16_t out_x, out_y;
+
+    // rawIsPortrait: raw_x = 100, raw_y = 120 (<= 240 and <= 320)
+    // Orientation 0: Portrait Rev / Native Portrait
+    mapTouchCoordinates(100, 120, out_x, out_y, 0);
+    TEST_ASSERT_EQUAL(100, out_x);
+    TEST_ASSERT_EQUAL(120, out_y);
+
+    // Orientation 1: Landscape
+    mapTouchCoordinates(100, 120, out_x, out_y, 1);
+    TEST_ASSERT_EQUAL(120, out_x);
+    TEST_ASSERT_EQUAL(140, out_y);
+
+    // Orientation 2: Portrait
+    mapTouchCoordinates(100, 120, out_x, out_y, 2);
+    TEST_ASSERT_EQUAL(140, out_x);
+    TEST_ASSERT_EQUAL(200, out_y);
+
+    // Orientation 3: Landscape Rev
+    mapTouchCoordinates(100, 120, out_x, out_y, 3);
+    TEST_ASSERT_EQUAL(200, out_x);
+    TEST_ASSERT_EQUAL(100, out_y);
+
+    // Default orientation
+    mapTouchCoordinates(100, 120, out_x, out_y, 99);
+    TEST_ASSERT_EQUAL(120, out_x);
+    TEST_ASSERT_EQUAL(100, out_y);
+
+    setMockCapacitive(false);
+}
+
+void test_capacitive_touch_mapping_landscape_raw(void) {
+    setMockCapacitive(true);
+
+    int16_t out_x, out_y;
+
+    // !rawIsPortrait: raw_x = 280, raw_y = 100 (280 > 240)
+    // Orientation 0: Portrait
+    mapTouchCoordinates(280, 100, out_x, out_y, 0);
+    TEST_ASSERT_EQUAL(140, out_x);
+    TEST_ASSERT_EQUAL(40, out_y);
+
+    // Orientation 1: Landscape
+    mapTouchCoordinates(280, 100, out_x, out_y, 1);
+    TEST_ASSERT_EQUAL(280, out_x);
+    TEST_ASSERT_EQUAL(100, out_y);
+
+    // Orientation 2: Portrait Rev
+    mapTouchCoordinates(280, 100, out_x, out_y, 2);
+    TEST_ASSERT_EQUAL(100, out_x);
+    TEST_ASSERT_EQUAL(280, out_y);
+
+    // Orientation 3: Landscape Rev
+    mapTouchCoordinates(280, 100, out_x, out_y, 3);
+    TEST_ASSERT_EQUAL(40, out_x);
+    TEST_ASSERT_EQUAL(140, out_y);
+
+    // Default orientation (out_x clamped to max_x = 239)
+    mapTouchCoordinates(280, 100, out_x, out_y, 99);
+    TEST_ASSERT_EQUAL(239, out_x);
+    TEST_ASSERT_EQUAL(100, out_y);
+
+    setMockCapacitive(false);
+}
+
+void test_display_inversion_and_orientations(void) {
+    setDisplayInversion(true);
+    setDisplayInversion(false);
+
+    // Test initialization and driver setup under different orientations
+    settings.setScreenOrientation(0);
+    initDisplayAndTouch();
+    initLVGL();
+
+    settings.setScreenOrientation(2);
+    initDisplayAndTouch();
+    initLVGL();
+
+    settings.setScreenOrientation(3);
+    initDisplayAndTouch();
+    initLVGL();
+
+    settings.setScreenOrientation(1);
+    initDisplayAndTouch();
+    initLVGL();
+
+    // Verify touchpad read observes orientation from settings
+    settings.setScreenOrientation(0);
+    setMockTouch(true, 1500, 2000);
+    lv_indev_data_t data;
+    my_touchpad_read(nullptr, &data);
+    TEST_ASSERT_EQUAL(LV_INDEV_STATE_PR, data.state);
+
+    settings.setScreenOrientation(1);
+    setMockTouch(false, 0, 0);
+}
+
 int main(int argc, char **argv) {
     UNITY_BEGIN();
     RUN_TEST(test_coordinate_mapping_landscape);
@@ -203,5 +304,8 @@ int main(int argc, char **argv) {
     RUN_TEST(test_disp_flush_and_init);
     RUN_TEST(test_format_hourly_tick_label);
     RUN_TEST(test_unit_label_helpers);
+    RUN_TEST(test_capacitive_touch_mapping_portrait_raw);
+    RUN_TEST(test_capacitive_touch_mapping_landscape_raw);
+    RUN_TEST(test_display_inversion_and_orientations);
     return UNITY_END();
 }

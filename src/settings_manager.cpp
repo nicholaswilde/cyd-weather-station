@@ -13,6 +13,10 @@
 #define MQTT_PASSWORD ""
 #endif
 
+#ifndef NATIVE_TEST
+void setDisplayInversion(bool invert);
+#endif
+
 SettingsManager::SettingsManager() {
     _unitSystem = UNIT_SYSTEM;
     _tempUnit = DEFAULT_TEMP_UNIT;
@@ -27,6 +31,7 @@ SettingsManager::SettingsManager() {
     _screenshotServerEnabled = false; // Default to false
     _apiServerEnabled = API_SERVER_ENABLED;
     _screenOrientation = 1;
+    _invertDisplay = DEFAULT_INVERT_DISPLAY;
     _ledEnabled = LED_ENABLED;
     _ledBrightness = LED_BRIGHTNESS;
     _mqttEnabled = MQTT_ENABLED;
@@ -40,6 +45,7 @@ SettingsManager::SettingsManager() {
     _sdCacheEnabled = USE_SD_CACHE;
     _screensaverEnabled = SCREENSAVER_ENABLED;
     _screensaverTimeout = SCREENSAVER_TIMEOUT_MS;
+    _screensaverColor = DEFAULT_SCREENSAVER_COLOR;
     _staticIpEnabled = false;
     _staticIp = "";
     _staticGateway = "";
@@ -94,6 +100,7 @@ void SettingsManager::begin() {
     _screenshotServerEnabled = prefs.getBool("scr_srv", false);
     _apiServerEnabled = prefs.getBool("api_srv", API_SERVER_ENABLED);
     _screenOrientation = prefs.getInt("screen_rot", 1);
+    _invertDisplay = prefs.getBool("inv_disp", DEFAULT_INVERT_DISPLAY);
     _ledEnabled = prefs.getBool("led_en", LED_ENABLED);
     _ledBrightness = prefs.getInt("led_bright", LED_BRIGHTNESS);
     _mqttEnabled = prefs.getBool("mqtt_en", MQTT_ENABLED);
@@ -107,6 +114,7 @@ void SettingsManager::begin() {
     _sdCacheEnabled = prefs.getBool("sd_cache", USE_SD_CACHE);
     _screensaverEnabled = prefs.getBool("scr_enabled", SCREENSAVER_ENABLED);
     _screensaverTimeout = prefs.getInt("scr_timeout", SCREENSAVER_TIMEOUT_MS);
+    _screensaverColor = prefs.getInt("scr_color", DEFAULT_SCREENSAVER_COLOR);
     _staticIpEnabled = prefs.getBool("static_en", false);
     _staticIp = prefs.getString("static_ip", "");
     _staticGateway = prefs.getString("static_gw", "");
@@ -364,6 +372,23 @@ void SettingsManager::setScreenOrientation(int orientation) {
     }
 }
 
+bool SettingsManager::isDisplayInverted() const {
+    return _invertDisplay;
+}
+
+void SettingsManager::setDisplayInverted(bool inverted) {
+    if (_invertDisplay != inverted) {
+        _invertDisplay = inverted;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putBool("inv_disp", _invertDisplay);
+        prefs.end();
+#ifndef NATIVE_TEST
+        setDisplayInversion(_invertDisplay);
+#endif
+    }
+}
+
 bool SettingsManager::getLedEnabled() const {
     return _ledEnabled;
 }
@@ -447,6 +472,21 @@ void SettingsManager::setScreensaverTimeout(int timeout) {
         Preferences prefs;
         prefs.begin("settings", false);
         prefs.putInt("scr_timeout", _screensaverTimeout);
+        prefs.end();
+    }
+}
+
+int SettingsManager::getScreensaverColor() const {
+    return _screensaverColor;
+}
+
+void SettingsManager::setScreensaverColor(int color) {
+    if (color < 0 || color > 3) color = 0;
+    if (_screensaverColor != color) {
+        _screensaverColor = color;
+        Preferences prefs;
+        prefs.begin("settings", false);
+        prefs.putInt("scr_color", _screensaverColor);
         prefs.end();
     }
 }

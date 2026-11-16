@@ -259,6 +259,7 @@ tasks:
       - npm run font:generate
       - npm run font:generate:24
       - npm run font:generate:72
+      - npm run font:generate:clock72
 
   test:api:
     desc: Run API endpoint integration tests

@@ -11,6 +11,7 @@ public:
 
 #if defined(NATIVE_TEST)
 void setMockTouch(bool touched, int x, int y);
+void setMockCapacitive(bool capacitive);
 #endif
 
 #endif // TOUCH_MANAGER_H

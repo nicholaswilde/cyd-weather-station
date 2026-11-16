@@ -6,6 +6,7 @@ class TFT_eSPI {
 public:
     void init() {}
     void setRotation(uint8_t r) {}
+    void invertDisplay(bool i) {}
     void fillScreen(uint32_t color) {}
     void startWrite() {}
     void setAddrWindow(int32_t x, int32_t y, int32_t w, int32_t h) {}

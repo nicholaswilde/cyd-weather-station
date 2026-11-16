@@ -12,6 +12,7 @@ LV_FONT_DECLARE(weather_icons_72);
 LV_FONT_DECLARE(weather_icons_48);
 LV_FONT_DECLARE(weather_icons_24);
 LV_FONT_DECLARE(weather_icons_16);
+LV_FONT_DECLARE(montserrat_digits_72);
 }
 
 extern SettingsManager settings;
@@ -40,6 +41,8 @@ static lv_obj_t *ui_dd_wind_unit = nullptr;
 static lv_obj_t *ui_dd_precip_unit = nullptr;
 static lv_obj_t *ui_dd_pressure_unit = nullptr;
 static lv_obj_t *ui_screensaver_sw = nullptr;
+static lv_obj_t *ui_screensaver_color_dropdown = nullptr;
+static lv_obj_t *ui_invert_disp_sw = nullptr;
 static lv_obj_t *ui_sleep_sw = nullptr;
 static lv_obj_t *ui_led_sw = nullptr;
 static lv_obj_t *ui_sd_log_sw = nullptr;
@@ -326,6 +329,22 @@ static void screensaver_sw_event_cb(lv_event_t * e) {
     if (!is_checked && screensaver.isActive()) {
         screensaver.wake(settings.getBrightness());
     }
+#endif
+}
+
+static void invert_disp_sw_event_cb(lv_event_t * e) {
+    lv_obj_t * sw = lv_event_get_target(e);
+    bool is_checked = lv_obj_has_state(sw, LV_STATE_CHECKED);
+#ifndef NATIVE_TEST
+    settings.setDisplayInverted(is_checked);
+#endif
+}
+
+static void screensaver_color_dropdown_event_cb(lv_event_t * e) {
+    lv_obj_t * dd = lv_event_get_target(e);
+    int selected = lv_dropdown_get_selected(dd);
+#ifndef NATIVE_TEST
+    settings.setScreensaverColor(selected);
 #endif
 }
 
@@ -1312,6 +1331,32 @@ void initUI() {
     }
     lv_obj_add_event_cb(ui_sleep_sw, sleep_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
+    // Invert display row
+    lv_obj_t * inv_disp_row = lv_obj_create(left_col);
+    lv_obj_clear_flag(inv_disp_row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_size(inv_disp_row, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(inv_disp_row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(inv_disp_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_bg_opa(inv_disp_row, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_width(inv_disp_row, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(inv_disp_row, 0, LV_PART_MAIN);
+    lv_obj_clear_flag(inv_disp_row, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_t * inv_disp_label = lv_label_create(inv_disp_row);
+    lv_label_set_text(inv_disp_label, isLargeScreen ? "Invert Colors" : "Invert Disp");
+    lv_obj_set_style_text_color(inv_disp_label, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_text_font(inv_disp_label, isLargeScreen ? &lv_font_montserrat_20 : &lv_font_montserrat_14, LV_PART_MAIN);
+
+    ui_invert_disp_sw = lv_switch_create(inv_disp_row);
+    lv_obj_set_size(ui_invert_disp_sw, isLargeScreen ? 60 : 40, isLargeScreen ? 30 : 20);
+    lv_obj_set_style_bg_color(ui_invert_disp_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_invert_disp_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_invert_disp_sw, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_KNOB | LV_STATE_DEFAULT);
+    if (settings.isDisplayInverted()) {
+        lv_obj_add_state(ui_invert_disp_sw, LV_STATE_CHECKED);
+    }
+    lv_obj_add_event_cb(ui_invert_disp_sw, invert_disp_sw_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
 
     // MQTT row
     lv_obj_t * mqtt_row = lv_obj_create(left_col);
@@ -1545,6 +1590,23 @@ void initUI() {
     lv_obj_set_style_border_color(orient_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
     lv_obj_set_style_bg_color(orient_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
     lv_obj_set_style_text_color(orient_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
+
+    // Screensaver color selector dropdown
+    ui_screensaver_color_dropdown = lv_dropdown_create(right_col);
+    lv_obj_set_size(ui_screensaver_color_dropdown, lv_pct(92), 26);
+    lv_dropdown_set_options(ui_screensaver_color_dropdown, "White\nRed\nAmber\nGreen");
+    lv_dropdown_set_selected(ui_screensaver_color_dropdown, settings.getScreensaverColor());
+    lv_obj_add_event_cb(ui_screensaver_color_dropdown, screensaver_color_dropdown_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_obj_set_style_bg_color(ui_screensaver_color_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(ui_screensaver_color_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_color(ui_screensaver_color_dropdown, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(ui_screensaver_color_dropdown, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t * ssc_list = lv_dropdown_get_list(ui_screensaver_color_dropdown);
+    lv_obj_set_style_bg_color(ssc_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_MAIN);
+    lv_obj_set_style_text_color(ssc_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).text), LV_PART_MAIN);
+    lv_obj_set_style_border_color(ssc_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).overlay0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(ssc_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).blue), LV_PART_SELECTED | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(ssc_list, TO_LV_COLOR(getCatppuccinFlavor(getCurrentThemeFlavor()).crust), LV_PART_SELECTED | LV_STATE_CHECKED);
 
     // Local Sensor Type Dropdown
     ui_dd_local_sensor_type = lv_dropdown_create(right_col);
@@ -1929,8 +1991,19 @@ void showScreenSaver() {
 
     // Create clock label
     screensaver_clock = lv_label_create(screensaver_overlay);
-    lv_obj_set_style_text_color(screensaver_clock, lv_color_make(180, 180, 180), 0);
-    lv_obj_set_style_text_font(screensaver_clock, &lv_font_montserrat_48, 0);
+    lv_color_t clock_color = lv_color_white();
+#ifndef NATIVE_TEST
+    switch (settings.getScreensaverColor()) {
+        case 1: clock_color = lv_color_make(255, 60, 60); break;   // Red
+        case 2: clock_color = lv_color_make(255, 170, 0); break;  // Amber
+        case 3: clock_color = lv_color_make(80, 255, 80); break;   // Green
+        case 0:
+        default: clock_color = lv_color_white(); break;            // White
+    }
+#endif
+    lv_obj_set_style_text_color(screensaver_clock, clock_color, 0);
+    bool isLargeScreen = (lv_disp_get_hor_res(NULL) >= 480 || lv_disp_get_ver_res(NULL) >= 480);
+    lv_obj_set_style_text_font(screensaver_clock, isLargeScreen ? &montserrat_digits_72 : &lv_font_montserrat_48, 0);
     
     if (time_label != nullptr) {
         lv_label_set_text(screensaver_clock, lv_label_get_text(time_label));
@@ -1964,18 +2037,16 @@ void updateScreenSaverTime(const char* time_str) {
     if (update_counter >= 15) {
         update_counter = 0;
         
-        int max_x = 100;
-        int max_y = 100;
-#ifndef NATIVE_TEST
-        int rotation = settings.getScreenOrientation();
-        if (rotation == 1 || rotation == 3) {
-            max_x = 320 - 150;
-            max_y = 240 - 55;
-        } else {
-            max_x = 240 - 150;
-            max_y = 320 - 55;
-        }
-#endif
+        lv_coord_t hor_res = lv_disp_get_hor_res(NULL);
+        lv_coord_t ver_res = lv_disp_get_ver_res(NULL);
+        bool isLarge = (hor_res >= 480 || ver_res >= 480);
+        lv_coord_t clock_w = lv_obj_get_width(screensaver_clock);
+        lv_coord_t clock_h = lv_obj_get_height(screensaver_clock);
+        if (clock_w <= 0) clock_w = isLarge ? 240 : 150;
+        if (clock_h <= 0) clock_h = isLarge ? 70 : 50;
+
+        int max_x = hor_res - clock_w - 10;
+        int max_y = ver_res - clock_h - 10;
         if (max_x < 10) max_x = 10;
         if (max_y < 10) max_y = 10;
 
@@ -2161,6 +2232,18 @@ void ui_sync_toggles() {
         } else {
             lv_obj_clear_state(ui_title_ver_sw, LV_STATE_CHECKED);
         }
+    }
+
+    if (ui_invert_disp_sw != nullptr) {
+        if (settings.isDisplayInverted()) {
+            lv_obj_add_state(ui_invert_disp_sw, LV_STATE_CHECKED);
+        } else {
+            lv_obj_clear_state(ui_invert_disp_sw, LV_STATE_CHECKED);
+        }
+    }
+
+    if (ui_screensaver_color_dropdown != nullptr) {
+        lv_dropdown_set_selected(ui_screensaver_color_dropdown, settings.getScreensaverColor());
     }
 
     if (header_title != nullptr) {
